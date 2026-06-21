@@ -1,0 +1,440 @@
+import path from "path"
+import z from "zod"
+import { Effect } from "effect"
+import { AppFileSystem } from "@mimo-ai/shared/filesystem"
+import { assertExternalDirectoryEffect } from "./external-directory"
+import { SessionCwd } from "./session-cwd"
+import DESCRIPTION from "./deep-file-analysis.txt"
+import * as Tool from "./tool"
+
+const MAX_FILE_SIZE = 1024 * 1024
+
+const ANALYSIS_EXTENSIONS: Record<string, string> = {
+  ".ts": "TypeScript",
+  ".tsx": "TypeScript React",
+  ".js": "JavaScript",
+  ".jsx": "JavaScript React",
+  ".py": "Python",
+  ".rs": "Rust",
+  ".go": "Go",
+  ".java": "Java",
+  ".rb": "Ruby",
+  ".php": "PHP",
+  ".c": "C",
+  ".cpp": "C++",
+  ".h": "C/C++ Header",
+  ".hpp": "C++ Header",
+  ".cs": "C#",
+  ".swift": "Swift",
+  ".kt": "Kotlin",
+  ".scala": "Scala",
+  ".vue": "Vue",
+  ".svelte": "Svelte",
+  ".astro": "Astro",
+  ".css": "CSS",
+  ".scss": "SCSS",
+  ".less": "Less",
+  ".html": "HTML",
+  ".json": "JSON",
+  ".yaml": "YAML",
+  ".yml": "YAML",
+  ".md": "Markdown",
+  ".toml": "TOML",
+  ".sql": "SQL",
+  ".sh": "Shell",
+  ".bash": "Shell",
+  ".zsh": "Shell",
+  ".dockerfile": "Dockerfile",
+  ".proto": "Protocol Buffers",
+  ".graphql": "GraphQL",
+  ".prisma": "Prisma",
+}
+
+const IMPORT_PATTERNS: Record<string, RegExp[]> = {
+  TypeScript: [/import\s+.*\s+from\s+['"]([^'"]+)['"]/g, /require\(['"]([^'"]+)['"]\)/g],
+  JavaScript: [/import\s+.*\s+from\s+['"]([^'"]+)['"]/g, /require\(['"]([^'"]+)['"]\)/g],
+  Python: [/^import\s+(\w+)/gm, /^from\s+(\w+)\s+import/gm],
+  Rust: [/^use\s+([\w:]+)/gm],
+  Go: [/^import\s+[""]([^""]+)[""]/gm, /^import\s+\(([^)]+)\)/gms],
+  Java: [/^import\s+([\w.]+);/gm],
+}
+
+const COMPLEXITY_PATTERNS: Record<string, RegExp[]> = {
+  TypeScript: [/\bif\s*\(/g, /\belse\s+if\b/g, /\bswitch\s*\(/g, /\bfor\s*\(/g, /\bwhile\s*\(/g, /\bcatch\s*\(/g, /\bcase\s+/g, /\b\?\s*[\w.]+:/g, /\|\|/g, /&&/g],
+  JavaScript: [/\bif\s*\(/g, /\belse\s+if\b/g, /\bswitch\s*\(/g, /\bfor\s*\(/g, /\bwhile\s*\(/g, /\bcatch\s*\(/g, /\bcase\s+/g, /\b\?\s*[\w.]+:/g, /\|\|/g, /&&/g],
+  Python: [/\bif\s+/g, /\belif\s+/g, /\bfor\s+/g, /\bwhile\s+/g, /\bexcept\s+/g, /\bcase\s+/g],
+  Rust: [/\bif\s+/g, /\belse\s+if\b/g, /\bmatch\s+/g, /\bfor\s+/g, /\bwhile\s+/g, /\bcatch\s+/g],
+  Go: [/\bif\s+/g, /\belse\s+if\b/g, /\bswitch\s+/g, /\bfor\s+/g, /\brange\s+/g],
+}
+
+const SECURITY_PATTERNS: { pattern: RegExp; severity: string; description: string }[] = [
+  { pattern: /eval\s*\(/g, severity: "high", description: "eval() usage can lead to code injection" },
+  { pattern: /exec\s*\(/g, severity: "high", description: "exec() can execute arbitrary commands" },
+  { pattern: /innerHTML\s*=/g, severity: "medium", description: "innerHTML assignment may cause XSS" },
+  { pattern: /dangerouslySetInnerHTML/g, severity: "medium", description: "dangerouslySetInnerHTML bypasses React XSS protection" },
+  { pattern: /process\.env/g, severity: "low", description: "Environment variable access - ensure no secrets exposed" },
+  { pattern: /sqlite3\.exec\s*\(/g, severity: "medium", description: "Direct SQL execution without parameterization" },
+  { pattern: /\.exec\s*\(/g, severity: "medium", description: "Command execution via exec()" },
+  { pattern: /child_process/g, severity: "medium", description: "Child process spawning" },
+  { pattern: /('|")?password('|")?\s*[:=]/gi, severity: "high", description: "Password field detected - sensitive data" },
+  { pattern: /('|")?token('|")?\s*[:=]/gi, severity: "high", description: "Token field detected - sensitive data" },
+  { pattern: /('|")?api[_-]?key('|")?\s*[:=]/gi, severity: "high", description: "API key field detected - sensitive data" },
+  { pattern: /('|")?secret('|")?\s*[:=]/gi, severity: "high", description: "Secret field detected - sensitive data" },
+  { pattern: /('|")?private[_-]?key('|")?\s*[:=]/gi, severity: "high", description: "Private key field detected" },
+  { pattern: /localStorage\.setItem/g, severity: "low", description: "LocalStorage usage - ensure no sensitive data stored" },
+  { pattern: /document\.cookie/g, severity: "medium", description: "Cookie access - ensure secure flags" },
+]
+
+function detectLanguage(filename: string): string | null {
+  const ext = path.extname(filename).toLowerCase()
+  return ANALYSIS_EXTENSIONS[ext] ?? null
+}
+
+function countLines(content: string): number {
+  return content.split("\n").length
+}
+
+function countComments(content: string, lang: string): number {
+  const lines = content.split("\n")
+  let commentLines = 0
+  let inBlock = false
+
+  for (const line of lines) {
+    const trimmed = line.trim()
+    if (inBlock) {
+      commentLines++
+      if (trimmed.includes("*/") || trimmed.includes("'''") || trimmed.includes('"""')) {
+        inBlock = false
+      }
+      continue
+    }
+    if (trimmed.startsWith("//") || trimmed.startsWith("#") || trimmed.startsWith("--")) {
+      commentLines++
+      continue
+    }
+    if (trimmed.startsWith("/*") || trimmed.startsWith("/**")) {
+      commentLines++
+      if (trimmed.includes("*/") && !trimmed.startsWith("/*", trimmed.length - 2)) {
+        continue
+      }
+      if (!trimmed.includes("*/")) {
+        inBlock = true
+      }
+      continue
+    }
+    if (lang === "Python") {
+      if (trimmed.startsWith("'''") || trimmed.startsWith('"""')) {
+        commentLines++
+        if (!trimmed.endsWith("'''") && !trimmed.endsWith('"""')) {
+          inBlock = true
+        }
+      }
+    }
+  }
+
+  return commentLines
+}
+
+function analyzePattern(content: string, patterns: RegExp[]): number {
+  let count = 0
+  for (const pattern of patterns) {
+    const matches = content.match(pattern)
+    if (matches) count += matches.length
+  }
+  return count
+}
+
+function extractFunctions(content: string, lang: string): { name: string; line: number }[] {
+  const functions: { name: string; line: number }[] = []
+  const lines = content.split("\n")
+
+  const patterns: Record<string, RegExp> = {
+    TypeScript: /^(?:export\s+)?(?:async\s+)?function\s+(\w+)/,
+    JavaScript: /^(?:export\s+)?(?:async\s+)?function\s+(\w+)/,
+    Python: /^def\s+(\w+)\s*\(/,
+    Rust: /^fn\s+(\w+)/,
+    Go: /^func\s+(\w+)/,
+    Java: /(?:public|private|protected)?\s+\w+\s+(\w+)\s*\(/,
+  }
+
+  const funcPattern = patterns[lang]
+  if (!funcPattern) return functions
+
+  for (let i = 0; i < lines.length; i++) {
+    const match = lines[i].match(funcPattern)
+    if (match) {
+      functions.push({ name: match[1], line: i + 1 })
+    }
+  }
+
+  return functions
+}
+
+function extractClasses(content: string, lang: string): { name: string; line: number }[] {
+  const classes: { name: string; line: number }[] = []
+  const lines = content.split("\n")
+
+  const patterns: Record<string, RegExp> = {
+    TypeScript: /^(?:export\s+)?(?:abstract\s+)?class\s+(\w+)/,
+    JavaScript: /^(?:export\s+)?class\s+(\w+)/,
+    Python: /^class\s+(\w+)/,
+    Rust: /^(?:pub\s+)?(?:struct|enum|trait|impl)\s+(\w+)/,
+    Go: /^type\s+(\w+)\s+(?:struct|interface)/,
+    Java: /(?:public|private|protected)?\s*(?:abstract\s+)?class\s+(\w+)/,
+  }
+
+  const classPattern = patterns[lang]
+  if (!classPattern) return classes
+
+  for (let i = 0; i < lines.length; i++) {
+    const match = lines[i].match(classPattern)
+    if (match) {
+      classes.push({ name: match[1], line: i + 1 })
+    }
+  }
+
+  return classes
+}
+
+function extractImports(content: string, lang: string): { source: string; line: number }[] {
+  const imports: { source: string; line: number }[] = []
+  const lines = content.split("\n")
+  const patterns = IMPORT_PATTERNS[lang]
+  if (!patterns) return imports
+
+  for (const pattern of patterns) {
+    pattern.lastIndex = 0
+    let match
+    while ((match = pattern.exec(content)) !== null) {
+      const lineNum = content.substring(0, match.index).split("\n").length
+      imports.push({ source: match[1], line: lineNum })
+    }
+  }
+
+  return imports
+}
+
+function analyzeSecurity(content: string, lang: string): { severity: string; description: string; line: number }[] {
+  const findings: { severity: string; description: string; line: number }[] = []
+  const lines = content.split("\n")
+
+  for (const { pattern, severity, description } of SECURITY_PATTERNS) {
+    pattern.lastIndex = 0
+    let match
+    while ((match = pattern.exec(content)) !== null) {
+      const lineNum = content.substring(0, match.index).split("\n").length
+      findings.push({ severity, description, line: lineNum })
+    }
+  }
+
+  return findings
+}
+
+export const DeepFileAnalysisTool = Tool.define(
+  "deep-file-analysis",
+  Effect.gen(function* () {
+    const fs = yield* AppFileSystem.Service
+
+    return {
+      description: DESCRIPTION,
+      parameters: z.object({
+        path: z.string().describe("The absolute path to the file to analyze"),
+        detailed: z
+          .boolean()
+          .optional()
+          .default(false)
+          .describe("If true, includes line-by-line analysis for small files"),
+      }),
+      execute: (params: { path: string; detailed?: boolean }, ctx: Tool.Context) =>
+        Effect.gen(function* () {
+          const effectiveCwd = SessionCwd.get(ctx.sessionID)
+          const filePath = path.isAbsolute(params.path) ? params.path : path.resolve(effectiveCwd, params.path)
+
+          yield* ctx.ask({
+            permission: "read",
+            patterns: [filePath],
+            always: ["*"],
+            metadata: { path: filePath, tool: "deep-file-analysis" },
+          })
+
+          const stat = yield* fs.stat(filePath).pipe(Effect.catch(() => Effect.succeed(undefined)))
+          if (!stat || stat.type !== "File") {
+            return {
+              title: path.basename(filePath),
+              metadata: { error: true },
+              output: `File not found or is not a regular file: ${filePath}`,
+            }
+          }
+
+          yield* assertExternalDirectoryEffect(ctx, filePath, { kind: "file" })
+
+          if (stat.size > MAX_FILE_SIZE) {
+            return {
+              title: path.basename(filePath),
+              metadata: { error: true },
+              output: `File too large (${(stat.size / 1024 / 1024).toFixed(1)} MB). Maximum: 1 MB`,
+            }
+          }
+
+          const content = yield* fs.readFileString(filePath)
+          if (!content) {
+            return {
+              title: path.basename(filePath),
+              metadata: { error: true },
+              output: `Could not read file: ${filePath}`,
+            }
+          }
+
+          const lang = detectLanguage(filePath) || "Unknown"
+          const totalLines = countLines(content)
+          const commentLines = countComments(content, lang)
+          const blankLines = content.split("\n").filter((l) => l.trim() === "").length
+          const codeLines = totalLines - commentLines - blankLines
+          const commentRatio = totalLines > 0 ? (commentLines / totalLines) * 100 : 0
+
+          const functions = extractFunctions(content, lang)
+          const classes = extractClasses(content, lang)
+          const imports = extractImports(content, lang)
+
+          const complexityScore = analyzePattern(content, (COMPLEXITY_PATTERNS[lang] || []))
+          const securityFindings = analyzeSecurity(content, lang)
+
+          const internalImports = imports.filter((i) => i.source.startsWith(".") || i.source.startsWith("/"))
+          const externalImports = imports.filter((i) => !i.source.startsWith(".") && !i.source.startsWith("/"))
+
+          const avgLineLength = totalLines > 0
+            ? Math.round(content.split("\n").reduce((acc, l) => acc + l.length, 0) / totalLines)
+            : 0
+
+          const maxLineLength = content.split("\n").reduce((max, l) => Math.max(max, l.length), 0)
+
+          const output: string[] = []
+          output.push(`# 📁 File Analysis: ${path.basename(filePath)}`)
+          output.push("")
+          output.push(`**Path:** \`${filePath}\``)
+          output.push(`**Language:** ${lang}`)
+          output.push(`**Size:** ${(stat.size / 1024).toFixed(1)} KB`)
+          output.push("")
+          output.push("## 📊 Code Metrics")
+          output.push(`- Total Lines: ${totalLines}`)
+          output.push(`- Code Lines: ${codeLines}`)
+          output.push(`- Comment Lines: ${commentLines} (${commentRatio.toFixed(1)}%)`)
+          output.push(`- Blank Lines: ${blankLines}`)
+          output.push(`- Avg Line Length: ${avgLineLength} chars`)
+          output.push(`- Max Line Length: ${maxLineLength} chars`)
+          output.push("")
+          output.push("## 🏗️ Structure")
+          output.push(`- Functions/Methods: ${functions.length}`)
+          output.push(`- Classes/Types: ${classes.length}`)
+          output.push(`- Total Imports: ${imports.length}`)
+          output.push(`  - Internal: ${internalImports.length}`)
+          output.push(`  - External: ${externalImports.length}`)
+          output.push("")
+          output.push("## 🔄 Imports")
+
+          if (imports.length > 0) {
+            const sorted = [...imports].sort((a, b) => a.line - b.line)
+            for (const imp of sorted.slice(0, 40)) {
+              output.push(`  L${imp.line}: ${imp.source}`)
+            }
+            if (sorted.length > 40) {
+              output.push(`  ... and ${sorted.length - 40} more imports`)
+            }
+          } else {
+            output.push("  No imports detected")
+          }
+
+          output.push("")
+          output.push("## 🧩 Function Map")
+
+          if (functions.length > 0) {
+            for (const fn of functions) {
+              output.push(`  L${fn.line}: \`${fn.name}\``)
+            }
+          } else {
+            output.push("  No functions detected")
+          }
+
+          if (classes.length > 0) {
+            output.push("")
+            output.push("## 📋 Class/Type Map")
+            for (const cls of classes) {
+              output.push(`  L${cls.line}: \`${cls.name}\``)
+            }
+          }
+
+          output.push("")
+          output.push("## ⚡ Complexity Analysis")
+          output.push(`- Cyclomatic complexity score: ${complexityScore}`)
+          if (complexityScore > 20) {
+            output.push("- ⚠️ High complexity — consider refactoring")
+          } else if (complexityScore > 10) {
+            output.push("- Moderate complexity")
+          } else {
+            output.push("- Low complexity")
+          }
+
+          if (securityFindings.length > 0) {
+            output.push("")
+            output.push("## 🔒 Security Scan")
+
+            const high = securityFindings.filter((f) => f.severity === "high")
+            const medium = securityFindings.filter((f) => f.severity === "medium")
+            const low = securityFindings.filter((f) => f.severity === "low")
+
+            if (high.length > 0) {
+              output.push(`\n### 🔴 High Severity (${high.length})`)
+              for (const f of high) {
+                output.push(`  L${f.line}: ${f.description}`)
+              }
+            }
+            if (medium.length > 0) {
+              output.push(`\n### 🟡 Medium Severity (${medium.length})`)
+              for (const f of medium) {
+                output.push(`  L${f.line}: ${f.description}`)
+              }
+            }
+            if (low.length > 0) {
+              output.push(`\n### 🔵 Low Severity (${low.length})`)
+              for (const f of low) {
+                output.push(`  L${f.line}: ${f.description}`)
+              }
+            }
+          } else {
+            output.push("\n## 🔒 Security Scan")
+            output.push("✅ No security issues detected")
+          }
+
+          output.push("")
+          output.push("## 🎯 Summary")
+          const issues: string[] = []
+          if (complexityScore > 20) issues.push("- ⚠️ **High complexity**: Consider breaking down into smaller functions")
+          if (commentRatio < 5 && codeLines > 100) issues.push("- 💡 **Low documentation**: Consider adding more comments")
+          if (maxLineLength > 120) issues.push("- 📏 **Long lines**: Max line length is ${maxLineLength} chars - consider formatting")
+          if (functions.length > 20) issues.push("- 📦 **Large file**: ${functions.length} functions - consider splitting into modules")
+          if (securityFindings.some((f) => f.severity === "high")) issues.push("- 🔴 **Security issues**: High severity findings detected - review immediately")
+
+          if (issues.length > 0) {
+            output.push(...issues)
+          } else {
+            output.push("✅ No significant issues detected")
+          }
+
+          return {
+            title: path.basename(filePath),
+            metadata: {
+              language: lang,
+              lines: totalLines,
+              functions: functions.length,
+              classes: classes.length,
+              imports: imports.length,
+              complexity: complexityScore,
+              securityFindings: securityFindings.length,
+            },
+            output: output.join("\n"),
+          }
+        }).pipe(Effect.orDie),
+    }
+  }),
+)
+

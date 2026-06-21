@@ -1,0 +1,8 @@
+- Deep file analysis tool that performs comprehensive code analysis on a single file
+- Analyzes code structure: functions, classes, imports/exports, control flow
+- Detects potential issues: unused variables, missing error handling, security vulnerabilities
+- Identifies code complexity: cyclomatic complexity, nesting depth, function length
+- Maps dependencies: internal imports, external packages, circular dependencies
+- Reports code metrics: lines of code, comment ratio, function count, class count
+- Use when you need deep understanding of a file beyond surface-level reading
+- Best used for complex files where you need to understand architecture and potential bugs
