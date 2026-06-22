@@ -166,7 +166,7 @@ const targets = singleFlag
     })
   : allTargets
 
-await $`rm -rf dist`
+fs.rmSync("dist", { recursive: true, force: true })
 
 const extDir = path.join(dir, "src", "ext")
 if (!fs.existsSync(extDir)) {
@@ -207,7 +207,7 @@ for (const item of targets) {
     .filter(Boolean)
     .join("-")
   console.log(`building ${name}`)
-  await $`mkdir -p dist/${name}/bin`
+  fs.mkdirSync(path.join(dir, "dist", name, "bin"), { recursive: true })
 
   const localPath = path.resolve(dir, "node_modules/@opentui/core/parser.worker.js")
   const rootPath = path.resolve(dir, "../../node_modules/@opentui/core/parser.worker.js")
@@ -250,7 +250,8 @@ for (const item of targets) {
 
   // Smoke test: only run if binary is for current platform
   if (item.os === process.platform && item.arch === process.arch && !item.abi) {
-    const binaryPath = `dist/${name}/bin/mimo`
+    const binaryName = process.platform === "win32" ? "mimo.exe" : "mimo"
+    const binaryPath = `dist/${name}/bin/${binaryName}`
     console.log(`Running smoke test: ${binaryPath} --version`)
     try {
       const versionOutput = await $`${binaryPath} --version`.text()
@@ -261,7 +262,7 @@ for (const item of targets) {
     }
   }
 
-  await $`rm -rf ./dist/${name}/bin/tui`
+  fs.rmSync(path.join(dir, "dist", name, "bin", "tui"), { recursive: true, force: true })
   await Bun.file(`dist/${name}/README.md`).write(
     `This is the ${item.os}-${item.arch} binary for [@mimo-ai/cli](https://www.npmjs.com/package/@mimo-ai/cli). Install that package directly.\n`,
   )

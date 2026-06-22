@@ -1406,6 +1406,11 @@ PART_MAPPING["text"] = function TextPartDisplay(props) {
   return (
     <Show when={text()}>
       <div data-component="text-part">
+        <Show when={model()}>
+          <div data-slot="text-part-model-badge" class="text-12-regular text-text-weak cursor-default" style="margin-bottom: 2px">
+            {model()}
+          </div>
+        </Show>
         <div data-slot="text-part-body">
           <Show when={streaming()} fallback={<Markdown text={text()} cacheKey={part().id} streaming={false} />}>
             <PacedMarkdown text={text()} cacheKey={part().id} streaming={streaming()} />
