@@ -3,7 +3,8 @@ chcp 65001 >nul
 title Glitch Code - Setup Builder
 
 echo =============================================
-echo    GLITCH CODE - SETUP BUILDER
+echo    GLITCH CODE - SETUP BUILDER v1.1.0
+echo    AI Provider Setup + TUI Integration
 echo =============================================
 echo.
 

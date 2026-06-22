@@ -51,7 +51,7 @@ echo =============================================
 echo    GLITCH CODE BASLATILIYOR...
 echo =============================================
 echo.
-start "" cmd /c "glitch.bat --offline"
+start "" cmd /c "glitch.bat"
 echo.
 echo Glitch Code baslatildi!
 echo Klasor: %REPO_DIR%

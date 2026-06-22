@@ -7,7 +7,7 @@ set "SCRIPT_DIR=%~dp0"
 cd /d "%SCRIPT_DIR%"
 
 echo [Glitch Code] Baslatiliyor...
-bun run dev --offline %*
+bun run dev %*
 
 if %errorlevel% neq 0 (
     echo [HATA] Glitch Code baslatilamadi!
