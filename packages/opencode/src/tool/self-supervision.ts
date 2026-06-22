@@ -85,7 +85,7 @@ export const SelfSupervisionTool = Tool.define(
             const flawPatterns = [
               { pattern: /(TODO|FIXME|HACK|XXX)/gi, severity: "medium", desc: "Unresolved work markers" },
               { pattern: /(workaround|hacky|temporary|quick fix)/gi, severity: "low", desc: "Potential technical debt" },
-              { pattern: /(as any|@ts-ignore|@ts-expect-error|// @ts-nocheck)/g, severity: "medium", desc: "Type safety bypass" },
+              { pattern: new RegExp('(as any|@ts-ignore|@ts-expect-error|// @ts-nocheck)', 'g'), severity: "medium", desc: "Type safety bypass" },
               { pattern: /(console\.log|console\.debug)/g, severity: "low", desc: "Debug logging in production code" },
               { pattern: /(.{200,})/g, severity: "medium", desc: "Extremely long line (>200 chars)" },
               { pattern: /(hardcoded|hard-coded)/gi, severity: "low", desc: "Hardcoded values detected" },
