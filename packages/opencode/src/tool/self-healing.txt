@@ -1,0 +1,5 @@
+- Automatic error recovery tool that detects, analyzes, and fixes issues
+- Three-phase approach: 1) Root cause analysis 2) Generate fix 3) Apply and verify
+- Integrates with self-supervision outputs for targeted fixes
+- Max 3 retry attempts before escalating to human
+- Best used as auto-follow-up after self-supervision finds issues

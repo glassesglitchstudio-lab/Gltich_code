@@ -1,0 +1,4 @@
+- Self-supervision tool that enables AI to audit its own work
+- Three modes: subagent-scan (finds errors in subagent outputs), agent-flaws (checks agent work against requirements), prompt-audit (analyzes conversation history for bad prompts)
+- Use after complex tasks to catch errors before they propagate
+- Best used as automatic post-task quality gate

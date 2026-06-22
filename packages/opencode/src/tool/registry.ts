@@ -25,6 +25,12 @@ import { Provider } from "../provider"
 import { ProviderID, type ModelID } from "../provider/schema"
 import { WebSearchTool } from "./websearch"
 import { CodeSearchTool } from "./codesearch"
+import { ContextCompressorTool } from "./context-compressor"
+import { ModelRouterTool } from "./model-router"
+import { PatternLearnerTool } from "./pattern-learner"
+import { SelfHealingTool } from "./self-healing"
+import { SelfSupervisionTool } from "./self-supervision"
+import { SmartPredictTool } from "./smart-predict"
 import { Flag } from "@/flag/flag"
 import { Log } from "@/util"
 import { LspTool } from "./lsp"
@@ -144,6 +150,12 @@ export const layer = Layer.effect(
     const agent = yield* Agent.Service
 
     const deepFileAnalysis = yield* DeepFileAnalysisTool
+    const selfSupervision = yield* SelfSupervisionTool
+    const contextCompressor = yield* ContextCompressorTool
+    const modelRouter = yield* ModelRouterTool
+    const patternLearner = yield* PatternLearnerTool
+    const selfHealing = yield* SelfHealingTool
+    const smartPredict = yield* SmartPredictTool
 
     const state = yield* InstanceState.make<State>(
       Effect.fn("ToolRegistry.state")(function* (ctx) {
@@ -229,6 +241,12 @@ export const layer = Layer.effect(
           task: Tool.init(tasktool),
           workflow: Tool.init(workflowtool),
           deepFileAnalysis: Tool.init(deepFileAnalysis),
+          selfSupervision: Tool.init(selfSupervision),
+          contextCompressor: Tool.init(contextCompressor),
+          modelRouter: Tool.init(modelRouter),
+          patternLearner: Tool.init(patternLearner),
+          selfHealing: Tool.init(selfHealing),
+          smartPredict: Tool.init(smartPredict),
         })
 
         return {
@@ -256,6 +274,12 @@ export const layer = Layer.effect(
             tool.task,
             ...(Flag.MIMOCODE_EXPERIMENTAL_WORKFLOW_TOOL ? [tool.workflow] : []),
             tool.deepFileAnalysis,
+            tool.selfSupervision,
+            tool.contextCompressor,
+            tool.modelRouter,
+            tool.patternLearner,
+            tool.selfHealing,
+            tool.smartPredict,
           ],
           actor: tool.actor,
           read: tool.read,

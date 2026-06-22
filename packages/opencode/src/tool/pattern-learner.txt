@@ -1,0 +1,4 @@
+- Scans git history and codebase to detect repeated code patterns and anti-patterns
+- Tracks duplicate functions, repeated bug patterns, and style inconsistencies
+- Suggests refactoring opportunities when the same pattern appears 3+ times
+- Best used as part of auto-supervision or before starting a new feature

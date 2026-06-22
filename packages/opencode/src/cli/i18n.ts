@@ -3,9 +3,10 @@ import { dict as zh } from "./cmd/tui/i18n/zh"
 import { dict as ja } from "./cmd/tui/i18n/ja"
 import { dict as fr } from "./cmd/tui/i18n/fr"
 import { dict as ru } from "./cmd/tui/i18n/ru"
+import { dict as tr } from "./cmd/tui/i18n/tr"
 import { detectSystemLocale } from "./cmd/tui/util/system-locale"
 
-const dicts: Record<string, Partial<Record<string, string>>> = { en, zh, ja, fr, ru }
+const dicts: Record<string, Partial<Record<string, string>>> = { en, zh, ja, fr, ru, tr }
 const dict = dicts[detectSystemLocale()] ?? en
 
 export function t(key: string, params?: Record<string, string | number>): string {

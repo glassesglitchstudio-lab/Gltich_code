@@ -1,0 +1,4 @@
+- Analyzes a task and predicts completion time, risk factors, and optimal approach
+- Uses codebase context (file count, complexity, dependencies) for estimation
+- Returns structured prediction with confidence level
+- Best used before starting complex tasks to plan the approach

@@ -1,8 +1,12 @@
 - Deep file analysis tool that performs comprehensive code analysis on a single file
-- Analyzes code structure: functions, classes, imports/exports, control flow
+- Analyzes code structure: functions with line counts, classes, imports/exports, TypeScript types
 - Detects potential issues: unused variables, missing error handling, security vulnerabilities
 - Identifies code complexity: cyclomatic complexity, nesting depth, function length
-- Maps dependencies: internal imports, external packages, circular dependencies
+- Maps dependencies: internal imports, external packages, circular dependency detection
 - Reports code metrics: lines of code, comment ratio, function count, class count
+- Scans for TODO/FIXME/HACK/XXX markers in code comments
+- Detects duplicate code blocks and deeply nested structures
+- Checks test coverage patterns and file age/modification info
 - Use when you need deep understanding of a file beyond surface-level reading
 - Best used for complex files where you need to understand architecture and potential bugs
+- Supports deep mode (default: true) for all advanced analysis features

@@ -1,0 +1,6 @@
+- Routes tasks to the best GlassesCat model based on task complexity and requirements
+- Priority order: X_FABLE_CODER_V1 (default) → V7_HYBRID_TITAN (reasoning) → V6_OMNI_OVERLORD (long context) → V5_NEXUS_CORE (fast) → MiMo Auto (fallback)
+- X_FABLE_CODER is always the first choice — it is the user's personal model
+- Analyzes task type, context size, and complexity before routing
+- Use when a task fails with one model and needs retry with another
+- Also use when the task has specific requirements (security, long context, reasoning)

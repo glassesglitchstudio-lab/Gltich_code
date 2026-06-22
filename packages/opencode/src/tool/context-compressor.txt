@@ -1,0 +1,5 @@
+- Compresses long conversation sessions into concise summaries
+- Preserves key decisions, code changes, error resolutions, and TODOs
+- Saves compressed context to a markdown file for future reference
+- Frees up context window by archiving older messages
+- Best used when approaching context limits or starting a new session
