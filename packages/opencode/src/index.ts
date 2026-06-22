@@ -38,6 +38,7 @@ import { Database } from "./storage"
 import { ClaudeImport } from "./session/claude-import"
 import { errorMessage } from "./util/error"
 import { PluginCommand } from "./cli/cmd/plug"
+import { InitCommand } from "./cli/cmd/init"
 import { Heap } from "./cli/heap"
 import { drizzle } from "drizzle-orm/bun-sqlite"
 import { ensureProcessMetadata } from "./util/mimo-process"
@@ -202,6 +203,7 @@ const cli = yargs(args)
   .command(SessionCommand)
   .command(PluginCommand)
   .command(DbCommand)
+  .command(InitCommand)
   .fail((msg, err) => {
     if (
       msg?.startsWith("Unknown argument") ||
