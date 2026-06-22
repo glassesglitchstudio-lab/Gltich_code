@@ -16,11 +16,11 @@ const PROVIDERS = [
   { value: "openai", label: "OpenAI", hint: "gpt-4o, gpt-4o-mini" },
   { value: "anthropic", label: "Anthropic", hint: "claude-sonnet-4, claude-haiku-3.5" },
   { value: "google", label: "Google", hint: "gemini-2.5-pro" },
-  { value: "ollama", label: "Ollama (yerel)", hint: "WSL gerekmez, local" },
+  { value: "ollama", label: "Ollama (yerel)", hint: "hic kurulum gerekmez" },
   { value: "groq", label: "Groq", hint: "hizli, ucretsiz" },
   { value: "openrouter", label: "OpenRouter", hint: "her modele tek API" },
   { value: "deepseek", label: "DeepSeek", hint: "ucuz, guclu" },
-  { value: "sonnet", label: "Sonnet", hint: "Anthropic Claude Sonnet" },
+  { value: "xiaomi", label: "Xiaomi", hint: "UYARI: Browser acar (OAuth), yalnizca Xiaomi hesabin varsa kullan" },
 ] as const
 
 function detectProjectType(root: string): string {
@@ -70,6 +70,11 @@ export const InitCommand = cmd({
       options: PROVIDERS.map((p) => ({ value: p.value, label: p.label, hint: p.hint })),
     })
     if (prompts.isCancel(provider)) throw new UI.CancelledError()
+
+    if (provider === "xiaomi") {
+      prompts.log.warn("Xiaomi provider'i browser uzerinden OAuth dogrulama acar.")
+      prompts.log.warn("Eger Xiaomi hesabin yoksa OpenAI, Anthropic veya Ollama sec.")
+    }
 
     const apiKey = await prompts.password({
       message: "API anahtarin ne? (bos gecersen sonra .env'den okur)",
