@@ -49,12 +49,12 @@ Source: "..\packages\opencode\dist\mimocode-windows-x64\bin\glitch.exe"; DestDir
 Source: "glitch.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{%USERPROFILE}\GlitchCodeProjects"; IconFilename: "{app}\glitch.ico"
+Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"; IconFilename: "{app}\glitch.ico"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{%USERPROFILE}\GlitchCodeProjects"; IconFilename: "{app}\glitch.ico"; Tasks: desktopicon
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"; IconFilename: "{app}\glitch.ico"; Tasks: desktopicon
 
 [Run]
-Filename: "{cmd}"; Parameters: "/C cd /d ""{%USERPROFILE}\GlitchCodeProjects"" && ""{app}\{#MyAppExeName}"""; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: nowait postinstall skipifsilent
+Filename: "{cmd}"; Parameters: "/C cd /d ""{app}"" && ""{app}\{#MyAppExeName}"""; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: nowait postinstall skipifsilent
 
 [Registry]
 Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; \
@@ -467,8 +467,8 @@ begin
     if ModelValue = '' then
       ModelValue := GetDefaultModel(ProviderCombo.ItemIndex);
 
-    // Write auth.json to user's AppData
-    AuthDir := ExpandConstant('{localappdata}') + '\mimocode';
+    // Write auth.json to user's AppData (glitchcode klasoru)
+    AuthDir := ExpandConstant('{localappdata}') + '\glitchcode';
     if not DirExists(AuthDir) then
       CreateDir(AuthDir);
 
@@ -484,15 +484,13 @@ begin
       SaveStringToFile(AuthFile, AuthJson, False);
     end;
 
-    // Write .glitch/config.json to user profile
-    GlitchDir := ExpandConstant('{%USERPROFILE}') + '\GlitchCodeProjects';
-    if not DirExists(GlitchDir) then
-      CreateDir(GlitchDir);
+    // Write .glitch/config.json to kurulum klasoru (kullanici nereye kurduysa oraya)
+    GlitchDir := ExpandConstant('{app}');
     GlitchDir := GlitchDir + '\.glitch';
     if not DirExists(GlitchDir) then
       CreateDir(GlitchDir);
 
-    ConfigFile := ExpandConstant('{%USERPROFILE}') + '\GlitchCodeProjects\.glitch\config.json';
+    ConfigFile := ExpandConstant('{app}') + '\.glitch\config.json';
     ConfigJson := '{'#13#10 +
       '  "version": "2.0",'#13#10 +
       '  "project": "GlitchCodeProjects",'#13#10 +
