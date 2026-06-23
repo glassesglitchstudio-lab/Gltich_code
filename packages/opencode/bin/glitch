@@ -51,8 +51,8 @@ let arch = archMap[osArch()]
 if (!arch) {
   arch = osArch()
 }
-const scope = "@mimo-ai/"
-const base = scope + "mimocode-" + platform + "-" + arch
+const scope = "@glitchcode/"
+const base = scope + "glitchcode-" + platform + "-" + arch
 const binary = platform === "windows" ? "glitch.exe" : "glitch"
 
 function supportsAvx2() {

@@ -49,7 +49,7 @@ function detectPlatformAndArch() {
 
 function findBinary() {
   const { platform, arch } = detectPlatformAndArch()
-  const packageName = `@mimo-ai/mimocode-${platform}-${arch}`
+  const packageName = `@glitchcode/glitchcode-${platform}-${arch}`
   const binaryName = platform === "windows" ? "glitch.exe" : "glitch"
 
   try {

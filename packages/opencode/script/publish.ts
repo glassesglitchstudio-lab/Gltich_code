@@ -42,20 +42,20 @@ await Bun.file(`./dist/${pkg.name}/package.json`).write(
     {
       name: pkg.name,
       version: version,
-      description: "MiMo Code: Where Models and Agents Co-Evolve",
+      description: "Glitch Code: Terminal-Native AI Coding Assistant",
       license: "MIT",
-      author: "Xiaomi MiMo Team",
-      homepage: "https://mimo.xiaomi.com/coder",
+      author: "GlassesCat AI",
+      homepage: "https://github.com/glassesglitchstudio-lab/Gltich_code",
       repository: {
         type: "git",
-        url: "git+https://github.com/XiaomiMiMo/MiMo-Code.git",
+        url: "git+https://github.com/glassesglitchstudio-lab/Gltich_code.git",
       },
       bugs: {
-        url: "https://github.com/XiaomiMiMo/MiMo-Code/issues",
+        url: "https://github.com/glassesglitchstudio-lab/Gltich_code/issues",
       },
-      keywords: ["ai", "cli", "code", "xiaomi", "mimo", "mimocode"],
+      keywords: ["ai", "cli", "code", "glitch", "glitchcode", "glassescat"],
       bin: {
-        mimo: "./bin/mimo",
+        glitch: "./bin/glitch",
       },
       scripts: {
         postinstall: "bun ./postinstall.mjs || node ./postinstall.mjs",

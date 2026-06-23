@@ -17,7 +17,7 @@ await import("./generate.ts")
 import { Script } from "@mimo-ai/script"
 import pkg from "../package.json"
 
-const BINARY_PREFIX = "mimocode"
+const BINARY_PREFIX = "glitchcode"
 
 // Load migrations from migration directories
 const migrationDirs = (
@@ -264,22 +264,22 @@ for (const item of targets) {
 
   fs.rmSync(path.join(dir, "dist", name, "bin", "tui"), { recursive: true, force: true })
   await Bun.file(`dist/${name}/README.md`).write(
-    `This is the ${item.os}-${item.arch} binary for [@mimo-ai/cli](https://www.npmjs.com/package/@mimo-ai/cli). Install that package directly.\n`,
+    `This is the ${item.os}-${item.arch} binary for [glitchcode-cli](https://www.npmjs.com/package/glitchcode-cli). Install that package directly.\n`,
   )
   await Bun.file(`dist/${name}/package.json`).write(
     JSON.stringify(
       {
-        name: `@mimo-ai/${name}`,
+        name: `@glitchcode/${name}`,
         version: Script.version,
-        description: "Platform-specific binary for @mimo-ai/cli.",
+        description: "Platform-specific binary for glitchcode-cli.",
         license: "MIT",
-        author: "Xiaomi MiMo Team",
-        homepage: "https://mimo.xiaomi.com/coder",
+        author: "GlassesCat AI",
+        homepage: "https://github.com/glassesglitchstudio-lab/Gltich_code",
         repository: {
           type: "git",
-          url: "git+https://github.com/XiaomiMiMo/MiMo-Code.git",
+          url: "git+https://github.com/glassesglitchstudio-lab/Gltich_code.git",
         },
-        keywords: ["ai", "coding", "agent", "cli", "mimo"],
+        keywords: ["ai", "coding", "agent", "cli", "glitch", "glitchcode"],
         os: [item.os],
         cpu: [item.arch],
       },
