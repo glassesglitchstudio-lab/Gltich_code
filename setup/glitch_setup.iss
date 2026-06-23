@@ -78,10 +78,10 @@ var
   ModelEdit: TEdit;
   InstructionsMemo: TMemo;
 
-  // Animation timer
-  AnimTimer: Integer;
-  AnimDots: Integer;
+  // Animation
   AnimLabel: TLabel;
+  SplashPage: TWizardPage;
+  InstallAnimLabel: TLabel;
 
 const
   PROVIDER_OPENAI = 0;
@@ -152,37 +152,20 @@ begin
   ModelEdit.Text := GetDefaultModel(ProviderCombo.ItemIndex);
 end;
 
-// ─── ANIMATED SPLASH PAGE ─────────────────────────────────
-
-procedure SplashPageOnActivate(Sender: TWizardPage);
-begin
-  AnimDots := 0;
-  AnimTimer := 0;
-end;
-
-procedure OnAnimTimer(Sender: HWND; Msg: Longword; IdEvent: Longword; dwTime: Longword);
-var
-  Dots: string;
-begin
-  AnimDots := AnimDots + 1;
-  if AnimDots > 3 then AnimDots := 0;
-  Dots := StringOfChar('.', AnimDots);
-  AnimLabel.Caption := 'GlassesCat AI hazirlaniyor' + Dots;
-end;
+// ─── SPLASH PAGE ─────────────────────────────────────────
 
 procedure CreateSplashPage(AfterID: Integer);
 var
-  Page: TWizardPage;
   LogoLabel: TLabel;
   SubLabel: TLabel;
 begin
-  Page := CreateCustomPage(AfterID, '', '');
+  SplashPage := CreateCustomPage(AfterID, '', '');
 
-  LogoLabel := TLabel.Create(Page);
-  LogoLabel.Parent := Page.Surface;
+  LogoLabel := TLabel.Create(SplashPage);
+  LogoLabel.Parent := SplashPage.Surface;
   LogoLabel.Top := 20;
   LogoLabel.Left := 0;
-  LogoLabel.Width := Page.SurfaceWidth;
+  LogoLabel.Width := SplashPage.SurfaceWidth;
   LogoLabel.Alignment := taCenter;
   LogoLabel.Font.Name := 'Consolas';
   LogoLabel.Font.Size := 9;
@@ -194,25 +177,25 @@ begin
     LOGO_LINE5 + #13#10 +
     LOGO_LINE6;
 
-  SubLabel := TLabel.Create(Page);
-  SubLabel.Parent := Page.Surface;
+  SubLabel := TLabel.Create(SplashPage);
+  SubLabel.Parent := SplashPage.Surface;
   SubLabel.Top := 180;
   SubLabel.Left := 0;
-  SubLabel.Width := Page.SurfaceWidth;
+  SubLabel.Width := SplashPage.SurfaceWidth;
   SubLabel.Alignment := taCenter;
   SubLabel.Font.Size := 12;
   SubLabel.Font.Style := [fsBold];
   SubLabel.Caption := 'Glitch Code v2.0';
   SubLabel.Font.Color := clHighlight;
 
-  AnimLabel := TLabel.Create(Page);
-  AnimLabel.Parent := Page.Surface;
+  AnimLabel := TLabel.Create(SplashPage);
+  AnimLabel.Parent := SplashPage.Surface;
   AnimLabel.Top := 210;
   AnimLabel.Left := 0;
-  AnimLabel.Width := Page.SurfaceWidth;
+  AnimLabel.Width := SplashPage.SurfaceWidth;
   AnimLabel.Alignment := taCenter;
   AnimLabel.Font.Size := 10;
-  AnimLabel.Caption := 'GlassesCat AI hazirlaniyor...';
+  AnimLabel.Caption := 'GlassesCat AI — Kurulum basliyor...';
 end;
 
 // ─── PROVIDER SELECTION PAGE ──────────────────────────────
@@ -409,33 +392,17 @@ begin
     Result := True;
 end;
 
-// ─── ANIMATION ON INSTALL ────────────────────────────────
+// ─── INSTALL PROGRESS ANIMATION ─────────────────────────
 
 var
-  InstallAnimLabel: TLabel;
-  InstallAnimDots: Integer;
-  InstallAnimTimer: Integer;
-
-procedure OnInstallTimer(Sender: HWND; Msg: Longword; IdEvent: Longword; dwTime: Longword);
-var
-  Dots: string;
-  Spinner: string;
-begin
-  InstallAnimDots := InstallAnimDots + 1;
-  case InstallAnimDots mod 4 of
-    0: Spinner := '|';
-    1: Spinner := '/';
-    2: Spinner := '-';
-    3: Spinner := '\';
-  end;
-  Dots := StringOfChar('.', (InstallAnimDots div 4) mod 4);
-  InstallAnimLabel.Caption := 'GlassesCat AI kuruluyor ' + Spinner + Dots;
-end;
+  InstallProgressMsg: string;
+  InstallDotsCount: Integer;
 
 procedure CurPageChanged(CurPageID: Integer);
 begin
   if CurPageID = wpInstalling then
   begin
+    InstallDotsCount := 0;
     InstallAnimLabel := TLabel.Create(WizardForm);
     InstallAnimLabel.Parent := WizardForm.InstallingPage;
     InstallAnimLabel.Top := 180;
@@ -443,7 +410,16 @@ begin
     InstallAnimLabel.Font.Size := 11;
     InstallAnimLabel.Font.Style := [fsBold];
     InstallAnimLabel.Caption := 'GlassesCat AI kuruluyor...';
-    InstallAnimTimer := SetTimer(0, 0, 500, @OnInstallTimer);
+  end;
+end;
+
+procedure CurInstallProgressChanged(CurProgress, MaxProgress: Integer);
+begin
+  if Assigned(InstallAnimLabel) then
+  begin
+    InstallDotsCount := InstallDotsCount + 1;
+    if InstallDotsCount mod 10 = 0 then
+      InstallAnimLabel.Caption := 'GlassesCat AI kuruluyor' + StringOfChar('.', (InstallDotsCount div 10) mod 4 + 1);
   end;
 end;
 
@@ -490,10 +466,6 @@ begin
 
     if ModelValue = '' then
       ModelValue := GetDefaultModel(ProviderCombo.ItemIndex);
-
-    // Kill timer
-    if InstallAnimTimer <> 0 then
-      KillTimer(0, InstallAnimTimer);
 
     // Write auth.json to user's AppData
     AuthDir := ExpandConstant('{localappdata}') + '\mimocode';
