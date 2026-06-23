@@ -45,26 +45,24 @@ Name: "addtopath"; Description: "Add to PATH (type 'glitch' from any CMD)"; Grou
 Name: "autostart"; Description: "Auto-start Glitch Code on Windows login"; GroupDescription: "Startup Options:"; Flags: checkedonce
 
 [Files]
-Source: "..\packages\opencode\dist\mimocode-windows-x64\bin\glitch.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "glitch.ico"; DestDir: "{app}"; Flags: ignoreversion
+; Tum dosyalar git clone ile gelecek
 
 [Icons]
-Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"; IconFilename: "{app}\glitch.ico"
+Name: "{group}\{#MyAppName}"; Filename: "{app}\packages\opencode\dist\mimocode-windows-x64\bin\glitch.exe"; WorkingDir: "{app}"; IconFilename: "{app}\setup\glitch.ico"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"; IconFilename: "{app}\glitch.ico"; Tasks: desktopicon
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\packages\opencode\dist\mimocode-windows-x64\bin\glitch.exe"; WorkingDir: "{app}"; IconFilename: "{app}\setup\glitch.ico"; Tasks: desktopicon
 
 [Run]
-Filename: "{cmd}"; Parameters: "/C cd /d ""{app}"" && ""{app}\{#MyAppExeName}"""; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: nowait postinstall skipifsilent
-Filename: "{cmd}"; Parameters: "/C git clone --depth 1 https://github.com/glassesglitchstudio-lab/Gltich_code.git ""{app}\repo"""; Description: "Download source from GitHub (skills, Modelfile, .glitchcode)"; Flags: nowait postinstall skipifsilent; Check: GitExists
+Filename: "{cmd}"; Parameters: "/C cd /d ""{app}"" && ""{app}\packages\opencode\dist\mimocode-windows-x64\bin\glitch.exe"""; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: nowait postinstall skipifsilent
 
 [Registry]
 Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; \
-    ValueType: expandsz; ValueName: "Path"; ValueData: "{olddata};{app}"; \
-    Tasks: addtopath; Check: NeedsAddPath(ExpandConstant('{app}'))
+    ValueType: expandsz; ValueName: "Path"; ValueData: "{olddata};{app}\packages\opencode\dist\mimocode-windows-x64\bin"; \
+    Tasks: addtopath; Check: NeedsAddPath(ExpandConstant('{app}\packages\opencode\dist\mimocode-windows-x64\bin'))
 
 ; Auto-start with Windows
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; \
-    ValueType: string; ValueName: "GlitchCode"; ValueData: "{app}\{#MyAppExeName}"; \
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentControlSet\Run"; \
+    ValueType: string; ValueName: "GlitchCode"; ValueData: "{app}\packages\opencode\dist\mimocode-windows-x64\bin\glitch.exe --daemon"; \
     Tasks: autostart
 
 [Code]
@@ -463,10 +461,15 @@ var
   ModelValue: string;
   InstructionsValue: string;
   AuthJson: string;
+  ResultCode: Integer;
   ConfigJson: string;
 begin
   if CurStep = ssPostInstall then
   begin
+    // 1) Git clone — repo'yu dogrudan {app}'e cek
+    if GitExists and not DirExists(ExpandConstant('{app}') + '\.git') then
+      Exec('git', 'clone --depth 1 https://github.com/glassesglitchstudio-lab/Gltich_code.git "' + ExpandConstant('{app}') + '"', '', SW_SHOW, ewWaitUntilTerminated, ResultCode);
+
     ProviderID := GetProviderID;
     ApiKeyValue := Trim(ApiKeyEdit.Text);
     ModelValue := Trim(ModelEdit.Text);
