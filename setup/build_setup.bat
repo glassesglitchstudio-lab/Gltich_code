@@ -1,40 +1,45 @@
 @echo off
+setlocal enabledelayedexpansion
 chcp 65001 >nul
-title Glitch Code - Setup Builder
+title Glitch Code v2.0 - Setup Builder
+color 0D
 
-echo =============================================
-echo    GLITCH CODE - SETUP BUILDER v1.1.0
-echo    AI Provider Setup + TUI Integration
-echo =============================================
+set "CYAN=[36m"
+set "GREEN=[32m"
+set "YELLOW=[33m"
+set "RED=[31m"
+set "RESET=[0m"
+
+echo.
+echo  %CYAN%  ╔═══════════════════════════════════════════╗%RESET%
+echo  %CYAN%  ║  %YELLOW%GLITCH CODE v2.0 - SETUP BUILDER%RESET%     %CYAN%║%RESET%
+echo  %CYAN%  ║  %YELLOW%GlassesCat AI Platform%RESET%               %CYAN%║%RESET%
+echo  %CYAN%  ╚═══════════════════════════════════════════╝%RESET%
 echo.
 
-:: Inno Setup kontrol
+:: ─── Inno Setup check ───
 where iscc >nul 2>nul
 if %errorlevel% neq 0 (
-    echo [!] Inno Setup bulunamadi, kuruluyor...
-    echo     Winget ile Inno Setup indiriliyor...
-    winget install --id JR.InnoSetup -e --silent
-    if %errorlevel% neq 0 (
-        echo [HATA] Inno Setup kurulamadi!
-        echo     Manuel indir: https://jrsoftware.org/isdl.php
+    echo  [%RED%!%RESET%] Inno Setup bulunamadi!
+    echo      Winget ile kuruluyor...
+    winget install --id JR.InnoSetup -e --silent >nul 2>&1
+    if !errorlevel! neq 0 (
+        echo  [%RED%HATA%RESET%] Kurulamadi! Manuel: https://jrsoftware.org/isdl.php
         pause
         exit /b 1
     )
-    echo [OK] Inno Setup kuruldu
+    echo  [%GREEN%OK%RESET%] Inno Setup kuruldu
 )
 
-:: Build .exe yoksa uyari
+:: ─── Build check ───
 if not exist "..\packages\opencode\dist\mimocode-windows-x64\bin\mimo.exe" (
-    echo [!] mimo.exe bulunamadi! Once build alin:
-    echo     cd packages\opencode
-    echo     set MIMOCODE_CHANNEL=prod
-    echo     bun run script\build.ts --single
-    echo.
-    set /p BUILD="Build alinsin mi? (E/H): "
-    if /i "!BUILD!"=="E" (
+    echo  [%YELLOW%!%RESET%] mimo.exe bulunamadi!
+    choice /C EH /M "Build alinsin mi? [E]vet / [H]ayir"
+    if !errorlevel! equ 1 (
         cd ..\packages\opencode
         set MIMOCODE_CHANNEL=prod
-        bun run script\build.ts --single
+        echo  [!] Build aliniyor...
+        call bun run script\build.ts --single
         cd ..\..\setup
     ) else (
         pause
@@ -42,19 +47,27 @@ if not exist "..\packages\opencode\dist\mimocode-windows-x64\bin\mimo.exe" (
     )
 )
 
-:: Setup'i derle
-echo [!] Setup derleniyor...
+:: ─── Build setup ───
+echo  [!] Setup derleniyor (v2.0 - GlassesCat Edition)...
+echo.
 iscc glitch_setup.iss
-if %errorlevel% neq 0 (
-    echo [HATA] Setup derlemesi basarisiz!
+if !errorlevel! neq 0 (
+    echo  [%RED%HATA%RESET%] Setup derlemesi basarisiz!
     pause
     exit /b 1
 )
 
 echo.
-echo =============================================
-echo    [OK] Setup hazir!
-echo    dist\GlitchCode_Setup_v1.0.0.exe
-echo =============================================
+echo  %CYAN%════════════════════════════════════════════%RESET%
+echo  %GREEN%  ✅ SETUP HAZIR!%RESET%
+echo  %CYAN%════════════════════════════════════════════%RESET%
+echo.
+echo   📦 dist\GlitchCode_Setup_v2.0.0.exe
+echo   🎨 GlassesCat AI entegrasyonu ile
+echo   🔄 Animasyonlu kurulum asistani
+echo.
+echo  %YELLOW}  Yayinlamak icin:%RESET%
+echo     git tag v2.0.0
+echo     git push origin v2.0.0
 echo.
 pause

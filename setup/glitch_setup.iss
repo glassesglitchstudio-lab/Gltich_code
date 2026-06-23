@@ -1,8 +1,8 @@
-; Glitch Code - Setup Wizard (with AI Provider Setup)
-; Inno Setup Script
+; Glitch Code - Setup Wizard v2.0 (GlassesCat Edition)
+; Inno Setup Script - Modern + Animated
 
 #define MyAppName "Glitch Code"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "2.0.0"
 #define MyAppPublisher "GlassesGlitchStudio"
 #define MyAppURL "https://github.com/glassesglitchstudio-lab/Gltich_code"
 #define MyAppExeName "mimo.exe"
@@ -20,12 +20,20 @@ DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
 OutputDir=..\dist
 OutputBaseFilename=GlitchCode_Setup_v{#MyAppVersion}
-Compression=lzma
+Compression=lzma2/ultra
 SolidCompression=yes
 WizardStyle=modern
+WizardResizable=yes
+DisableWelcomePage=no
+DisableFinishedPage=no
 PrivilegesRequired=admin
 DisableProgramGroupPage=yes
 SetupLogging=yes
+SetupIconFile=glitch.ico
+AppCopyright=GlassesGlitchStudio 2026
+VersionInfoDescription=Glitch Code AI Platform
+VersionInfoProductName=Glitch Code
+VersionInfoProductVersion={#MyAppVersion}
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -33,15 +41,17 @@ Name: "turkish"; MessagesFile: "compiler:Languages\Turkish.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "Create desktop shortcut"; GroupDescription: "Shortcuts:"; Flags: checkedonce
-Name: "addtopath"; Description: "Add to PATH (type 'mimo' from any CMD)"; GroupDescription: "Installation Options:"; Flags: checkedonce
+Name: "addtopath"; Description: "Add to PATH (type 'glitch' from any CMD)"; GroupDescription: "Installation Options:"; Flags: checkedonce
+Name: "autostart"; Description: "Auto-start Glitch Code on Windows login"; GroupDescription: "Startup Options:"; Flags: checkedonce
 
 [Files]
 Source: "..\packages\opencode\dist\mimocode-windows-x64\bin\mimo.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "glitch.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{%USERPROFILE}\GlitchCodeProjects"
+Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{%USERPROFILE}\GlitchCodeProjects"; IconFilename: "{app}\glitch.ico"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{%USERPROFILE}\GlitchCodeProjects"; Tasks: desktopicon
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{%USERPROFILE}\GlitchCodeProjects"; IconFilename: "{app}\glitch.ico"; Tasks: desktopicon
 
 [Run]
 Filename: "{cmd}"; Parameters: "/C cd /d ""{%USERPROFILE}\GlitchCodeProjects"" && ""{app}\{#MyAppExeName}"""; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: nowait postinstall skipifsilent
@@ -50,6 +60,11 @@ Filename: "{cmd}"; Parameters: "/C cd /d ""{%USERPROFILE}\GlitchCodeProjects"" &
 Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; \
     ValueType: expandsz; ValueName: "Path"; ValueData: "{olddata};{app}"; \
     Tasks: addtopath; Check: NeedsAddPath(ExpandConstant('{app}'))
+
+; Auto-start with Windows
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; \
+    ValueType: string; ValueName: "GlitchCode"; ValueData: "{app}\{#MyAppExeName}"; \
+    Tasks: autostart
 
 [Code]
 var
@@ -63,6 +78,11 @@ var
   ModelEdit: TEdit;
   InstructionsMemo: TMemo;
 
+  // Animation timer
+  AnimTimer: Integer;
+  AnimDots: Integer;
+  AnimLabel: TLabel;
+
 const
   PROVIDER_OPENAI = 0;
   PROVIDER_ANTHROPIC = 1;
@@ -72,6 +92,16 @@ const
   PROVIDER_OPENROUTER = 5;
   PROVIDER_DEEPSEEK = 6;
   PROVIDER_XIAOMI = 7;
+
+  // GlassesCat ASCII Logo
+  LOGO_LINE1 = '   _____ _ _       _     _____          _        ';
+  LOGO_LINE2 = '  / ____| (_)     | |   / ____|        | |       ';
+  LOGO_LINE3 = ' | |  __| |_  ___| |_ | |     ___   ___| | _____ ';
+  LOGO_LINE4 = ' | | |_ | | |/ _ \ __|| |    / _ \ / __| |/ / __|';
+  LOGO_LINE5 = ' | |__| | | |  __/ |_ | |___| (_) | (__|   <\__ \';
+  LOGO_LINE6 = '  \_____|_|_|\___|\__| \_____\___/ \___|_|\_\___/';
+  LOGO_LINE7 = '                                                  ';
+  LOGO_LINE8 = '  🚀 GlassesCat AI - Otonom Kod Asistani         ';
 
 function NeedsAddPath(Param: string): boolean;
 var
@@ -122,138 +152,299 @@ begin
   ModelEdit.Text := GetDefaultModel(ProviderCombo.ItemIndex);
 end;
 
+// ─── ANIMATED SPLASH PAGE ─────────────────────────────────
+
+procedure SplashPageOnActivate(Sender: TWizardPage);
+begin
+  AnimDots := 0;
+  AnimTimer := 0;
+end;
+
+procedure OnAnimTimer(Sender: HWND; Msg: Longword; IdEvent: Longword; dwTime: Longword);
+var
+  Dots: string;
+begin
+  AnimDots := AnimDots + 1;
+  if AnimDots > 3 then AnimDots := 0;
+  Dots := StringOfChar('.', AnimDots);
+  AnimLabel.Caption := 'GlassesCat AI hazirlaniyor' + Dots;
+end;
+
+procedure CreateSplashPage(AfterID: Integer);
+var
+  Page: TWizardPage;
+  LogoLabel: TLabel;
+  SubLabel: TLabel;
+begin
+  Page := CreateCustomPage(AfterID, '', '');
+
+  LogoLabel := TLabel.Create(Page);
+  LogoLabel.Parent := Page.Surface;
+  LogoLabel.Top := 20;
+  LogoLabel.Left := 0;
+  LogoLabel.Width := Page.SurfaceWidth;
+  LogoLabel.Alignment := taCenter;
+  LogoLabel.Font.Name := 'Consolas';
+  LogoLabel.Font.Size := 9;
+  LogoLabel.Font.Style := [fsBold];
+  LogoLabel.Caption := LOGO_LINE1 + #13#10 +
+    LOGO_LINE2 + #13#10 +
+    LOGO_LINE3 + #13#10 +
+    LOGO_LINE4 + #13#10 +
+    LOGO_LINE5 + #13#10 +
+    LOGO_LINE6;
+
+  SubLabel := TLabel.Create(Page);
+  SubLabel.Parent := Page.Surface;
+  SubLabel.Top := 180;
+  SubLabel.Left := 0;
+  SubLabel.Width := Page.SurfaceWidth;
+  SubLabel.Alignment := taCenter;
+  SubLabel.Font.Size := 12;
+  SubLabel.Font.Style := [fsBold];
+  SubLabel.Caption := 'Glitch Code v2.0';
+  SubLabel.Font.Color := clHighlight;
+
+  AnimLabel := TLabel.Create(Page);
+  AnimLabel.Parent := Page.Surface;
+  AnimLabel.Top := 210;
+  AnimLabel.Left := 0;
+  AnimLabel.Width := Page.SurfaceWidth;
+  AnimLabel.Alignment := taCenter;
+  AnimLabel.Font.Size := 10;
+  AnimLabel.Caption := 'GlassesCat AI hazirlaniyor...';
+end;
+
+// ─── PROVIDER SELECTION PAGE ──────────────────────────────
+
 procedure CreateProviderPage;
 var
   DescLabel: TLabel;
+  LogoLabel: TLabel;
 begin
   ProviderPage := CreateCustomPage(wpSelectTasks,
     'AI Provider Secimi',
     'Hangi AI saglayicisini kullanmak istiyorsun?');
 
+  LogoLabel := TLabel.Create(ProviderPage);
+  LogoLabel.Parent := ProviderPage.Surface;
+  LogoLabel.Caption := '⚡';
+  LogoLabel.Font.Size := 32;
+  LogoLabel.Top := 0;
+  LogoLabel.Left := 180;
+  LogoLabel.AutoSize := True;
+
   DescLabel := TLabel.Create(ProviderPage);
   DescLabel.Parent := ProviderPage.Surface;
-  DescLabel.Caption := 'AI model saglayicini sec. Dilersen kurulumdan sonra da degistirebilirsin.';
+  DescLabel.Caption := 'AI model saglayicini sec. GlassesCat modelleri otomatik taninir.' + #13#10 +
+    'Dilersen kurulumdan sonra da degistirebilirsin.';
   DescLabel.AutoSize := False;
   DescLabel.WordWrap := True;
   DescLabel.Width := 400;
+  DescLabel.Top := 60;
 
   ProviderCombo := TComboBox.Create(ProviderPage);
   ProviderCombo.Parent := ProviderPage.Surface;
-  ProviderCombo.Top := 40;
+  ProviderCombo.Top := 100;
   ProviderCombo.Width := 400;
-  ProviderCombo.Height := 24;
+  ProviderCombo.Height := 28;
   ProviderCombo.Style := csDropDownList;
+  ProviderCombo.Font.Size := 10;
   ProviderCombo.Items.Add('OpenAI - gpt-4o, gpt-4o-mini');
   ProviderCombo.Items.Add('Anthropic - claude-sonnet-4, claude-haiku-3.5');
   ProviderCombo.Items.Add('Google - gemini-2.5-pro');
-  ProviderCombo.Items.Add('Ollama (yerel) - hic kurulum gerekmez');
+  ProviderCombo.Items.Add('🌟 Ollama (yerel) - GlassesCat modelleri icin tavsiye edilir');
   ProviderCombo.Items.Add('Groq - hizli, ucretsiz');
   ProviderCombo.Items.Add('OpenRouter - her modele tek API');
   ProviderCombo.Items.Add('DeepSeek - ucuz, guclu');
   ProviderCombo.Items.Add('Xiaomi - UYARI: Browser acar (OAuth)');
-  ProviderCombo.ItemIndex := PROVIDER_OPENAI;
+  ProviderCombo.ItemIndex := PROVIDER_OLLAMA;
   ProviderCombo.OnChange := @ProviderComboChange;
 end;
+
+// ─── API KEY PAGE ────────────────────────────────────────
 
 procedure CreateApiKeyPage;
 var
   DescLabel: TLabel;
   SkipLabel: TLabel;
+  KeyLabel: TLabel;
 begin
   ApiKeyPage := CreateCustomPage(ProviderPage.ID,
     'API Anahtari',
-    'AI saglayicinin API anahtarini gir (opsiyonel).');
+    'AI saglayicinin API anahtarini gir.');
+
+  KeyLabel := TLabel.Create(ApiKeyPage);
+  KeyLabel.Parent := ApiKeyPage.Surface;
+  KeyLabel.Caption := '🔑';
+  KeyLabel.Font.Size := 28;
+  KeyLabel.Top := 0;
+  KeyLabel.Left := 180;
 
   DescLabel := TLabel.Create(ApiKeyPage);
   DescLabel.Parent := ApiKeyPage.Surface;
-  DescLabel.Caption := 'API anahtarin ne? (bos birakirsan sonra .env dosyasindan okur)';
+  DescLabel.Caption := 'API anahtarin ne?' + #13#10 +
+    'Ollama sectiysen bos birakabilirsin (yerel calisir).';
   DescLabel.AutoSize := False;
   DescLabel.WordWrap := True;
   DescLabel.Width := 400;
+  DescLabel.Top := 50;
 
   ApiKeyEdit := TEdit.Create(ApiKeyPage);
   ApiKeyEdit.Parent := ApiKeyPage.Surface;
-  ApiKeyEdit.Top := 40;
+  ApiKeyEdit.Top := 90;
   ApiKeyEdit.Width := 400;
-  ApiKeyEdit.Height := 24;
+  ApiKeyEdit.Height := 26;
+  ApiKeyEdit.Font.Size := 11;
   ApiKeyEdit.PasswordChar := '*';
 
   SkipLabel := TLabel.Create(ApiKeyPage);
   SkipLabel.Parent := ApiKeyPage.Surface;
-  SkipLabel.Top := 70;
-  SkipLabel.Caption := 'Bos birakabilirsin, sonra mimo icinde ayarlarsin.';
+  SkipLabel.Top := 125;
+  SkipLabel.Caption := 'Bos birakabilirsin, sonra glitch icinde ayarlarsin.';
   SkipLabel.AutoSize := False;
   SkipLabel.WordWrap := True;
   SkipLabel.Width := 400;
+  SkipLabel.Font.Color := clGray;
 end;
+
+// ─── MODEL PAGE ──────────────────────────────────────────
 
 procedure CreateModelPage;
 var
   DescLabel: TLabel;
+  ModelLabel: TLabel;
 begin
   ModelPage := CreateCustomPage(ApiKeyPage.ID,
     'Varsayilan Model',
     'Hangi model varsayilan olsun?');
 
+  ModelLabel := TLabel.Create(ModelPage);
+  ModelLabel.Parent := ModelPage.Surface;
+  ModelLabel.Caption := '🤖';
+  ModelLabel.Font.Size := 28;
+  ModelLabel.Top := 0;
+  ModelLabel.Left := 180;
+
   DescLabel := TLabel.Create(ModelPage);
   DescLabel.Parent := ModelPage.Surface;
-  DescLabel.Caption := 'Varsayilan model adi:';
+  DescLabel.Caption := 'Varsayilan model adi (provider a gore otomatik dolduruldu):';
   DescLabel.AutoSize := False;
   DescLabel.WordWrap := True;
   DescLabel.Width := 400;
+  DescLabel.Top := 50;
 
   ModelEdit := TEdit.Create(ModelPage);
   ModelEdit.Parent := ModelPage.Surface;
-  ModelEdit.Top := 40;
+  ModelEdit.Top := 80;
   ModelEdit.Width := 400;
-  ModelEdit.Height := 24;
+  ModelEdit.Height := 26;
+  ModelEdit.Font.Size := 11;
 
   DescLabel := TLabel.Create(ModelPage);
   DescLabel.Parent := ModelPage.Surface;
-  DescLabel.Top := 70;
-  DescLabel.Caption := 'Provider''a gore otomatik dolduruldu. Istersen degistirebilirsin.';
+  DescLabel.Top := 115;
+  DescLabel.Caption := 'Provider a gore otomatik dolduruldu. Istersen degistirebilirsin.' + #13#10 +
+    'GlassesCat kullanicilari: gulmzcetiner:V5_NEXUS_CORE tavsiye edilir.';
   DescLabel.AutoSize := False;
   DescLabel.WordWrap := True;
   DescLabel.Width := 400;
+  DescLabel.Font.Color := clGray;
 end;
+
+// ─── INSTRUCTIONS PAGE ───────────────────────────────────
 
 procedure CreateInstructionsPage;
 var
   DescLabel: TLabel;
+  InstLabel: TLabel;
 begin
   InstructionsPage := CreateCustomPage(ModelPage.ID,
     'Proje Talimatlari',
     'Varsayilan proje talimatlarin var mi? (opsiyonel)');
 
+  InstLabel := TLabel.Create(InstructionsPage);
+  InstLabel.Parent := InstructionsPage.Surface;
+  InstLabel.Caption := '📝';
+  InstLabel.Font.Size := 28;
+  InstLabel.Top := 0;
+  InstLabel.Left := 180;
+
   DescLabel := TLabel.Create(InstructionsPage);
   DescLabel.Parent := InstructionsPage.Surface;
-  DescLabel.Caption := 'Ornek: "React + TypeScript kullan, Tailwind CSS ile stil ver"';
+  DescLabel.Caption := 'Ornek: "React + TypeScript kullan, Tailwind CSS ile stil ver, ' + #13#10 +
+    'GlassesCat AI ozelliklerini aktif et"';
   DescLabel.AutoSize := False;
   DescLabel.WordWrap := True;
   DescLabel.Width := 400;
+  DescLabel.Top := 50;
 
   InstructionsMemo := TMemo.Create(InstructionsPage);
   InstructionsMemo.Parent := InstructionsPage.Surface;
-  InstructionsMemo.Top := 40;
+  InstructionsMemo.Top := 80;
   InstructionsMemo.Width := 400;
-  InstructionsMemo.Height := 120;
+  InstructionsMemo.Height := 140;
+  InstructionsMemo.Font.Size := 10;
   InstructionsMemo.ScrollBars := ssVertical;
 end;
 
+// ─── WIZARD INIT ─────────────────────────────────────────
+
 procedure InitializeWizard;
 begin
+  CreateSplashPage(wpWelcome);
   CreateProviderPage;
   CreateApiKeyPage;
   CreateModelPage;
   CreateInstructionsPage;
+
+  // Set wizard colours
+  WizardForm.Color := clWindow;
 end;
 
 function ShouldSkipPage(PageID: Integer): Boolean;
 begin
   Result := False;
-  // Skip API key page for Ollama (local, no key needed)
   if (PageID = ApiKeyPage.ID) and (ProviderCombo.ItemIndex = PROVIDER_OLLAMA) then
     Result := True;
+end;
+
+// ─── ANIMATION ON INSTALL ────────────────────────────────
+
+var
+  InstallAnimLabel: TLabel;
+  InstallAnimDots: Integer;
+  InstallAnimTimer: Integer;
+
+procedure OnInstallTimer(Sender: HWND; Msg: Longword; IdEvent: Longword; dwTime: Longword);
+var
+  Dots: string;
+  Spinner: string;
+begin
+  InstallAnimDots := InstallAnimDots + 1;
+  case InstallAnimDots mod 4 of
+    0: Spinner := '|';
+    1: Spinner := '/';
+    2: Spinner := '-';
+    3: Spinner := '\';
+  end;
+  Dots := StringOfChar('.', (InstallAnimDots div 4) mod 4);
+  InstallAnimLabel.Caption := 'GlassesCat AI kuruluyor ' + Spinner + Dots;
+end;
+
+procedure CurPageChanged(CurPageID: Integer);
+begin
+  if CurPageID = wpInstalling then
+  begin
+    InstallAnimLabel := TLabel.Create(WizardForm);
+    InstallAnimLabel.Parent := WizardForm.InstallingPage;
+    InstallAnimLabel.Top := 180;
+    InstallAnimLabel.Left := 120;
+    InstallAnimLabel.Font.Size := 11;
+    InstallAnimLabel.Font.Style := [fsBold];
+    InstallAnimLabel.Caption := 'GlassesCat AI kuruluyor...';
+    InstallAnimTimer := SetTimer(0, 0, 500, @OnInstallTimer);
+  end;
 end;
 
 function EscapeJson(S: string): string;
@@ -300,6 +491,10 @@ begin
     if ModelValue = '' then
       ModelValue := GetDefaultModel(ProviderCombo.ItemIndex);
 
+    // Kill timer
+    if InstallAnimTimer <> 0 then
+      KillTimer(0, InstallAnimTimer);
+
     // Write auth.json to user's AppData
     AuthDir := ExpandConstant('{localappdata}') + '\mimocode';
     if not DirExists(AuthDir) then
@@ -327,12 +522,13 @@ begin
 
     ConfigFile := ExpandConstant('{%USERPROFILE}') + '\GlitchCodeProjects\.glitch\config.json';
     ConfigJson := '{'#13#10 +
-      '  "version": "1.0",'#13#10 +
+      '  "version": "2.0",'#13#10 +
       '  "project": "GlitchCodeProjects",'#13#10 +
       '  "type": "auto",'#13#10 +
       '  "provider": "' + EscapeJson(ProviderID) + '",'#13#10 +
       '  "model": "' + EscapeJson(ModelValue) + '",'#13#10 +
       '  "instructions": "' + EscapeJson(InstructionsValue) + '",'#13#10 +
+      '  "edition": "GlassesCat",'#13#10 +
       '  "created": "' + GetDateTimeString('yyyy-mm-dd hh:nn:ss', '-', ':') + '"'#13#10 +
       '}';
     SaveStringToFile(ConfigFile, ConfigJson, False);
