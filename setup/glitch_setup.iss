@@ -5,7 +5,7 @@
 #define MyAppVersion "2.0.0"
 #define MyAppPublisher "GlassesGlitchStudio"
 #define MyAppURL "https://github.com/glassesglitchstudio-lab/Gltich_code"
-#define MyAppExeName "mimo.exe"
+#define MyAppExeName "glitch.exe"
 
 [Setup]
 AppId={{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}
@@ -45,7 +45,7 @@ Name: "addtopath"; Description: "Add to PATH (type 'glitch' from any CMD)"; Grou
 Name: "autostart"; Description: "Auto-start Glitch Code on Windows login"; GroupDescription: "Startup Options:"; Flags: checkedonce
 
 [Files]
-Source: "..\packages\opencode\dist\mimocode-windows-x64\bin\mimo.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\packages\opencode\dist\mimocode-windows-x64\bin\glitch.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "glitch.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]

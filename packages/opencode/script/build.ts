@@ -232,7 +232,7 @@ for (const item of targets) {
       autoloadTsconfig: true,
       autoloadPackageJson: true,
       target: name.replace(BINARY_PREFIX, "bun") as any,
-      outfile: `dist/${name}/bin/mimo`,
+      outfile: `dist/${name}/bin/glitch`,
       execArgv: [`--user-agent=mimocode/${Script.version}`, "--use-system-ca", "--"],
       windows: {},
     },
@@ -250,7 +250,7 @@ for (const item of targets) {
 
   // Smoke test: only run if binary is for current platform
   if (item.os === process.platform && item.arch === process.arch && !item.abi) {
-    const binaryName = process.platform === "win32" ? "mimo.exe" : "mimo"
+    const binaryName = process.platform === "win32" ? "glitch.exe" : "glitch"
     const binaryPath = `dist/${name}/bin/${binaryName}`
     console.log(`Running smoke test: ${binaryPath} --version`)
     try {

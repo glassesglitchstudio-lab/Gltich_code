@@ -50,7 +50,7 @@ function detectPlatformAndArch() {
 function findBinary() {
   const { platform, arch } = detectPlatformAndArch()
   const packageName = `@mimo-ai/mimocode-${platform}-${arch}`
-  const binaryName = platform === "windows" ? "mimo.exe" : "mimo"
+  const binaryName = platform === "windows" ? "glitch.exe" : "glitch"
 
   try {
     // Use require.resolve to find the package
