@@ -32,8 +32,8 @@ if %errorlevel% neq 0 (
 )
 
 :: ─── Build check ───
-if not exist "..\packages\opencode\dist\mimocode-windows-x64\bin\mimo.exe" (
-    echo  [%YELLOW%!%RESET%] mimo.exe bulunamadi!
+if not exist "..\packages\opencode\dist\mimocode-windows-x64\bin\glitch.exe" (
+    echo  [%YELLOW%!%RESET%] glitch.exe bulunamadi!
     choice /C EH /M "Build alinsin mi? [E]vet / [H]ayir"
     if !errorlevel! equ 1 (
         cd ..\packages\opencode

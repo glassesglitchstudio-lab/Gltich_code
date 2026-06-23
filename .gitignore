@@ -36,11 +36,12 @@ tsconfig.tsbuildinfo
 .claude/
 *.pid
 .mimo-worktrees
+.glitchcode/*
+!.glitchcode/skills/
+!.glitchcode/command/
+.glitchcode/**/node_modules/
+.glitchcode/**/.cache/
 .mimocode/*
-!.mimocode/skills/
-!.mimocode/command/
-.mimocode/**/node_modules/
-.mimocode/**/.cache/
 
 # experiment run artifacts (regenerated per run, not source)
 experiment/*.log

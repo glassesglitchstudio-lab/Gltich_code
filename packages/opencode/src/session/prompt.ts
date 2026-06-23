@@ -176,7 +176,7 @@ const INVALID_OUTPUT_CONTINUATION_LIMIT = Flag.MIMOCODE_INVALID_OUTPUT_CONTINUAT
 const log = Log.create({ service: "session.prompt" })
 
 function isExtensionPath(filePath: string): boolean {
-  return /\/\.mimocode\/(tools?|skills?|hooks?)\//.test(filePath)
+  return /\/\.glitchcode\/(tools?|skills?|hooks?)\//.test(filePath)
 }
 const elog = EffectLogger.create({ service: "session.prompt" })
 

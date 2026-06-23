@@ -283,7 +283,7 @@
       "name": "@mimo-ai/cli",
       "version": "0.1.1",
       "bin": {
-        "mimo": "./bin/mimo",
+        "glitch": "./bin/glitch",
       },
       "dependencies": {
         "@actions/core": "1.11.1",
