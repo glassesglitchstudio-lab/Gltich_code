@@ -167,14 +167,32 @@ function findBinary(startDir) {
   }
 }
 
-const resolved = findBinary(scriptDir)
+// try cached binary in user-global dir
+const glitchDir = path.join(os.homedir(), ".glitchcode")
+const cachedBinary = path.join(glitchDir, "bin", binary)
+let resolved = findBinary(scriptDir) || (fs.existsSync(cachedBinary) ? cachedBinary : null)
+
 if (!resolved) {
-  console.error(
-    "It seems that your package manager failed to install the right version of the mimocode CLI for your platform. You can try manually installing " +
-      names.map((n) => `\"${n}\"`).join(" or ") +
-      " package",
-  )
-  process.exit(1)
+  const releaseUrl =
+    "https://github.com/glassesglitchstudio-lab/Gltich_code/releases/latest/download/" + binary
+
+  console.log("Downloading " + binary + "...")
+
+  fs.mkdirSync(path.join(glitchDir, "bin"), { recursive: true })
+
+  const curlExe = platform === "windows" ? "curl.exe" : "curl"
+  let dl = childProcess.spawnSync(curlExe, ["-L", "-o", cachedBinary, releaseUrl], { stdio: "inherit", timeout: 300000 })
+  if (dl.status !== 0 && platform !== "windows") {
+    dl = childProcess.spawnSync("wget", ["-O", cachedBinary, releaseUrl], { stdio: "inherit", timeout: 300000 })
+  }
+  if (dl.status !== 0) {
+    console.error("Failed to download " + releaseUrl + " to " + cachedBinary)
+    process.exit(1)
+  }
+
+  try { fs.chmodSync(cachedBinary, 0o755) } catch {}
+  resolved = cachedBinary
+  console.log("Downloaded to " + cachedBinary)
 }
 
 run(resolved)

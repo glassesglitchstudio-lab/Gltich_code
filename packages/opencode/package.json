@@ -1,13 +1,13 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
-  "version": "0.1.1",
-  "name": "@mimo-ai/cli",
+  "version": "0.1.3",
+  "name": "glitchcode-cli",
   "type": "module",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
-  "private": true,
+  "private": false,
   "scripts": {
     "prepare": "effect-language-service patch || true",
     "typecheck": "tsgo --noEmit",
