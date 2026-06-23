@@ -55,6 +55,7 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; WorkingDi
 
 [Run]
 Filename: "{cmd}"; Parameters: "/C cd /d ""{app}"" && ""{app}\{#MyAppExeName}"""; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: nowait postinstall skipifsilent
+Filename: "{cmd}"; Parameters: "/C git clone --depth 1 https://github.com/glassesglitchstudio-lab/Gltich_code.git ""{app}\repo"""; Description: "Download source from GitHub (skills, Modelfile, .glitchcode)"; Flags: nowait postinstall skipifsilent; Check: GitExists
 
 [Registry]
 Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; \
@@ -421,6 +422,13 @@ begin
     if InstallDotsCount mod 10 = 0 then
       InstallAnimLabel.Caption := 'GlassesCat AI kuruluyor' + StringOfChar('.', (InstallDotsCount div 10) mod 4 + 1);
   end;
+end;
+
+function GitExists: Boolean;
+var
+  ResultCode: Integer;
+begin
+  Result := Exec('git', '--version', '', SW_HIDE, ewWaitUntilTerminated, ResultCode) and (ResultCode = 0);
 end;
 
 function EscapeJson(S: string): string;
