@@ -102,7 +102,7 @@ jobs:
       - name: Publish glitchcode-cli to npmjs.com
         run: |
           cd packages/opencode
-          bun run script/publish.ts
+          npm publish --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
