@@ -18,12 +18,35 @@ Glitch Code supports connecting to any mainstream LLM provider API, including Gl
 
 ## Quick Start
 
-```bash
-# Install via npm
-npm install -g glitchcode-cli
+### Option 1: Install via npm (Recommended)
 
-# Run
+```bash
+npm install -g glitchcode-cli
 glitch
+```
+
+### Option 2: Install from GitHub Releases
+
+Download the binary for your platform from [Releases](https://github.com/glassesglitchstudio-lab/Gltich_code/releases):
+
+| Platform | Download |
+|----------|----------|
+| Linux x64 (glibc) | `linux-x64.tar.gz` |
+| Linux x64 (musl/Alpine) | `linux-x64-musl.tar.gz` |
+| Linux ARM64 | `linux-arm64.tar.gz` |
+| macOS Intel | `darwin-x64.tar.gz` |
+| macOS Apple Silicon | `darwin-arm64.tar.gz` |
+| Windows x64 | `win32-x64.zip` |
+| Windows ARM64 | `win32-arm64.zip` |
+
+```bash
+# Linux/macOS example
+tar -xzf linux-x64.tar.gz
+chmod +x bin/glitch
+./bin/glitch
+
+# Windows example
+# Extract the .zip, then run bin\glitch.exe
 ```
 
 The first launch guides you through configuration automatically. Supported options:
@@ -136,6 +159,53 @@ Glitch Code is configured via `.mimocode/mimocode.json` in the project directory
 - Keybindings and theme
 
 Max Mode (parallel best-of-N reasoning with judge selection) can be enabled via `experimental.maxMode` in the config.
+
+---
+
+## CI/CD Pipeline
+
+This project uses **GitHub Actions** for automated build and publish.
+
+### How it works
+
+1. **Tag push** — When you push a `v*` tag (e.g. `git tag v0.2.9 && git push origin v0.2.9`), the publish workflow triggers
+2. **Parallel build** — 12 platform binaries are built simultaneously using matrix strategy:
+   - Linux: x64, arm64, x64-baseline, x64-musl, arm64-musl, x64-musl-baseline
+   - macOS: x64, arm64, x64-baseline
+   - Windows: x64, arm64, x64-baseline
+3. **npm publish** — The main `glitchcode-cli` package is published to npmjs.com
+4. **GitHub Release** — Binary archives (`.tar.gz` for Linux/macOS, `.zip` for Windows) are attached to the GitHub Release
+
+### Release a new version
+
+```bash
+# 1. Bump version in packages/opencode/package.json
+# 2. Commit and push
+git add . && git commit -m "V0.3.0: new version" && git push origin main
+
+# 3. Create and push tag
+git tag v0.3.0
+git push origin v0.3.0
+```
+
+GitHub Actions will automatically build, publish to npm, and create a GitHub Release.
+
+### Required secrets
+
+| Secret | Purpose |
+|--------|---------|
+| `NPM_TOKEN` | npmjs.com authentication token |
+
+`GITHUB_TOKEN` is provided automatically by GitHub Actions.
+
+### Workflow files
+
+| File | Trigger | Purpose |
+|------|---------|---------|
+| `.github/workflows/publish.yml` | `v*` tag push | Build + npm publish + GitHub Release |
+| `.github/workflows/lint.yml` | push to main/dev, PRs | Run oxlint |
+| `.github/workflows/test.yml` | push to main/dev, PRs | Run tests via Turborepo |
+| `.github/workflows/typecheck.yml` | push to main/dev, PRs | Run TypeScript type checking |
 
 ---
 
