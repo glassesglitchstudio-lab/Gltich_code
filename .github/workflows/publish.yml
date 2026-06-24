@@ -1,0 +1,135 @@
+name: publish
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish (e.g. 0.2.0)"
+        required: false
+
+permissions:
+  contents: write
+  packages: write
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux-arm64
+          - os: ubuntu-latest
+            target: linux-x64
+          - os: ubuntu-latest
+            target: linux-x64-baseline
+          - os: ubuntu-latest
+            target: linux-arm64-musl
+          - os: ubuntu-latest
+            target: linux-x64-musl
+          - os: ubuntu-latest
+            target: linux-x64-musl-baseline
+          - os: macos-latest
+            target: darwin-arm64
+          - os: macos-latest
+            target: darwin-x64
+          - os: macos-latest
+            target: darwin-x64-baseline
+          - os: windows-latest
+            target: win32-arm64
+          - os: windows-latest
+            target: win32-x64
+          - os: windows-latest
+            target: win32-x64-baseline
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: ./.github/actions/setup-bun
+
+      - name: Build binary for ${{ matrix.target }}
+        run: bun run --cwd packages/opencode script/build.ts --single
+        env:
+          MIMOCODE_CHANNEL: prod
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target }}
+          path: packages/opencode/dist/${{ matrix.target }}/
+          retention-days: 5
+
+  publish-github:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: ./.github/actions/setup-bun
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: Configure GitHub Packages
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
+          echo "@glitchcode:registry=https://npm.pkg.github.com/" >> ~/.npmrc
+
+      - name: Publish platform packages to GitHub Packages
+        run: |
+          for dir in artifacts/*/; do
+            platform=$(basename "$dir")
+            echo "Publishing @glitchcode/${platform}..."
+            cd "$dir"
+            npm publish --registry=https://npm.pkg.github.com/ --access=public || echo "Failed to publish ${platform}"
+            cd "$GITHUB_WORKSPACE"
+          done
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: Create archives
+        run: |
+          mkdir -p release
+          for dir in artifacts/*/; do
+            platform=$(basename "$dir")
+            if [[ "$platform" == *"win32"* ]]; then
+              cd "$dir" && zip -r "$GITHUB_WORKSPACE/release/${platform}.zip" . && cd "$GITHUB_WORKSPACE"
+            else
+              cd "$dir" && tar -czf "$GITHUB_WORKSPACE/release/${platform}.tar.gz" . && cd "$GITHUB_WORKSPACE"
+            fi
+          done
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
