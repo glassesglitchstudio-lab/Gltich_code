@@ -1,108 +1,125 @@
-- Use MiMoCode Compose skills when available, otherwise use superpowers skill if installed.
-- To regenerate the JavaScript SDK, run `./packages/sdk/js/script/build.ts`.
-- ALWAYS USE PARALLEL TOOLS WHEN APPLICABLE.
-- The default branch in this repo is `main`.
-- CI triggers on both `main` and `dev` branches.
-- Prefer automation: execute requested actions without confirmation unless blocked by missing info or safety/irreversibility.
+# Glitch Code - Agent Kuralları
 
-## Core Focus (as of 2025-06-18)
+## Temel Bilgiler
 
-Our core development focus is the **TUI** (terminal UI) implementation in `packages/opencode/src/cli/cmd/tui/`. We do not currently provide support for Web or App interfaces. All operations should default to checking the TUI implementation first.
+- **Proje**: Glitch Code (MiMoCode/OpenCode fork'u)
+- **GitHub**: `glassesglitchstudio-lab/Gltich_code`
+- **Package**: `glitchcode-cli` (npmjs.com)
+- **Binary**: `glitch`
+- **Branch**: `main`
+- **CI**: test, typecheck, lint + publish (tag-triggered)
 
-## Style Guide
+## Publish Pipeline Durumu
 
-### General Principles
+- **Son başarılı version**: `v0.2.9` (README güncellemesi)
+- **npm'de yayında olan**: `glitchcode-cli@0.2.8`
+- **12 platform build**: linux/darwin/win32 x arm64/x64 + musl/baseline
+- **Workflow**: `.github/workflows/publish.yml`
+- **Tag ile tetikleniyor**: `v*` push
 
-- Keep things in one function unless composable or reusable
-- Avoid `try`/`catch` where possible
-- Avoid using the `any` type
-- Use Bun APIs when possible, like `Bun.file()`
-- Rely on type inference when possible; avoid explicit type annotations or interfaces unless necessary for exports or clarity
-- Prefer functional array methods (flatMap, filter, map) over for loops; use type guards on filter to maintain type inference downstream
-- In `src/config`, follow the existing self-export pattern at the top of the file (for example `export * as ConfigAgent from "./agent"`) when adding a new config module.
+## Bilinen Sorunlar
 
-Reduce total variable count by inlining when a value is only used once.
+### 1. npm ile kurulanlarda özellikler çalışmıyor
+- **Sorun**: `npm install -g glitchcode-cli` ile kurulduğunda sadece compile edilmiş binary iniyor
+- **Neden**: `.glitchcode/` ve `.mimocode/` config dizinleri pakete eklenmemiş
+- **Çözüm**: `package.json`'daki `files` alanına `.glitchcode/` ve `.mimocode/` eklenecek
+- **Alternatif**: postinstall ile otomatik setup
 
-```ts
-// Good
-const journal = await Bun.file(path.join(dir, "journal.json")).json()
+### 2. Windows build
+- `--skip-install` flag'i zorunlu (node-gyp/tree-sitter sorunları)
+- `node-gyp` global kurulumu tek başına çözüm olmadı
 
-// Bad
-const journalPath = path.join(dir, "journal.json")
-const journal = await Bun.file(journalPath).json()
+### 3. npm token
+- CLI'da sorunlu — web UI üzerinden Automation tipinde oluşturulmalı
+- `gh secret set NPM_TOKEN` ile GitHub secret eklenebilir
+
+### 4. Version stratejisi
+- Her publish öncesi version bump zorunlu (npm overwrite mümkün değil)
+- `package.json` version = npmjs.com'daki version olmalı
+
+## Çözülmesi Gerekenler (Öncelikli)
+
+1. **npm package'a config dosyalarını ekle** ✅ ÇÖZÜLDÜ
+   - `bin/glitch` → `ensureProjectConfig()` first-run detection eklendi
+   - `script/postinstall.mjs` → `ensureProjectConfig()` eklendi
+   - İlk çalıştırmada `.glitchcode/` ve `.mimocode/` otomatik oluşturuluyor
+
+2. **Binary branding**
+   - Logo/GLITCH yazısı doğru (logo.ts, ui.ts)
+   - Ama middleware'de hâlâ "Opencode'dan base alınmıştır" uyarısı var
+
+3. **Build output dizin adı**
+   - `build.ts` → `BINARY_PREFIX = "glitchcode"` (doğru)
+   - Ama local build `mimocode-windows-x64` üretiyor (eski build cache?)
+
+## Kurulum Talimatları (Kullanıcılar için)
+
+### npm ile
+```bash
+npm install -g glitchcode-cli
+glitch
 ```
 
-### Destructuring
+### GitHub Releases'dan
+1. https://github.com/glassesglitchstudio-lab/Gltich_code/releases
+2. Platforma göre dosya indir (win32-x64.zip, darwin-arm64.tar.gz, linux-x64.tar.gz)
+3. Aç ve `glitch` çalıştır
 
-Avoid unnecessary destructuring. Use dot notation to preserve context.
+## Styling Kuralları
 
-```ts
-// Good
-obj.a
-obj.b
+- neon-turuncu tema (#FF6B00)
+- Glassmorphism efektleri
+- Framer Motion animasyonları
+- Dark mode default
+- Monospace font (JetBrains Mono / Fira Code)
 
-// Bad
-const { a, b } = obj
+## Test Komutları
+
+```bash
+# Typecheck
+bun typecheck
+
+# Test
+bun test
+
+# Build
+bun run script/build.ts --single
+
+# Dev
+bun run dev
 ```
 
-### Variables
+## Dosya Yapısı
 
-Prefer `const` over `let`. Use ternaries or early returns instead of reassignment.
-
-```ts
-// Good
-const foo = condition ? 1 : 2
-
-// Bad
-let foo
-if (condition) foo = 1
-else foo = 2
+```
+packages/opencode/
+├── src/
+│   ├── cli/          # CLI komutları ve UI
+│   ├── agent/        # Agent sistemi
+│   ├── memory/       # Hafıza sistemi
+│   ├── task/         # Task yönetimi
+│   ├── skill/        # Skill sistemi
+│   ├── tool/         # Araçlar (bash, read, write, edit, glob, grep, webfetch, actor, task)
+│   ├── provider/     # AI provider entegrasyonları
+│   └── index.ts      # Ana entry point
+├── script/
+│   └── build.ts      # Build scripti (Bun.build)
+├── bin/
+│   └── glitch        # Node.js wrapper (binary resolution)
+└── package.json
 ```
 
-### Control Flow
+## Notlar
 
-Avoid `else` statements. Prefer early returns.
+- Kullanıcı "sadece cevap ver" dediğinde aksiyon alma, sadece açıkla
+- Kullanıcı genellikle sinirli — hızlı ve net cevap ver
+- Windows kullanıcısı — PowerShell komutları tercih et
+- `--no-verify` ile push ediliyor (husky hook typecheck hatası yüzünden)
 
-```ts
-// Good
-function foo() {
-  if (condition) return 1
-  return 2
-}
+## Session Notları (2026-06-24)
 
-// Bad
-function foo() {
-  if (condition) return 1
-  else return 2
-}
-```
-
-### Schema Definitions (Drizzle)
-
-Use snake_case for field names so column names don't need to be redefined as strings.
-
-```ts
-// Good
-const table = sqliteTable("session", {
-  id: text().primaryKey(),
-  project_id: text().notNull(),
-  created_at: integer().notNull(),
-})
-
-// Bad
-const table = sqliteTable("session", {
-  id: text("id").primaryKey(),
-  projectID: text("project_id").notNull(),
-  createdAt: integer("created_at").notNull(),
-})
-```
-
-## Testing
-
-- Avoid mocks as much as possible
-- Test actual implementation, do not duplicate logic into tests
-- Tests cannot run from repo root (guard: `do-not-run-tests-from-root`); run from package dirs like `packages/opencode`.
-
-## Type Checking
-
-- Always run `bun typecheck` from package directories (e.g., `packages/opencode`), never `tsc` directly.
+- v0.2.9 publish başarılı (12 build ✅, npm ✅, release ✅)
+- v0.2.8 npm'de yayında
+- npm config sorunu ÇÖZÜLDÜ: `ensureProjectConfig()` first-run detection eklendi
+- `bin/glitch` + `postinstall.mjs` güncellendi
+- Bir sonraki publish'da bu değişiklikler dahil edilecek

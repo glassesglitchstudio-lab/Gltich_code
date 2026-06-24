@@ -68,17 +68,37 @@ function findBinary() {
   }
 }
 
+function ensureProjectConfig() {
+  const cwd = process.cwd()
+  const glitchDir = path.join(cwd, ".glitchcode")
+  const mimoDir = path.join(cwd, ".mimocode")
+
+  if (!fs.existsSync(glitchDir)) {
+    fs.mkdirSync(path.join(glitchDir, "command"), { recursive: true })
+    fs.mkdirSync(path.join(glitchDir, "skills"), { recursive: true })
+    fs.writeFileSync(path.join(glitchDir, "command", "README.md"), "# Glitch Code - Commands\n")
+    fs.writeFileSync(path.join(glitchDir, "skills", "README.md"), "# Glitch Code - Skills\n")
+    console.log("Created .glitchcode/ config directory")
+  }
+
+  if (!fs.existsSync(mimoDir)) {
+    fs.mkdirSync(path.join(mimoDir, "command"), { recursive: true })
+    fs.mkdirSync(path.join(mimoDir, "skills"), { recursive: true })
+    fs.writeFileSync(path.join(mimoDir, "command", "README.md"), "# MiMo Code - Commands\n")
+    fs.writeFileSync(path.join(mimoDir, "skills", "README.md"), "# MiMo Code - Skills\n")
+    console.log("Created .mimocode/ config directory")
+  }
+}
+
 async function main() {
   try {
+    ensureProjectConfig()
+
     if (os.platform() === "win32") {
-      // On Windows, the .exe is already included in the package and bin field points to it
-      // No postinstall setup needed
       console.log("Windows detected: binary setup not needed (using packaged .exe)")
       return
     }
 
-    // On non-Windows platforms, just verify the binary package exists
-    // Don't replace the wrapper script - it handles binary execution
     const { binaryPath } = findBinary()
     const target = path.join(__dirname, "bin", ".mimocode")
     if (fs.existsSync(target)) fs.unlinkSync(target)

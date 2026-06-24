@@ -1,10 +1,32 @@
 #!/usr/bin/env node
 
 import { spawnSync } from "child_process"
-import { existsSync, mkdirSync, chmodSync, realpathSync, readFileSync } from "fs"
+import { existsSync, mkdirSync, chmodSync, realpathSync, readFileSync, writeFileSync } from "fs"
 import { dirname, join } from "path"
 import { homedir, platform as osPlatform, arch as osArch } from "os"
 import { fileURLToPath } from "url"
+
+function ensureProjectConfig() {
+  const cwd = process.cwd()
+  const glitchDir = join(cwd, ".glitchcode")
+  const mimoDir = join(cwd, ".mimocode")
+
+  if (!existsSync(glitchDir)) {
+    mkdirSync(join(glitchDir, "command"), { recursive: true })
+    mkdirSync(join(glitchDir, "skills"), { recursive: true })
+    writeFileSync(join(glitchDir, "command", "README.md"), "# Glitch Code - Commands\n")
+    writeFileSync(join(glitchDir, "skills", "README.md"), "# Glitch Code - Skills\n")
+  }
+
+  if (!existsSync(mimoDir)) {
+    mkdirSync(join(mimoDir, "command"), { recursive: true })
+    mkdirSync(join(mimoDir, "skills"), { recursive: true })
+    writeFileSync(join(mimoDir, "command", "README.md"), "# MiMo Code - Commands\n")
+    writeFileSync(join(mimoDir, "skills", "README.md"), "# MiMo Code - Skills\n")
+  }
+}
+
+ensureProjectConfig()
 
 function run(target) {
   const result = spawnSync(target, process.argv.slice(2), {
