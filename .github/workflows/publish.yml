@@ -57,6 +57,10 @@ jobs:
       - name: Setup Bun
         uses: ./.github/actions/setup-bun
 
+      - name: Install node-gyp
+        run: npm install -g node-gyp
+        shell: bash
+
       - name: Build binary for ${{ matrix.target }}
         run: bun run --cwd packages/opencode script/build.ts --single
         env:
