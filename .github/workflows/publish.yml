@@ -68,7 +68,13 @@ jobs:
         run: npm install -g node-gyp
 
       - name: Build binary for ${{ matrix.target }}
-        run: bun run --cwd packages/opencode script/build.ts --single
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            bun run --cwd packages/opencode script/build.ts --single --skip-install
+          else
+            bun run --cwd packages/opencode script/build.ts --single
+          fi
+        shell: bash
         env:
           MIMOCODE_CHANNEL: prod
 
