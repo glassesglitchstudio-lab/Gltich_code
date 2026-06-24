@@ -8,6 +8,11 @@
     "access": "public"
   },
   "private": false,
+  "files": [
+    "bin/",
+    "dist/",
+    "README.md"
+  ],
   "scripts": {
     "prepare": "effect-language-service patch || true",
     "typecheck": "tsgo --noEmit",
