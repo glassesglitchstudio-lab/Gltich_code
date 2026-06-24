@@ -49,12 +49,6 @@ jobs:
             target: win32-x64
           - os: windows-latest
             target: win32-x64-baseline
-          - os: windows-latest
-            target: win32-arm64
-          - os: windows-latest
-            target: win32-x64
-          - os: windows-latest
-            target: win32-x64-baseline
 
     steps:
       - name: Checkout repository
@@ -82,40 +76,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target }}
-          path: packages/opencode/dist/${{ matrix.target }}/
+          path: packages/opencode/dist/glitchcode-${{ matrix.target }}/
           retention-days: 5
-
-  publish-github:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Bun
-        uses: ./.github/actions/setup-bun
-
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts/
-
-      - name: Configure GitHub Packages
-        run: |
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
-          echo "@glitchcode:registry=https://npm.pkg.github.com/" >> ~/.npmrc
-
-      - name: Publish platform packages to GitHub Packages
-        run: |
-          for dir in artifacts/*/; do
-            platform=$(basename "$dir")
-            echo "Publishing @glitchcode/${platform}..."
-            cd "$dir"
-            npm publish --registry=https://npm.pkg.github.com/ --access=public || echo "Failed to publish ${platform}"
-            cd "$GITHUB_WORKSPACE"
-          done
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish-npm:
     needs: build
@@ -162,6 +124,10 @@ jobs:
           mkdir -p release
           for dir in artifacts/*/; do
             platform=$(basename "$dir")
+            if [ ! -d "$dir" ] || [ -z "$(ls -A "$dir")" ]; then
+              echo "Skipping empty artifact: $platform"
+              continue
+            fi
             if [[ "$platform" == *"win32"* ]]; then
               cd "$dir" && zip -r "$GITHUB_WORKSPACE/release/${platform}.zip" . && cd "$GITHUB_WORKSPACE"
             else
