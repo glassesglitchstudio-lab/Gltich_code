@@ -15,30 +15,38 @@ MiMo Auto is built in as a free-for-limited-time channel, so you can start with 
 
 ---
 
-## Quick Start
+## Kurulum
 
+### npm ile (Önerilen)
 ```bash
-# Clone the repo
+npm install -g glitchcode-cli
+glitch
+```
+
+### GitHub Releases'dan
+1. https://github.com/glassesglitchstudio-lab/Gltich_code/releases adresine git
+2. Platformuna göre dosyayı indir:
+   - **Windows:** `windows-x64.zip` veya `windows-x64-baseline.zip`
+   - **macOS Apple Silicon:** `darwin-arm64.tar.gz`
+   - **macOS Intel:** `darwin-x64.tar.gz` veya `darwin-x64-baseline.tar.gz`
+   - **Linux:** `linux-x64.tar.gz`, `linux-arm64.tar.gz`, `linux-x64-musl.tar.gz` vb.
+3. Arşivi aç
+4. Terminal'den `glitch` komutunu çalıştır
+
+### Kaynaktan
+```bash
 git clone https://github.com/glassesglitchstudio-lab/Gltich_code.git
 cd Gltich_code
-
-# Install dependencies
 bun install
-
-# Run (TUI mode)
 bun run dev
 ```
 
-The first launch guides you through configuration automatically. Supported options:
-- **MiMo Auto (free for a limited time)** — anonymous channel, zero configuration
-- **Xiaomi MiMo Platform** — OAuth login
-- **Import from Claude Code** — migrate existing authentication in one step
-- **Custom Provider** — add any OpenAI-compatible API in the TUI
+İlk çalıştırmada `glitch init` ile kurulumu tamamla.
 
 <details>
 <summary><strong>WSL: clipboard issues</strong></summary>
 
-If you encounter garbled text when copying on WSL, install `xsel`:
+WSL'de kopyalama sorunu yaşarsan:
 ```bash
 sudo apt install xsel
 ```
