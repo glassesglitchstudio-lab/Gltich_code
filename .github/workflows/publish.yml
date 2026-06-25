@@ -86,7 +86,8 @@ jobs:
       - name: Publish glitchcode-cli to npmjs.com
         run: |
           cd packages/opencode
-          npm publish --access=public
+          bun pm pack
+          npm publish *.tgz --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
