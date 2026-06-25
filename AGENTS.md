@@ -116,16 +116,13 @@ packages/opencode/
 - Windows kullanıcısı — PowerShell komutları tercih et
 - `--no-verify` ile push ediliyor (husky hook typecheck hatası yüzünden)
 
-## Session Notları (2026-06-24)
+## Session Notları (2026-06-25)
 
-- v0.2.12 publish BAŞARILI ✅ (GitHub + npm)
-- v0.2.11 publish BAŞARISIZ: `@glitchcode` scope npm'de yok, publish.ts hatası
-- v0.2.10 publish başarılı (8 skill eklendi, init geliştirildi)
-- v0.2.9 publish başarılı (12 build ✅, npm ✅, release ✅)
-- v0.2.8 npm'de yayında
-- npm config sorunu ÇÖZÜLDÜ: `ensureProjectConfig()` first-run detection eklendi
-- 8 özel skill compose bundle'a eklendi (context-compressor, deep-file-analysis, effect, model-router, pattern-learner, self-healing, self-supervision, smart-predict)
-- `glitch init` geliştirildi (.glitchcode/ ve .mimocode/ dizinlerini de oluşturuyor)
+- v0.2.25 publish BAŞARILI ✅ (GitHub + npm, 10 platform)
+- v0.2.22 npm'de yayınlandı
+- CI/CD fix tamamlandı (win32→windows path, --target flag, timeout)
+- README güncellendi (gerçek kurulum talimatları)
+- npm version fix bekleniyor (publish.ts → package.json)
 
 ## Bilinen Sorunlar (Devam)
 
