@@ -65,9 +65,9 @@ jobs:
       - name: Build binary for ${{ matrix.target }}
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then
-            bun run --cwd packages/opencode script/build.ts --single --skip-install
+            bun run --cwd packages/opencode script/build.ts --skip-install
           else
-            bun run --cwd packages/opencode script/build.ts --single
+            bun run --cwd packages/opencode script/build.ts
           fi
         shell: bash
         env:
