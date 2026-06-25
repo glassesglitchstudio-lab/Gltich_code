@@ -11,8 +11,8 @@
 
 ## Publish Pipeline Durumu
 
-- **Son başarılı version**: `v0.2.9` (README güncellemesi)
-- **npm'de yayında olan**: `glitchcode-cli@0.2.8`
+- **Son başarılı version**: `v0.2.12` (AMA Windows binary'leri eksik)
+- **npm'de yayında olan**: `glitchcode-cli@0.2.12`
 - **12 platform build**: linux/darwin/win32 x arm64/x64 + musl/baseline
 - **Workflow**: `.github/workflows/publish.yml`
 - **Tag ile tetikleniyor**: `v*` push
@@ -49,8 +49,8 @@
    - Ama middleware'de hâlâ "Opencode'dan base alınmıştır" uyarısı var
 
 3. **Build output dizin adı**
-   - `build.ts` → `BINARY_PREFIX = "glitchcode"` (doğru)
-   - Ama local build `mimocode-windows-x64` üretiyor (eski build cache?)
+   - `build.ts` → `BINARY_PREFIX = "glitchcode"` ✅
+   - `win32` → `windows` rename var (build.ts:202) — CI path'leri buna uygun olmalı
 
 ## Kurulum Talimatları (Kullanıcılar için)
 
@@ -129,6 +129,6 @@ packages/opencode/
 
 ## Bilinen Sorunlar (Devam)
 
-1. **npm package boyutu**: 77+ MB (binary'ler paket içinde). publish.ts ile küçültülebilir ama `@glitchcode` scope npm'de oluşturulmalı
-2. **publish.ts @glitchcode scope**: npm'de `@glitchcode` scope'u yok, platform binary'leri yayınlanamıyor
-3. **test dizini**: `C:\Users\ErCuM\CascadeProjects\tunnel` ile test edilecek
+1. **Windows binary upload path mismatch** — Build output `glitchcode-windows-*` ama upload-artifact `glitchcode-win32-*` arıyor. publish.yml fix bekliyor.
+2. **npm package boyutu**: 77+ MB (binary'ler paket içinde)
+3. **npm install timeout**: Bu makinede `npm install -g glitchcode-cli` zaman aşımı veriyor
