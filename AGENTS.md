@@ -118,8 +118,17 @@ packages/opencode/
 
 ## Session Notları (2026-06-24)
 
+- v0.2.12 publish BAŞARILI ✅ (GitHub + npm)
+- v0.2.11 publish BAŞARISIZ: `@glitchcode` scope npm'de yok, publish.ts hatası
+- v0.2.10 publish başarılı (8 skill eklendi, init geliştirildi)
 - v0.2.9 publish başarılı (12 build ✅, npm ✅, release ✅)
 - v0.2.8 npm'de yayında
 - npm config sorunu ÇÖZÜLDÜ: `ensureProjectConfig()` first-run detection eklendi
-- `bin/glitch` + `postinstall.mjs` güncellendi
-- Bir sonraki publish'da bu değişiklikler dahil edilecek
+- 8 özel skill compose bundle'a eklendi (context-compressor, deep-file-analysis, effect, model-router, pattern-learner, self-healing, self-supervision, smart-predict)
+- `glitch init` geliştirildi (.glitchcode/ ve .mimocode/ dizinlerini de oluşturuyor)
+
+## Bilinen Sorunlar (Devam)
+
+1. **npm package boyutu**: 77+ MB (binary'ler paket içinde). publish.ts ile küçültülebilir ama `@glitchcode` scope npm'de oluşturulmalı
+2. **publish.ts @glitchcode scope**: npm'de `@glitchcode` scope'u yok, platform binary'leri yayınlanamıyor
+3. **test dizini**: `C:\Users\ErCuM\CascadeProjects\tunnel` ile test edilecek

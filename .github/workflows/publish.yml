@@ -44,11 +44,11 @@ jobs:
           - os: macos-latest
             target: darwin-x64-baseline
           - os: windows-latest
-            target: win32-arm64
+            target: windows-arm64
           - os: windows-latest
-            target: win32-x64
+            target: windows-x64
           - os: windows-latest
-            target: win32-x64-baseline
+            target: windows-x64-baseline
 
     steps:
       - name: Checkout repository
@@ -128,7 +128,7 @@ jobs:
               echo "Skipping empty artifact: $platform"
               continue
             fi
-            if [[ "$platform" == *"win32"* ]]; then
+            if [[ "$platform" == *"windows"* ]]; then
               cd "$dir" && zip -r "$GITHUB_WORKSPACE/release/${platform}.zip" . && cd "$GITHUB_WORKSPACE"
             else
               cd "$dir" && tar -czf "$GITHUB_WORKSPACE/release/${platform}.tar.gz" . && cd "$GITHUB_WORKSPACE"
