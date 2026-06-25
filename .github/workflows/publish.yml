@@ -21,21 +21,21 @@ concurrency:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 20
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: ubuntu-latest
-            target: linux-arm64
-          - os: ubuntu-latest
             target: linux-x64
+          - os: ubuntu-latest
+            target: linux-arm64
           - os: ubuntu-latest
             target: linux-x64-baseline
           - os: ubuntu-latest
-            target: linux-arm64-musl
-          - os: ubuntu-latest
             target: linux-x64-musl
+          - os: ubuntu-latest
+            target: linux-arm64-musl
           - os: ubuntu-latest
             target: linux-x64-musl-baseline
           - os: macos-latest
@@ -44,6 +44,8 @@ jobs:
             target: darwin-x64
           - os: macos-latest
             target: darwin-x64-baseline
+          - os: windows-latest
+            target: windows-x64
           - os: windows-latest
             target: windows-x64-baseline
 
@@ -100,9 +102,6 @@ jobs:
       - name: Publish glitchcode-cli to npmjs.com
         run: |
           cd packages/opencode
-          PKG_VERSION=$(node -p "require('./package.json').version")
-          echo "Publishing version: $PKG_VERSION"
-          npm version "$PKG_VERSION" --no-git-tag-version --allow-same-version
           npm publish --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
