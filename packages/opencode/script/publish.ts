@@ -60,15 +60,19 @@ await Bun.file(`./dist/${pkg.name}/package.json`).write(
       scripts: {
         postinstall: "bun ./postinstall.mjs || node ./postinstall.mjs",
       },
-      optionalDependencies: Object.fromEntries(binaries.map((b) => [b.name, b.version])),
+      optionalDependencies: Object.fromEntries(
+        binaries.filter((b) => !b.name.startsWith("@glitchcode/")).map((b) => [b.name, b.version])
+      ),
     },
     null,
     2,
   ),
 )
 
-const tasks = binaries.map(async (b) => {
-  await publish(b.dir, b.name, b.version)
-})
+const tasks = binaries
+  .filter((b) => !b.name.startsWith("@glitchcode/"))
+  .map(async (b) => {
+    await publish(b.dir, b.name, b.version)
+  })
 await Promise.all(tasks)
 await publish(`./dist/${pkg.name}`, pkg.name, version)
