@@ -21,17 +21,35 @@ concurrency:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: ubuntu-latest
+            target: linux-arm64
+          - os: ubuntu-latest
             target: linux-x64
+          - os: ubuntu-latest
+            target: linux-x64-baseline
+          - os: ubuntu-latest
+            target: linux-arm64-musl
+          - os: ubuntu-latest
+            target: linux-x64-musl
+          - os: ubuntu-latest
+            target: linux-x64-musl-baseline
           - os: macos-latest
             target: darwin-arm64
+          - os: macos-latest
+            target: darwin-x64
+          - os: macos-latest
+            target: darwin-x64-baseline
+          - os: windows-latest
+            target: windows-arm64
           - os: windows-latest
             target: windows-x64
+          - os: windows-latest
+            target: windows-x64-baseline
 
     steps:
       - name: Checkout repository
@@ -47,9 +65,9 @@ jobs:
       - name: Build binary for ${{ matrix.target }}
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then
-            bun run --cwd packages/opencode script/build.ts --single --skip-install
+            bun run --cwd packages/opencode script/build.ts --target glitchcode-${{ matrix.target }} --skip-install
           else
-            bun run --cwd packages/opencode script/build.ts --single
+            bun run --cwd packages/opencode script/build.ts --target glitchcode-${{ matrix.target }}
           fi
         shell: bash
         env:
