@@ -45,8 +45,6 @@ jobs:
           - os: macos-latest
             target: darwin-x64-baseline
           - os: windows-latest
-            target: windows-x64
-          - os: windows-latest
             target: windows-x64-baseline
 
     steps:
