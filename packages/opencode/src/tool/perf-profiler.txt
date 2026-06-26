@@ -1,0 +1,5 @@
+- Static performance analysis of source code without execution
+- Detects: expensive functions, sync I/O in async, deep nesting, memory leak risks
+- React-specific: inline objects/functions causing re-renders
+- Outputs severity-ranked findings with line numbers and fix suggestions
+- Focus modes: all, memory, async, react

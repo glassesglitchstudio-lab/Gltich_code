@@ -78,7 +78,6 @@ export const InitCommand = cmd({
 
     const apiKey = await prompts.password({
       message: "API anahtarin ne? (bos gecersen sonra .env'den okur)",
-      placeholder: "sk-...",
       validate: (v) => {
         if (v && v.length < 10) return "Gecersiz API anahtari"
       },
@@ -132,7 +131,7 @@ export const InitCommand = cmd({
             yield* auth.set(key, info)
           }),
         )
-      await put(provider as string, { apiKey: apiKey as string } as Auth.Info)
+      await put(provider as string, { apiKey: apiKey as string } as unknown as Auth.Info)
     }
 
     const gitignoreStatus = ensureGitignore(root)

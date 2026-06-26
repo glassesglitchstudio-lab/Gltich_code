@@ -18,18 +18,19 @@ export const ContextCompressorTool = Tool.define(
   "context-compressor",
   Effect.gen(function* () {
     const sessions = yield* Session.Service
+    const appFs = yield* AppFileSystem.Service
     return {
       description: DESCRIPTION,
       parameters,
       execute: (args: z.infer<typeof parameters>, ctx: Tool.Context) =>
         Effect.gen(function* () {
           const sessionID = args.session_id ?? ctx.sessionID
-          const msgs = yield* sessions.messages({ sessionID, agentID: "*" })
+          const msgs = yield* sessions.messages({ sessionID: sessionID as any, agentID: "*" })
           if (msgs.length === 0) {
             return {
               title: "Context compressor: no messages",
               output: "Session has no messages to compress.",
-              metadata: { sessionID, count: 0 },
+              metadata: { sessionID, count: 0, format: args.format, output_path: args.output_path },
             }
           }
 
@@ -41,17 +42,21 @@ export const ContextCompressorTool = Tool.define(
           let assistantText = ""
 
           for (const msg of msgs) {
+            const role = msg.info.role
             for (const part of msg.parts) {
-              const text = typeof part.data === "object" && part.data !== null
-                ? (part.data as any).text ?? ""
-                : ""
-              if (part.role === "user") {
+              let text = ""
+              if (part.type === "text") {
+                text = part.text
+              } else if (part.type === "reasoning") {
+                text = part.text
+              }
+              if (role === "user") {
                 userText += text + "\n"
               } else {
                 assistantText += text + "\n"
               }
-              if (part.type === "tool" && (part.data as any)?.state?.error) {
-                errors.push((part.data as any).state.error)
+              if (part.type === "tool" && part.state.status === "error") {
+                errors.push(part.state.error)
               }
             }
           }
@@ -104,8 +109,7 @@ export const ContextCompressorTool = Tool.define(
             const fp = path.isAbsolute(args.output_path)
               ? args.output_path
               : path.join(process.cwd(), args.output_path)
-            const fs = yield* AppFileSystem.Service
-            yield* fs.writeWithDirs(fp, output)
+            yield* appFs.writeWithDirs(fp, output)
             output += `\n\nCompressed context written to: ${fp}`
           }
 

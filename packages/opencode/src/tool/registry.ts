@@ -31,6 +31,10 @@ import { PatternLearnerTool } from "./pattern-learner"
 import { SelfHealingTool } from "./self-healing"
 import { SelfSupervisionTool } from "./self-supervision"
 import { SmartPredictTool } from "./smart-predict"
+import { GitTool } from "./git"
+import { TestGeneratorTool } from "./test-generator"
+import { DepAnalyzerTool } from "./dep-analyzer"
+import { PerfProfilerTool } from "./perf-profiler"
 import { Flag } from "@/flag/flag"
 import { Log } from "@/util"
 import { LspTool } from "./lsp"
@@ -156,6 +160,10 @@ export const layer = Layer.effect(
     const patternLearner = yield* PatternLearnerTool
     const selfHealing = yield* SelfHealingTool
     const smartPredict = yield* SmartPredictTool
+    const gitTool = yield* GitTool
+    const testGenerator = yield* TestGeneratorTool
+    const depAnalyzer = yield* DepAnalyzerTool
+    const perfProfiler = yield* PerfProfilerTool
 
     const state = yield* InstanceState.make<State>(
       Effect.fn("ToolRegistry.state")(function* (ctx) {
@@ -247,6 +255,10 @@ export const layer = Layer.effect(
           patternLearner: Tool.init(patternLearner),
           selfHealing: Tool.init(selfHealing),
           smartPredict: Tool.init(smartPredict),
+          git: Tool.init(gitTool),
+          testGenerator: Tool.init(testGenerator),
+          depAnalyzer: Tool.init(depAnalyzer),
+          perfProfiler: Tool.init(perfProfiler),
         })
 
         return {
@@ -280,6 +292,10 @@ export const layer = Layer.effect(
             tool.patternLearner,
             tool.selfHealing,
             tool.smartPredict,
+            tool.git,
+            tool.testGenerator,
+            tool.depAnalyzer,
+            tool.perfProfiler,
           ],
           actor: tool.actor,
           read: tool.read,

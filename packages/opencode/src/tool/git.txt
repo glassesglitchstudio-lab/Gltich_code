@@ -1,0 +1,5 @@
+- Safe git operations for agents — no push, force, or destructive commands
+- Operations: status, diff, log, blame, commit, branch (list/create/checkout only)
+- Commit requires permission approval via ctx.ask()
+- Branch delete, push, force-push, reset --hard are BLOCKED by design
+- Use instead of raw bash git commands for structured, safe output

@@ -30,6 +30,7 @@ export const SelfSupervisionTool = Tool.define(
           const limit = Math.min(params.depth ?? 10, 50)
 
           const hits = yield* history.search({
+            query: "*",
             scope: "project",
             session_id: params.session_id || ctx.sessionID,
             limit,
@@ -60,12 +61,12 @@ export const SelfSupervisionTool = Tool.define(
             ]
 
             for (const hit of hits) {
-              if (hit.kind !== "assistant_text" && hit.kind !== "tool_call") continue
+              if (hit.kind !== "assistant_text" && hit.kind !== "tool_output") continue
               for (let i = 0; i < errorPatterns.length; i++) {
-                const matches = hit.content.match(errorPatterns[i])
+                const matches = hit.snippet.match(errorPatterns[i])
                 if (matches) {
-                  lines.push(`L${hit.messageID}: ${matches.length}x error pattern hit — "${matches[0]}"`)
-                  lines.push(`  Context: ${hit.content.substring(0, 200)}`)
+                  lines.push(`L${hit.message_id}: ${matches.length}x error pattern hit — "${matches[0]}"`)
+                  lines.push(`  Context: ${hit.snippet.substring(0, 200)}`)
                   findings++
                   break
                 }
@@ -94,11 +95,11 @@ export const SelfSupervisionTool = Tool.define(
             for (const hit of hits) {
               if (hit.kind !== "assistant_text" && hit.kind !== "tool_output") continue
               for (const fp of flawPatterns) {
-                const matches = hit.content.match(fp.pattern)
+                const matches = hit.snippet.match(fp.pattern)
                 if (matches) {
                   const sev = fp.severity === "high" ? "!" : fp.severity === "medium" ? "!" : "i"
                   lines.push(`[${sev}] ${fp.desc} (${matches.length}x)`)
-                  lines.push(`  ${hit.content.substring(0, 150)}`)
+                  lines.push(`  ${hit.snippet.substring(0, 150)}`)
                   findings++
                   if (fp.severity === "high" || fp.severity === "medium") warnings++
                   break
@@ -127,10 +128,10 @@ export const SelfSupervisionTool = Tool.define(
             for (const hit of hits) {
               if (hit.kind !== "user_text") continue
               for (const pi of promptIssues) {
-                const matches = hit.content.match(pi.pattern)
+                const matches = hit.snippet.match(pi.pattern)
                 if (matches) {
                   lines.push(`[${pi.severity}] ${pi.desc}`)
-                  lines.push(`  Prompt: ${hit.content.substring(0, 200)}`)
+                  lines.push(`  Prompt: ${hit.snippet.substring(0, 200)}`)
                   findings++
                   break
                 }
@@ -157,11 +158,11 @@ export const SelfSupervisionTool = Tool.define(
             for (const hit of hits) {
               if (hit.kind !== "assistant_text" && hit.kind !== "user_text") continue
               for (const cp of consistencyPatterns) {
-                const matches = hit.content.match(cp.pattern)
+                const matches = hit.snippet.match(cp.pattern)
                 if (matches) {
                   const sev = cp.severity === "high" ? "!!" : cp.severity === "medium" ? "!" : "i"
                   lines.push(`[${sev}] ${cp.desc} (${matches.length}x)`)
-                  lines.push(`  ${hit.kind} L${hit.messageID}: ${hit.content.substring(0, 200)}`)
+                  lines.push(`  ${hit.kind} L${hit.message_id}: ${hit.snippet.substring(0, 200)}`)
                   findings++
                   if (cp.severity === "high" || cp.severity === "medium") warnings++
                   break
@@ -194,10 +195,10 @@ export const SelfSupervisionTool = Tool.define(
               findings,
               warnings,
               consistencyPromises: params.mode === "consistency-check"
-                ? hits.filter(h => /(I will|I'll|I'm going to|I plan to)/gi.test(h.content)).length
+                ? hits.filter(h => /(I will|I'll|I'm going to|I plan to)/gi.test(h.snippet)).length
                 : undefined,
               consistencyContradictions: params.mode === "consistency-check"
-                ? hits.filter(h => /(actually|however|but wait|on second thought)/gi.test(h.content)).length
+                ? hits.filter(h => /(actually|however|but wait|on second thought)/gi.test(h.snippet)).length
                 : undefined,
             },
             output: lines.join("\n"),

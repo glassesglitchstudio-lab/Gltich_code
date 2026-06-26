@@ -1,0 +1,5 @@
+- Analyzes project dependencies for security, outdated packages, and unused deps
+- Operations: audit (security), outdated (updates), unused (dead deps), summary (overview)
+- Scans package.json and lock files
+- Checks npm registry for latest versions
+- Detects imports vs declared dependencies

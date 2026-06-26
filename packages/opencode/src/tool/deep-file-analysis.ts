@@ -524,7 +524,7 @@ export const DeepFileAnalysisTool = Tool.define(
           if (!stat || stat.type !== "File") {
             return {
               title: path.basename(filePath),
-              metadata: { error: true },
+              metadata: { error: true } as any,
               output: `File not found or is not a regular file: ${filePath}`,
             }
           }
@@ -534,8 +534,8 @@ export const DeepFileAnalysisTool = Tool.define(
           if (stat.size > MAX_FILE_SIZE) {
             return {
               title: path.basename(filePath),
-              metadata: { error: true },
-              output: `File too large (${(stat.size / 1024 / 1024).toFixed(1)} MB). Maximum: 1 MB`,
+              metadata: { error: true } as any,
+              output: `File too large (${(Number(stat.size) / 1024 / 1024).toFixed(1)} MB). Maximum: 1 MB`,
             }
           }
 
@@ -543,7 +543,7 @@ export const DeepFileAnalysisTool = Tool.define(
           if (!content) {
             return {
               title: path.basename(filePath),
-              metadata: { error: true },
+              metadata: { error: true } as any,
               output: `Could not read file: ${filePath}`,
             }
           }
@@ -579,7 +579,8 @@ export const DeepFileAnalysisTool = Tool.define(
           const duplicates = params.deep ? findDuplicateBlocks(content) : []
           const tsTypes = params.deep ? extractTypeScriptTypes(content, lang) : []
           const exports = params.deep ? extractExports(content, lang) : []
-          const fileAge = stat.mtime ? getFileAge(stat) : null
+          const mtime = stat.mtime instanceof Date ? stat.mtime : undefined
+          const fileAge = mtime ? getFileAge({ mtime }) : null
           const testInfo = checkTestCoverage(filePath, content)
 
           const output: string[] = []
@@ -587,7 +588,7 @@ export const DeepFileAnalysisTool = Tool.define(
           output.push("")
           output.push(`**Path:** \`${filePath}\``)
           output.push(`**Language:** ${lang}`)
-          output.push(`**Size:** ${(stat.size / 1024).toFixed(1)} KB`)
+          output.push(`**Size:** ${(Number(stat.size) / 1024).toFixed(1)} KB`)
           if (fileAge) {
             output.push(`**Age:** ${fileAge.age} (${fileAge.modified})`)
           }
@@ -795,6 +796,7 @@ export const DeepFileAnalysisTool = Tool.define(
           return {
             title: path.basename(filePath),
             metadata: {
+              error: false,
               language: lang,
               lines: totalLines,
               functions: functions.length,

@@ -1,0 +1,5 @@
+- Automatically generates test files from source code
+- Detects functions, classes, exports, and edge cases
+- Supports bun:test, jest, and vitest frameworks
+- Generates comprehensive tests with edge cases, error paths, and type variations
+- Output is written to a test file adjacent to the source

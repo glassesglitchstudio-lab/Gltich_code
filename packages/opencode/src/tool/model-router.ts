@@ -26,7 +26,8 @@ export const ModelRouterTool = Tool.define(
             { id: "glassesglitchstudio/gulmzcetiner:V5_NEXUS_CORE", name: "V5_NEXUS_CORE", priority: 4, desc: "Fast executor — simple tasks", bestFor: ["fast", "simple", "refactor"] },
           ]
 
-          const failedIdx = params.failed_model ? modelHierarchy.findIndex(m => m.name.toLowerCase().includes(params.failed_model.toLowerCase())) : -1
+          const failedModel = params.failed_model
+          const failedIdx = failedModel ? modelHierarchy.findIndex(m => m.name.toLowerCase().includes(failedModel.toLowerCase())) : -1
 
           const excluded = failedIdx >= 0 ? modelHierarchy.slice(0, failedIdx + 1) : []
 
