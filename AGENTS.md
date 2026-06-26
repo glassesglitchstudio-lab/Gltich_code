@@ -2,7 +2,7 @@
 
 ## Temel Bilgiler
 
-- **Proje**: Glitch Code (MiMoCode/OpenCode fork'u)
+- **Proje**: Glitch Code (OpenCode fork'u)
 - **GitHub**: `glassesglitchstudio-lab/Gltich_code`
 - **Package**: `glitchcode-cli` (npmjs.com)
 - **Binary**: `glitch`
@@ -21,8 +21,8 @@
 
 ### 1. npm ile kurulanlarda özellikler çalışmıyor
 - **Sorun**: `npm install -g glitchcode-cli` ile kurulduğunda sadece compile edilmiş binary iniyor
-- **Neden**: `.glitchcode/` ve `.mimocode/` config dizinleri pakete eklenmemiş
-- **Çözüm**: `package.json`'daki `files` alanına `.glitchcode/` ve `.mimocode/` eklenecek
+- **Neden**: `.glitchcode/` config dizini pakete eklenmemiş
+- **Çözüm**: `package.json`'daki `files` alanına `.glitchcode/` eklenecek
 - **Alternatif**: postinstall ile otomatik setup
 
 ### 2. Windows build
@@ -42,7 +42,7 @@
 1. **npm package'a config dosyalarını ekle** ✅ ÇÖZÜLDÜ
    - `bin/glitch` → `ensureProjectConfig()` first-run detection eklendi
    - `script/postinstall.mjs` → `ensureProjectConfig()` eklendi
-   - İlk çalıştırmada `.glitchcode/` ve `.mimocode/` otomatik oluşturuluyor
+   - İlk çalıştırmada `.glitchcode/` otomatik oluşturuluyor
 
 2. **Binary branding**
    - Logo/GLITCH yazısı doğru (logo.ts, ui.ts)

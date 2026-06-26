@@ -44,10 +44,10 @@ function create(opts: { cors?: string[] }) {
 
   const runtime = adapter.create(app)
 
-  if (Flag.MIMOCODE_WORKSPACE_ID) {
+  if (Flag.GLITCHCODE_WORKSPACE_ID) {
     return {
       app: app
-        .use(InstanceMiddleware(Flag.MIMOCODE_WORKSPACE_ID ? WorkspaceID.make(Flag.MIMOCODE_WORKSPACE_ID) : undefined))
+        .use(InstanceMiddleware(Flag.GLITCHCODE_WORKSPACE_ID ? WorkspaceID.make(Flag.GLITCHCODE_WORKSPACE_ID) : undefined))
         .use(FenceMiddleware)
         .route("/", InstanceRoutes(runtime.upgradeWebSocket)),
       runtime,

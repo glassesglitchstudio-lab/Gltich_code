@@ -19,9 +19,9 @@ describe("isInlineScript", () => {
 })
 
 describe("resolveWorkflowScript", () => {
-  test("finds <name>.js under .mimocode/workflows walking up from start", async () => {
+  test("finds <name>.js under .glitchcode/workflows walking up from start", async () => {
     const root = mkdtempSync(`${tmpdir()}/wf-res-`)
-    const dir = path.join(root, ".mimocode", "workflows")
+    const dir = path.join(root, ".glitchcode", "workflows")
     mkdirSync(dir, { recursive: true })
     const body = `export const meta = { name: "phase-a", description: "d" }\nreturn 1`
     writeFileSync(path.join(dir, "phase-a.js"), body)

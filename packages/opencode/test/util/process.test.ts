@@ -69,9 +69,9 @@ describe("util.process", () => {
   })
 
   test("merges environment overrides", async () => {
-    const out = await Process.run(node('process.stdout.write(process.env.MIMOCODE_TEST ?? "")'), {
+    const out = await Process.run(node('process.stdout.write(process.env.GLITCHCODE_TEST ?? "")'), {
       env: {
-        MIMOCODE_TEST: "set",
+        GLITCHCODE_TEST: "set",
       },
     })
     expect(out.stdout.toString()).toBe("set")
@@ -80,15 +80,15 @@ describe("util.process", () => {
   test("uses shell in run on Windows", async () => {
     if (process.platform !== "win32") return
 
-    const out = await Process.run(["set", "MIMOCODE_TEST_SHELL"], {
+    const out = await Process.run(["set", "GLITCHCODE_TEST_SHELL"], {
       shell: true,
       env: {
-        MIMOCODE_TEST_SHELL: "ok",
+        GLITCHCODE_TEST_SHELL: "ok",
       },
     })
 
     expect(out.code).toBe(0)
-    expect(out.stdout.toString()).toContain("MIMOCODE_TEST_SHELL=ok")
+    expect(out.stdout.toString()).toContain("GLITCHCODE_TEST_SHELL=ok")
   })
 
   test("runs cmd scripts with spaces on Windows without shell", async () => {

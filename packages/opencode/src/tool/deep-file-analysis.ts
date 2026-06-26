@@ -1,7 +1,7 @@
 import path from "path"
 import z from "zod"
 import { Effect } from "effect"
-import { AppFileSystem } from "@mimo-ai/shared/filesystem"
+import { AppFileSystem } from "@glitchcode/shared/filesystem"
 import { assertExternalDirectoryEffect } from "./external-directory"
 import { SessionCwd } from "./session-cwd"
 import DESCRIPTION from "./deep-file-analysis.txt"

@@ -9,7 +9,7 @@ import { ProjectID } from "../../src/project/schema"
 import { Effect, Layer, Stream } from "effect"
 import { ChildProcess, ChildProcessSpawner } from "effect/unstable/process"
 import { NodePath } from "@effect/platform-node"
-import { AppFileSystem } from "@mimo-ai/shared/filesystem"
+import { AppFileSystem } from "@glitchcode/shared/filesystem"
 import * as CrossSpawnSpawner from "../../src/effect/cross-spawn-spawner"
 
 void Log.init({ print: false })
@@ -85,7 +85,7 @@ describe("Project.fromDirectory", () => {
     const legacy = path.join(tmp.path, ".git", "mimocode")
     expect(await Bun.file(legacy).exists()).toBe(false)
     // v5 UUID cache file should exist.
-    const idFile = path.join(tmp.path, ".git", "mimocode-project-id")
+    const idFile = path.join(tmp.path, ".git", "glitchcode-project-id")
     expect(await Bun.file(idFile).exists()).toBe(true)
   })
 
@@ -99,7 +99,7 @@ describe("Project.fromDirectory", () => {
     expect(project.vcs).toBe("git")
     expect(project.worktree).toBe(tmp.path)
 
-    const idFile = path.join(tmp.path, ".git", "mimocode-project-id")
+    const idFile = path.join(tmp.path, ".git", "glitchcode-project-id")
     expect(await Bun.file(idFile).exists()).toBe(true)
   })
 
@@ -216,7 +216,7 @@ describe("Project.fromDirectory with worktrees", () => {
       expect(wt.id).toBe(main.id)
 
       // Cache should live in the common .git dir, not the worktree's .git file
-      const cache = path.join(tmp.path, ".git", "mimocode-project-id")
+      const cache = path.join(tmp.path, ".git", "glitchcode-project-id")
       const exists = await Bun.file(cache).exists()
       expect(exists).toBe(true)
     } finally {

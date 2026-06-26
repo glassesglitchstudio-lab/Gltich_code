@@ -21,7 +21,7 @@ Use available evidence in this order:
 3. Existing skills, custom agents, custom commands, and plugins, so you reuse or
    extend what already exists instead of duplicating it.
 
-Trajectory database: `<DATA>/mimocode.db` (SQLite, read-only)
+Trajectory database: `<DATA>/glitchcode.db` (SQLite, read-only)
 Memory files root: `<DATA>/memory/`
 
 ## Ground Rules
@@ -46,8 +46,8 @@ Memory files root: `<DATA>/memory/`
    time", "rule", and "decision".
 2. Use Glob/Read to inspect the memory paths from the system memory instructions.
 3. Use bash to locate the database:
-   - Infer `<DATA>/mimocode.db` from the resolved memory root.
-   - If `MIMOCODE_DB` is visible in the shell environment, account for its
+   - Infer `<DATA>/glitchcode.db` from the resolved memory root.
+   - If `GLITCHCODE_DB` is visible in the shell environment, account for its
      override behavior.
    - Treat the resolved database path as read-only.
 4. If there is no recent project activity and memory is empty, report "Nothing to

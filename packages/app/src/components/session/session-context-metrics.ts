@@ -1,4 +1,4 @@
-import type { AssistantMessage, Message } from "@mimo-ai/sdk/v2/client"
+import type { AssistantMessage, Message } from "@glitchcode/sdk/v2/client"
 
 type Provider = {
   id: string

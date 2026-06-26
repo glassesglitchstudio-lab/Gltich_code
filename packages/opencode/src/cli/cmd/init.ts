@@ -116,7 +116,7 @@ export const InitCommand = cmd({
     fs.writeFileSync(path.join(glitchDir, CONFIG_FILE), JSON.stringify(config, null, 2))
 
     const glitchcodeDir = path.join(root, ".glitchcode")
-    const mimocodeDir = path.join(root, ".mimocode")
+    const glitchcodeDir = path.join(root, ".glitchcode")
 
     if (!fs.existsSync(glitchcodeDir)) {
       fs.mkdirSync(path.join(glitchcodeDir, "command"), { recursive: true })
@@ -125,11 +125,11 @@ export const InitCommand = cmd({
       fs.writeFileSync(path.join(glitchcodeDir, "skills", "README.md"), "# Glitch Code - Skills\n")
     }
 
-    if (!fs.existsSync(mimocodeDir)) {
-      fs.mkdirSync(path.join(mimocodeDir, "command"), { recursive: true })
-      fs.mkdirSync(path.join(mimocodeDir, "skills"), { recursive: true })
-      fs.writeFileSync(path.join(mimocodeDir, "command", "README.md"), "# MiMo Code - Commands\n")
-      fs.writeFileSync(path.join(mimocodeDir, "skills", "README.md"), "# MiMo Code - Skills\n")
+    if (!fs.existsSync(glitchcodeDir)) {
+      fs.mkdirSync(path.join(glitchcodeDir, "command"), { recursive: true })
+      fs.mkdirSync(path.join(glitchcodeDir, "skills"), { recursive: true })
+      fs.writeFileSync(path.join(glitchcodeDir, "command", "README.md"), "# Glitch Code - Commands\n")
+      fs.writeFileSync(path.join(glitchcodeDir, "skills", "README.md"), "# Glitch Code - Skills\n")
     }
 
     if (apiKey) {
@@ -148,7 +148,7 @@ export const InitCommand = cmd({
     s.stop("Hazir!")
 
     prompts.log.success(`.glitch/config.json olusturuldu`)
-    prompts.log.success(`.glitchcode/ ve .mimocode/ dizinleri olusturuldu`)
+    prompts.log.success(`.glitchcode/ ve .glitchcode/ dizinleri olusturuldu`)
     if (apiKey) prompts.log.success(`API anahtari kaydedildi (${provider})`)
     if (gitignoreStatus === "created") prompts.log.success(`.gitignore olusturuldu`)
     else if (gitignoreStatus === "added") prompts.log.info(`.glitch/ .gitignore'a eklendi`)

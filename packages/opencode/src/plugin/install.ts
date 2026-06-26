@@ -10,7 +10,7 @@ import {
 import * as ConfigPaths from "@/config/paths"
 import { Global } from "@/global"
 import { Filesystem } from "@/util"
-import { Flock } from "@mimo-ai/shared/util/flock"
+import { Flock } from "@glitchcode/shared/util/flock"
 import { isRecord } from "@/util/record"
 
 import { parsePluginSpecifier, readPackageThemes, readPluginPackage, resolvePluginTarget } from "./shared"
@@ -31,7 +31,7 @@ export type PatchDeps = {
   readText: (file: string) => Promise<string>
   write: (file: string, text: string) => Promise<void>
   exists: (file: string) => Promise<boolean>
-  files: (dir: string, name: "mimocode" | "tui") => string[]
+  files: (dir: string, name: "glitchcode" | "tui") => string[]
 }
 
 export type PatchInput = {
@@ -334,11 +334,11 @@ function patchDir(input: PatchInput) {
   if (input.global) return input.config ?? Global.Path.config
   const git = input.vcs === "git" && input.worktree !== "/"
   const root = git ? input.worktree : input.directory
-  return path.join(root, ".mimocode")
+  return path.join(root, ".glitchcode")
 }
 
-function patchName(kind: Kind): "mimocode" | "tui" {
-  if (kind === "server") return "mimocode"
+function patchName(kind: Kind): "glitchcode" | "tui" {
+  if (kind === "server") return "glitchcode"
   return "tui"
 }
 

@@ -18,7 +18,7 @@ import { SkillTool } from "./skill"
 import { DeepFileAnalysisTool } from "./deep-file-analysis"
 import * as Tool from "./tool"
 import { Config } from "../config"
-import { type ToolContext as PluginToolContext, type ToolDefinition } from "@mimo-ai/plugin"
+import { type ToolContext as PluginToolContext, type ToolDefinition } from "@glitchcode/plugin"
 import z from "zod"
 import { Plugin } from "../plugin"
 import { Provider } from "../provider"
@@ -37,7 +37,7 @@ import { LspTool } from "./lsp"
 import * as Truncate from "./truncate"
 import { ApplyPatchTool } from "./apply_patch"
 import { ChangeDirectoryTool } from "./change-directory"
-import { Glob } from "@mimo-ai/shared/util/glob"
+import { Glob } from "@glitchcode/shared/util/glob"
 import path from "path"
 import { pathToFileURL } from "url"
 import { Effect, Layer, Context } from "effect"
@@ -51,7 +51,7 @@ import { Question } from "../question"
 import { Todo } from "../session/todo"
 import { LSP } from "../lsp"
 import { Instruction } from "../session/instruction"
-import { AppFileSystem } from "@mimo-ai/shared/filesystem"
+import { AppFileSystem } from "@glitchcode/shared/filesystem"
 import { Bus } from "../bus"
 import { Agent } from "../agent/agent"
 import { Skill } from "../skill"
@@ -216,7 +216,7 @@ export const layer = Layer.effect(
 
         yield* config.get()
         const questionEnabled =
-          ["app", "cli", "desktop"].includes(Flag.MIMOCODE_CLIENT) || Flag.MIMOCODE_ENABLE_QUESTION_TOOL
+          ["app", "cli", "desktop"].includes(Flag.GLITCHCODE_CLIENT) || Flag.GLITCHCODE_ENABLE_QUESTION_TOOL
 
         const tool = yield* Effect.all({
           invalid: Tool.init(invalid),
@@ -267,12 +267,12 @@ export const layer = Layer.effect(
             tool.skill,
             tool.patch,
             tool.changedir,
-            ...(Flag.MIMOCODE_EXPERIMENTAL_LSP_TOOL ? [tool.lsp] : []),
+            ...(Flag.GLITCHCODE_EXPERIMENTAL_LSP_TOOL ? [tool.lsp] : []),
             tool.plan,
             tool.memory,
             tool.history,
             tool.task,
-            ...(Flag.MIMOCODE_EXPERIMENTAL_WORKFLOW_TOOL ? [tool.workflow] : []),
+            ...(Flag.GLITCHCODE_EXPERIMENTAL_WORKFLOW_TOOL ? [tool.workflow] : []),
             tool.deepFileAnalysis,
             tool.selfSupervision,
             tool.contextCompressor,
@@ -345,10 +345,10 @@ export const layer = Layer.effect(
             return (
               input.providerID === ProviderID.opencode ||
               input.providerID === "xiaomi" ||
-              Flag.MIMOCODE_ENABLE_EXA
+              Flag.GLITCHCODE_ENABLE_EXA
             )
           }
-          return input.providerID === ProviderID.opencode || Flag.MIMOCODE_ENABLE_EXA
+          return input.providerID === ProviderID.opencode || Flag.GLITCHCODE_ENABLE_EXA
         }
 
         const usePatch =

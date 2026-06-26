@@ -12,7 +12,7 @@ import { ModelsCommand } from "./cli/cmd/models"
 import { UI } from "./cli/ui"
 import { Installation } from "./installation"
 import { InstallationVersion } from "./installation/version"
-import { NamedError } from "@mimo-ai/shared/util/error"
+import { NamedError } from "@glitchcode/shared/util/error"
 import { FormatError } from "./cli/error"
 import { ServeCommand } from "./cli/cmd/serve"
 import { Filesystem } from "./util"
@@ -95,14 +95,14 @@ const cli = yargs(args)
       process.env.GLITCH_WARNED = "1"
       process.stderr.write(
         "\x1b[93m⚠ Bu proje \x1b[1mOpencode\x1b[0m\x1b[93m'dan base alınmıştır, " +
-        "\x1b[1mmimocode\x1b[0m\x1b[93m'un özelliklerini taşır.\x1b[0m\n" +
+        "\x1b[1mglitchcode\x1b[0m\x1b[93m'un özelliklerini taşır.\x1b[0m\n" +
         "\x1b[93m  GitHub: \x1b[4mhttps://github.com/glassesglitchstudio-lab/Gltich_code\x1b[0m\x1b[93m\x1b[0m\n" +
         "\x1b[93m  Lisans: \x1b[1mLICENSE\x1b[0m\x1b[93m dosyasına bakın\x1b[0m\n\n"
       )
     }
 
     if (opts.pure) {
-      process.env.MIMOCODE_PURE = "1"
+      process.env.GLITCHCODE_PURE = "1"
     }
 
     await Log.init({
@@ -119,16 +119,16 @@ const cli = yargs(args)
 
     process.env.AGENT = "1"
     process.env.MIMOCODE = "1"
-    process.env.MIMOCODE_PID = String(process.pid)
+    process.env.GLITCHCODE_PID = String(process.pid)
 
-    Log.Default.info("mimocode", {
+    Log.Default.info("glitchcode", {
       version: InstallationVersion,
       args: process.argv.slice(2),
       process_role: processMetadata.processRole,
       run_id: processMetadata.runID,
     })
 
-    const marker = path.join(Global.Path.data, "mimocode.db")
+    const marker = path.join(Global.Path.data, "glitchcode.db")
     if (!(await Filesystem.exists(marker))) {
       const tty = process.stderr.isTTY
       process.stderr.write("Performing one time database migration, may take a few minutes..." + EOL)
@@ -168,8 +168,8 @@ const cli = yargs(args)
     // Idempotently import Claude Code sessions into SQLite. Runs once per process
     // tree (the env guard is inherited by spawned children) and is best-effort:
     // a failure here must never block command startup.
-    if (!process.env.MIMOCODE_DISABLE_CLAUDE_IMPORT && !process.env.MIMOCODE_CLAUDE_IMPORTED) {
-      process.env.MIMOCODE_CLAUDE_IMPORTED = "1"
+    if (!process.env.GLITCHCODE_DISABLE_CLAUDE_IMPORT && !process.env.GLITCHCODE_CLAUDE_IMPORTED) {
+      process.env.GLITCHCODE_CLAUDE_IMPORTED = "1"
       try {
         await ClaudeImport.run()
       } catch (e) {

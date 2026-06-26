@@ -49,7 +49,7 @@ describe("Worktree", () => {
 
             expect(info.name).toBeDefined()
             expect(typeof info.name).toBe("string")
-            expect(info.branch).toBe(`mimocode/${info.name}`)
+            expect(info.branch).toBe(`glitchcode/${info.name}`)
             expect(info.directory).toContain(info.name)
           }),
         { git: true },

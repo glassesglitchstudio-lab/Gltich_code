@@ -8,8 +8,8 @@ import { Database } from "../../src/storage"
 describe("Database.Path", () => {
   test("returns database path for the current channel", () => {
     const expected =
-      ["latest", "beta", "prod"].includes(InstallationChannel) || Flag.MIMOCODE_DISABLE_CHANNEL_DB
-        ? path.join(Global.Path.data, "mimocode.db")
+      ["latest", "beta", "prod"].includes(InstallationChannel) || Flag.GLITCHCODE_DISABLE_CHANNEL_DB
+        ? path.join(Global.Path.data, "glitchcode.db")
         : path.join(Global.Path.data, `mimocode-${InstallationChannel.replace(/[^a-zA-Z0-9._-]/g, "-")}.db`)
     expect(Database.getChannelPath()).toBe(expected)
   })

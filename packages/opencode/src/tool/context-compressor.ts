@@ -4,7 +4,7 @@ import { Effect } from "effect"
 import * as Tool from "./tool"
 import { Session } from "../session"
 import DESCRIPTION from "./context-compressor.txt"
-import { AppFileSystem } from "@mimo-ai/shared/filesystem"
+import { AppFileSystem } from "@glitchcode/shared/filesystem"
 
 const parameters = z.object({
   session_id: z.string().optional().describe("Session ID to compress. Defaults to current session."),

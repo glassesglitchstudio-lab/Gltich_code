@@ -14,7 +14,7 @@ import { Global } from "../../global"
 import { Plugin } from "../../plugin"
 import { t } from "../i18n"
 import { Instance } from "../../project/instance"
-import type { Hooks } from "@mimo-ai/plugin"
+import type { Hooks } from "@glitchcode/plugin"
 import { Process } from "../../util"
 import { text } from "node:stream/consumers"
 import { Effect } from "effect"
@@ -224,26 +224,26 @@ async function loadFreeLogin(): Promise<(() => Promise<void>) | undefined> {
   if (!fs.existsSync(file)) return undefined
   try {
     const mod = await import(/* @vite-ignore */ pathToFileURL(file).href)
-    return typeof mod.mimoFreeLogin === "function" ? mod.mimoFreeLogin : undefined
+    return typeof mod.glitchFreeLogin === "function" ? mod.glitchFreeLogin : undefined
   } catch {
     return undefined
   }
 }
 
-async function mimoLogin() {
+async function glitchLogin() {
   const hooks = await AppRuntime.runPromise(
     Effect.gen(function* () {
       const plugin = yield* Plugin.Service
       return yield* plugin.list()
     }),
   )
-  const mimoHook = hooks.findLast((h) => h.auth?.provider === "xiaomi")
-  if (!mimoHook?.auth) {
+  const glitchHook = hooks.findLast((h) => h.auth?.provider === "xiaomi")
+  if (!glitchHook?.auth) {
     prompts.log.error("MiMo auth plugin not found")
     return
   }
 
-  const method = mimoHook.auth.methods[0]
+  const method = glitchHook.auth.methods[0]
   if (method.type !== "oauth") return
 
   const authorize = await method.authorize()
@@ -396,7 +396,7 @@ export const ProvidersLoginCommand = cmd({
   builder: (yargs) =>
     yargs
       .positional("url", {
-        describe: "mimocode auth provider",
+        describe: "glitchcode auth provider",
         type: "string",
       })
       .option("provider", {
@@ -510,9 +510,9 @@ export const ProvidersLoginCommand = cmd({
         const freeLogin = await loadFreeLogin()
         let provider: string
         if (args.provider === "xiaomi") {
-          await mimoLogin()
+          await glitchLogin()
           return
-        } else if ((args.provider === "mimo" || args.provider === "mimo-free") && freeLogin) {
+        } else if ((args.provider === "mimo" || args.provider === "glitch-free") && freeLogin) {
           await freeLogin()
           return
         } else if (args.provider) {
@@ -531,7 +531,7 @@ export const ProvidersLoginCommand = cmd({
             options: [
               { label: "MiMo", value: "xiaomi", hint: t("cli.providers.mimo.recommended_hint") },
               ...(freeLogin
-                ? [{ label: "MiMo Auto (free)", value: "mimo-free", hint: t("cli.providers.mimo_free.hint") }]
+                ? [{ label: "MiMo Auto (free)", value: "glitch-free", hint: t("cli.providers.mimo_free.hint") }]
                 : []),
               { label: t("cli.providers.other"), value: "__other__" },
             ],
@@ -539,11 +539,11 @@ export const ProvidersLoginCommand = cmd({
           if (prompts.isCancel(choice)) throw new UI.CancelledError()
 
           if (choice === "xiaomi") {
-            await mimoLogin()
+            await glitchLogin()
             return
           }
 
-          if (choice === "mimo-free" && freeLogin) {
+          if (choice === "glitch-free" && freeLogin) {
             await freeLogin()
             return
           }
@@ -584,7 +584,7 @@ export const ProvidersLoginCommand = cmd({
           }
 
           prompts.log.warn(
-            `This only stores a credential for ${provider} - you will need configure it in mimocode.json, check the docs for examples.`,
+            `This only stores a credential for ${provider} - you will need configure it in glitchcode.json, check the docs for examples.`,
           )
         }
 
@@ -593,7 +593,7 @@ export const ProvidersLoginCommand = cmd({
             "Amazon Bedrock authentication priority:\n" +
               "  1. Bearer token (AWS_BEARER_TOKEN_BEDROCK or /connect)\n" +
               "  2. AWS credential chain (profile, access keys, IAM roles, EKS IRSA)\n\n" +
-              "Configure via mimocode.json options (profile, region, endpoint) or\n" +
+              "Configure via glitchcode.json options (profile, region, endpoint) or\n" +
               "AWS environment variables (AWS_PROFILE, AWS_REGION, AWS_ACCESS_KEY_ID, AWS_WEB_IDENTITY_TOKEN_FILE).",
           )
         }
@@ -677,7 +677,7 @@ export const ProvidersWhoamiCommand = cmd({
       }),
     )
     if (!info) {
-      prompts.log.error("Not logged in. Run `mimo auth login` to log in.")
+      prompts.log.error("Not logged in. Run `glitch auth login` to log in.")
       return
     }
     if (info.type === "api" && info.metadata) {

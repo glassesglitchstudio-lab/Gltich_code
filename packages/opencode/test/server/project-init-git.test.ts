@@ -32,7 +32,7 @@ describe("project.initGit endpoint", () => {
       const init = await app.request("/project/git/init", {
         method: "POST",
         headers: {
-          "x-mimocode-directory": tmp.path,
+          "x-glitchcode-directory": tmp.path,
         },
       })
       const body = await init.json()
@@ -51,7 +51,7 @@ describe("project.initGit endpoint", () => {
 
       const current = await app.request("/project/current", {
         headers: {
-          "x-mimocode-directory": tmp.path,
+          "x-glitchcode-directory": tmp.path,
         },
       })
       expect(current.status).toBe(200)
@@ -90,7 +90,7 @@ describe("project.initGit endpoint", () => {
       const init = await app.request("/project/git/init", {
         method: "POST",
         headers: {
-          "x-mimocode-directory": tmp.path,
+          "x-glitchcode-directory": tmp.path,
         },
       })
       expect(init.status).toBe(200)
@@ -105,7 +105,7 @@ describe("project.initGit endpoint", () => {
 
       const current = await app.request("/project/current", {
         headers: {
-          "x-mimocode-directory": tmp.path,
+          "x-glitchcode-directory": tmp.path,
         },
       })
       expect(current.status).toBe(200)

@@ -627,7 +627,7 @@ export type QuestionInfo = {
    */
   key?: string
   /**
-   * Template parameters for i18n interpolation (e.g. { plan: '.mimocode/plans/...' })
+   * Template parameters for i18n interpolation (e.g. { plan: '.glitchcode/plans/...' })
    */
   params?: {
     [key: string]: string

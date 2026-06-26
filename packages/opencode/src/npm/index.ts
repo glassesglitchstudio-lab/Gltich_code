@@ -5,9 +5,9 @@ import npa from "npm-package-arg"
 import semver from "semver"
 import { Effect, Schema, Context, Layer, Option, FileSystem } from "effect"
 import { NodeFileSystem } from "@effect/platform-node"
-import { AppFileSystem } from "@mimo-ai/shared/filesystem"
-import { Global } from "@mimo-ai/shared/global"
-import { EffectFlock } from "@mimo-ai/shared/util/effect-flock"
+import { AppFileSystem } from "@glitchcode/shared/filesystem"
+import { Global } from "@glitchcode/shared/global"
+import { EffectFlock } from "@glitchcode/shared/util/effect-flock"
 
 import { makeRuntime } from "../effect/runtime"
 

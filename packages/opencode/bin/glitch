@@ -9,20 +9,12 @@ import { fileURLToPath } from "url"
 function ensureProjectConfig() {
   const cwd = process.cwd()
   const glitchDir = join(cwd, ".glitchcode")
-  const mimoDir = join(cwd, ".mimocode")
 
   if (!existsSync(glitchDir)) {
     mkdirSync(join(glitchDir, "command"), { recursive: true })
     mkdirSync(join(glitchDir, "skills"), { recursive: true })
     writeFileSync(join(glitchDir, "command", "README.md"), "# Glitch Code - Commands\n")
     writeFileSync(join(glitchDir, "skills", "README.md"), "# Glitch Code - Skills\n")
-  }
-
-  if (!existsSync(mimoDir)) {
-    mkdirSync(join(mimoDir, "command"), { recursive: true })
-    mkdirSync(join(mimoDir, "skills"), { recursive: true })
-    writeFileSync(join(mimoDir, "command", "README.md"), "# MiMo Code - Commands\n")
-    writeFileSync(join(mimoDir, "skills", "README.md"), "# MiMo Code - Skills\n")
   }
 }
 
@@ -40,7 +32,7 @@ function run(target) {
   process.exit(code)
 }
 
-const envPath = process.env.MIMOCODE_BIN_PATH
+const envPath = process.env.GLITCHCODE_BIN_PATH
 if (envPath) {
   run(envPath)
 }
@@ -49,7 +41,7 @@ const scriptPath = realpathSync(fileURLToPath(import.meta.url))
 const scriptDir = dirname(scriptPath)
 
 //
-const cached = join(scriptDir, ".mimocode")
+const cached = join(scriptDir, ".glitchcode")
 if (existsSync(cached)) {
   run(cached)
 }
