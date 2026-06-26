@@ -153,24 +153,24 @@ export const dict = {
     "Utilisez des plugins pour envoyer des notifications système à la fin des sessions",
   "tui.tips.plugin_protect":
     "Créez un plugin pour empêcher Glitch Code de lire des fichiers sensibles",
-  "tui.tips.run": "Utilisez {highlight}mimo run{/highlight} pour des scripts non interactifs",
-  "tui.tips.continue": "Utilisez {highlight}mimo --continue{/highlight} pour reprendre la dernière session",
+  "tui.tips.run": "Utilisez {highlight}glitch run{/highlight} pour des scripts non interactifs",
+  "tui.tips.continue": "Utilisez {highlight}glitch --continue{/highlight} pour reprendre la dernière session",
   "tui.tips.attach_cli":
-    "Utilisez {highlight}mimo run -f file.ts{/highlight} pour joindre des fichiers via la CLI",
+    "Utilisez {highlight}glitch run -f file.ts{/highlight} pour joindre des fichiers via la CLI",
   "tui.tips.format_json":
     "Utilisez {highlight}--format json{/highlight} pour une sortie lisible par machine dans les scripts",
-  "tui.tips.serve": "Exécutez {highlight}mimo serve{/highlight} pour exposer l'API Glitch Code en mode headless",
+  "tui.tips.serve": "Exécutez {highlight}glitch serve{/highlight} pour exposer l'API Glitch Code en mode headless",
   "tui.tips.attach_server":
-    "Utilisez {highlight}mimo run --attach{/highlight} pour vous connecter à un serveur en cours",
-  "tui.tips.upgrade": "Exécutez {highlight}mimo upgrade{/highlight} pour passer à la dernière version",
+    "Utilisez {highlight}glitch run --attach{/highlight} pour vous connecter à un serveur en cours",
+  "tui.tips.upgrade": "Exécutez {highlight}glitch upgrade{/highlight} pour passer à la dernière version",
   "tui.tips.auth_list":
-    "Exécutez {highlight}mimo auth list{/highlight} pour voir tous les fournisseurs configurés",
+    "Exécutez {highlight}glitch auth list{/highlight} pour voir tous les fournisseurs configurés",
   "tui.tips.agent_create":
-    "Exécutez {highlight}mimo agent create{/highlight} pour créer un agent en mode guidé",
+    "Exécutez {highlight}glitch agent create{/highlight} pour créer un agent en mode guidé",
   "tui.tips.github_trigger":
     "Utilisez {highlight}/opencode{/highlight} dans les issues/PR GitHub pour déclencher des actions IA",
   "tui.tips.github_install":
-    "Exécutez {highlight}mimo github install{/highlight} pour configurer le workflow GitHub",
+    "Exécutez {highlight}glitch github install{/highlight} pour configurer le workflow GitHub",
   "tui.tips.github_oc":
     "Commentez {highlight}/oc{/highlight} sur une ligne de PR pour une revue ciblée",
   "tui.tips.theme_system":
@@ -206,7 +206,7 @@ export const dict = {
   "tui.tips.external_dir":
     "La permission {highlight}external_directory{/highlight} protège les fichiers en dehors du projet",
   "tui.tips.debug_config":
-    "Exécutez {highlight}mimo debug config{/highlight} pour diagnostiquer la configuration",
+    "Exécutez {highlight}glitch debug config{/highlight} pour diagnostiquer la configuration",
   "tui.tips.print_logs":
     "Utilisez l'option {highlight}--print-logs{/highlight} pour afficher des journaux détaillés sur stderr",
   "tui.tips.timeline":
@@ -429,11 +429,11 @@ export const dict = {
   "tui.command.plugins.list.title": "Plugins",
   "tui.command.plugins.install.title": "Installer un plugin",
 
-  // MiMo Auto (free) — TUI login dialog
-  "tui.dialog.login.mimo_free": "MiMo Auto (free)",
-  "tui.dialog.login.mimo_free.desc": "Canal anonyme gratuit — aucune connexion requise",
-  "tui.dialog.login.mimo_free.success": "MiMo Auto (free) est prêt — modèle par défaut défini sur mimo/mimo-auto",
-  "tui.dialog.login.mimo_free.unavailable": "Fournisseur MiMo Auto (free) non chargé",
+  // Glitch Auto (free) — TUI login dialog
+  "tui.dialog.login.glitch_free": "Glitch Auto (free)",
+  "tui.dialog.login.glitch_free.desc": "Canal anonyme gratuit — aucune connexion requise",
+  "tui.dialog.login.glitch_free.success": "Glitch Auto (free) est prêt — modèle par défaut défini sur glitch/glitch-auto",
+  "tui.dialog.login.glitch_free.unavailable": "Fournisseur Glitch Auto (free) non chargé",
   "tui.dialog.login.flow.title": "Connexion MiMo",
   "tui.dialog.login.flow.placeholder": "Collez le code (ou attendez le rappel du navigateur)",
   "tui.dialog.login.flow.busy": "Connexion en cours...",
@@ -445,16 +445,16 @@ export const dict = {
   // CLI: providers command (auth login)
   "cli.providers.select": "Sélectionner un fournisseur",
   "cli.providers.other": "Autre fournisseur",
-  "cli.providers.mimo.recommended_hint": "recommandé",
-  "cli.providers.mimo_free.hint": "Canal anonyme gratuit / mimo-auto",
-  "cli.providers.mimo_free.verifying": "Vérification du canal MiMo Auto (free)...",
-  "cli.providers.mimo_free.ready": "Canal MiMo Auto (free) prêt",
-  "cli.providers.mimo_free.failed": "Échec de la vérification de MiMo Auto (free)",
-  "cli.providers.mimo_free.default_set": "Modèle par défaut défini sur mimo/mimo-auto (contexte 1M, gratuit)",
-  "cli.providers.mimo_free.usage_hint":
-    "Aucune connexion requise — exécutez simplement mimo. Pour les modèles payants/premium, choisissez plutôt la connexion navigateur MiMo.",
-  "cli.providers.mimo_login.decrypt_retry": "Échec du déchiffrement, veuillez réessayer ({remaining} tentatives restantes)",
-  "cli.providers.mimo_login.decrypt_exhausted": "Échec du déchiffrement, nombre maximal de tentatives atteint",
+  "cli.providers.glitch.recommended_hint": "recommandé",
+  "cli.providers.glitch_free.hint": "Canal anonyme gratuit / glitch-auto",
+  "cli.providers.glitch_free.verifying": "Vérification du canal Glitch Auto (free)...",
+  "cli.providers.glitch_free.ready": "Canal Glitch Auto (free) prêt",
+  "cli.providers.glitch_free.failed": "Échec de la vérification de Glitch Auto (free)",
+  "cli.providers.glitch_free.default_set": "Modèle par défaut défini sur glitch/glitch-auto (contexte 1M, gratuit)",
+  "cli.providers.glitch_free.usage_hint":
+    "Aucune connexion requise — exécutez simplement glitch. Pour les modèles payants/premium, choisissez plutôt la connexion navigateur MiMo.",
+  "cli.providers.glitch_login.decrypt_retry": "Échec du déchiffrement, veuillez réessayer ({remaining} tentatives restantes)",
+  "cli.providers.glitch_login.decrypt_exhausted": "Échec du déchiffrement, nombre maximal de tentatives atteint",
 
   // Question i18n — plan_exit
   "tui.question.plan_exit.question": "Le plan {{plan}} est terminé. Voulez-vous basculer vers l'agent build pour commencer l'implémentation ?",

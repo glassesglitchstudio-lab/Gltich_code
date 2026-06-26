@@ -162,27 +162,27 @@ export const dict = {
   "tui.tips.plugin_protect":
     "Создайте плагин, который запретит Glitch Code читать чувствительные файлы",
   "tui.tips.run":
-    "Используйте {highlight}mimo run{/highlight} для неинтерактивных скриптов",
+    "Используйте {highlight}glitch run{/highlight} для неинтерактивных скриптов",
   "tui.tips.continue":
-    "Используйте {highlight}mimo --continue{/highlight}, чтобы продолжить последнюю сессию",
+    "Используйте {highlight}glitch --continue{/highlight}, чтобы продолжить последнюю сессию",
   "tui.tips.attach_cli":
-    "Используйте {highlight}mimo run -f file.ts{/highlight}, чтобы прикрепить файлы из командной строки",
+    "Используйте {highlight}glitch run -f file.ts{/highlight}, чтобы прикрепить файлы из командной строки",
   "tui.tips.format_json":
     "Используйте {highlight}--format json{/highlight} для машинно-читаемого вывода в скриптах",
   "tui.tips.serve":
-    "Запустите {highlight}mimo serve{/highlight} для headless-доступа к API Glitch Code",
+    "Запустите {highlight}glitch serve{/highlight} для headless-доступа к API Glitch Code",
   "tui.tips.attach_server":
-    "Используйте {highlight}mimo run --attach{/highlight}, чтобы подключиться к запущенному серверу",
+    "Используйте {highlight}glitch run --attach{/highlight}, чтобы подключиться к запущенному серверу",
   "tui.tips.upgrade":
-    "Выполните {highlight}mimo upgrade{/highlight}, чтобы обновиться до последней версии",
+    "Выполните {highlight}glitch upgrade{/highlight}, чтобы обновиться до последней версии",
   "tui.tips.auth_list":
-    "Выполните {highlight}mimo auth list{/highlight}, чтобы увидеть всех настроенных провайдеров",
+    "Выполните {highlight}glitch auth list{/highlight}, чтобы увидеть всех настроенных провайдеров",
   "tui.tips.agent_create":
-    "Выполните {highlight}mimo agent create{/highlight}, чтобы создать агента в пошаговом режиме",
+    "Выполните {highlight}glitch agent create{/highlight}, чтобы создать агента в пошаговом режиме",
   "tui.tips.github_trigger":
     "Используйте {highlight}/opencode{/highlight} в issue/PR на GitHub, чтобы запускать AI-действия",
   "tui.tips.github_install":
-    "Выполните {highlight}mimo github install{/highlight}, чтобы настроить GitHub-workflow",
+    "Выполните {highlight}glitch github install{/highlight}, чтобы настроить GitHub-workflow",
   "tui.tips.github_oc":
     "Оставьте {highlight}/oc{/highlight} в комментарии к строке PR для точечного код-ревью",
   "tui.tips.theme_system":
@@ -219,7 +219,7 @@ export const dict = {
   "tui.tips.external_dir":
     "Разрешение {highlight}external_directory{/highlight} защищает файлы вне проекта",
   "tui.tips.debug_config":
-    "Выполните {highlight}mimo debug config{/highlight}, чтобы диагностировать проблемы конфигурации",
+    "Выполните {highlight}glitch debug config{/highlight}, чтобы диагностировать проблемы конфигурации",
   "tui.tips.print_logs":
     "Используйте флаг {highlight}--print-logs{/highlight}, чтобы видеть подробные логи в stderr",
   "tui.tips.timeline":
@@ -441,11 +441,11 @@ export const dict = {
   "tui.command.plugins.list.title": "Плагины",
   "tui.command.plugins.install.title": "Установить плагин",
 
-  // MiMo Auto (free) — TUI login dialog
-  "tui.dialog.login.mimo_free": "MiMo Auto (free)",
-  "tui.dialog.login.mimo_free.desc": "Анонимный бесплатный канал — вход не требуется",
-  "tui.dialog.login.mimo_free.success": "MiMo Auto (free) готов — модель по умолчанию: mimo/mimo-auto",
-  "tui.dialog.login.mimo_free.unavailable": "Провайдер MiMo Auto (free) не загружен",
+  // Glitch Auto (free) — TUI login dialog
+  "tui.dialog.login.glitch_free": "Glitch Auto (free)",
+  "tui.dialog.login.glitch_free.desc": "Анонимный бесплатный канал — вход не требуется",
+  "tui.dialog.login.glitch_free.success": "Glitch Auto (free) готов — модель по умолчанию: glitch/glitch-auto",
+  "tui.dialog.login.glitch_free.unavailable": "Провайдер Glitch Auto (free) не загружен",
   "tui.dialog.login.flow.title": "Вход в MiMo",
   "tui.dialog.login.flow.placeholder": "Вставьте код (или дождитесь обратного вызова браузера)",
   "tui.dialog.login.flow.busy": "Вход...",
@@ -457,16 +457,16 @@ export const dict = {
   // CLI: providers command (auth login)
   "cli.providers.select": "Выберите провайдера",
   "cli.providers.other": "Другой провайдер",
-  "cli.providers.mimo.recommended_hint": "рекомендуется",
-  "cli.providers.mimo_free.hint": "Анонимный бесплатный канал / mimo-auto",
-  "cli.providers.mimo_free.verifying": "Проверка канала MiMo Auto (free)...",
-  "cli.providers.mimo_free.ready": "Канал MiMo Auto (free) готов",
-  "cli.providers.mimo_free.failed": "Не удалось проверить MiMo Auto (free)",
-  "cli.providers.mimo_free.default_set": "Модель по умолчанию: mimo/mimo-auto (контекст 1M, бесплатно)",
-  "cli.providers.mimo_free.usage_hint":
-    "Вход не требуется — просто запустите mimo. Для платных/премиум-моделей выберите вход через браузер MiMo.",
-  "cli.providers.mimo_login.decrypt_retry": "Ошибка расшифровки, повторите попытку (осталось попыток: {remaining})",
-  "cli.providers.mimo_login.decrypt_exhausted": "Ошибка расшифровки, превышено максимальное число попыток",
+  "cli.providers.glitch.recommended_hint": "рекомендуется",
+  "cli.providers.glitch_free.hint": "Анонимный бесплатный канал / glitch-auto",
+  "cli.providers.glitch_free.verifying": "Проверка канала Glitch Auto (free)...",
+  "cli.providers.glitch_free.ready": "Канал Glitch Auto (free) готов",
+  "cli.providers.glitch_free.failed": "Не удалось проверить Glitch Auto (free)",
+  "cli.providers.glitch_free.default_set": "Модель по умолчанию: glitch/glitch-auto (контекст 1M, бесплатно)",
+  "cli.providers.glitch_free.usage_hint":
+    "Вход не требуется — просто запустите glitch. Для платных/премиум-моделей выберите вход через браузер MiMo.",
+  "cli.providers.glitch_login.decrypt_retry": "Ошибка расшифровки, повторите попытку (осталось попыток: {remaining})",
+  "cli.providers.glitch_login.decrypt_exhausted": "Ошибка расшифровки, превышено максимальное число попыток",
 
   // Question i18n — plan_exit
   "tui.question.plan_exit.question": "План {{plan}} завершён. Переключиться на агента build и начать реализацию?",
