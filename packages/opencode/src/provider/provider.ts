@@ -1,4 +1,4 @@
-﻿import z from "zod"
+import z from "zod"
 import os from "os"
 import fuzzysort from "fuzzysort"
 import { Config } from "../config"
@@ -1722,9 +1722,9 @@ const layer: Layer.Layer<
       }
 
       const provider = Object.values(s.providers).find((p) => !cfg.provider || Object.keys(cfg.provider).includes(p.id))
-      if (!provider) throw new Error("no providers found")
+      if (!provider) throw new Error("No providers configured. Run `glitch auth login` to connect a provider (MiMo, GitHub Copilot, etc.) or set environment variables for Cloudflare.")
       const [model] = sort(Object.values(provider.models))
-      if (!model) throw new Error("no models found")
+      if (!model) throw new Error(`No models available for provider "${provider.id}". Check your provider configuration in glitchcode.json or run \`glitch models\`.`)
       return {
         providerID: provider.id,
         modelID: model.id,

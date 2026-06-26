@@ -37,6 +37,16 @@ export function FormatError(input: unknown) {
     ].join("\n")
   }
 
+  // NoProvidersError
+  if (NamedError.hasName(input, "NoProvidersError")) {
+    return [
+      `No providers configured.`,
+      `Run \`glitch auth login\` to connect a provider.`,
+      `Available providers: MiMo (free), GitHub Copilot, Cloudflare, and more.`,
+      `For Cloudflare: set CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_KEY env vars.`,
+    ].join("\n")
+  }
+
   // ProviderInitError: { providerID: string }
   if (NamedError.hasName(input, "ProviderInitError")) {
     return `Failed to initialize provider "${(input as ErrorLike).data?.providerID}". Check credentials and configuration.`
