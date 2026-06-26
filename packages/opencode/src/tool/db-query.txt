@@ -1,0 +1,5 @@
+- Queries SQLite databases directly from the agent
+- Operations: tables (list), schema (show structure), query (run SQL), info (db stats)
+- Read-only by default (tables, schema, info)
+- Query requires permission approval
+- No DROP/DELETE/UPDATE/INSERT by default — read safety

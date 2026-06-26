@@ -35,6 +35,12 @@ import { GitTool } from "./git"
 import { TestGeneratorTool } from "./test-generator"
 import { DepAnalyzerTool } from "./dep-analyzer"
 import { PerfProfilerTool } from "./perf-profiler"
+import { SecretScannerTool } from "./secret-scanner"
+import { ApiTesterTool } from "./api-tester"
+import { DockerTool } from "./docker"
+import { CodeMigrationTool } from "./code-migration"
+import { DbQueryTool } from "./db-query"
+import { ApiDocGenTool } from "./api-doc-gen"
 import { Flag } from "@/flag/flag"
 import { Log } from "@/util"
 import { LspTool } from "./lsp"
@@ -164,6 +170,12 @@ export const layer = Layer.effect(
     const testGenerator = yield* TestGeneratorTool
     const depAnalyzer = yield* DepAnalyzerTool
     const perfProfiler = yield* PerfProfilerTool
+    const secretScanner = yield* SecretScannerTool
+    const apiTester = yield* ApiTesterTool
+    const dockerTool = yield* DockerTool
+    const codeMigration = yield* CodeMigrationTool
+    const dbQuery = yield* DbQueryTool
+    const apiDocGen = yield* ApiDocGenTool
 
     const state = yield* InstanceState.make<State>(
       Effect.fn("ToolRegistry.state")(function* (ctx) {
@@ -259,6 +271,12 @@ export const layer = Layer.effect(
           testGenerator: Tool.init(testGenerator),
           depAnalyzer: Tool.init(depAnalyzer),
           perfProfiler: Tool.init(perfProfiler),
+          secretScanner: Tool.init(secretScanner),
+          apiTester: Tool.init(apiTester),
+          docker: Tool.init(dockerTool),
+          codeMigration: Tool.init(codeMigration),
+          dbQuery: Tool.init(dbQuery),
+          apiDocGen: Tool.init(apiDocGen),
         })
 
         return {
@@ -296,6 +314,12 @@ export const layer = Layer.effect(
             tool.testGenerator,
             tool.depAnalyzer,
             tool.perfProfiler,
+            tool.secretScanner,
+            tool.apiTester,
+            tool.docker,
+            tool.codeMigration,
+            tool.dbQuery,
+            tool.apiDocGen,
           ],
           actor: tool.actor,
           read: tool.read,

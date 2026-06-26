@@ -1,0 +1,4 @@
+- Migrates code between modern patterns and frameworks
+- Supports: JS→TS, React class→functional, var→const/let, callback→async/await
+- Preserves logic while transforming syntax
+- Generates diff view of changes made

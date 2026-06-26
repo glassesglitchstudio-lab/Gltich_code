@@ -1,0 +1,4 @@
+- Sends HTTP requests to test APIs (GET, POST, PUT, DELETE, PATCH)
+- Displays response status, headers, body, and timing
+- Supports JSON bodies, custom headers, and query parameters
+- Useful for backend development and API debugging

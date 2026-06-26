@@ -1,0 +1,5 @@
+- Manages Docker containers and images from within the agent
+- Operations: ps (list containers), images (list images), logs, stop, start, build, run, exec, inspect
+- Read-only by default (ps, images, logs, inspect)
+- Destructive ops require permission: stop, start, run, exec, build
+- No prune/rmi/rm — safe by design

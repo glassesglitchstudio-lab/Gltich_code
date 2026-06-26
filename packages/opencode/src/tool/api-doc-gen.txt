@@ -1,0 +1,4 @@
+- Generates OpenAPI/Swagger documentation from source code
+- Scans TypeScript/JavaScript files for exported functions, classes, routes
+- Generates OpenAPI 3.0 compatible JSON spec
+- Supports REST API route detection (Express, Fastify, Hono patterns)
