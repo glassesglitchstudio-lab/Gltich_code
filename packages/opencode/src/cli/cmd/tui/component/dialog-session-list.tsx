@@ -1,4 +1,4 @@
-import { useDialog } from "@tui/ui/dialog"
+﻿import { useDialog } from "@tui/ui/dialog"
 import { DialogSelect } from "@tui/ui/dialog-select"
 import { useRoute } from "@tui/context/route"
 import { useSync } from "@tui/context/sync"
@@ -130,7 +130,7 @@ export function DialogSessionList() {
         }
 
         let footer = ""
-        if (Flag.MIMOCODE_EXPERIMENTAL_WORKSPACES) {
+        if (Flag.GLITCHCODE_EXPERIMENTAL_WORKSPACES) {
           if (x.workspaceID) {
             let desc = "unknown"
             if (workspace) {
@@ -258,7 +258,7 @@ export function DialogSessionList() {
           keybind: Keybind.parse("ctrl+w")[0],
           title: "new workspace",
           side: "right",
-          disabled: !Flag.MIMOCODE_EXPERIMENTAL_WORKSPACES,
+          disabled: !Flag.GLITCHCODE_EXPERIMENTAL_WORKSPACES,
           onTrigger: () => {
             createWorkspace()
           },

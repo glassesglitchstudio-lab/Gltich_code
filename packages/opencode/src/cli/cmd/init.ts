@@ -116,14 +116,6 @@ export const InitCommand = cmd({
     fs.writeFileSync(path.join(glitchDir, CONFIG_FILE), JSON.stringify(config, null, 2))
 
     const glitchcodeDir = path.join(root, ".glitchcode")
-    const glitchcodeDir = path.join(root, ".glitchcode")
-
-    if (!fs.existsSync(glitchcodeDir)) {
-      fs.mkdirSync(path.join(glitchcodeDir, "command"), { recursive: true })
-      fs.mkdirSync(path.join(glitchcodeDir, "skills"), { recursive: true })
-      fs.writeFileSync(path.join(glitchcodeDir, "command", "README.md"), "# Glitch Code - Commands\n")
-      fs.writeFileSync(path.join(glitchcodeDir, "skills", "README.md"), "# Glitch Code - Skills\n")
-    }
 
     if (!fs.existsSync(glitchcodeDir)) {
       fs.mkdirSync(path.join(glitchcodeDir, "command"), { recursive: true })

@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   Message,
   Agent,
   Provider,
@@ -18,12 +18,12 @@ import type {
   ProviderListResponse,
   ProviderAuthMethod,
   VcsInfo,
-} from "@mimo-ai/sdk/v2"
+} from "@glitchcode/sdk/v2"
 import { createStore, produce, reconcile } from "solid-js/store"
 import { useProject } from "@tui/context/project"
 import { useEvent } from "@tui/context/event"
 import { useSDK } from "@tui/context/sdk"
-import { Binary } from "@mimo-ai/shared/util/binary"
+import { Binary } from "@glitchcode/shared/util/binary"
 import { createSimpleContext } from "./helper"
 import type { Snapshot } from "@/snapshot"
 import { useExit } from "./exit"
@@ -743,7 +743,7 @@ export const { use: useSync, provider: SyncProvider } = createSimpleContext({
         return store.status
       },
       get ready() {
-        if (process.env.MIMOCODE_FAST_BOOT) return true
+        if (process.env.GLITCHCODE_FAST_BOOT) return true
         return store.status !== "loading"
       },
       get path() {

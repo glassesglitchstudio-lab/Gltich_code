@@ -1,4 +1,4 @@
-import { createStore, reconcile } from "solid-js/store"
+﻿import { createStore, reconcile } from "solid-js/store"
 import { createMemo, type Accessor } from "solid-js"
 import { createSimpleContext } from "./helper"
 import type { PromptInfo } from "../component/prompt/history"
@@ -28,8 +28,8 @@ export const { use: useRoute, provider: RouteProvider } = createSimpleContext({
   init: (props: { initialRoute?: Route }) => {
     const [store, setStore] = createStore<Route>(
       props.initialRoute ??
-        (process.env["MIMOCODE_ROUTE"]
-          ? JSON.parse(process.env["MIMOCODE_ROUTE"])
+        (process.env["GLITCHCODE_ROUTE"]
+          ? JSON.parse(process.env["GLITCHCODE_ROUTE"])
           : {
               type: "home",
             }),

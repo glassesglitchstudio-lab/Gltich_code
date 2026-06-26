@@ -1,4 +1,4 @@
-import { useKeyboard, useRenderer, useTerminalDimensions } from "@opentui/solid"
+﻿import { useKeyboard, useRenderer, useTerminalDimensions } from "@opentui/solid"
 import { batch, createContext, Show, useContext, type JSX, type ParentProps } from "solid-js"
 import { useTheme } from "@tui/context/theme"
 import { MouseButton, Renderable, RGBA } from "@opentui/core"
@@ -53,7 +53,7 @@ export function Dialog(
       <box
         onMouseUp={(e) => {
           dismiss = false
-          if (!Flag.MIMOCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT) {
+          if (!Flag.GLITCHCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT) {
             const text = renderer.getSelection()?.getSelectedText()
             if (text) {
               Clipboard.copy(text)
@@ -175,7 +175,7 @@ export function DialogProvider(props: ParentProps) {
         position="absolute"
         zIndex={3000}
         onMouseDown={(evt) => {
-          if (!Flag.MIMOCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT) return
+          if (!Flag.GLITCHCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT) return
           if (evt.button !== MouseButton.RIGHT) return
 
           if (!Selection.copy(renderer, toast, t("tui.toast.copied_to_clipboard"))) return
@@ -183,7 +183,7 @@ export function DialogProvider(props: ParentProps) {
           evt.stopPropagation()
         }}
         onMouseUp={
-          !Flag.MIMOCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT
+          !Flag.GLITCHCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT
             ? () => Selection.copy(renderer, toast, t("tui.toast.copied_to_clipboard"))
             : undefined
         }
