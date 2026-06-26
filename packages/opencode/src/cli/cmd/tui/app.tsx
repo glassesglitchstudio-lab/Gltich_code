@@ -1,4 +1,4 @@
-﻿import { render, TimeToFirstDraw, useKeyboard, useRenderer, useTerminalDimensions } from "@opentui/solid"
+import { render, TimeToFirstDraw, useKeyboard, useRenderer, useTerminalDimensions } from "@opentui/solid"
 import * as Clipboard from "@tui/util/clipboard"
 import * as Selection from "@tui/util/selection"
 import { createCliRenderer, MouseButton, type CliRendererConfig } from "@opentui/core"
@@ -415,6 +415,17 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
 
 
   const connected = useConnected()
+
+  // Auto-open login dialog on first run when no provider is configured
+  let authCheckDone = false
+  createEffect(() => {
+    if (authCheckDone) return
+    if (sync.status !== "partial" && sync.status !== "complete") return
+    authCheckDone = true
+    if (!connected()) {
+      setTimeout(() => dialog.replace(() => <DialogMimoLogin />), 500)
+    }
+  })
 
   // Seed never-ask from the launch flag once connected (the server starts with
   // it off; this mirrors --never-ask to the question service).
