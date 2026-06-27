@@ -39,6 +39,16 @@ import { ClaudeImport } from "./session/claude-import"
 import { errorMessage } from "./util/error"
 import { PluginCommand } from "./cli/cmd/plug"
 import { InitCommand } from "./cli/cmd/init"
+import { OnboardCommand } from "./cli/cmd/onboard"
+import { ShareCommand } from "./cli/cmd/share"
+import { BenchmarkCommand } from "./cli/cmd/benchmark"
+import { PluginMarketCommand } from "./cli/cmd/plugin"
+import { TeamCommand } from "./cli/cmd/team"
+import { ReviewCommand } from "./cli/cmd/review"
+import { SuggestCommand } from "./cli/cmd/suggest"
+import { ThemeCommand } from "./cli/cmd/theme"
+import { OfflineCommand } from "./cli/cmd/offline"
+import { HistoryCommand } from "./cli/cmd/history"
 import { Heap } from "./cli/heap"
 import { drizzle } from "drizzle-orm/bun-sqlite"
 import { ensureProcessMetadata } from "./util/glitch-process"
@@ -204,6 +214,16 @@ const cli = yargs(args)
   .command(PluginCommand)
   .command(DbCommand)
   .command(InitCommand)
+  .command(OnboardCommand)
+  .command(ShareCommand)
+  .command(BenchmarkCommand)
+  .command(PluginMarketCommand)
+  .command(TeamCommand)
+  .command(ReviewCommand)
+  .command(SuggestCommand)
+  .command(ThemeCommand)
+  .command(OfflineCommand)
+  .command(HistoryCommand)
   .fail((msg, err) => {
     if (
       msg?.startsWith("Unknown argument") ||

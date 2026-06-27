@@ -116,6 +116,23 @@ packages/opencode/
 - Windows kullanıcısı — PowerShell komutları tercih et
 - `--no-verify` ile push ediliyor (husky hook typecheck hatası yüzünden)
 
+## Session Notları (2026-06-27)
+
+- 10 yeni feature eklendi ✅
+  1. `glitch onboard` - Interaktif baslangic turu
+  2. `glitch share` - Session export (markdown/json/html)
+  3. `glitch benchmark` - Token/maliyet istatistikleri
+  4. `glitch plugins` - Plugin marketi (MCP server)
+  5. `glitch team` - Takim workspace yonetimi
+  6. `glitch review` - Otomatik kod incelemesi
+  7. `glitch suggest` - Context-aware oneri sistemi
+  8. `glitch theme` - Tema yonetimi (7 tema)
+  9. `glitch offline` - Offline model destegi (Ollama/LMStudio)
+  10. `glitch history` - Gelismis session arama
+
+- Typecheck basarili ✅
+- Tum komutlar index.ts'ye kaydedildi
+
 ## Session Notları (2026-06-25)
 
 - v0.2.25 publish BAŞARILI ✅ (GitHub + npm, 10 platform)
