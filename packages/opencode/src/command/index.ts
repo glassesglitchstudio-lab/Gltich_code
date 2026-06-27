@@ -65,6 +65,15 @@ export const Default = {
   DISTILL: "distill",
   GOAL: "goal",
   DEEP_RESEARCH: "deep-research",
+  ONBOARD: "onboard",
+  SHARE: "share",
+  BENCHMARK: "benchmark",
+  PLUGINS: "plugins",
+  TEAM: "team",
+  SUGGEST: "suggest",
+  THEME: "theme",
+  OFFLINE: "offline",
+  HISTORY: "history",
 } as const
 
 export function deepResearchTemplate(): string {
@@ -188,6 +197,247 @@ export const layer = Layer.effect(
           hints: ["$ARGUMENTS"],
         }
       }
+
+      // --- Glitch Code Custom Commands ---
+      commands[Default.ONBOARD] = {
+        name: Default.ONBOARD,
+        description: "interactive onboarding tour - explore Glitch Code features",
+        source: "command",
+        subtask: true,
+        get template() {
+          return [
+            "Run an interactive onboarding tour for the user.",
+            "",
+            "Show the user how to use Glitch Code:",
+            "1. How to run commands (glitch run)",
+            "2. Agent switching (Tab key)",
+            "3. Memory system (MEMORY.md, checkpoint.md)",
+            "4. Special commands (/voice, /dream, /distill, /goal)",
+            "5. Keyboard shortcuts",
+            "",
+            "Use a friendly, helpful tone. Ask if they want to try anything specific.",
+          ].join("\n")
+        },
+        hints: [],
+      }
+
+      commands[Default.SHARE] = {
+        name: Default.SHARE,
+        description: "export current session for sharing (markdown/json/html)",
+        source: "command",
+        subtask: true,
+        get template() {
+          return [
+            "Export the current session for sharing.",
+            "",
+            "Format: $ARGUMENTS (default: markdown)",
+            "",
+            "Export options:",
+            "- markdown: Clean markdown format",
+            "- json: Structured JSON data",
+            "- html: Styled HTML page",
+            "",
+            "If no format specified, ask the user which format they prefer.",
+            "Offer to anonymize sensitive data (emails, API keys, passwords).",
+            "Show a preview before exporting.",
+          ].join("\n")
+        },
+        hints: ["$ARGUMENTS"],
+      }
+
+      commands[Default.BENCHMARK] = {
+        name: Default.BENCHMARK,
+        description: "show token usage and performance metrics",
+        source: "command",
+        subtask: true,
+        get template() {
+          return [
+            "Show benchmark and performance metrics for the current session.",
+            "",
+            "Display:",
+            "- Total tokens used (input/output)",
+            "- Estimated cost",
+            "- Response time per message",
+            "- Tool usage statistics",
+            "- Model performance comparison",
+            "",
+            "Compare with previous sessions if available.",
+            "Suggest optimizations for reducing token usage.",
+          ].join("\n")
+        },
+        hints: [],
+      }
+
+      commands[Default.PLUGINS] = {
+        name: Default.PLUGINS,
+        description: "manage plugins and MCP servers",
+        source: "command",
+        subtask: true,
+        get template() {
+          return [
+            "Help the user manage plugins and MCP servers.",
+            "",
+            "Available actions:",
+            "- list: Show installed plugins",
+            "- add <name>: Install a new plugin",
+            "- remove <name>: Uninstall a plugin",
+            "- enable <name>: Enable a disabled plugin",
+            "- disable <name>: Disable a plugin",
+            "",
+            "Available plugins:",
+            "- github: GitHub API integration",
+            "- filesystem: Advanced file system access",
+            "- postgres: PostgreSQL queries",
+            "- sqlite: SQLite management",
+            "- brave-search: Web search via Brave API",
+            "- puppeteer: Web scraping and browser automation",
+            "",
+            "Action: $ARGUMENTS",
+          ].join("\n")
+        },
+        hints: ["$ARGUMENTS"],
+      }
+
+      commands[Default.TEAM] = {
+        name: Default.TEAM,
+        description: "team workspace management",
+        source: "command",
+        subtask: true,
+        get template() {
+          return [
+            "Help the user manage their team workspace.",
+            "",
+            "Available actions:",
+            "- init: Create a new team",
+            "- join <teamId>: Join an existing team",
+            "- list: Show team members",
+            "- invite: Invite a new member",
+            "- remove <memberId>: Remove a member",
+            "- sync: Sync shared files",
+            "",
+            "Shared resources:",
+            "- Memory: Cross-team project knowledge",
+            "- Skills: Shared automation workflows",
+            "- Config: Team-wide settings",
+            "",
+            "Action: $ARGUMENTS",
+          ].join("\n")
+        },
+        hints: ["$ARGUMENTS"],
+      }
+
+      commands[Default.SUGGEST] = {
+        name: Default.SUGGEST,
+        description: "get context-aware suggestions",
+        source: "command",
+        subtask: true,
+        get template() {
+          return [
+            "Provide context-aware suggestions to the user.",
+            "",
+            "Analyze the current project and suggest:",
+            "- Relevant commands to run",
+            "- Files that might need attention",
+            "- Skills that could help",
+            "- Config improvements",
+            "- Git workflow optimizations",
+            "",
+            "Consider:",
+            "- Recent file changes",
+            "- Project type (React, Next.js, Python, etc.)",
+            "- Current git status",
+            "- Installed dependencies",
+            "",
+            "Context: $ARGUMENTS",
+          ].join("\n")
+        },
+        hints: ["$ARGUMENTS"],
+      }
+
+      commands[Default.THEME] = {
+        name: Default.THEME,
+        description: "change UI theme",
+        source: "command",
+        subtask: true,
+        get template() {
+          return [
+            "Help the user change the UI theme.",
+            "",
+            "Available themes:",
+            "- neon-orange: Default neon orange theme",
+            "- cyber-blue: Cyber blue/neon theme",
+            "- matrix-green: Matrix green terminal theme",
+            "- sunset: Sunset colors",
+            "- ocean: Ocean blue-green theme",
+            "- dracula: Dracula theme",
+            "- monokai: Monokai theme",
+            "",
+            "Actions:",
+            "- list: Show all available themes",
+            "- set <name>: Change to a specific theme",
+            "- preview <name>: Preview a theme",
+            "- create: Create a custom theme",
+            "",
+            "Theme: $ARGUMENTS",
+          ].join("\n")
+        },
+        hints: ["$ARGUMENTS"],
+      }
+
+      commands[Default.OFFLINE] = {
+        name: Default.OFFLINE,
+        description: "configure offline/local model support",
+        source: "command",
+        subtask: true,
+        get template() {
+          return [
+            "Help the user configure offline/local model support.",
+            "",
+            "Supported providers:",
+            "- ollama: Local models via Ollama (free, wide model support)",
+            "- lmstudio: LM Studio (GUI-based, easy setup)",
+            "- local: Custom local API (OpenAI-compatible)",
+            "",
+            "Actions:",
+            "- setup: Configure offline model",
+            "- status: Check if model server is running",
+            "- models: List available models",
+            "- test: Test connection to model server",
+            "",
+            "Action: $ARGUMENTS",
+          ].join("\n")
+        },
+        hints: ["$ARGUMENTS"],
+      }
+
+      commands[Default.HISTORY] = {
+        name: Default.HISTORY,
+        description: "search through session history",
+        source: "command",
+        subtask: true,
+        get template() {
+          return [
+            "Search through session history and find relevant conversations.",
+            "",
+            "Search query: $ARGUMENTS",
+            "",
+            "Search options:",
+            "- by keyword: Find messages containing specific text",
+            "- by date: Filter by time range",
+            "- by session: Search within a specific session",
+            "- by role: Filter by user/assistant messages",
+            "",
+            "Display results with:",
+            "- Session title and date",
+            "- Message preview",
+            "- Relevance score",
+            "",
+            "If no query provided, show recent session history.",
+          ].join("\n")
+        },
+        hints: ["$ARGUMENTS"],
+      }
+      // --- End Glitch Code Custom Commands ---
 
       for (const [name, command] of Object.entries(cfg.command ?? {})) {
         commands[name] = {
