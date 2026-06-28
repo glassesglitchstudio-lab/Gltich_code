@@ -60,6 +60,14 @@ export const ContextOverflowError = NamedError.create(
   "ContextOverflowError",
   z.object({ message: z.string(), responseBody: z.string().optional() }),
 )
+export const QuotaExceededError = NamedError.create(
+  "QuotaExceededError",
+  z.object({
+    providerID: z.string(),
+    message: z.string(),
+    responseBody: z.string().optional(),
+  }),
+)
 export const InvalidOutputError = NamedError.create("InvalidOutputError", z.object({ message: z.string() }))
 export const ContentFilterError = NamedError.create("ContentFilterError", z.object({ message: z.string() }))
 export const ModelError = NamedError.create("ModelError", z.object({ message: z.string() }))
@@ -444,6 +452,7 @@ export const Assistant = Base.extend({
       AbortedError.Schema,
       StructuredOutputError.Schema,
       ContextOverflowError.Schema,
+      QuotaExceededError.Schema,
       InvalidOutputError.Schema,
       ContentFilterError.Schema,
       ModelError.Schema,
@@ -1091,6 +1100,17 @@ export function fromError(
         ).toObject()
       }
 
+      if (parsed.type === "quota_exceeded") {
+        return new QuotaExceededError(
+          {
+            providerID: ctx.providerID,
+            message: parsed.message,
+            responseBody: parsed.responseBody,
+          },
+          { cause: e },
+        ).toObject()
+      }
+
       return new APIError(
         {
           message: parsed.message,
@@ -1111,6 +1131,16 @@ export function fromError(
           if (parsed.type === "context_overflow") {
             return new ContextOverflowError(
               {
+                message: parsed.message,
+                responseBody: parsed.responseBody,
+              },
+              { cause: e },
+            ).toObject()
+          }
+          if (parsed.type === "quota_exceeded") {
+            return new QuotaExceededError(
+              {
+                providerID: ctx.providerID,
                 message: parsed.message,
                 responseBody: parsed.responseBody,
               },

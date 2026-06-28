@@ -132,6 +132,12 @@ export type ParsedStreamError =
       responseBody: string
     }
   | {
+      type: "quota_exceeded"
+      message: string
+      isRetryable: false
+      responseBody: string
+    }
+  | {
       type: "api_error"
       message: string
       isRetryable: false
@@ -154,14 +160,14 @@ export function parseStreamError(input: unknown): ParsedStreamError | undefined 
       }
     case "insufficient_quota":
       return {
-        type: "api_error",
+        type: "quota_exceeded",
         message: "Quota exceeded. Check your plan and billing details.",
         isRetryable: false,
         responseBody,
       }
     case "usage_not_included":
       return {
-        type: "api_error",
+        type: "quota_exceeded",
         message: "To use Codex with your ChatGPT plan, upgrade to Plus: https://chatgpt.com/explore/plus.",
         isRetryable: false,
         responseBody,
@@ -174,6 +180,16 @@ export function parseStreamError(input: unknown): ParsedStreamError | undefined 
         responseBody,
       }
   }
+
+  // Detect billing/quota errors from HTTP status codes and error messages
+  if (body?.error?.type === "billing_error" || body?.error?.type === "payment_required") {
+    return {
+      type: "quota_exceeded",
+      message: typeof body?.error?.message === "string" ? body.error.message : "Billing error. Check your payment method.",
+      isRetryable: false,
+      responseBody,
+    }
+  }
 }
 
 export type ParsedAPICallError =
@@ -181,6 +197,14 @@ export type ParsedAPICallError =
       type: "context_overflow"
       message: string
       responseBody?: string
+    }
+  | {
+      type: "quota_exceeded"
+      message: string
+      statusCode?: number
+      responseHeaders?: Record<string, string>
+      responseBody?: string
+      metadata?: Record<string, string>
     }
   | {
       type: "api_error"
@@ -192,6 +216,22 @@ export type ParsedAPICallError =
       metadata?: Record<string, string>
     }
 
+export function isQuotaError(input: { statusCode?: number; responseBody?: string; message: string }): boolean {
+  if (input.statusCode === 402) return true
+  if (input.statusCode === 403) {
+    const lower = input.message.toLowerCase()
+    if (lower.includes("quota") || lower.includes("billing") || lower.includes("payment")) return true
+  }
+  if (input.responseBody) {
+    const body = json(input.responseBody)
+    if (body?.error?.code === "insufficient_quota") return true
+    if (body?.error?.type === "billing_error" || body?.error?.type === "payment_required") return true
+  }
+  const lower = input.message.toLowerCase()
+  if (lower.includes("insufficient quota") || lower.includes("quota exceeded") || lower.includes("billing error")) return true
+  return false
+}
+
 export function parseAPICallError(input: { providerID: ProviderID; error: APICallError }): ParsedAPICallError {
   const m = message(input.providerID, input.error)
   const body = json(input.error.responseBody)
@@ -200,6 +240,17 @@ export function parseAPICallError(input: { providerID: ProviderID; error: APICal
       type: "context_overflow",
       message: m,
       responseBody: input.error.responseBody,
+    }
+  }
+
+  if (isQuotaError({ statusCode: input.error.statusCode, responseBody: input.error.responseBody, message: m })) {
+    return {
+      type: "quota_exceeded",
+      message: m,
+      statusCode: input.error.statusCode,
+      responseHeaders: input.error.responseHeaders,
+      responseBody: input.error.responseBody,
+      metadata: input.error.url ? { url: input.error.url } : undefined,
     }
   }
 

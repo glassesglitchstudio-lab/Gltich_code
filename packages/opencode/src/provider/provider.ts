@@ -952,6 +952,10 @@ export interface Interface {
   readonly getSmallModel: (providerID: ProviderID) => Effect.Effect<Model | undefined>
   readonly resolveModelRef: (ref: string, contextProviderID?: ProviderID) => Effect.Effect<Model>
   readonly defaultModel: () => Effect.Effect<{ providerID: ProviderID; modelID: ModelID }>
+  readonly getFallbackProviders: (
+    currentProviderID: ProviderID,
+    currentModelID: ModelID,
+  ) => Effect.Effect<Array<{ providerID: ProviderID; modelID: ModelID; source: string }>>
 }
 
 interface State {
@@ -1731,7 +1735,63 @@ const layer: Layer.Layer<
       }
     })
 
-    return Service.of({ list, getProvider, getModel, getLanguage, closest, getSmallModel, defaultModel, resolveModelRef })
+    const getFallbackProviders = Effect.fn("Provider.getFallbackProviders")(function* (
+      currentProviderID: ProviderID,
+      currentModelID: ModelID,
+    ) {
+      const s = yield* InstanceState.get(state)
+      const cfg = yield* config.get()
+
+      // Get fallback providers from config if available
+      const providerConfig = cfg.provider?.[currentProviderID]
+      const configuredFallbacks = providerConfig?.options?.fallback_providers ?? []
+
+      const fallbacks: Array<{ providerID: ProviderID; modelID: ModelID; source: string }> = []
+
+      // 1. Add explicitly configured fallback providers
+      for (const ref of configuredFallbacks) {
+        const parsed = parseModel(ref)
+        const provider = s.providers[parsed.providerID]
+        if (provider && provider.models[parsed.modelID]) {
+          fallbacks.push({ providerID: parsed.providerID, modelID: parsed.modelID, source: "config" })
+        }
+      }
+
+      // 2. Add other providers with similar models (same model name, different provider)
+      for (const [pid, provider] of Object.entries(s.providers)) {
+        const providerID = ProviderID.make(pid)
+        if (providerID === currentProviderID) continue
+        if (fallbacks.some((f) => f.providerID === providerID)) continue
+
+        // Look for models with similar names
+        for (const [mid, model] of Object.entries(provider.models)) {
+          const modelID = ModelID.make(mid)
+          if (modelID === currentModelID) {
+            fallbacks.push({ providerID, modelID, source: "same-model" })
+            break
+          }
+        }
+      }
+
+      // 3. If no same-model fallbacks, add any available provider with models
+      if (fallbacks.length === 0) {
+        for (const [pid, provider] of Object.entries(s.providers)) {
+          const providerID = ProviderID.make(pid)
+          if (providerID === currentProviderID) continue
+          const models = Object.keys(provider.models)
+          if (models.length > 0) {
+            const sorted = sort(Object.values(provider.models))
+            if (sorted[0]) {
+              fallbacks.push({ providerID, modelID: sorted[0].id, source: "any-available" })
+            }
+          }
+        }
+      }
+
+      return fallbacks.slice(0, 5) // Limit to 5 fallbacks
+    })
+
+    return Service.of({ list, getProvider, getModel, getLanguage, closest, getSmallModel, defaultModel, resolveModelRef, getFallbackProviders })
   }),
 )
 

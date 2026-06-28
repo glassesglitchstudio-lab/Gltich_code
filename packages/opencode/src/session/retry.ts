@@ -8,6 +8,7 @@ export type Err = ReturnType<NamedError["toObject"]>
 // This exported message is shared with the TUI upsell detector. Matching on a
 // literal error string kind of sucks, but it is the simplest for now.
 export const GO_UPSELL_MESSAGE = "Free usage exceeded, subscribe to Go https://opencode.ai/go"
+export const QUOTA_EXCEEDED_MESSAGE = "Quota exceeded. Switch to a different provider or upgrade your plan."
 
 export const RETRY_INITIAL_DELAY = 2000
 export const RETRY_BACKOFF_FACTOR = 2
@@ -41,6 +42,37 @@ export function isRetryableTransientError(error: unknown): boolean {
   if (typeof code === "string" && NETWORK_ERROR_CODES.has(code)) return true
 
   if (error.message === SSE_TIMEOUT_MESSAGE) return true
+
+  return false
+}
+
+/**
+ * Check if an error is a quota/billing error that should trigger provider fallback.
+ * Quota errors are NOT retryable on the same provider — they require switching.
+ */
+export function isQuotaError(error: unknown): boolean {
+  if (MessageV2.QuotaExceededError.isInstance(error)) return true
+
+  if (MessageV2.APIError.isInstance(error)) {
+    const status = error.data.statusCode
+    if (status === 402) return true
+    if (status === 403) {
+      const lower = error.data.message.toLowerCase()
+      if (lower.includes("quota") || lower.includes("billing") || lower.includes("payment")) return true
+    }
+    if (error.data.responseBody?.includes("insufficient_quota")) return true
+    if (error.data.responseBody?.includes("billing_error")) return true
+    const lower = error.data.message.toLowerCase()
+    if (lower.includes("insufficient quota") || lower.includes("quota exceeded") || lower.includes("billing error")) return true
+  }
+
+  if (typeof error === "object" && error !== null && "data" in error) {
+    const data = (error as { data?: { message?: string } }).data
+    if (data?.message) {
+      const lower = data.message.toLowerCase()
+      if (lower.includes("quota exceeded") || lower.includes("billing error") || lower.includes("insufficient quota")) return true
+    }
+  }
 
   return false
 }
@@ -86,6 +118,12 @@ export function retryable(error: Err) {
   // context overflow errors should not be retried
   if (MessageV2.ContextOverflowError.isInstance(error)) return undefined
 
+  // quota/billing errors should not be retried on the same provider
+  // they require switching to a different provider
+  if (MessageV2.QuotaExceededError.isInstance(error)) {
+    return QUOTA_EXCEEDED_MESSAGE
+  }
+
   // Catch raw Error / network / SSE-timeout BEFORE APIError narrowing.
   // SessionRetry.policy unwraps Cause<unknown> via opts.parse, but raw
   // Error instances slip past the APIError check below. Adding this
@@ -115,6 +153,10 @@ export function retryable(error: Err) {
     ) {
       return msg
     }
+    // Quota patterns in plain text
+    if (lower.includes("quota exceeded") || lower.includes("billing error") || lower.includes("insufficient quota")) {
+      return QUOTA_EXCEEDED_MESSAGE
+    }
   }
 
   const json = iife(() => {
@@ -140,6 +182,9 @@ export function retryable(error: Err) {
   }
   if (json.type === "error" && typeof json.error?.code === "string" && json.error.code.includes("rate_limit")) {
     return "Rate Limited"
+  }
+  if (json.error?.code === "insufficient_quota" || json.error?.type === "billing_error") {
+    return QUOTA_EXCEEDED_MESSAGE
   }
   return undefined
 }

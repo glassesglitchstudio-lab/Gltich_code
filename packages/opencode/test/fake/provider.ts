@@ -82,6 +82,9 @@ export namespace ProviderTest {
           defaultModel: Effect.fn("TestProvider.defaultModel")(() =>
             Effect.succeed({ providerID: row.id, modelID: mdl.id }),
           ),
+          getFallbackProviders: Effect.fn("TestProvider.getFallbackProviders")(() =>
+            Effect.succeed([]),
+          ),
           ...override,
         }),
       ),

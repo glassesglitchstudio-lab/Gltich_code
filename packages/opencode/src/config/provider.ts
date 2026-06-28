@@ -106,6 +106,10 @@ export class Info extends Schema.Class<Info>("ProviderConfig")({
           description:
             "Timeout in milliseconds between streamed SSE chunks for this provider. If no chunk arrives within this window, the request is aborted.",
         }),
+        fallback_providers: Schema.optional(Schema.mutable(Schema.Array(Schema.String))).annotate({
+          description:
+            "List of provider/model references to try when this provider hits quota or billing errors. Format: 'provider/model' (e.g., 'anthropic/claude-sonnet-4-20250514').",
+        }),
       }),
       [Schema.Record(Schema.String, Schema.Any)],
     ),

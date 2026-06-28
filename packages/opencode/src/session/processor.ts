@@ -17,7 +17,7 @@ import type { SessionID } from "./schema"
 import { SessionRetry } from "./retry"
 import { SessionStatus } from "./status"
 import { SessionSummary } from "./summary"
-import type { Provider } from "@/provider"
+import { Provider } from "@/provider"
 import { Question } from "@/question"
 import { errorMessage } from "@/util/error"
 import { isRecoverableError } from "@/tool/recoverable"
@@ -164,6 +164,7 @@ export const layer: Layer.Layer<
   | Plugin.Service
   | SessionSummary.Service
   | SessionStatus.Service
+  | Provider.Service
 > = Layer.effect(
   Service,
   Effect.gen(function* () {
@@ -178,6 +179,7 @@ export const layer: Layer.Layer<
     const summary = yield* SessionSummary.Service
     const scope = yield* Scope.Scope
     const status = yield* SessionStatus.Service
+    const provider = yield* Provider.Service
 
     const create = Effect.fn("SessionProcessor.create")(function* (input: Input) {
       // Pre-capture snapshot before the LLM stream starts. The AI SDK
@@ -677,6 +679,54 @@ export const layer: Layer.Layer<
         ctx.needsOverflowHandling = false
         ctx.shouldBreak = (yield* config.get()).experimental?.continue_loop_on_deny !== true
 
+        const attemptFallback = Effect.fn("SessionProcessor.attemptFallback")(function* (error: unknown) {
+          if (!SessionRetry.isQuotaError(error)) return yield* Effect.fail(error)
+
+          const currentModel = streamInput.model
+          const fallbacks = yield* provider.getFallbackProviders(currentModel.providerID, currentModel.id)
+
+          for (const fallback of fallbacks) {
+            if (fallback.providerID === currentModel.providerID) continue
+
+            slog.info("quota fallback", {
+              from: `${currentModel.providerID}/${currentModel.id}`,
+              to: `${fallback.providerID}/${fallback.modelID}`,
+              source: fallback.source,
+            })
+
+            const fallbackModel = yield* provider.getModel(fallback.providerID, fallback.modelID).pipe(Effect.exit)
+            if (fallbackModel._tag !== "Success") continue
+
+            const newInput: LLM.StreamInput = {
+              ...streamInput,
+              model: fallbackModel.value,
+            }
+
+            yield* Effect.gen(function* () {
+              ctx.currentText = undefined
+              ctx.reasoningMap = {}
+              ctx.stepPartIds = []
+              ctx.toolcalls = {}
+              const stream = llm.stream(newInput)
+
+              yield* stream.pipe(
+                Stream.tap((event) => handleEvent(event)),
+                Stream.takeUntil(() => ctx.needsOverflowHandling),
+                Stream.runDrain,
+              )
+            }).pipe(
+              Effect.catchCauseIf(
+                (cause) => !Cause.hasInterruptsOnly(cause),
+                (cause) => Effect.fail(Cause.squash(cause)),
+              ),
+            )
+
+            return yield* Effect.void
+          }
+
+          return yield* Effect.fail(error)
+        })
+
         return yield* Effect.gen(function* () {
           yield* Effect.gen(function* () {
             ctx.currentText = undefined
@@ -729,6 +779,7 @@ export const layer: Layer.Layer<
                     : Effect.void,
               }),
             ),
+            Effect.catch(attemptFallback),
             Effect.catch(halt),
             Effect.ensuring(cleanup()),
           )
@@ -962,6 +1013,7 @@ export const defaultLayer = Layer.suspend(() =>
     Layer.provide(SessionStatus.defaultLayer),
     Layer.provide(Bus.layer),
     Layer.provide(Config.defaultLayer),
+    Layer.provide(Provider.defaultLayer),
   ),
 )
 

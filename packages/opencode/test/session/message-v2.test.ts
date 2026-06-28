@@ -972,7 +972,7 @@ describe("session.message-v2.fromError", () => {
   })
 
   test("serializes response error codes", () => {
-    const cases = [
+    const quotaCases = [
       {
         code: "insufficient_quota",
         message: "Quota exceeded. Check your plan and billing details.",
@@ -981,18 +981,40 @@ describe("session.message-v2.fromError", () => {
         code: "usage_not_included",
         message: "To use Codex with your ChatGPT plan, upgrade to Plus: https://chatgpt.com/explore/plus.",
       },
+    ]
+
+    quotaCases.forEach((item) => {
+      const input = {
+        type: "error",
+        error: {
+          code: item.code,
+        },
+      }
+      const result = MessageV2.fromError(input, { providerID })
+
+      expect(result).toStrictEqual({
+        name: "QuotaExceededError",
+        data: {
+          providerID: providerID,
+          message: item.message,
+          responseBody: JSON.stringify(input),
+        },
+      })
+    })
+
+    const apiCases = [
       {
         code: "invalid_prompt",
         message: "Invalid prompt from test",
       },
     ]
 
-    cases.forEach((item) => {
+    apiCases.forEach((item) => {
       const input = {
         type: "error",
         error: {
           code: item.code,
-          message: item.code === "invalid_prompt" ? item.message : undefined,
+          message: item.message,
         },
       }
       const result = MessageV2.fromError(input, { providerID })
