@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
-  "version": "0.2.28",
+  "version": "0.2.31",
   "name": "glitchcode-cli",
   "type": "module",
   "license": "MIT",
