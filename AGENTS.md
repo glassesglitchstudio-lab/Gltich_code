@@ -116,6 +116,32 @@ packages/opencode/
 - Windows kullanıcısı — PowerShell komutları tercih et
 - `--no-verify` ile push ediliyor (husky hook typecheck hatası yüzünden)
 
+## Session Notları (2026-06-28)
+
+- **PlusTwoCoder eklendi** ✅ — Multi-model debate sistemi. 2-3 model tartışarak kod üretir.
+  - CLI: `glitch plus-two-coder` (aliases: `ptc`, `debate`)
+  - TUI slash: `/ptc`, `/debate`
+  - 18 unit test yazıldı
+  - Provider Service API pattern: `Instance.provide` + `Effect.gen` + `generateText` from `ai`
+
+- **Rebrand tamamlandı** ✅ — `@mimo-ai/` → `@glitchcode/` (125+ dosya)
+  - `custom-elements.d.ts` fix (app + enterprise)
+  - `script/publish.ts` düzeltildi
+
+- **npm package optimize** ✅ — `files: ["bin/", "README.md"]`
+
+- **Build sistemi** — `--skip-install` sadece Windows'da (universal approach başarısız — cross-compilation native binding gerektiriyor)
+  - `@parcel/watcher` runtime-only (atlanabilir)
+  - `@opentui/core` build-time'da `parser.worker.js` gerektiriyor
+
+- **Publish** — v0.2.31 (11/11 ✅), v0.2.32 (11/11 ✅)
+  - npm: `glitchcode-cli@0.2.32`
+  - GitHub Release: v0.2.32
+
+- **CLI rating: 8/10**
+  - Güçlü: PlusTwoCoder (sektörde ilk), fallback sistemi, build pipeline
+  - Eksik: cross-compilation kırılganlığı, PlusTwoCoder scoring keyword-based
+
 ## Session Notları (2026-06-27)
 
 - 10 yeni feature eklendi ✅
