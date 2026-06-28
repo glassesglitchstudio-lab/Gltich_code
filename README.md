@@ -179,6 +179,91 @@ Custom providers must register at least one model in their `models` field to be 
 
 ---
 
+## CLI Commands
+
+### Core
+
+| Command | Description |
+|---------|-------------|
+| `glitch` | Start interactive TUI session |
+| `glitch run <prompt>` | Run a prompt non-interactively |
+| `glitch init` | Initialize project configuration |
+| `glitch upgrade` | Upgrade to latest version |
+
+### Multi-Model Debate
+
+```bash
+glitch plus-two-coder --task "Build a REST API with Express"
+glitch ptc -t "Optimize this React component" -m "anthropic/claude-sonnet-4-20250514,openai/gpt-4o"
+glitch debate -t "Design a database schema" --rounds 3
+```
+
+2-3 models debate and critique each other's solutions. Each round, every model proposes a solution, then another critiques it. After N rounds, a consensus is produced.
+
+### Code Review
+
+```bash
+glitch review                    # Review uncommitted changes
+glitch review --branch main      # Review branch vs main
+glitch review --pr 42            # Review a GitHub PR
+glitch review --format markdown  # Output as markdown
+```
+
+### Benchmark & Analytics
+
+```bash
+glitch benchmark                 # Session cost/token stats
+glitch benchmark --days 7        # Last 7 days only
+glitch benchmark --sort speed    # Sort by tokens/second
+```
+
+### Session Management
+
+```bash
+glitch share                     # Export current session
+glitch history                   # Search session history
+glitch history "auth bug"        # Search for specific topic
+```
+
+### Provider & Models
+
+```bash
+glitch providers login           # Authenticate with a provider
+glitch models                    # List all available models
+glitch models anthropic          # List models for a provider
+```
+
+### Offline Mode
+
+```bash
+glitch offline setup             # Configure local models (Ollama/LMStudio)
+glitch offline status            # Check offline model status
+glitch offline models            # List available local models
+```
+
+### Themes
+
+```bash
+glitch theme list                # List available themes
+glitch theme set neon-orange     # Switch theme
+```
+
+### TUI Slash Commands
+
+Inside the TUI, type `/` to access:
+
+| Slash | Description |
+|-------|-------------|
+| `/share` | Share session |
+| `/rename` | Rename session |
+| `/compact` | Summarize session |
+| `/undo` | Undo last message |
+| `/redo` | Redo last message |
+| `/export` | Export session |
+| `/ptc` | Plus Two Coder |
+
+---
+
 ## Configuration
 
 MiMoCode is configured via `.mimocode/mimocode.json` in the project directory (or `~/.config/mimocode/mimocode.json` globally). Key options include:

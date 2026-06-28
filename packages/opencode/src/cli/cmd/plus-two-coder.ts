@@ -9,7 +9,7 @@ import { Effect } from "effect"
 import { generateText } from "ai"
 import type { LanguageModel } from "ai"
 
-interface CoderOpinion {
+export interface CoderOpinion {
   model: string
   provider: string
   solution: string
@@ -17,7 +17,7 @@ interface CoderOpinion {
   score: number
 }
 
-interface DebateRound {
+export interface DebateRound {
   round: number
   opinions: CoderOpinion[]
   consensus?: string
@@ -185,7 +185,7 @@ Cevabini su formatta ver:
   },
 })
 
-function selectModels(inputModels: string[] | undefined, providers: Record<string, any>): ModelRef[] {
+export function selectModels(inputModels: string[] | undefined, providers: Record<string, any>): ModelRef[] {
   if (inputModels && inputModels.length >= 2) {
     return inputModels.slice(0, 3).map((m) => {
       const [provider, model] = m.includes("/") ? m.split("/", 2) : ["auto", m]
@@ -238,7 +238,7 @@ function selectModels(inputModels: string[] | undefined, providers: Record<strin
   return selected
 }
 
-function buildInitialPrompt(task: string): string {
+export function buildInitialPrompt(task: string): string {
   return `Sen bir uzman yazilimciisin. Asagidaki gorevi cozmek icin en iyi cozumu uret.
 
 GOREV: ${task}
@@ -260,7 +260,7 @@ Cevabini su formatta ver:
 [alternative approaches]`
 }
 
-function buildDebatePrompt(task: string, previousOpinions: CoderOpinion[], context: string): string {
+export function buildDebatePrompt(task: string, previousOpinions: CoderOpinion[], context: string): string {
   const opinionsText = previousOpinions
     .map((o) => `### ${o.provider}/${o.model} (Skor: ${o.score})\n${o.solution}\nElestiri: ${o.critique}`)
     .join("\n\n")
@@ -292,7 +292,7 @@ Cevabini su formatta ver:
 [potential risks]`
 }
 
-function buildCritiquePrompt(task: string, solution: string): string {
+export function buildCritiquePrompt(task: string, solution: string): string {
   return `Sen sert bir kod reviewcusun. Asagidaki cozumu elestir.
 
 GOREV: ${task}
@@ -316,7 +316,7 @@ Cevabini su formatta ver:
 [suggestions]`
 }
 
-function evaluateSolution(solution: string): number {
+export function evaluateSolution(solution: string): number {
   let score = 50
   if (solution.includes("```")) score += 10
   if (solution.length > 200) score += 10
@@ -328,7 +328,7 @@ function evaluateSolution(solution: string): number {
   return Math.min(100, score)
 }
 
-function buildConsensusContext(opinions: CoderOpinion[]): string {
+export function buildConsensusContext(opinions: CoderOpinion[]): string {
   const best = opinions[0]
   const worst = opinions[opinions.length - 1]
 

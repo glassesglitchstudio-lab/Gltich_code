@@ -1,4 +1,4 @@
-﻿import {
+import {
   batch,
   createContext,
   createEffect,
@@ -1011,6 +1011,20 @@ export function Session() {
       hidden: true,
       onSelect: (dialog) => {
         moveChild(-1)
+        dialog.clear()
+      },
+    },
+    {
+      title: "Plus Two Coder",
+      value: "session.plus-two-coder",
+      category: "session",
+      suggested: true,
+      slash: {
+        name: "ptc",
+        aliases: ["debate"],
+      },
+      onSelect: (dialog) => {
+        toast.show({ message: "PlusTwoCoder: Use 'glitch plus-two-coder --task <description>' in terminal", variant: "info" })
         dialog.clear()
       },
     },

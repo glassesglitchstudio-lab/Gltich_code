@@ -10,8 +10,6 @@
   "private": false,
   "files": [
     "bin/",
-    "dist/",
-    "script/",
     "README.md"
   ],
   "scripts": {
