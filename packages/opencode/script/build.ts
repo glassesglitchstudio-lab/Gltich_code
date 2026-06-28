@@ -51,6 +51,7 @@ console.log(`Loaded ${migrations.length} migrations`)
 
 const singleFlag = process.argv.includes("--single")
 const baselineFlag = process.argv.includes("--baseline")
+const skipInstall = process.argv.includes("--skip-install")
 const targetFlag = process.argv.find((arg, i) => process.argv[i - 1] === "--target")
 const plugin = createSolidTransformPlugin()
 // const skipEmbedWebUi = process.argv.includes("--skip-embed-web-ui")
@@ -205,6 +206,9 @@ if (extEntrypoints.length) {
 
 const binaries: Record<string, string> = {}
 await $`bun install --os="*" --cpu="*" @opentui/core@${pkg.dependencies["@opentui/core"]}`
+if (!skipInstall) {
+  await $`bun install --os="*" --cpu="*" @parcel/watcher@${pkg.dependencies["@parcel/watcher"]}`
+}
 for (const item of targets) {
   const name = [
     BINARY_PREFIX,
