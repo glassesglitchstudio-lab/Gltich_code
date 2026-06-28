@@ -56,8 +56,17 @@ jobs:
       - name: Setup Bun
         uses: ./.github/actions/setup-bun
 
+      - name: Install node-gyp (Windows)
+        if: runner.os == 'Windows'
+        run: npm install -g node-gyp
+
       - name: Build binary for ${{ matrix.target }}
-        run: bun run --cwd packages/opencode script/build.ts --target glitchcode-${{ matrix.target }}
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            bun run --cwd packages/opencode script/build.ts --target glitchcode-${{ matrix.target }} --skip-install
+          else
+            bun run --cwd packages/opencode script/build.ts --target glitchcode-${{ matrix.target }}
+          fi
         shell: bash
         env:
           GLITCHCODE_CHANNEL: prod
