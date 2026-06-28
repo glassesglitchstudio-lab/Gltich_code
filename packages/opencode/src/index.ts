@@ -49,6 +49,7 @@ import { SuggestCommand } from "./cli/cmd/suggest"
 import { ThemeCommand } from "./cli/cmd/theme"
 import { OfflineCommand } from "./cli/cmd/offline"
 import { HistoryCommand } from "./cli/cmd/history"
+import { PlusTwoCoderCommand } from "./cli/cmd/plus-two-coder"
 import { Heap } from "./cli/heap"
 import { drizzle } from "drizzle-orm/bun-sqlite"
 import { ensureProcessMetadata } from "./util/glitch-process"
@@ -224,6 +225,7 @@ const cli = yargs(args)
   .command(ThemeCommand)
   .command(OfflineCommand)
   .command(HistoryCommand)
+  .command(PlusTwoCoderCommand)
   .fail((msg, err) => {
     if (
       msg?.startsWith("Unknown argument") ||
