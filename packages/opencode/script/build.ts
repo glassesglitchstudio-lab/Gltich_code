@@ -51,7 +51,14 @@ console.log(`Loaded ${migrations.length} migrations`)
 
 const singleFlag = process.argv.includes("--single")
 const baselineFlag = process.argv.includes("--baseline")
-const skipInstall = process.argv.includes("--skip-install")
+let skipInstall = process.argv.includes("--skip-install")
+
+// Windows'da native binding'ler (node-gyp/tree-sitter) compile edilemez
+// Otomatik olarak --skip-install aktif et
+if (process.platform === "win32" && !skipInstall) {
+  console.log("Windows detected: auto-enabling --skip-install (native bindings unavailable)")
+  skipInstall = true
+}
 const targetFlag = process.argv.find((arg, i) => process.argv[i - 1] === "--target")
 const plugin = createSolidTransformPlugin()
 // const skipEmbedWebUi = process.argv.includes("--skip-embed-web-ui")
@@ -206,8 +213,13 @@ if (extEntrypoints.length) {
 
 const binaries: Record<string, string> = {}
 if (!skipInstall) {
-  await $`bun install --os="*" --cpu="*" @opentui/core@${pkg.dependencies["@opentui/core"]}`
-  await $`bun install --os="*" --cpu="*" @parcel/watcher@${pkg.dependencies["@parcel/watcher"]}`
+  const deps = pkg.dependencies as Record<string, string>
+  const optDeps = (pkg as any).optionalDependencies as Record<string, string> | undefined
+  await $`bun install --os="*" --cpu="*" @opentui/core@${deps["@opentui/core"]}`
+  const parcelVersion = deps["@parcel/watcher"] ?? optDeps?.["@parcel/watcher"]
+  if (parcelVersion) {
+    await $`bun install --os="*" --cpu="*" @parcel/watcher@${parcelVersion}`
+  }
 }
 for (const item of targets) {
   const name = [
@@ -225,12 +237,18 @@ for (const item of targets) {
 
   const localPath = path.resolve(dir, "node_modules/@opentui/core/parser.worker.js")
   const rootPath = path.resolve(dir, "../../node_modules/@opentui/core/parser.worker.js")
-  const parserWorker = fs.realpathSync(fs.existsSync(localPath) ? localPath : rootPath)
+  const parserWorkerExists = fs.existsSync(localPath) || fs.existsSync(rootPath)
+  if (!parserWorkerExists && skipInstall) {
+    console.log(`  Warning: parser.worker.js not found (--skip-install mode). Build will include worker placeholder.`)
+  }
+  const parserWorker = parserWorkerExists
+    ? fs.realpathSync(fs.existsSync(localPath) ? localPath : rootPath)
+    : null
   const workerPath = "./src/cli/cmd/tui/worker.ts"
 
   // Use platform-specific bunfs root path based on target OS
   const bunfsRoot = item.os === "win32" ? "B:/~BUN/root/" : "/$bunfs/root/"
-  const workerRelativePath = path.relative(dir, parserWorker).replaceAll("\\", "/")
+  const workerRelativePath = parserWorker ? path.relative(dir, parserWorker).replaceAll("\\", "/") : ""
 
   await Bun.build({
     conditions: ["browser"],
@@ -251,11 +269,11 @@ for (const item of targets) {
       windows: {},
     },
     files: embeddedFileMap ? { "opencode-web-ui.gen.ts": embeddedFileMap } : {},
-    entrypoints: ["./src/index.ts", parserWorker, workerPath, ...(embeddedFileMap ? ["opencode-web-ui.gen.ts"] : []), ...extEntrypoints],
+    entrypoints: ["./src/index.ts", ...(parserWorker ? [parserWorker] : []), workerPath, ...(embeddedFileMap ? ["opencode-web-ui.gen.ts"] : []), ...extEntrypoints],
     define: {
       GLITCH_VERSION: `'${Script.version}'`,
       OPENCODE_MIGRATIONS: JSON.stringify(migrations),
-      OTUI_TREE_SITTER_WORKER_PATH: bunfsRoot + workerRelativePath,
+      OTUI_TREE_SITTER_WORKER_PATH: workerRelativePath ? bunfsRoot + workerRelativePath : "",
       OPENCODE_WORKER_PATH: workerPath,
       GLITCH_CHANNEL: `'${Script.channel}'`,
       OPENCODE_LIBC: item.os === "linux" ? `'${item.abi ?? "glibc"}'` : "",

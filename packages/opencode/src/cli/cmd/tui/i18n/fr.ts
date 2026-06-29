@@ -60,7 +60,7 @@ export const dict = {
   "tui.tips.undo": "Utilisez {highlight}/undo{/highlight} pour annuler le dernier message et ses modifications",
   "tui.tips.redo": "Utilisez {highlight}/redo{/highlight} pour rétablir des messages et modifications précédemment annulés",
   "tui.tips.share":
-    "Exécutez {highlight}/share{/highlight} pour créer un lien public vers votre conversation sur opencode.ai",
+    "Exécutez {highlight}/share{/highlight} pour créer un lien public vers votre conversation",
   "tui.tips.drag_drop": "Glissez-déposez des images ou PDF dans le terminal pour les ajouter au contexte",
   "tui.tips.paste_image":
     "Appuyez sur {highlight}Ctrl+V{/highlight} pour coller des images du presse-papiers dans l'invite",
@@ -168,7 +168,7 @@ export const dict = {
   "tui.tips.agent_create":
     "Exécutez {highlight}glitch agent create{/highlight} pour créer un agent en mode guidé",
   "tui.tips.github_trigger":
-    "Utilisez {highlight}/opencode{/highlight} dans les issues/PR GitHub pour déclencher des actions IA",
+    "Utilisez {highlight}/glitch{/highlight} dans les issues/PR GitHub pour déclencher des actions IA",
   "tui.tips.github_install":
     "Exécutez {highlight}glitch github install{/highlight} pour configurer le workflow GitHub",
   "tui.tips.github_oc":
@@ -220,7 +220,7 @@ export const dict = {
   "tui.tips.username_toggle":
     "Activez/désactivez l'affichage du nom d'utilisateur via la palette de commandes ({highlight}Ctrl+P{/highlight})",
   "tui.tips.docker":
-    "Exécutez {highlight}docker run -it --rm ghcr.io/anomalyco/opencode{/highlight} pour une utilisation conteneurisée",
+    "Exécutez {highlight}docker run -it --rm ghcr.io/glitchcode/glitchcode{/highlight} pour une utilisation conteneurisée",
   "tui.tips.zen":
     "Utilisez {highlight}/connect{/highlight} avec Glitch Code pour des modèles testés et sélectionnés",
   "tui.tips.agents_md":

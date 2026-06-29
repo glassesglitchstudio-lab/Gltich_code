@@ -62,7 +62,7 @@ export const dict = {
   "tui.tips.redo":
     "Используйте {highlight}/redo{/highlight}, чтобы вернуть ранее отменённые сообщения и изменения",
   "tui.tips.share":
-    "Выполните {highlight}/share{/highlight}, чтобы получить публичную ссылку на диалог на opencode.ai",
+    "Выполните {highlight}/share{/highlight}, чтобы получить публичную ссылку на диалог",
   "tui.tips.drag_drop": "Перетащите изображения или PDF в терминал, чтобы добавить их в контекст",
   "tui.tips.paste_image":
     "Нажмите {highlight}Ctrl+V{/highlight}, чтобы вставить изображение из буфера обмена в строку ввода",
@@ -180,7 +180,7 @@ export const dict = {
   "tui.tips.agent_create":
     "Выполните {highlight}glitch agent create{/highlight}, чтобы создать агента в пошаговом режиме",
   "tui.tips.github_trigger":
-    "Используйте {highlight}/opencode{/highlight} в issue/PR на GitHub, чтобы запускать AI-действия",
+    "Используйте {highlight}/glitch{/highlight} в issue/PR на GitHub, чтобы запускать AI-действия",
   "tui.tips.github_install":
     "Выполните {highlight}glitch github install{/highlight}, чтобы настроить GitHub-workflow",
   "tui.tips.github_oc":
@@ -233,7 +233,7 @@ export const dict = {
   "tui.tips.username_toggle":
     "Переключайте отображение имени пользователя через палитру команд ({highlight}Ctrl+P{/highlight})",
   "tui.tips.docker":
-    "Выполните {highlight}docker run -it --rm ghcr.io/anomalyco/opencode{/highlight} для контейнерного запуска",
+    "Выполните {highlight}docker run -it --rm ghcr.io/glitchcode/glitchcode{/highlight} для контейнерного запуска",
   "tui.tips.zen":
     "Используйте {highlight}/connect{/highlight} с Glitch Code для подобранных и протестированных моделей",
   "tui.tips.agents_md":

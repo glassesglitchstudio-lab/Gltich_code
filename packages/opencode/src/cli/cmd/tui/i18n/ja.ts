@@ -57,7 +57,7 @@ export const dict = {
   "tui.tips.background": "{highlight}/background{/highlight} を実行してホーム背景にお好みの画像を設定できます",
   "tui.tips.undo": "{highlight}/undo{/highlight} で直前のメッセージとファイル変更を取り消します",
   "tui.tips.redo": "{highlight}/redo{/highlight} で取り消したメッセージとファイル変更を復元します",
-  "tui.tips.share": "{highlight}/share{/highlight} を実行すると opencode.ai に会話の公開リンクを作成します",
+  "tui.tips.share": "{highlight}/share{/highlight} を実行すると会話の公開リンクを作成します",
   "tui.tips.drag_drop": "画像や PDF をターミナルにドラッグ＆ドロップしてコンテキストに追加できます",
   "tui.tips.paste_image": "{highlight}Ctrl+V{/highlight} でクリップボードの画像をプロンプトに貼り付けます",
   "tui.tips.editor":
@@ -141,7 +141,7 @@ export const dict = {
   "tui.tips.upgrade": "{highlight}glitch upgrade{/highlight} で最新バージョンに更新します",
   "tui.tips.auth_list": "{highlight}glitch auth list{/highlight} で設定済みプロバイダを確認します",
   "tui.tips.agent_create": "{highlight}glitch agent create{/highlight} でガイド付きエージェント作成を行います",
-  "tui.tips.github_trigger": "GitHub の issue/PR で {highlight}/opencode{/highlight} を入力すると AI を起動します",
+  "tui.tips.github_trigger": "GitHub の issue/PR で {highlight}/glitch{/highlight} を入力すると AI を起動します",
   "tui.tips.github_install": "{highlight}glitch github install{/highlight} で GitHub workflow を設定します",
   "tui.tips.github_oc": "PR のコード行に {highlight}/oc{/highlight} とコメントすると的を絞ったレビューが行われます",
   "tui.tips.theme_system": '{highlight}"theme": "system"{/highlight} でターミナルの配色に合わせます',
@@ -178,7 +178,7 @@ export const dict = {
   "tui.tips.username_toggle":
     "コマンドパレット（{highlight}Ctrl+P{/highlight}）でチャット内のユーザー名表示を切り替えます",
   "tui.tips.docker":
-    "{highlight}docker run -it --rm ghcr.io/anomalyco/opencode{/highlight} でコンテナ版を実行できます",
+    "{highlight}docker run -it --rm ghcr.io/glitchcode/glitchcode{/highlight} でコンテナ版を実行できます",
   "tui.tips.zen": "Glitch Code と組み合わせて {highlight}/connect{/highlight} で厳選されたモデルを使えます",
   "tui.tips.agents_md": "プロジェクトの {highlight}AGENTS.md{/highlight} を Git にコミットしてチームで共有します",
   "tui.tips.review": "{highlight}/review{/highlight} で未コミット変更、ブランチ、PR をレビューします",

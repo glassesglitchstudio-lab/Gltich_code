@@ -57,12 +57,6 @@ await Bun.file(`./dist/${pkg.name}/package.json`).write(
       bin: {
         glitch: "./bin/glitch",
       },
-      scripts: {
-        postinstall: "bun ./postinstall.mjs || node ./postinstall.mjs",
-      },
-      optionalDependencies: Object.fromEntries(
-        binaries.filter((b) => !b.name.startsWith("@glitchcode/")).map((b) => [b.name, b.version])
-      ),
     },
     null,
     2,

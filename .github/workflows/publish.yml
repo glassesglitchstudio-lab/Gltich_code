@@ -70,7 +70,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.target }}
+          name: glitchcode-${{ matrix.target }}
           path: packages/opencode/dist/glitchcode-${{ matrix.target }}/
           retention-days: 5
 

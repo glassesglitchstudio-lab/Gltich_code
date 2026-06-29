@@ -62,7 +62,7 @@ export const dict = {
   "tui.tips.redo":
     "Usa {highlight}/redo{/highlight} para restaurar mensajes y cambios deshechos previamente",
   "tui.tips.share":
-    "Ejecuta {highlight}/share{/highlight} para crear un enlace público a tu conversación en opencode.ai",
+    "Ejecuta {highlight}/share{/highlight} para crear un enlace público a tu conversación",
   "tui.tips.drag_drop": "Arrastra y suelta imágenes o PDF en el terminal para añadirlos como contexto",
   "tui.tips.paste_image":
     "Pulsa {highlight}Ctrl+V{/highlight} para pegar imágenes desde el portapapeles en la entrada",
@@ -178,7 +178,7 @@ export const dict = {
   "tui.tips.agent_create":
     "Ejecuta {highlight}glitch agent create{/highlight} para crear un agente con asistente guiado",
   "tui.tips.github_trigger":
-    "Usa {highlight}/opencode{/highlight} en issues/PR de GitHub para disparar acciones de IA",
+    "Usa {highlight}/glitch{/highlight} en issues/PR de GitHub para disparar acciones de IA",
   "tui.tips.github_install":
     "Ejecuta {highlight}glitch github install{/highlight} para configurar el workflow de GitHub",
   "tui.tips.github_oc":
@@ -230,7 +230,7 @@ export const dict = {
   "tui.tips.username_toggle":
     "Activa/desactiva la visualización del nombre de usuario desde la paleta de comandos ({highlight}Ctrl+P{/highlight})",
   "tui.tips.docker":
-    "Ejecuta {highlight}docker run -it --rm ghcr.io/anomalyco/opencode{/highlight} para uso en contenedor",
+    "Ejecuta {highlight}docker run -it --rm ghcr.io/glitchcode/glitchcode{/highlight} para uso en contenedor",
   "tui.tips.zen":
     "Usa {highlight}/connect{/highlight} con Glitch Code para modelos seleccionados y probados",
   "tui.tips.agents_md":
