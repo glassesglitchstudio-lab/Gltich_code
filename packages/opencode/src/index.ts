@@ -50,6 +50,8 @@ import { ThemeCommand } from "./cli/cmd/theme"
 import { OfflineCommand } from "./cli/cmd/offline"
 import { HistoryCommand } from "./cli/cmd/history"
 import { PlusTwoCoderCommand } from "./cli/cmd/plus-two-coder"
+import { FixCommand } from "./cli/cmd/fix"
+import { SolveCommand } from "./cli/cmd/solve"
 import { Heap } from "./cli/heap"
 import { drizzle } from "drizzle-orm/bun-sqlite"
 import { ensureProcessMetadata } from "./util/glitch-process"
@@ -102,16 +104,6 @@ const cli = yargs(args)
     type: "boolean",
   })
   .middleware(async (opts) => {
-    if (!process.env.GLITCH_WARNED) {
-      process.env.GLITCH_WARNED = "1"
-      process.stderr.write(
-        "\x1b[93m⚠ Bu proje \x1b[1mOpencode\x1b[0m\x1b[93m'dan base alınmıştır, " +
-        "\x1b[1mglitchcode\x1b[0m\x1b[93m'un özelliklerini taşır.\x1b[0m\n" +
-        "\x1b[93m  GitHub: \x1b[4mhttps://github.com/glassesglitchstudio-lab/Gltich_code\x1b[0m\x1b[93m\x1b[0m\n" +
-        "\x1b[93m  Lisans: \x1b[1mLICENSE\x1b[0m\x1b[93m dosyasına bakın\x1b[0m\n\n"
-      )
-    }
-
     if (opts.pure) {
       process.env.GLITCHCODE_PURE = "1"
     }
@@ -226,6 +218,8 @@ const cli = yargs(args)
   .command(OfflineCommand)
   .command(HistoryCommand)
   .command(PlusTwoCoderCommand)
+  .command(FixCommand)
+  .command(SolveCommand)
   .fail((msg, err) => {
     if (
       msg?.startsWith("Unknown argument") ||

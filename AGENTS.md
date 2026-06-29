@@ -19,11 +19,10 @@
 
 ## Bilinen Sorunlar
 
-### 1. npm ile kurulanlarda özellikler çalışmıyor
-- **Sorun**: `npm install -g glitchcode-cli` ile kurulduğunda sadece compile edilmiş binary iniyor
-- **Neden**: `.glitchcode/` config dizini pakete eklenmemiş
-- **Çözüm**: `package.json`'daki `files` alanına `.glitchcode/` eklenecek
-- **Alternatif**: postinstall ile otomatik setup
+### 1. npm ile kurulanlarda özellikler çalışmıyor ✅ ÇÖZÜLDÜ
+- `bin/glitch` → `ensureProjectConfig()` + lazy binary download eklendi
+- `script/postinstall.mjs` → `ensureProjectConfig()` eklendi
+- İlk çalıştırmada `.glitchcode/` otomatik oluşturuluyor
 
 ### 2. Windows build
 - `--skip-install` flag'i zorunlu (node-gyp/tree-sitter sorunları)
@@ -44,13 +43,20 @@
    - `script/postinstall.mjs` → `ensureProjectConfig()` eklendi
    - İlk çalıştırmada `.glitchcode/` otomatik oluşturuluyor
 
-2. **Binary branding**
+2. **Binary branding** ✅ ÇÖZÜLDÜ
    - Logo/GLITCH yazısı doğru (logo.ts, ui.ts)
-   - Ama middleware'de hâlâ "Opencode'dan base alınmıştır" uyarısı var
+   - Middleware uyarısı kaldırıldı (index.ts)
+   - i18n dosyalarında opencode.ai referansları Glitch Code'a çevrildi
 
-3. **Build output dizin adı**
+3. **Build output dizin adı** ✅ ÇÖZÜLDÜ
    - `build.ts` → `BINARY_PREFIX = "glitchcode"` ✅
-   - `win32` → `windows` rename var (build.ts:202) — CI path'leri buna uygun olmalı
+   - `win32` → `windows` rename var (build.ts:202)
+   - `publish.yml` artifact adı `glitchcode-${{ matrix.target }}` olarak düzeltildi
+
+4. **npm paket boyutu** ✅ ÇÖZÜLDÜ
+   - `optionalDependencies` kaldırıldı (publish.ts)
+   - `bin/glitch` → lazy binary download (GitHub Releases'dan arşiv indirip çıkarma)
+   - Paket boyutu <1MB olacak (binary ~7MB, sadece gerekli platform)
 
 ## Kurulum Talimatları (Kullanıcılar için)
 
@@ -115,6 +121,106 @@ packages/opencode/
 - Kullanıcı genellikle sinirli — hızlı ve net cevap ver
 - Windows kullanıcısı — PowerShell komutları tercih et
 - `--no-verify` ile push ediliyor (husky hook typecheck hatası yüzünden)
+- `zht.ts` = Geleneksel Çince (Traditional Chinese) dil dosyası — Taiwan/Hong Kong
+
+## Session Notları (2026-06-29)
+
+### Glitch Fix — Enhanced OctoAgent Entegrasyonu ✅
+GitHub issue'ları otomatik çözümlüyen 7 fazlı pipeline sistemi eklendi.
+
+**Komut**: `glitch fix <issue-url>` (aliases: `solve`, `autofix`)
+
+**7 Faz**:
+1. **Issue Triage** — GitHub issue fetch + analiz
+2. **Planning** — Adım adım çözüm planı
+3. **File Discovery** — Etkilenen dosyaları bulma (glob/grep ile)
+4. **Code Proposal** — Kod önerisi üretme (+ PlusTwoCoder debate modu)
+5. **Review & Revision** — Technical + Style + Security review döngüsü
+6. **Apply & Test** — Değişiklikleri uygulama
+7. **Git & PR** — Branch oluşturma, commit, PR, issue yorumu
+
+**Seçenekler**:
+- `--model, -m`: Model seçimi
+- `--target-file, -f`: Hedef dosya (opsiyonel)
+- `--max-review, -r`: Maksimum review döngüsü (varsayılan: 3)
+- `--no-pr`: PR oluşturma
+- `--dry-run`: Sadece planı göster
+- `--debate`: PlusTwoCoder debate modu
+- `--auto-commit`: Otomatik commit
+
+**OctoAgent'dan Farkları**:
+- Multi-provider (20+ provider desteği)
+- PlusTwoCoder debate modu (2-3 model tartışması)
+- Security review (OWASP kontrolü)
+- Batch commit (tek commit)
+- Otomatik PR oluşturma
+- Dry-run modu
+- Lokal git + GitHub API entegrasyonu
+
+**Dosyalar**: `packages/opencode/src/cli/cmd/fix/` (12 dosya)
+**Typecheck**: ✅ Başarılı
+
+### Glitch Solve — Genel Görev Çözümleme Sistemi ✅
+Herhangi bir zor görevi parçalara bölüp sub-agent ile çalıştıran sistem.
+
+**Komut**: `glitch solve "görev açıklaması"` (aliases: `task`, `execute`)
+
+**5 Faz**:
+1. **Task Analysis** — Görevi analiz et, bileşenleri tanımla
+2. **Task Planning** — Alt görevlere böl (3-8 arası)
+3. **Topological Sort** — Bağımlılıklara göre sırala
+4. **Execute** — Her alt görevi sub-agent ile çalıştır
+5. **Summarize** — Sonuçları birleştir, özet çıkar
+
+**Seçenekler**:
+- `--model, -m`: Model seçimi
+- `--dry-run`: Sadece planı göster
+- `--max-parallel, -p`: Aynı anda çalışan sub-agent sayısı
+- `--max-steps, -s`: Maksimum alt görev sayısı (varsayılan: 8)
+- `--verbose, -v`: Detaylı çıktı
+
+**Farkları (glitch fix'ten)**:
+- GitHub issue'ya özel değil, herhangi bir görev
+- Sub-agent sistemi ile paralel/seri çalışma
+- Topological sort ile bağımlılık yönetimi
+- Genel amaçlı task decomposition
+
+**Kullanım**:
+```bash
+glitch solve "Bu projeye JWT authentication ekle"
+glitch solve "Bu 10 dosyadaki refactor'ü yap" --dry-run
+glitch solve "Test coverage'ı %80'e çıkar" -m anthropic/claude-sonnet-4-20250514
+```
+
+**Dosyalar**: `packages/opencode/src/cli/cmd/solve/` (6 dosya)
+**Typecheck**: ✅ Başarılı
+
+### Sorun Çözüm Beyin Fırtınası ✅
+3 ana sorun için çözüm planı oluşturuldu ve uygulandı:
+
+**1. Windows Binary Path Mismatch** ✅
+- `publish.yml:73` — artifact adı `${{ matrix.target }}` → `glitchcode-${{ matrix.target }}`
+- Build output `glitchcode-windows-x64/` artık doğru yere indiriliyor
+
+**2. npm Paket Boyutu (77+MB → <1MB)** ✅
+- `publish.ts` — `optionalDependencies` ve `postinstall` kaldırıldı
+- `bin/glitch` — GitHub Releases'dan doğru platform arşivini indirip çıkaran lazy download eklendi
+- Arşiv indirme: zip (windows) / tar.gz (linux/darwin)
+- Arşiv çıkarma: PowerShell Expand-Archive / tar -xzf
+
+**3. Middleware Branding ("Opencode'dan base alınmıştır")** ✅
+- `index.ts:104-113` — Middleware uyarısı tamamen silindi
+- `retry.ts:10` — opencode.ai URL kaldırıldı
+- `error.ts:20` — "opencode" → "glitchcode"
+- `providers.ts:601-611` — opencode.ai URL'leri kaldırıldı
+- 8 i18n dosyası (en/tr/ru/ja/zh/zht/fr/es) — opencode.ai, anomalyco/opencode, /opencode referansları Glitch Code'a çevrildi
+- `config.ts` — `$schema` URL auto-injection kaldırıldı
+- `tui-migrate.ts` — schema URL boşaltıldı
+
+**Not**: `@opencode/` Effect service tag'leri (64 adet) dokunulmadı — framework entegrasyonu bozulmaması için. `session/opencode-import.ts` de korundu (meşru OpenCode session import feature).
+
+**Toplam: 17 dosya, 51 ekleme, 58 silme**
+**Typecheck: ✅ Başarılı**
 
 ## Session Notları (2026-06-28)
 
@@ -166,9 +272,3 @@ packages/opencode/
 - CI/CD fix tamamlandı (win32→windows path, --target flag, timeout)
 - README güncellendi (gerçek kurulum talimatları)
 - npm version fix bekleniyor (publish.ts → package.json)
-
-## Bilinen Sorunlar (Devam)
-
-1. **Windows binary upload path mismatch** — Build output `glitchcode-windows-*` ama upload-artifact `glitchcode-win32-*` arıyor. publish.yml fix bekliyor.
-2. **npm package boyutu**: 77+ MB (binary'ler paket içinde)
-3. **npm install timeout**: Bu makinede `npm install -g glitchcode-cli` zaman aşımı veriyor
