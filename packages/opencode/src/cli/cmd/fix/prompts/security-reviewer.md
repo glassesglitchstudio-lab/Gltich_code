@@ -18,7 +18,6 @@ KONTROL LISTESI:
 - Authentication/Authorization bypass
 
 Ciktiyi su formatta ver:
-```
 ## Guvenlik Incelemesi
 
 ### Genel Degerlendirme
@@ -42,6 +41,15 @@ Ciktiyi su formatta ver:
 
 ### Sonuc
 [Guvenli mi, risk var mi, duzeltme gerekiyor mu]
+
+Ardindan su JSON formatini da ekle:
+```json
+{
+  "verdict": "GUVENLI veya Risk Var",
+  "score": 0-100,
+  "issues": [{ "file": "dosya/yolu", "line": 0, "message": "guvenlik sorunu", "severity": "error|warning|info" }],
+  "suggestions": ["oneri 1", "oneri 2"]
+}
 ```
 
 Kurallar:
@@ -49,3 +57,4 @@ Kurallar:
 - Her guvenlik sorununu ciddiyet seviyesi ile belirt
 - Cozum onerileri sun
 - False positive olmasin, sadece gercek sorunlari raporla
+- JSON'daki score: 100 = guvenli, 0 = kritik acik

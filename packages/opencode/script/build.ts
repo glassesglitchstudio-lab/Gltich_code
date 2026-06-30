@@ -56,7 +56,9 @@ let skipInstall = process.argv.includes("--skip-install")
 // Windows'da native binding'ler (node-gyp/tree-sitter) compile edilemez
 // Otomatik olarak --skip-install aktif et
 if (process.platform === "win32" && !skipInstall) {
-  console.log("Windows detected: auto-enabling --skip-install (native bindings unavailable)")
+  console.log("⚠️  Windows detected: auto-enabling --skip-install")
+  console.log("   Native bindings (node-gyp, tree-sitter) are not available on Windows.")
+  console.log("   This is expected — the binary will use WASM fallbacks where available.")
   skipInstall = true
 }
 const targetFlag = process.argv.find((arg, i) => process.argv[i - 1] === "--target")

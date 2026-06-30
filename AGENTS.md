@@ -272,3 +272,21 @@ glitch solve "Test coverage'ı %80'e çıkar" -m anthropic/claude-sonnet-4-20250
 - CI/CD fix tamamlandı (win32→windows path, --target flag, timeout)
 - README güncellendi (gerçek kurulum talimatları)
 - npm version fix bekleniyor (publish.ts → package.json)
+
+### Windows Build Fix + @parcel/watcher Optional ✅
+**Commit**: `4d570ba`
+
+**Yapılanlar**:
+1. **build.ts** — Windows auto-detect: `process.platform === "win32"` olduğunda `--skip-install` otomatik aktif
+2. **build.ts** — `parserWorker` null-safe: `--skip-install` modunda `@opentui/core` olmadığında crash olmaz
+3. **build.ts** — `workerRelativePath` ve `OTUI_TREE_SITTER_WORKER_PATH` empty case handling
+4. **package.json** — `@parcel/watcher` `dependencies`'ten `optionalDependencies`'a taşındı (lazy-load ile graceful degradation)
+5. **build.ts** — Parcel versiyonu `optionalDependencies`'dan okuma desteği
+
+**CI**: test ✅ | typecheck ✅ | lint ✅ (1m49s / 1m20s / 1m8s)
+
+**Kalanlar** (bir sonraki oturum):
+- T3: PlusTwoCoder scoring keyword → LLM tabanlı
+- T4: Review prompt JSON format
+- T5-T7: Test coverage (fix/solve/scoring)
+- T8: Cross-compilation advisory

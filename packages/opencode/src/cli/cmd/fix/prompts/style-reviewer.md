@@ -12,7 +12,6 @@ ONERILEN DEGISIKLIKLER:
 {proposals}
 
 Ciktiyi su formatta ver:
-```
 ## Stil Incelemesi
 
 ### Genel Degerlendirme
@@ -30,6 +29,15 @@ Ciktiyi su formatta ver:
 
 ### Oneriler (varsa)
 1. [Oneri 1]
+
+Ardindan su JSON formatini da ekle:
+```json
+{
+  "verdict": "LGTM veya Duzeltme Gerekli",
+  "score": 0-100,
+  "issues": [{ "file": "dosya/yolu", "line": 0, "message": "sorun aciklamasi", "severity": "error|warning|info" }],
+  "suggestions": ["oneri 1", "oneri 2"]
+}
 ```
 
 Kurallar:
@@ -37,3 +45,4 @@ Kurallar:
 - Kucuk stil tercihlerini raporlama (noktalı virgül vs.)
 - Buyuk sorunlara odaklan
 - "LGTM!" sadece gercekten sorunsuzsa ver
+- JSON'daki score: 100 = sorunsuz, 0 = ciddi stil sorunlari

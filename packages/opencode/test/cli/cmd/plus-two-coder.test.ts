@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test"
 import {
   evaluateSolution,
+  parseLLMScore,
   buildInitialPrompt,
   buildDebatePrompt,
   buildCritiquePrompt,
@@ -10,6 +11,49 @@ import {
 } from "../../../src/cli/cmd/plus-two-coder"
 
 describe("plus-two-coder", () => {
+  describe("parseLLMScore", () => {
+    test("parses score from markdown header", () => {
+      expect(parseLLMScore("## Skor: 85")).toBe(85)
+    })
+
+    test("parses score with single hash", () => {
+      expect(parseLLMScore("# Skor: 42")).toBe(42)
+    })
+
+    test("parses score from mixed text", () => {
+      const text = "Some analysis\n## Skor: 72\nMore text"
+      expect(parseLLMScore(text)).toBe(72)
+    })
+
+    test("parses score zero", () => {
+      expect(parseLLMScore("## Skor: 0")).toBe(0)
+    })
+
+    test("parses score 100", () => {
+      expect(parseLLMScore("## Skor: 100")).toBe(100)
+    })
+
+    test("returns null for missing score", () => {
+      expect(parseLLMScore("No score here at all")).toBeNull()
+    })
+
+    test("returns null for score > 100", () => {
+      expect(parseLLMScore("## Skor: 150")).toBeNull()
+    })
+
+    test("returns null for negative score", () => {
+      expect(parseLLMScore("## Skor: -5")).toBeNull()
+    })
+
+    test("returns null for non-numeric score", () => {
+      expect(parseLLMScore("## Skor: abc")).toBeNull()
+    })
+
+    test("handles case insensitive", () => {
+      expect(parseLLMScore("## SKOR: 60")).toBe(60)
+    })
+  })
+
   describe("evaluateSolution", () => {
     test("returns base score for empty solution", () => {
       expect(evaluateSolution("")).toBe(50)
@@ -39,6 +83,26 @@ describe("plus-two-coder", () => {
     test("caps at 100", () => {
       const perfectSolution = "```\n" + "a".repeat(600) + "\n```\nperformans guvenlik test error"
       expect(evaluateSolution(perfectSolution)).toBeLessThanOrEqual(100)
+    })
+
+    test("uses LLM score when provided and valid", () => {
+      expect(evaluateSolution("short", "## Skor: 90")).toBe(90)
+    })
+
+    test("uses LLM score 0", () => {
+      expect(evaluateSolution("anything", "## Skor: 0")).toBe(0)
+    })
+
+    test("falls back to keyword when LLM score is null", () => {
+      expect(evaluateSolution("``` test performance", null)).toBeGreaterThanOrEqual(60)
+    })
+
+    test("falls back to keyword when LLM score text has no score", () => {
+      expect(evaluateSolution("``` test", "no score here")).toBeGreaterThanOrEqual(60)
+    })
+
+    test("falls back when LLM score is out of range", () => {
+      expect(evaluateSolution("``` test", "## Skor: 200")).toBeGreaterThanOrEqual(60)
     })
   })
 

@@ -52,6 +52,11 @@ import { HistoryCommand } from "./cli/cmd/history"
 import { PlusTwoCoderCommand } from "./cli/cmd/plus-two-coder"
 import { FixCommand } from "./cli/cmd/fix"
 import { SolveCommand } from "./cli/cmd/solve"
+import { CostCommand } from "./cli/cmd/cost"
+import { ChangelogCommand } from "./cli/cmd/changelog"
+import { ReplayCommand } from "./cli/cmd/replay"
+import { AuditCommand } from "./cli/cmd/audit"
+import { BenchCommand } from "./cli/cmd/bench"
 import { Heap } from "./cli/heap"
 import { drizzle } from "drizzle-orm/bun-sqlite"
 import { ensureProcessMetadata } from "./util/glitch-process"
@@ -220,6 +225,11 @@ const cli = yargs(args)
   .command(PlusTwoCoderCommand)
   .command(FixCommand)
   .command(SolveCommand)
+  .command(CostCommand)
+  .command(ChangelogCommand)
+  .command(ReplayCommand)
+  .command(AuditCommand)
+  .command(BenchCommand)
   .fail((msg, err) => {
     if (
       msg?.startsWith("Unknown argument") ||

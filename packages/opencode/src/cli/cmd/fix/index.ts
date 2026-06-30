@@ -21,11 +21,46 @@ import {
 import { parseFileOperations, extractJsonFromMarkdown, extractFileList } from "./parser"
 import { loadPrompt, fillTemplate } from "./prompts-loader"
 import type { FixOptions, FixContext } from "./types"
+import { evaluateSolution } from "../plus-two-coder"
 
 interface ModelRef {
   providerID: ProviderID
   modelID: string
   model: LanguageModel
+}
+
+interface ParsedReview {
+  approved: boolean
+  score: number
+  feedback: string
+  suggestions: string[]
+}
+
+export function parseReviewResponse(text: string): ParsedReview {
+  const jsonMatch = text.match(/```json\s*([\s\S]*?)```/)
+  if (jsonMatch) {
+    try {
+      const data = JSON.parse(jsonMatch[1])
+      const verdict = (data.verdict ?? "").toLowerCase()
+      const approved =
+        verdict.includes("lgtm") ||
+        verdict.includes("guvenli") ||
+        verdict.includes("safe") ||
+        verdict.includes("no issues")
+      return {
+        approved,
+        score: typeof data.score === "number" ? Math.min(100, Math.max(0, data.score)) : 0,
+        feedback: text,
+        suggestions: Array.isArray(data.suggestions) ? data.suggestions : [],
+      }
+    } catch {}
+  }
+  return {
+    approved: /lgtm|satisfactory|approved|guvenli|safe|no issues/i.test(text),
+    score: 0,
+    feedback: text,
+    suggestions: [],
+  }
 }
 
 export const FixCommand = cmd({
@@ -288,7 +323,7 @@ export const FixCommand = cmd({
                 const techResult = yield* Effect.promise(() =>
                   generateText({ model: selectedModel.model, messages: [{ role: "user", content: techPrompt }] }),
                 )
-                const techApproved = /lgtm|satisfactory|approved/i.test(techResult.text)
+                const techReview = parseReviewResponse(techResult.text)
 
                 // Style review
                 const stylePrompt = fillTemplate(loadPrompt("style-reviewer"), {
@@ -297,7 +332,7 @@ export const FixCommand = cmd({
                 const styleResult = yield* Effect.promise(() =>
                   generateText({ model: selectedModel.model, messages: [{ role: "user", content: stylePrompt }] }),
                 )
-                const styleApproved = /lgtm|satisfactory|approved/i.test(styleResult.text)
+                const styleReview = parseReviewResponse(styleResult.text)
 
                 // Security review
                 const secPrompt = fillTemplate(loadPrompt("security-reviewer"), {
@@ -306,17 +341,17 @@ export const FixCommand = cmd({
                 const secResult = yield* Effect.promise(() =>
                   generateText({ model: selectedModel.model, messages: [{ role: "user", content: secPrompt }] }),
                 )
-                const secApproved = /guvenli|safe|no issues/i.test(secResult.text)
+                const secReview = parseReviewResponse(secResult.text)
 
                 ctx.reviews = [
-                  { reviewer: "technical", approved: techApproved, score: 0, feedback: techResult.text, suggestions: [] },
-                  { reviewer: "style", approved: styleApproved, score: 0, feedback: styleResult.text, suggestions: [] },
-                  { reviewer: "security", approved: secApproved, score: 0, feedback: secResult.text, suggestions: [] },
+                  { reviewer: "technical", approved: techReview.approved, score: techReview.score, feedback: techReview.feedback, suggestions: techReview.suggestions },
+                  { reviewer: "style", approved: styleReview.approved, score: styleReview.score, feedback: styleReview.feedback, suggestions: styleReview.suggestions },
+                  { reviewer: "security", approved: secReview.approved, score: secReview.score, feedback: secReview.feedback, suggestions: secReview.suggestions },
                 ]
 
-                s.message(`Teknik: ${techApproved ? "OK" : "REVIZE"} | Stil: ${styleApproved ? "OK" : "REVIZE"} | Guvenlik: ${secApproved ? "OK" : "REVIZE"}`)
+                s.message(`Teknik: ${techReview.approved ? "OK" : "REVIZE"} (Skor: ${techReview.score}) | Stil: ${styleReview.approved ? "OK" : "REVIZE"} (Skor: ${styleReview.score}) | Guvenlik: ${secReview.approved ? "OK" : "REVIZE"} (Skor: ${secReview.score})`)
 
-                if (techApproved && styleApproved && secApproved) {
+                if (techReview.approved && styleReview.approved && secReview.approved) {
                   s.message("Tum review'lar basarili!")
                   break
                 }
@@ -499,17 +534,6 @@ Neden bu cozumu sectigini kisa kisa acikla.`
 
   opinions.sort((a, b) => b.score - a.score)
   return opinions[0].solution
-}
-
-function evaluateSolution(solution: string): number {
-  let score = 50
-  if (solution.includes("```")) score += 10
-  if (solution.length > 200) score += 10
-  if (solution.includes("performance") || solution.includes("performans")) score += 5
-  if (solution.includes("security") || solution.includes("guvenlik")) score += 5
-  if (solution.includes("test")) score += 5
-  if (solution.length > 500) score += 10
-  return Math.min(100, score)
 }
 
 function buildPrBody(ctx: FixContext): string {

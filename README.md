@@ -54,6 +54,33 @@ sudo apt install xsel
 
 ---
 
+## Platform Desteği
+
+| Platform | Durum | Binary |
+|----------|-------|--------|
+| Linux x64 (glibc) | ✅ Tam destek | `linux-x64.tar.gz` |
+| Linux x64 (musl) | ✅ Tam destek | `linux-x64-musl.tar.gz` (Alpine/WSL) |
+| Linux x64 baseline | ✅ Tam destek | `linux-x64-baseline.tar.gz` (AVX2 yok) |
+| Linux ARM64 | ✅ Tam destek | `linux-arm64.tar.gz` |
+| Linux ARM64 (musl) | ✅ Tam destek | `linux-arm64-musl.tar.gz` |
+| macOS x64 (Intel) | ✅ Tam destek | `darwin-x64.tar.gz` |
+| macOS ARM64 (Apple Silicon) | ✅ Tam destek | `darwin-arm64.tar.gz` |
+| Windows x64 | ✅ Tam destek | `windows-x64.zip` |
+| Windows x64 baseline | ✅ Tam destek | `windows-x64-baseline.zip` |
+| Windows ARM64 | ⚠️ Sınırlı | Native modül desteği yok |
+
+### Windows Derleme Notları
+
+Windows platformunda `node-gyp` ve `tree-sitter` gibi native modüller derlenemez.
+Binary'ler `--skip-install` moduyla üretilir — bu normaldir ve fonksiyonelliği etkilemez.
+Eğer yerel derleme yapıyorsanız:
+
+```bash
+bun run script/build.ts --single --skip-install
+```
+
+---
+
 ## Core Features
 
 ### Multiple Agents

@@ -253,7 +253,7 @@ export const SolveCommand = cmd({
   },
 })
 
-function topologicalSort(tasks: SubTask[]): string[] {
+export function topologicalSort(tasks: SubTask[]): string[] {
   const sorted: string[] = []
   const visited = new Set<string>()
   const visiting = new Set<string>()

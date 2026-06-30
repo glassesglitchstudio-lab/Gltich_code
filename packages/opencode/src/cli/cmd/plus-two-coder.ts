@@ -112,7 +112,7 @@ export const PlusTwoCoderCommand = cmd({
                     }),
                   )
 
-                  const score = evaluateSolution(solution.text)
+                  const score = evaluateSolution(solution.text, critiqueResult.text)
 
                   opinions.push({
                     model: m.modelID,
@@ -316,7 +316,18 @@ Cevabini su formatta ver:
 [suggestions]`
 }
 
-export function evaluateSolution(solution: string): number {
+export function parseLLMScore(text: string): number | null {
+  const match = text.match(/##?\s*Skor:\s*(\d{1,3})/i)
+  if (!match) return null
+  const score = parseInt(match[1], 10)
+  return score >= 0 && score <= 100 ? score : null
+}
+
+export function evaluateSolution(solution: string, llmScoreText?: string | null): number {
+  if (llmScoreText) {
+    const parsed = parseLLMScore(llmScoreText)
+    if (parsed !== null) return parsed
+  }
   let score = 50
   if (solution.includes("```")) score += 10
   if (solution.length > 200) score += 10

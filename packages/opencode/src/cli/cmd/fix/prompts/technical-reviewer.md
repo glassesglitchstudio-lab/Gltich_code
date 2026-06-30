@@ -10,7 +10,6 @@ ONERILEN DEGISIKLIKLER:
 {proposals}
 
 Ciktiyi su formatta ver:
-```
 ## Teknik Inceleme
 
 ### Genel Degerlendirme
@@ -30,6 +29,15 @@ Ciktiyi su formatta ver:
 ### Oneriler (varsa)
 1. [Oneri 1]
 2. [Oneri 2]
+
+Ardindan su JSON formatini da ekle:
+```json
+{
+  "verdict": "LGTM veya Duzeltme Gerekli",
+  "score": 0-100,
+  "issues": [{ "file": "dosya/yolu", "line": 0, "message": "sorun aciklamasi", "severity": "error|warning|info" }],
+  "suggestions": ["oneri 1", "oneri 2"]
+}
 ```
 
 Kurallar:
@@ -37,3 +45,4 @@ Kurallar:
 - Her sorunu dosya ve satir numarasi ile belirt
 - Cozum onerileri sun
 - "LGTM!" sadece gercekten sorunsuzsa ver
+- JSON'daki score: 100 = sorunsuz, 0 = kritik sorunlar
