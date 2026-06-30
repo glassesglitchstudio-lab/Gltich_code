@@ -364,12 +364,7 @@ export const layer = Layer.effect(
             },
           }).pipe(
             Effect.catch(() => {
-              // TODO: make proper events for this
-              // bus.publish(Session.Event.Error, {
-              //   error: new NamedError.Unknown({
-              //     message: `Failed to load plugin ${load.spec}: ${message}`,
-              //   }).toObject(),
-              // })
+              publishPluginError(`Failed to load plugin ${load.spec}`)
               return Effect.void
             }),
           )
@@ -471,12 +466,6 @@ export const layer = Layer.effect(
           const startedAt = Date.now()
           const o: ActorStopOutput = { continue: false }
           let hookOutcome: "success" | "error" = "success"
-          // TODO: pass an AbortSignal to fn so plugin authors can wire cooperative
-          // cancellation into their fetch / DB calls. Effect interrupt only stops
-          // the awaiting fiber — the underlying Promise keeps running and may
-          // bus.publish events after the actor has been cleaned up. See spec
-          // Future work for full discussion. Strict in-process cancellation
-          // (子进程隔离) is out of scope; AbortSignal is the in-process ceiling.
           yield* Effect.tryPromise({
             try: () => fn(input as never, o),
             catch: (err) => err,
