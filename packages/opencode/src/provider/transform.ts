@@ -1320,3 +1320,11 @@ export function schema(model: Provider.Model, schema: JSONSchema.BaseSchema | JS
 
   return schema as JSONSchema7
 }
+
+/**
+ * Checks if system prompts should be passed as options.instructions
+ * instead of in the messages array. Currently applies to OpenAI OAuth.
+ */
+export function usesInstructionsForSystem(providerID: string, authType?: string): boolean {
+  return providerID === "openai" && authType === "oauth"
+}

@@ -485,9 +485,8 @@ export const layer = Layer.effect(
         yield* plugin.trigger("experimental.chat.system.transform", { model: resolved }, { system })
         const existing = yield* InstanceState.useEffect(state, (s) => s.list())
 
-        // TODO: clean this up so provider specific logic doesnt bleed over
         const authInfo = yield* auth.get(model.providerID).pipe(Effect.orDie)
-        const isOpenaiOauth = model.providerID === "openai" && authInfo?.type === "oauth"
+        const useInstructionsSystem = ProviderTransform.usesInstructionsForSystem(model.providerID, authInfo?.type)
 
         const params = {
           experimental_telemetry: {
@@ -499,7 +498,7 @@ export const layer = Layer.effect(
           },
           temperature: 0.3,
           messages: [
-            ...(isOpenaiOauth
+            ...(useInstructionsSystem
               ? []
               : system.map(
                   (item): ModelMessage => ({
@@ -520,7 +519,7 @@ export const layer = Layer.effect(
           }),
         } satisfies Parameters<typeof generateObject>[0]
 
-        if (isOpenaiOauth) {
+        if (useInstructionsSystem) {
           return yield* Effect.promise(async () => {
             const result = streamObject({
               ...params,
