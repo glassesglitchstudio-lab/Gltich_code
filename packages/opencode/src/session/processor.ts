@@ -688,6 +688,17 @@ export const layer: Layer.Layer<
           for (const fallback of fallbacks) {
             if (fallback.providerID === currentModel.providerID) continue
 
+            // API key kontrolü — key yoksa bu provider'ı atla
+            const fallbackProvider = yield* provider.getProvider(fallback.providerID).pipe(Effect.exit)
+            if (fallbackProvider._tag !== "Success") {
+              slog.info("skip fallback - provider not found", { provider: fallback.providerID })
+              continue
+            }
+            if (!fallbackProvider.value.key && !fallbackProvider.value.options?.apiKey) {
+              slog.info("skip fallback - no API key", { provider: fallback.providerID })
+              continue
+            }
+
             slog.info("quota fallback", {
               from: `${currentModel.providerID}/${currentModel.id}`,
               to: `${fallback.providerID}/${fallback.modelID}`,

@@ -47,10 +47,31 @@ export function isRetryableTransientError(error: unknown): boolean {
 }
 
 /**
+ * Check if an error is an authentication/authorization error.
+ * Auth errors should NOT trigger fallback — the key itself is invalid.
+ */
+export function isAuthError(error: unknown): boolean {
+  if (MessageV2.APIError.isInstance(error)) {
+    const status = error.data.statusCode
+    if (status === 401) return true
+    if (status === 403) {
+      const lower = error.data.message.toLowerCase()
+      if (lower.includes("token") || lower.includes("api_key") || lower.includes("unauthorized") || lower.includes("invalid") || lower.includes("authentication") || lower.includes("credential")) return true
+    }
+    const lower = error.data.message.toLowerCase()
+    if (lower.includes("invalid api key") || lower.includes("unauthorized") || lower.includes("authentication failed")) return true
+  }
+  return false
+}
+
+/**
  * Check if an error is a quota/billing error that should trigger provider fallback.
  * Quota errors are NOT retryable on the same provider — they require switching.
+ * Auth errors are excluded — they won't be fixed by switching providers.
  */
 export function isQuotaError(error: unknown): boolean {
+  if (isAuthError(error)) return false
+
   if (MessageV2.QuotaExceededError.isInstance(error)) return true
 
   if (MessageV2.APIError.isInstance(error)) {
@@ -117,6 +138,11 @@ export function delay(attempt: number, error?: MessageV2.APIError) {
 export function retryable(error: Err) {
   // context overflow errors should not be retried
   if (MessageV2.ContextOverflowError.isInstance(error)) return undefined
+
+  // auth errors should not be retried — the API key itself is invalid
+  if (isAuthError(error)) {
+    return "API key is invalid or expired. Check your provider configuration."
+  }
 
   // quota/billing errors should not be retried on the same provider
   // they require switching to a different provider

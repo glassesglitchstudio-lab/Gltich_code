@@ -216,7 +216,26 @@ export type ParsedAPICallError =
       metadata?: Record<string, string>
     }
 
+export function isAuthError(input: { statusCode?: number; responseBody?: string; message: string }): boolean {
+  if (input.statusCode === 401) return true
+  if (input.statusCode === 403) {
+    const lower = input.message.toLowerCase()
+    if (lower.includes("token") || lower.includes("api_key") || lower.includes("unauthorized") || lower.includes("invalid") || lower.includes("authentication") || lower.includes("credential")) return true
+  }
+  if (input.responseBody) {
+    const body = json(input.responseBody)
+    if (body?.error?.code === "invalid_api_key") return true
+    if (body?.error?.type === "authentication_error") return true
+  }
+  const lower = input.message.toLowerCase()
+  if (lower.includes("invalid api key") || lower.includes("unauthorized") || lower.includes("authentication failed")) return true
+  return false
+}
+
 export function isQuotaError(input: { statusCode?: number; responseBody?: string; message: string }): boolean {
+  // Auth hatalarını quota'dan ayır — bunlar fallback ile çözülmez
+  if (isAuthError(input)) return false
+
   if (input.statusCode === 402) return true
   if (input.statusCode === 403) {
     const lower = input.message.toLowerCase()

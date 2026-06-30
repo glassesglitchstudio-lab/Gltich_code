@@ -113,6 +113,7 @@ export const PlusTwoCoderCommand = cmd({
                   )
 
                   const score = evaluateSolution(solution.text, critiqueResult.text)
+                  const hasLLMScore = parseLLMScore(critiqueResult.text) !== null
 
                   opinions.push({
                     model: m.modelID,
@@ -122,7 +123,7 @@ export const PlusTwoCoderCommand = cmd({
                     score,
                   })
 
-                  s.message(`${m.modelID} skoru: ${score}/100`)
+                  s.message(`${m.modelID} skoru: ${score}/100${hasLLMScore ? "" : " (keyword-based, dusuk guven)"}`)
                 }
 
                 opinions.sort((a, b) => b.score - a.score)
@@ -143,17 +144,20 @@ GOREV: ${args.task}
 TUM GORUSLER:
 ${opinionsSummary}
 
-Simdi nihai konsensusu acikla. En iyi cozumu sec ve neden digerlerinden daha iyi oldugunu acikla.
+Simdi nihai konsensusu acikla. Her modelin guclu ve zayif yonlerini degerlendir.
 
 Cevabini su formatta ver:
 ## Nihai Cozum
-[final solution]
+[final solution - tam kod]
 
-## Konsensus Nedeni
-[why this solution won]
+## Model Karsilastirmasi
+[Her modelin guclu ve zayif yonlerini kisa kisa listele]
+
+## Neden Bu Cozum?
+[Bu cozumun digerlerinden neden daha iyi oldugunu acikla]
 
 ## Uygulama Adimlari
-[steps to implement]`
+[adim adim uygulama talimatlari - kod ornekleriyle]`
 
               const primary = selectedModels[0]
               const consensusResult = yield* Effect.promise(() =>
@@ -317,10 +321,21 @@ Cevabini su formatta ver:
 }
 
 export function parseLLMScore(text: string): number | null {
-  const match = text.match(/##?\s*Skor:\s*(\d{1,3})/i)
-  if (!match) return null
-  const score = parseInt(match[1], 10)
-  return score >= 0 && score <= 100 ? score : null
+  const patterns = [
+    /##?\s*Skor:\s*(\d{1,3})/i,
+    /##?\s*Score:\s*(\d{1,3})/i,
+    /##?\s*Puan:\s*(\d{1,3})/i,
+    /(\d{1,3})\s*\/\s*100/,
+    /##?\s*Rating:\s*(\d{1,3})/i,
+  ]
+  for (const pattern of patterns) {
+    const match = text.match(pattern)
+    if (match) {
+      const score = parseInt(match[1], 10)
+      if (score >= 0 && score <= 100) return score
+    }
+  }
+  return null
 }
 
 export function evaluateSolution(solution: string, llmScoreText?: string | null): number {
@@ -328,15 +343,22 @@ export function evaluateSolution(solution: string, llmScoreText?: string | null)
     const parsed = parseLLMScore(llmScoreText)
     if (parsed !== null) return parsed
   }
-  let score = 50
-  if (solution.includes("```")) score += 10
-  if (solution.length > 200) score += 10
-  if (solution.includes("performans") || solution.includes("performance")) score += 5
-  if (solution.includes("guvenlik") || solution.includes("security")) score += 5
-  if (solution.includes("test") || solution.includes("spec")) score += 5
-  if (solution.includes("error") || solution.includes("hata")) score += 5
-  if (solution.length > 500) score += 10
-  return Math.min(100, score)
+  let score = 40
+  if (solution.includes("```")) score += 8
+  if (solution.length > 200) score += 5
+  if (solution.length > 500) score += 8
+  if (solution.length > 1000) score += 5
+  if (solution.includes("import ") || solution.includes("require(")) score += 5
+  if (solution.includes("function ") || solution.includes("const ") || solution.includes("class ")) score += 5
+  if (solution.includes("try") || solution.includes("catch") || solution.includes("error")) score += 5
+  if (solution.includes("export ") || solution.includes("module.exports")) score += 3
+  if (solution.includes("performans") || solution.includes("performance") || solution.includes("optimize")) score += 3
+  if (solution.includes("guvenlik") || solution.includes("security") || solution.includes("sanitize")) score += 3
+  if (solution.includes("test") || solution.includes("spec") || solution.includes("describe(")) score += 3
+  if (solution.includes("type") || solution.includes("interface") || solution.includes(": ")) score += 3
+  if (solution.length < 100) score -= 10
+  if (!solution.includes("```") && !solution.includes("function") && !solution.includes("class")) score -= 5
+  return Math.max(0, Math.min(100, score))
 }
 
 export function buildConsensusContext(opinions: CoderOpinion[]): string {
@@ -344,7 +366,7 @@ export function buildConsensusContext(opinions: CoderOpinion[]): string {
   const worst = opinions[opinions.length - 1]
 
   return `En iyi cozum: ${best.provider}/${best.model} (Skor: ${best.score})
-En zayif cozum: ${best.provider}/${worst.model} (Skor: ${worst.score})
+En zayif cozum: ${worst.provider}/${worst.model} (Skor: ${worst.score})
 
 En iyi cozumun ozeti:
 ${best.solution.substring(0, 500)}
@@ -354,37 +376,39 @@ ${best.critique.substring(0, 300)}`
 }
 
 function printTerminal(rounds: DebateRound[], task: string) {
-  console.log("\n" + "═".repeat(60))
+  console.log("\n" + "=".repeat(60))
   console.log("  PLUS TWOCODER - MODEL TARTISMA OTURUMU")
-  console.log("═".repeat(60))
+  console.log("=".repeat(60))
   console.log(`\nGOREV: ${task}\n`)
 
   for (const round of rounds) {
-    console.log(`\n${"─".repeat(60)}`)
+    console.log(`\n${"-".repeat(60)}`)
     console.log(`  TUR ${round.round}`)
-    console.log("─".repeat(60))
+    console.log("-".repeat(60))
 
     for (const opinion of round.opinions) {
-      const bar = "█".repeat(Math.floor(opinion.score / 5)) + "░".repeat(20 - Math.floor(opinion.score / 5))
-      console.log(`\n  🤖 ${opinion.provider}/${opinion.model}`)
+      const bar = "#".repeat(Math.floor(opinion.score / 5)) + ".".repeat(20 - Math.floor(opinion.score / 5))
+      console.log(`\n  [AI] ${opinion.provider}/${opinion.model}`)
       console.log(`  Skor: [${bar}] ${opinion.score}/100`)
-      console.log(`\n  Çözüm:`)
-      console.log(`  ${opinion.solution.split("\n").join("\n  ")}`)
-      console.log(`\n  Elestiri:`)
-      console.log(`  ${opinion.critique.split("\n").slice(0, 5).join("\n  ")}`)
+      console.log(`\n  Cozum:`)
+      const solutionLines = opinion.solution.split("\n")
+      console.log(`  ${solutionLines.slice(0, 15).join("\n  ")}${solutionLines.length > 15 ? "\n  ... (devami var)" : ""}`)
+      console.log(`\n  Elestiri (ozet):`)
+      const critiqueLines = opinion.critique.split("\n").filter(l => l.trim())
+      console.log(`  ${critiqueLines.slice(0, 8).join("\n  ")}`)
     }
   }
 
   if (rounds.length > 0 && rounds[rounds.length - 1].consensus) {
-    console.log(`\n${"═".repeat(60)}`)
-    console.log("  NİHAİ KONSENSÜS")
-    console.log("═".repeat(60))
+    console.log(`\n${"=".repeat(60)}`)
+    console.log("  Nihai Konsensus")
+    console.log("=".repeat(60))
     console.log(`\n${rounds[rounds.length - 1].consensus}`)
   }
 
-  console.log("\n" + "═".repeat(60))
+  console.log("\n" + "=".repeat(60))
   console.log("  OTURUM SONU")
-  console.log("═".repeat(60) + "\n")
+  console.log("=".repeat(60) + "\n")
 }
 
 function printJSON(rounds: DebateRound[], task: string) {
@@ -419,7 +443,7 @@ function printMarkdown(rounds: DebateRound[], task: string) {
 
     for (const opinion of round.opinions) {
       console.log(`### ${opinion.provider}/${opinion.model} (Skor: ${opinion.score}/100)\n`)
-      console.log(`**Çözüm:**\n\`\`\`\n${opinion.solution}\n\`\`\`\n`)
+      console.log(`**Cozum:**\n\`\`\`\n${opinion.solution}\n\`\`\`\n`)
       console.log(`**Elestiri:**\n${opinion.critique}\n`)
     }
   }

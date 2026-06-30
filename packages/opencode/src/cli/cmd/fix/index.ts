@@ -21,7 +21,7 @@ import {
 import { parseFileOperations, extractJsonFromMarkdown, extractFileList } from "./parser"
 import { loadPrompt, fillTemplate } from "./prompts-loader"
 import type { FixOptions, FixContext } from "./types"
-import { evaluateSolution } from "../plus-two-coder"
+import { evaluateSolution, buildCritiquePrompt, parseLLMScore } from "../plus-two-coder"
 
 interface ModelRef {
   providerID: ProviderID
@@ -509,9 +509,11 @@ async function runDebate(
   }
 
   const debaters = [primaryModel, allModels[0], allModels[1]].filter(Boolean).slice(0, 3)
-  const opinions: Array<{ model: string; solution: string; score: number }> = []
+  const opinions: Array<{ model: string; solution: string; critique: string; score: number }> = []
 
-  for (const m of debaters) {
+  // Round 1: Her model bağımsız çözüm üretir + cross-critique
+  for (let i = 0; i < debaters.length; i++) {
+    const m = debaters[i]
     const prompt = `Sen bir uzman yazilimciisin. Asagidaki issue icin en iyi kod cozumunu uret.
 
 ISSUE: ${context.title}
@@ -528,12 +530,54 @@ Cevabi su formatta ver (Her dosya icin Changes for \`dosya\`: ile basla):
 Neden bu cozumu sectigini kisa kisa acikla.`
 
     const result = await generateText({ model: m.model, messages: [{ role: "user", content: prompt }] })
-    const score = evaluateSolution(result.text)
-    opinions.push({ model: `${m.providerID}/${m.modelID}`, solution: result.text, score })
+
+    // Cross-critique: bir sonraki model bu çözümü eleştirsin
+    const nextModel = debaters[(i + 1) % debaters.length]
+    const critiqueResult = await generateText({
+      model: nextModel.model,
+      messages: [{ role: "user", content: buildCritiquePrompt(context.title + "\n" + context.body, result.text) }],
+    })
+
+    const score = evaluateSolution(result.text, critiqueResult.text)
+    opinions.push({
+      model: `${m.providerID}/${m.modelID}`,
+      solution: result.text,
+      critique: critiqueResult.text,
+      score,
+    })
   }
 
   opinions.sort((a, b) => b.score - a.score)
-  return opinions[0].solution
+
+  // Konsensus: moderatör tüm çözümleri değerlendirsin
+  const opinionsSummary = opinions
+    .map((o) => `### ${o.model} (Skor: ${o.score})\nÇözüm:\n${o.solution.substring(0, 500)}\nElestiri:\n${o.critique.substring(0, 300)}`)
+    .join("\n\n")
+
+  const consensusPrompt = `Sen bir kod uzmani moderatörüsün. Tum modellerin goruslerini inceledin.
+
+ISSUE: ${context.title}
+ACIKLAMA: ${context.body}
+
+TUM GORUSLER:
+${opinionsSummary}
+
+Nihai konsensusu acikla. En iyi cozumu sec ve neden digerlerinden daha iyi oldugunu acikla.
+
+Cevabini su formatta ver:
+### Changes for \`dosya/yolu\`:
+\`\`\`[dil]
+[final kod]
+\`\`\`
+
+Neden bu cozum secildi: [aciklama]`
+
+  const consensusResult = await generateText({
+    model: primaryModel.model,
+    messages: [{ role: "user", content: consensusPrompt }],
+  })
+
+  return consensusResult.text
 }
 
 function buildPrBody(ctx: FixContext): string {

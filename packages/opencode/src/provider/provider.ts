@@ -1742,26 +1742,38 @@ const layer: Layer.Layer<
       const s = yield* InstanceState.get(state)
       const cfg = yield* config.get()
 
+      // Helper: provider'ın geçerli bir API key'i var mı?
+      const hasValidKey = (providerID: ProviderID): boolean => {
+        const p = s.providers[providerID]
+        if (!p) return false
+        if (p.key) return true
+        if (p.options?.apiKey) return true
+        // Env-based provider'lar key olmadan kullanılamaz
+        if (p.source === "env") return false
+        return false
+      }
+
       // Get fallback providers from config if available
       const providerConfig = cfg.provider?.[currentProviderID]
       const configuredFallbacks = providerConfig?.options?.fallback_providers ?? []
 
       const fallbacks: Array<{ providerID: ProviderID; modelID: ModelID; source: string }> = []
 
-      // 1. Add explicitly configured fallback providers
+      // 1. Add explicitly configured fallback providers (only with valid keys)
       for (const ref of configuredFallbacks) {
         const parsed = parseModel(ref)
         const provider = s.providers[parsed.providerID]
-        if (provider && provider.models[parsed.modelID]) {
+        if (provider && provider.models[parsed.modelID] && hasValidKey(parsed.providerID)) {
           fallbacks.push({ providerID: parsed.providerID, modelID: parsed.modelID, source: "config" })
         }
       }
 
-      // 2. Add other providers with similar models (same model name, different provider)
+      // 2. Add other providers with similar models (only with valid keys)
       for (const [pid, provider] of Object.entries(s.providers)) {
         const providerID = ProviderID.make(pid)
         if (providerID === currentProviderID) continue
         if (fallbacks.some((f) => f.providerID === providerID)) continue
+        if (!hasValidKey(providerID)) continue
 
         // Look for models with similar names
         for (const [mid, model] of Object.entries(provider.models)) {
@@ -1773,11 +1785,12 @@ const layer: Layer.Layer<
         }
       }
 
-      // 3. If no same-model fallbacks, add any available provider with models
+      // 3. If no same-model fallbacks, use config/custom providers with valid keys
       if (fallbacks.length === 0) {
         for (const [pid, provider] of Object.entries(s.providers)) {
           const providerID = ProviderID.make(pid)
           if (providerID === currentProviderID) continue
+          if (!hasValidKey(providerID)) continue
           const models = Object.keys(provider.models)
           if (models.length > 0) {
             const sorted = sort(Object.values(provider.models))
