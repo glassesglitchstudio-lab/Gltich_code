@@ -352,7 +352,6 @@ const parser = lazy(async () => {
   return { bash, ps }
 })
 
-// TODO: we may wanna rename this tool so it works better on other shells
 export const BashTool = Tool.define(
   "bash",
   Effect.gen(function* () {

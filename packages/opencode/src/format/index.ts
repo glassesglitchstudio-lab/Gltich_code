@@ -136,11 +136,14 @@ export const layer = Layer.effect(
           for (const [name, item] of Object.entries(cfg.formatter)) {
             const builtIn = Formatter[name as keyof typeof Formatter]
 
-            // Ruff and uv are both the same formatter, so disabling either should disable both.
-            if (["ruff", "uv"].includes(name) && (cfg.formatter.ruff?.disabled || cfg.formatter.uv?.disabled)) {
-              // TODO combine formatters so shared backends like Ruff/uv don't need linked disable handling here.
-              delete formatters.ruff
-              delete formatters.uv
+            // Shared backend mapping: disabling one disables all aliases
+            const sharedBackends: Record<string, string[]> = {
+              ruff: ["ruff", "uv"],
+              uv: ["ruff", "uv"],
+            }
+            const aliases = sharedBackends[name] ?? [name]
+            if (cfg.formatter && aliases.some((alias) => (cfg.formatter as any)?.[alias]?.disabled)) {
+              for (const alias of aliases) delete formatters[alias]
               continue
             }
             if (item.disabled) {

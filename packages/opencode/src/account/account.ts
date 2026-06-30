@@ -415,8 +415,20 @@ export const layer: Layer.Layer<Service, never, AccountRepo.Service | HttpClient
 
       const [account, remoteOrgs] = yield* Effect.all([user, orgs], { concurrency: 2 })
 
-      // TODO: When there are multiple orgs, let the user choose
-      const firstOrgID = remoteOrgs.length > 0 ? Option.some(remoteOrgs[0].id) : Option.none<OrgID>()
+      // Multiple org varsa kullanıcıya sor
+      let selectedOrgID: Option.Option<OrgID>
+      if (remoteOrgs.length > 1) {
+        const prompts = yield* Effect.promise(() => import("@clack/prompts"))
+        const choice = yield* Effect.promise(() =>
+          prompts.select({
+            message: "Hangi organization'a bağlanmak istersiniz?",
+            options: remoteOrgs.map((org) => ({ value: org.id, label: org.name ?? org.id })),
+          }),
+        )
+        selectedOrgID = Option.some(choice as OrgID)
+      } else {
+        selectedOrgID = remoteOrgs.length > 0 ? Option.some(remoteOrgs[0].id) : Option.none<OrgID>()
+      }
 
       const now = yield* Clock.currentTimeMillis
       const expiry = now + Duration.toMillis(parsed.expires_in)
@@ -429,7 +441,7 @@ export const layer: Layer.Layer<Service, never, AccountRepo.Service | HttpClient
         accessToken,
         refreshToken,
         expiry,
-        orgID: firstOrgID,
+        orgID: selectedOrgID,
       })
 
       return new PollSuccess({ email: account.email })
