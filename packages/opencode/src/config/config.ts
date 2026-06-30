@@ -385,6 +385,12 @@ const InfoSchema = Schema.Struct({
         description:
           "Predict the user's likely next prompt after each turn and show it as inline ghost text (Tab to accept). Enabled by default; set to false to disable.",
       }),
+      maxGoalReact: Schema.optional(PositiveInt).annotate({
+        description: "Max goal-driven main-loop re-entries per turn (default 12). Higher = more retries but more token cost.",
+      }),
+      maxPreReact: Schema.optional(PositiveInt).annotate({
+        description: "Max preStop ReAct re-entries per spawned actor (default 3). Prevents infinite loops.",
+      }),
       maxMode: Schema.optional(
         Schema.Struct({
           candidates: Schema.optional(PositiveInt).annotate({

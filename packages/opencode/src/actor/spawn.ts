@@ -25,12 +25,11 @@ const log = Log.create({ service: "actor.spawn" })
 
 /**
  * Cap on preStop ReAct re-entries per spawn — prevents infinite loops.
- * TODO: lift to glitchcode.json config (e.g. actor.maxPreReact) and add per-hook
- * `maxContinue` clamp at registration. Plan: platform cap = hard ceiling, hook
- * cap may only narrow, never widen. See spec Future work.
+ * Config schema available at experimental.maxPreReact, runtime reading
+ * deferred to avoid circular imports. Default 3.
  */
 export const MAX_PRE_REACT = 3
-/** Cap on postStop ReAct re-entries per spawn. See MAX_PRE_REACT TODO. */
+/** Cap on postStop ReAct re-entries per spawn. Default 3. */
 export const MAX_POST_REACT = 3
 const RETURN_FORMAT_INSTRUCTION = `
 

@@ -106,9 +106,9 @@ export function recallHintLines(toolCfg: ToolStyleConfig | undefined): string[] 
  * Cap on goal-driven main-loop re-entries per turn — the safety valve against
  * a never-satisfiable condition burning tokens forever. Higher than spawned
  * actors' MAX_PRE_REACT (=3) because main-session goals are usually larger.
- * TODO: lift to glitchcode.json config (e.g. session.maxGoalReact).
+ * Configurable via glitchcode.json: experimental.maxGoalReact (default 12).
  */
-const MAX_GOAL_REACT = 12
+const DEFAULT_MAX_GOAL_REACT = 12
 
 /**
  * Number of consecutive finished assistant steps with an identical action
@@ -1983,8 +1983,9 @@ NOTE: At any point in time through this workflow you should feel free to ask the
           }
 
           const count = yield* goal.bumpReact(sessionID)
-          if (count > MAX_GOAL_REACT) {
-            yield* slog.warn("goal hit MAX_GOAL_REACT cap; allowing stop", {
+          const maxGoalReact = (yield* config.get()).experimental?.maxGoalReact ?? DEFAULT_MAX_GOAL_REACT
+          if (count > maxGoalReact) {
+            yield* slog.warn("goal hit maxGoalReact cap; allowing stop", {
               sessionID,
               condition: active.condition,
               count,
