@@ -11,9 +11,9 @@
 
 ## Publish Pipeline Durumu
 
-- **Son başarılı version**: `v0.2.12` (AMA Windows binary'leri eksik)
-- **npm'de yayında olan**: `glitchcode-cli@0.2.12`
-- **12 platform build**: linux/darwin/win32 x arm64/x64 + musl/baseline
+- **Son başarılı version**: `v0.2.33`
+- **npm'de yayında olan**: `glitchcode-cli@0.2.33`
+- **10 platform build**: linux/darwin/win32 x arm64/x64 + musl/baseline
 - **Workflow**: `.github/workflows/publish.yml`
 - **Tag ile tetikleniyor**: `v*` push
 
@@ -122,6 +122,54 @@ packages/opencode/
 - Windows kullanıcısı — PowerShell komutları tercih et
 - `--no-verify` ile push ediliyor (husky hook typecheck hatası yüzünden)
 - `zht.ts` = Geleneksel Çince (Traditional Chinese) dil dosyası — Taiwan/Hong Kong
+
+## Session Notları (2026-06-30)
+
+### T3-T8 Kalan İşler Tamamlandı ✅
+
+**T3: LLM Tabanlı Skorlama**
+- `parseLLMScore()` fonksiyonu eklendi — LLM'nin ürettiği `## Skor: [0-100]` parse ediyor
+- `evaluateSolution()` artık LLM skorunu tercih ediyor, keyword fallback korundu
+- `fix/index.ts`'deki duplicate `evaluateSolution` kaldırıldı
+
+**T4: JSON Review Format**
+- 3 review prompt'a JSON çıktı formatı eklendi
+- `parseReviewResponse()` fonksiyonu — hem JSON hem regex fallback
+- `ReviewFeedback.score` artık gerçek skorları gösteriyor (0-100)
+
+**T5-T7: Test Coverage**
+- 59 test, 85 assertion, 0 hata
+- `plus-two-coder.test.ts` — 30 test
+- `fix-review.test.ts` — 17 test (yeni)
+- `solve.test.ts` — 10 test (yeni)
+- `topologicalSort` export edildi
+
+**T8: Cross-Compilation Advisory**
+- README'ye "Platform Desteği" tablosu (10 platform)
+- `build.ts` advisory warning geliştirildi
+
+### 5 Yeni Komut Eklendi ✅
+
+1. **`glitch cost`** — Token/maliyet takibi ve raporlama
+2. **`glitch changelog`** — Git commit'lerinden otomatik CHANGELOG
+3. **`glitch replay`** — Eski oturumları tekrar oynatma
+4. **`glitch audit`** — Bagımlılık güvenlik denetimi
+5. **`glitch bench`** — Multi-model benchmark ve karşılaştırma
+
+### Dokümantasyon İyileştirmesi ✅
+
+- **CONTRIBUTING.md** — Katkı rehberi (yeni)
+- **ARCHITECTURE.md** — Mimari doküman (yeni)
+- **README.md** — Tamamen yeniden yazıldı (kullanım örnekleri, komut listesi, provider rehberi)
+- **AGENTS.md** — Güncellendi
+
+### v0.2.33 Publish ✅
+- GitHub Actions: publish, lint, typecheck — tümü başarılı
+- 10 platform binary'si hazır
+- npm: `glitchcode-cli@0.2.33`
+- GitHub Release: v0.2.33
+
+---
 
 ## Session Notları (2026-06-29)
 
