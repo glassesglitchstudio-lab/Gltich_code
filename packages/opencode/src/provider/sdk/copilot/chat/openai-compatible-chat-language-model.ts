@@ -403,8 +403,8 @@ export class OpenAICompatibleChatLanguageModel implements LanguageModelV3 {
 
             metadataExtractor?.processChunk(chunk.rawValue)
 
-            // handle error chunks:
-            if ("error" in value) {
+            // handle error chunks with type guard:
+            if (isErrorResponse(value)) {
               finishReason = {
                 unified: "error",
                 raw: undefined,
@@ -813,3 +813,9 @@ const createOpenAICompatibleChatChunkSchema = <ERROR_SCHEMA extends z.core.$ZodT
     }),
     errorSchema,
   ])
+
+type ChatChunkValue = z.infer<ReturnType<typeof createOpenAICompatibleChatChunkSchema>>
+
+function isErrorResponse(value: unknown): value is { error: { message: string } } {
+  return typeof value === "object" && value !== null && "error" in value
+}

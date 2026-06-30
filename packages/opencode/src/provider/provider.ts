@@ -146,6 +146,7 @@ type CustomDep = {
   config: () => Effect.Effect<Config.Info>
   env: () => Effect.Effect<Record<string, string | undefined>>
   get: (key: string) => Effect.Effect<string | undefined>
+  set: (key: string, value: string) => Effect.Effect<void>
 }
 
 function useLanguageModel(sdk: any) {
@@ -272,8 +273,7 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
 
       const awsAccessKeyId = env["AWS_ACCESS_KEY_ID"]
 
-      // TODO: Using process.env directly because Env.set only updates a process.env shallow copy,
-      // until the scope of the Env API is clarified (test only or runtime?)
+      // Bearer token: auth storage'dan al, env'e yaz
       const awsBearerToken = iife(() => {
         const envToken = process.env.AWS_BEARER_TOKEN_BEDROCK
         if (envToken) return envToken
@@ -287,7 +287,7 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
       const awsWebIdentityTokenFile = env["AWS_WEB_IDENTITY_TOKEN_FILE"]
 
       const containerCreds = Boolean(
-        process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI || process.env.AWS_CONTAINER_CREDENTIALS_FULL_URI,
+        env["AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"] || env["AWS_CONTAINER_CREDENTIALS_FULL_URI"],
       )
 
       if (!profile && !awsAccessKeyId && !awsBearerToken && !awsWebIdentityTokenFile && !containerCreds)
@@ -512,17 +512,10 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
     }),
     "sap-ai-core": Effect.fnUntraced(function* () {
       const auth = yield* dep.auth("sap-ai-core")
-      // TODO: Using process.env directly because Env.set only updates a shallow copy (not process.env),
-      // until the scope of the Env API is clarified (test only or runtime?)
-      const envServiceKey = iife(() => {
-        const envAICoreServiceKey = process.env.AICORE_SERVICE_KEY
-        if (envAICoreServiceKey) return envAICoreServiceKey
-        if (auth?.type === "api") {
-          process.env.AICORE_SERVICE_KEY = auth.key
-          return auth.key
-        }
-        return undefined
-      })
+      const envServiceKey = process.env.AICORE_SERVICE_KEY ?? (auth?.type === "api" ? auth.key : undefined)
+      if (auth?.type === "api" && !process.env.AICORE_SERVICE_KEY) {
+        yield* dep.set("AICORE_SERVICE_KEY", auth.key)
+      }
       const deploymentId = process.env.AICORE_DEPLOYMENT_ID
       const resourceGroup = process.env.AICORE_RESOURCE_GROUP
 
@@ -1113,6 +1106,7 @@ const layer: Layer.Layer<
           config: () => config.get(),
           env: () => env.all(),
           get: (key: string) => env.get(key),
+          set: (key: string, value: string) => env.set(key, value),
         }
 
         log.info("init")
