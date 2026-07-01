@@ -65,7 +65,7 @@ jobs:
           fi
         shell: bash
         env:
-          GLITCHCODE_CHANNEL: prod
+          GLITCHCODE_CHANNEL: latest
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

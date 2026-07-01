@@ -11,8 +11,8 @@
 
 ## Publish Pipeline Durumu
 
-- **Son başarılı version**: `v0.2.33`
-- **npm'de yayında olan**: `glitchcode-cli@0.2.33`
+- **Son successful version**: `v0.2.34` (local)
+- **npm'de yayında olan**: `glitchcode-cli@0.0.0-prod-*` (eski - düzeltilmeli)
 - **10 platform build**: linux/darwin/win32 x arm64/x64 + musl/baseline
 - **Workflow**: `.github/workflows/publish.yml`
 - **Tag ile tetikleniyor**: `v*` push
@@ -168,6 +168,14 @@ packages/opencode/
 - 10 platform binary'si hazır
 - npm: `glitchcode-cli@0.2.33`
 - GitHub Release: v0.2.33
+
+### v0.2.34 Version Fix ✅ (2026-07-01)
+- **Sorun**: `GLITCHCODE_CHANNEL=prod` yüzünden version `0.0.0-prod-*` oluyordu
+- **Çözüm**: `publish.yml`'de `GLITCHCODE_CHANNEL: latest` yapıldı
+- **Version bump**: `package.json` → `0.2.34`
+- **Testler**: Başarılı (classify, llm, prompt testleri geçti)
+- **Typecheck**: 12/12 paket başarılı
+- **Not**: Publish sonrası npm'de `0.2.34` version'u görünecek
 
 ---
 
