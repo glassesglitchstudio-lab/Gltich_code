@@ -11,8 +11,8 @@
 
 ## Publish Pipeline Durumu
 
-- **Son successful version**: `v0.2.34` (local)
-- **npm'de yayında olan**: `glitchcode-cli@0.0.0-prod-*` (eski - düzeltilmeli)
+- **Son successful version**: `v0.2.34`
+- **npm'de yayında olan**: `glitchcode-cli@0.2.34` ✅
 - **10 platform build**: linux/darwin/win32 x arm64/x64 + musl/baseline
 - **Workflow**: `.github/workflows/publish.yml`
 - **Tag ile tetikleniyor**: `v*` push
