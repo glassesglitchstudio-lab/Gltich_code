@@ -48,6 +48,10 @@ jobs:
             target: windows-x64
           - os: windows-latest
             target: windows-x64-baseline
+          - os: windows-latest
+            target: windows-arm64
+          - os: windows-latest
+            target: windows-arm64-baseline
 
     steps:
       - name: Checkout repository
@@ -56,16 +60,32 @@ jobs:
       - name: Setup Bun
         uses: ./.github/actions/setup-bun
 
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            packages/opencode/node_modules
+          key: bun-${{ runner.os }}-${{ hashFiles('**/package.json', '**/bun.lock') }}
+          restore-keys: |
+            bun-${{ runner.os }}-
+
       - name: Build binary for ${{ matrix.target }}
         run: |
-          if [ "$RUNNER_OS" = "Windows" ]; then
-            bun run --cwd packages/opencode script/build.ts --target glitchcode-${{ matrix.target }} --skip-install
-          else
-            bun run --cwd packages/opencode script/build.ts --target glitchcode-${{ matrix.target }}
-          fi
+          bun run --cwd packages/opencode script/build.ts --target glitchcode-${{ matrix.target }}
         shell: bash
         env:
           GLITCHCODE_CHANNEL: latest
+
+      - name: Smoke test binary
+        run: |
+          if [ "${{ matrix.target }}" == *"windows"* ]; then
+            ./packages/opencode/dist/glitchcode-${{ matrix.target }}/bin/glitch.exe --version
+          else
+            chmod +x ./packages/opencode/dist/glitchcode-${{ matrix.target }}/bin/glitch
+            ./packages/opencode/dist/glitchcode-${{ matrix.target }}/bin/glitch --version
+          fi
+        shell: bash
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

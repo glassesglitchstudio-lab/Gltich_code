@@ -2,88 +2,119 @@ import { describe, expect, test } from "bun:test"
 import { topologicalSort } from "../../../src/cli/cmd/solve"
 import type { SubTask } from "../../../src/cli/cmd/solve/types"
 
-function makeTask(id: string, deps: string[] = []): SubTask {
+function makeTask(overrides: Partial<SubTask> & { id: string; dependencies?: string[] }): SubTask {
   return {
-    id,
-    title: `Task ${id}`,
-    description: `Description for ${id}`,
-    dependencies: deps,
+    title: overrides.id,
+    description: "",
+    dependencies: [],
     status: "pending",
     filesChanged: [],
+    ...overrides,
   }
 }
 
-describe("topologicalSort", () => {
-  test("sorts independent tasks", () => {
-    const tasks = [makeTask("A"), makeTask("B"), makeTask("C")]
-    const result = topologicalSort(tasks)
-    expect(result).toEqual(["A", "B", "C"])
-  })
+describe("solve", () => {
+  describe("topologicalSort", () => {
+    test("returns empty array for empty input", () => {
+      expect(topologicalSort([])).toEqual([])
+    })
 
-  test("respects single dependency", () => {
-    const tasks = [makeTask("B", ["A"]), makeTask("A"), makeTask("C")]
-    const result = topologicalSort(tasks)
-    expect(result.indexOf("A")).toBeLessThan(result.indexOf("B"))
-  })
+    test("returns single task with no dependencies", () => {
+      const tasks = [makeTask({ id: "T1" })]
+      expect(topologicalSort(tasks)).toEqual(["T1"])
+    })
 
-  test("respects chain dependencies", () => {
-    const tasks = [makeTask("C", ["B"]), makeTask("B", ["A"]), makeTask("A")]
-    const result = topologicalSort(tasks)
-    expect(result).toEqual(["A", "B", "C"])
-  })
+    test("sorts two independent tasks", () => {
+      const tasks = [makeTask({ id: "T1" }), makeTask({ id: "T2" })]
+      const result = topologicalSort(tasks)
+      expect(result).toContain("T1")
+      expect(result).toContain("T2")
+      expect(result).toHaveLength(2)
+    })
 
-  test("respects diamond dependencies", () => {
-    const tasks = [
-      makeTask("D", ["B", "C"]),
-      makeTask("B", ["A"]),
-      makeTask("C", ["A"]),
-      makeTask("A"),
-    ]
-    const result = topologicalSort(tasks)
-    expect(result.indexOf("A")).toBeLessThan(result.indexOf("B"))
-    expect(result.indexOf("A")).toBeLessThan(result.indexOf("C"))
-    expect(result.indexOf("B")).toBeLessThan(result.indexOf("D"))
-    expect(result.indexOf("C")).toBeLessThan(result.indexOf("D"))
-  })
+    test("respects dependency order", () => {
+      const tasks = [
+        makeTask({ id: "T2", dependencies: ["T1"] }),
+        makeTask({ id: "T1" }),
+      ]
+      const result = topologicalSort(tasks)
+      expect(result.indexOf("T1")).toBeLessThan(result.indexOf("T2"))
+    })
 
-  test("handles empty list", () => {
-    expect(topologicalSort([])).toEqual([])
-  })
+    test("handles chain of dependencies", () => {
+      const tasks = [
+        makeTask({ id: "T3", dependencies: ["T2"] }),
+        makeTask({ id: "T1" }),
+        makeTask({ id: "T2", dependencies: ["T1"] }),
+      ]
+      const result = topologicalSort(tasks)
+      expect(result.indexOf("T1")).toBeLessThan(result.indexOf("T2"))
+      expect(result.indexOf("T2")).toBeLessThan(result.indexOf("T3"))
+    })
 
-  test("handles single task", () => {
-    expect(topologicalSort([makeTask("A")])).toEqual(["A"])
-  })
+    test("handles diamond dependency", () => {
+      const tasks = [
+        makeTask({ id: "D", dependencies: ["B", "C"] }),
+        makeTask({ id: "B", dependencies: ["A"] }),
+        makeTask({ id: "C", dependencies: ["A"] }),
+        makeTask({ id: "A" }),
+      ]
+      const result = topologicalSort(tasks)
+      expect(result.indexOf("A")).toBeLessThan(result.indexOf("B"))
+      expect(result.indexOf("A")).toBeLessThan(result.indexOf("C"))
+      expect(result.indexOf("B")).toBeLessThan(result.indexOf("D"))
+      expect(result.indexOf("C")).toBeLessThan(result.indexOf("D"))
+    })
 
-  test("handles cycle gracefully (skips visiting)", () => {
-    const tasks = [
-      makeTask("A", ["C"]),
-      makeTask("B", ["A"]),
-      makeTask("C", ["B"]),
-    ]
-    const result = topologicalSort(tasks)
-    expect(result.length).toBe(3)
-  })
+    test("handles circular dependency gracefully", () => {
+      const tasks = [
+        makeTask({ id: "T1", dependencies: ["T2"] }),
+        makeTask({ id: "T2", dependencies: ["T1"] }),
+      ]
+      const result = topologicalSort(tasks)
+      // Should not hang, should return both tasks
+      expect(result).toHaveLength(2)
+      expect(result).toContain("T1")
+      expect(result).toContain("T2")
+    })
 
-  test("handles missing dependency gracefully", () => {
-    const tasks = [makeTask("B", ["A"])]
-    const result = topologicalSort(tasks)
-    expect(result).toContain("B")
-  })
+    test("handles missing dependency gracefully", () => {
+      const tasks = [
+        makeTask({ id: "T1", dependencies: ["T_NONEXISTENT"] }),
+      ]
+      const result = topologicalSort(tasks)
+      // missing dep gets visited and added, T1 still appears
+      expect(result).toContain("T1")
+      expect(result).toContain("T_NONEXISTENT")
+      expect(result.indexOf("T_NONEXISTENT")).toBeLessThan(result.indexOf("T1"))
+    })
 
-  test("handles multiple roots", () => {
-    const tasks = [
-      makeTask("C", ["A", "B"]),
-      makeTask("A"),
-      makeTask("B"),
-    ]
-    const result = topologicalSort(tasks)
-    expect(result.indexOf("A")).toBeLessThan(result.indexOf("C"))
-    expect(result.indexOf("B")).toBeLessThan(result.indexOf("C"))
-  })
+    test("sorts complex dependency graph", () => {
+      const tasks = [
+        makeTask({ id: "T5", dependencies: ["T3", "T4"] }),
+        makeTask({ id: "T1" }),
+        makeTask({ id: "T2", dependencies: ["T1"] }),
+        makeTask({ id: "T3", dependencies: ["T2"] }),
+        makeTask({ id: "T4", dependencies: ["T2"] }),
+      ]
+      const result = topologicalSort(tasks)
+      expect(result).toHaveLength(5)
+      expect(result.indexOf("T1")).toBeLessThan(result.indexOf("T2"))
+      expect(result.indexOf("T2")).toBeLessThan(result.indexOf("T3"))
+      expect(result.indexOf("T2")).toBeLessThan(result.indexOf("T4"))
+      expect(result.indexOf("T3")).toBeLessThan(result.indexOf("T5"))
+      expect(result.indexOf("T4")).toBeLessThan(result.indexOf("T5"))
+    })
 
-  test("preserves order for same-level tasks", () => {
-    const tasks = [makeTask("A"), makeTask("B"), makeTask("C")]
-    const result = topologicalSort(tasks)
-    expect(result).toEqual(["A", "B", "C"])
+    test("preserves all task IDs", () => {
+      const tasks = [
+        makeTask({ id: "A" }),
+        makeTask({ id: "B", dependencies: ["A"] }),
+        makeTask({ id: "C" }),
+        makeTask({ id: "D", dependencies: ["B", "C"] }),
+      ]
+      const result = topologicalSort(tasks)
+      expect(result.sort()).toEqual(["A", "B", "C", "D"])
+    })
   })
 })

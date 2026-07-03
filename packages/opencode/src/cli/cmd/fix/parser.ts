@@ -47,6 +47,7 @@ export function parseFileOperations(markdown: string): CodeProposal[] {
 }
 
 export function extractJsonFromMarkdown(text: string): Record<string, any> | null {
+  if (!text) return null
   const jsonMatch = text.match(/```json\s*\n([\s\S]*?)\n```/)
   if (jsonMatch) {
     try {

@@ -189,6 +189,33 @@ const targets = targetFlag
       })
     : allTargets
 
+// Advisory: build beforelimits ve eksiklikler hakkinda bilgi ver
+function printAdvisory(target: typeof allTargets[number], targetName: string, skipInstall: boolean) {
+  const warnings: string[] = []
+
+  if (target.abi === "musl") {
+    warnings.push("Alpine Linux icin optimize edildi (musl), glibc uygulamalari calismaz")
+  }
+  if (target.avx2 === false) {
+    warnings.push("AVX2 destegi olmayan eski CPU'lar icin (baseline)")
+  }
+  if (target.os === "win32" && target.arch === "arm64") {
+    warnings.push("Windows ARM64 - sinirli uygulama destegi")
+  }
+
+  if (warnings.length > 0) {
+    console.log(`  Advisory [${targetName}]:`)
+    for (const w of warnings) {
+      console.log(`    - ${w}`)
+    }
+  }
+}
+
+console.log(`\nBuild targets: ${targets.map((t) => {
+  const name = [BINARY_PREFIX, t.os === "win32" ? "windows" : t.os, t.arch, t.avx2 === false ? "baseline" : undefined, t.abi].filter(Boolean).join("-")
+  return name
+}).join(", ")}\n`)
+
 fs.rmSync("dist", { recursive: true, force: true })
 
 const extDir = path.join(dir, "src", "ext")
@@ -235,6 +262,7 @@ for (const item of targets) {
     .filter(Boolean)
     .join("-")
   console.log(`building ${name}`)
+  printAdvisory(item, name, skipInstall)
   fs.mkdirSync(path.join(dir, "dist", name, "bin"), { recursive: true })
 
   const localPath = path.resolve(dir, "node_modules/@opentui/core/parser.worker.js")
