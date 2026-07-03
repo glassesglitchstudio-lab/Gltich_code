@@ -105,8 +105,8 @@ jobs:
 
       - name: "Eval: --version (Windows)"
         if: runner.os == 'Windows'
-        run: |
-          & ./packages/opencode/dist/glitchcode-*/bin/glitch.exe --version
+        shell: pwsh
+        run: ./packages/opencode/dist/glitchcode-*/bin/glitch.exe --version
 
       - name: "Eval: --help (Linux/macOS)"
         if: runner.os != 'Windows'
@@ -114,7 +114,8 @@ jobs:
 
       - name: "Eval: --help (Windows)"
         if: runner.os == 'Windows'
-        run: & ./packages/opencode/dist/glitchcode-*/bin/glitch.exe --help
+        shell: pwsh
+        run: ./packages/opencode/dist/glitchcode-*/bin/glitch.exe --help
 
       - name: "Eval: doctor (Linux/macOS)"
         if: runner.os != 'Windows'
@@ -122,7 +123,8 @@ jobs:
 
       - name: "Eval: doctor (Windows)"
         if: runner.os == 'Windows'
-        run: & ./packages/opencode/dist/glitchcode-*/bin/glitch.exe doctor
+        shell: pwsh
+        run: ./packages/opencode/dist/glitchcode-*/bin/glitch.exe doctor
         continue-on-error: true
 
       - name: "Eval: models (Linux/macOS)"
@@ -131,7 +133,8 @@ jobs:
 
       - name: "Eval: models (Windows)"
         if: runner.os == 'Windows'
-        run: & ./packages/opencode/dist/glitchcode-*/bin/glitch.exe models
+        shell: pwsh
+        run: ./packages/opencode/dist/glitchcode-*/bin/glitch.exe models
         continue-on-error: true
 
       - name: "Eval: binary info (Linux/macOS)"
