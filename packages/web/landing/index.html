@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glitch Code — AI-Powered CLI for Developers</title>
+  <meta name="description" content="40+ AI provider, 7 fazlı otomatik kod düzeltme, multi-model debate sistemi ve sınırsız hafıza.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a12;
+      --surface: rgba(139, 92, 246, 0.06);
+      --surface-hover: rgba(139, 92, 246, 0.12);
+      --border: rgba(139, 92, 246, 0.15);
+      --violet: #8b5cf6;
+      --violet-light: #a78bfa;
+      --orange: #ff6b00;
+      --text: #f1f0ff;
+      --text2: #9492b0;
+      --text3: #6b6880;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+    /* Nav */
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,10,18,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+    nav .container { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .nav-brand { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 18px; color: var(--violet); text-decoration: none; }
+    .nav-brand span { color: var(--orange); }
+    .nav-links { display: flex; gap: 32px; }
+    .nav-links a { color: var(--text2); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta { padding: 8px 20px; background: var(--violet); color: white; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; transition: all 0.2s; }
+    .nav-cta:hover { background: var(--violet-light); transform: translateY(-1px); }
+
+    /* Hero */
+    .hero { position: relative; padding: 160px 0 100px; text-align: center; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(139,92,246,0.15), transparent); pointer-events: none; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 100px; font-size: 13px; color: var(--violet-light); margin-bottom: 32px; }
+    .hero-badge .dot { width: 6px; height: 6px; background: #22c55e; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .ascii-logo { font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.15; color: var(--violet); margin-bottom: 8px; white-space: pre; }
+    .logo-code { font-size: 64px; font-weight: 800; letter-spacing: 12px; background: linear-gradient(135deg, var(--orange), #ff9500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 32px; }
+    .hero h1 { font-size: 52px; font-weight: 800; line-height: 1.1; margin-bottom: 24px; }
+    .hero h1 .gradient { background: linear-gradient(135deg, var(--violet), var(--orange)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero-desc { font-size: 20px; color: var(--text2); max-width: 640px; margin: 0 auto 40px; }
+    .hero-actions { display: flex; gap: 16px; justify-content: center; margin-bottom: 40px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; border-radius: 12px; font-size: 16px; font-weight: 600; text-decoration: none; transition: all 0.25s; }
+    .btn-primary { background: var(--violet); color: white; }
+    .btn-primary:hover { background: var(--violet-light); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(139,92,246,0.35); }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--surface-hover); border-color: var(--violet); transform: translateY(-2px); }
+    .hero-cmd { background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 12px; padding: 16px 24px; display: inline-block; }
+    .hero-cmd code { font-family: 'JetBrains Mono', monospace; font-size: 15px; color: var(--violet-light); }
+    .hero-cmd .prompt { color: var(--orange); }
+
+    /* Stats */
+    .stats { padding: 56px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; text-align: center; }
+    .stat-num { display: block; font-size: 40px; font-weight: 800; color: var(--violet); }
+    .stat-label { font-size: 13px; color: var(--text3); text-transform: uppercase; letter-spacing: 1.5px; }
+
+    /* Section */
+    section { padding: 120px 0; }
+    .section-title { font-size: 40px; font-weight: 800; text-align: center; margin-bottom: 16px; }
+    .section-desc { font-size: 18px; color: var(--text2); text-align: center; max-width: 600px; margin: 0 auto 64px; }
+
+    /* Features */
+    .features { background: rgba(139,92,246,0.02); }
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+    .feature-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; transition: all 0.3s; }
+    .feature-card:hover { background: var(--surface-hover); border-color: var(--violet); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(139,92,246,0.12); }
+    .feature-icon { font-size: 28px; margin-bottom: 16px; }
+    .feature-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+    .feature-card p { color: var(--text2); font-size: 14px; }
+    .feature-card code { background: rgba(139,92,246,0.15); padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--violet-light); }
+
+    /* How */
+    .how { background: var(--bg); }
+    .steps { max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px; }
+    .step { display: flex; gap: 24px; align-items: flex-start; }
+    .step-num { flex-shrink: 0; width: 48px; height: 48px; background: linear-gradient(135deg, var(--violet), var(--orange)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; }
+    .step h3 { font-size: 22px; margin-bottom: 8px; }
+    .step-cmd { display: inline-block; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 8px; padding: 8px 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--orange); margin-bottom: 12px; }
+    .step p { color: var(--text2); font-size: 15px; }
+
+    /* Install */
+    .install { background: rgba(139,92,246,0.02); }
+    .install-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 48px; }
+    .install-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; text-align: center; }
+    .install-card .icon { font-size: 36px; margin-bottom: 16px; }
+    .install-card h3 { font-size: 18px; margin-bottom: 16px; }
+    .install-card code { display: block; background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--violet-light); margin-bottom: 10px; word-break: break-all; }
+    .install-card .note { font-size: 12px; color: var(--text3); }
+    .alt-links { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .alt-links a { padding: 12px 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; color: var(--text); text-decoration: none; font-size: 14px; transition: all 0.2s; }
+    .alt-links a:hover { background: var(--surface-hover); border-color: var(--violet); }
+
+    /* Commands */
+    .commands-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; max-width: 900px; margin: 0 auto; }
+    .cmd-item { display: flex; align-items: center; gap: 16px; padding: 14px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; transition: all 0.2s; }
+    .cmd-item:hover { border-color: var(--violet); background: var(--surface-hover); }
+    .cmd-item code { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--orange); white-space: nowrap; }
+    .cmd-item span { color: var(--text2); font-size: 13px; }
+
+    /* Footer */
+    footer { padding: 64px 0 32px; border-top: 1px solid var(--border); }
+    .footer-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+    .footer-brand { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 20px; color: var(--violet); }
+    .footer-brand span { color: var(--orange); }
+    .footer-brand p { color: var(--text3); font-size: 13px; margin-top: 4px; }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a { color: var(--text2); text-decoration: none; font-size: 14px; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--violet); }
+    .footer-bottom { text-align: center; padding-top: 24px; border-top: 1px solid var(--border); }
+    .footer-bottom p { color: var(--text3); font-size: 12px; }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hero h1 { font-size: 32px; }
+      .logo-code { font-size: 40px; letter-spacing: 6px; }
+      .ascii-logo { font-size: 8px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .install-grid { grid-template-columns: 1fr; }
+      .footer-top { flex-direction: column; gap: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="container">
+      <a href="#" class="nav-brand">GLITCH<span>CODE</span></a>
+      <div class="nav-links">
+        <a href="#features">Özellikler</a>
+        <a href="#how">Nasıl Çalışır</a>
+        <a href="#install">Kurulum</a>
+        <a href="#commands">Komutlar</a>
+        <a href="https://github.com/glassesglitchstudio-lab/Gltich_code" target="_blank">GitHub</a>
+      </div>
+      <a href="#install" class="nav-cta">Başla</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge"><span class="dot"></span> v0.2.34 — Tüm platformlarda stabil</div>
+      <pre class="ascii-logo"> ██████╗  ██████╗  ██████╗  ███████╗
+██╔════╝ ██╔═══██╗ ██╔══██╗ ██╔════╝
+██║      ██║   ██║ ██║  ██║ █████╗  
+██║      ██║   ██║ ██║  ██║ ██╔══╝  
+╚██████╗ ╚██████╔╝ ██████╔╝ ███████╗
+ ╚═════╝  ╚═════╝  ╚═════╝  ╚══════╝</pre>
+      <div class="logo-code">CODE</div>
+      <h1>Yapay Zeka Destekli<br><span class="gradient">Geliştirici Araç Seti</span></h1>
+      <p class="hero-desc">40+ AI provider, 7 fazlı otomatik kod düzeltme, multi-model debate sistemi ve sınırsız hafıza. Tek terminal komutuyla geliştirme deneyimini dönüştür.</p>
+      <div class="hero-actions">
+        <a href="#install" class="btn btn-primary">⚡ Hemen Başla</a>
+        <a href="https://github.com/glassesglitchstudio-lab/Gltich_code" class="btn btn-secondary" target="_blank">📦 GitHub</a>
+      </div>
+      <div class="hero-cmd">
+        <code><span class="prompt">$</span> npm install -g glitchcode-cli && glitch</code>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="container">
+      <div class="stats-grid">
+        <div><span class="stat-num">40+</span><span class="stat-label">AI Provider</span></div>
+        <div><span class="stat-num">84+</span><span class="stat-label">CLI + TUI Komut</span></div>
+        <div><span class="stat-num">380+</span><span class="stat-label">Test</span></div>
+        <div><span class="stat-num">13</span><span class="stat-label">Platform</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features" id="features">
+    <div class="container">
+      <h2 class="section-title">Özellikler</h2>
+      <p class="section-desc">Modern geliştirme akışınızı hızlandıran güçlü araçlar.</p>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🤖</div>
+          <h3>PlusTwoCoder Debate</h3>
+          <p>2-3 model aynı sorunu tartışır, cross-critique ile en iyi çözümü üretir.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔧</div>
+          <h3>Otomatik Kod Düzeltme</h3>
+          <p><code>glitch fix</code> ile GitHub issue'larını 7 fazda otomatik çöz.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🧠</div>
+          <h3>Sınırsız Hafıza</h3>
+          <p>Obsidian tabanlı .md hafıza sistemi. Geçmiş oturumları hatırla.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🌐</div>
+          <h3>40+ Provider</h3>
+          <p>OpenAI, Anthropic, Google, Ollama ve daha fazlası tek arayüzde.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>Görev Yönetimi</h3>
+          <p><code>glitch solve</code> ile karmaşık görevleri parçalara böl ve çalıştır.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔒</div>
+          <h3>Güvenlik Denetimi</h3>
+          <p>OWASP kontrollü security review. Kod değişiklikleri otomatik taranır.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎨</div>
+          <h3>Tema Desteği</h3>
+          <p>7 hazır tema, neon-turuncu Glassmorphism, koyu mod default.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>Offline Çalışma</h3>
+          <p>Ollama ve LMStudio ile internet olmadan çalış. Yerel modellerle geliştir.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how" id="how">
+    <div class="container">
+      <h2 class="section-title">Nasıl Çalışır?</h2>
+      <p class="section-desc">3 basit adımda başla.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div>
+            <h3>Kur</h3>
+            <code class="step-cmd">npm install -g glitchcode-cli</code>
+            <p>Tek komutla global kur. İlk çalıştırmada <code>.glitchcode/</code> dizini otomatik oluşturulur.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div>
+            <h3>Yapılandır</h3>
+            <code class="step-cmd">glitch onboard</code>
+            <p>Provider seçimi, API key ayarları, tema tercihi. Interaktif tur ile her şeyi ayarla.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div>
+            <h3>Geliştir</h3>
+            <code class="step-cmd">glitch fix https://github.com/user/repo/issues/42</code>
+            <p>GitHub issue'sunu yapay zeka ile otomatik çöz. 7 fazlı pipeline, PR oluşturma.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="install" id="install">
+    <div class="container">
+      <h2 class="section-title">Kurulum</h2>
+      <p class="section-desc">Platformuna göre kurulum yap.</p>
+      <div class="install-grid">
+        <div class="install-card">
+          <div class="icon">🐧</div>
+          <h3>Linux</h3>
+          <code>npm install -g glitchcode-cli</code>
+          <span class="note">veya GitHub Releases'dan indir</span>
+        </div>
+        <div class="install-card">
+          <div class="icon">🍎</div>
+          <h3>macOS</h3>
+          <code>npm install -g glitchcode-cli</code>
+          <span class="note">Intel ve Apple Silicon destekli</span>
+        </div>
+        <div class="install-card">
+          <div class="icon">🪟</div>
+          <h3>Windows</h3>
+          <code>npm install -g glitchcode-cli</code>
+          <span class="note">PowerShell ve CMD ile uyumlu</span>
+        </div>
+      </div>
+      <div style="text-align:center">
+        <p style="color:var(--text3);font-size:14px;margin-bottom:16px">Alternatif Kurulum</p>
+        <div class="alt-links">
+          <a href="https://github.com/glassesglitchstudio-lab/Gltich_code/releases" target="_blank">📦 GitHub Releases</a>
+          <a href="https://www.npmjs.com/package/glitchcode-cli" target="_blank">📄 npmjs.com</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="commands" id="commands">
+    <div class="container">
+      <h2 class="section-title">Komutlar</h2>
+      <p class="section-desc">Güçlü komut seti ile geliştirme akışını hızlandır.</p>
+      <div class="commands-grid">
+        <div class="cmd-item"><code>glitch fix</code><span>GitHub issue'yu otomatik çöz</span></div>
+        <div class="cmd-item"><code>glitch solve</code><span>Karmaşık görevi parçalara böl</span></div>
+        <div class="cmd-item"><code>glitch review</code><span>Otomatik kod incelemesi</span></div>
+        <div class="cmd-item"><code>glitch cost</code><span>Token/maliyet takibi</span></div>
+        <div class="cmd-item"><code>glitch bench</code><span>Multi-model karşılaştırma</span></div>
+        <div class="cmd-item"><code>glitch changelog</code><span>Otomatik CHANGELOG</span></div>
+        <div class="cmd-item"><code>glitch replay</code><span>Eski oturumları tekrar oynat</span></div>
+        <div class="cmd-item"><code>glitch audit</code><span>Güvenlik denetimi</span></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">GLITCH<span>CODE</span><p>AI-Powered Developer Tools</p></div>
+        <div class="footer-links">
+          <a href="https://github.com/glassesglitchstudio-lab/Gltich_code" target="_blank">GitHub</a>
+          <a href="https://www.npmjs.com/package/glitchcode-cli" target="_blank">npm</a>
+          <a href="#features">Özellikler</a>
+          <a href="#install">Kurulum</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Glitch Code. GlassesCat AI tarafından geliştirildi.</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,7 +1,6 @@
 import { Cause, Effect, Layer, Context } from "effect"
-// @ts-ignore
-import { createWrapper } from "@parcel/watcher/wrapper"
-import type ParcelWatcher from "@parcel/watcher"
+import chokidar, { type FSWatcher } from "chokidar"
+import fs from "fs"
 import { readdir } from "fs/promises"
 import path from "path"
 import z from "zod"
@@ -11,16 +10,12 @@ import { InstanceState } from "@/effect"
 import { Flag } from "@/flag/flag"
 import { Git } from "@/git"
 import { Instance } from "@/project/instance"
-import { lazy } from "@/util/lazy"
 import { Config } from "../config"
 import { FileIgnore } from "./ignore"
 import { Protected } from "./protected"
 import { Log } from "../util"
 
-declare const OPENCODE_LIBC: string | undefined
-
 const log = Log.create({ service: "file.watcher" })
-const SUBSCRIBE_TIMEOUT_MS = 10_000
 
 export const Event = {
   Updated: BusEvent.define(
@@ -32,23 +27,16 @@ export const Event = {
   ),
 }
 
-const watcher = lazy((): typeof import("@parcel/watcher") | undefined => {
-  try {
-    const binding = require(
-      `@parcel/watcher-${process.platform}-${process.arch}${process.platform === "linux" ? `-${OPENCODE_LIBC || "glibc"}` : ""}`,
-    )
-    return createWrapper(binding) as typeof import("@parcel/watcher")
-  } catch (error) {
-    log.error("failed to load watcher binding", { error })
-    return
-  }
-})
+export type WatcherBackend = "chokidar" | "fs" | "noop"
 
-function getBackend() {
-  if (process.platform === "win32") return "windows"
-  if (process.platform === "darwin") return "fs-events"
-  if (process.platform === "linux") return "inotify"
+export interface WatcherStatus {
+  backend: WatcherBackend
+  active: boolean
+  directories: string[]
 }
+
+let currentBackend: WatcherBackend = "noop"
+let activeWatchers: string[] = []
 
 function protecteds(dir: string) {
   return Protected.paths().filter((item) => {
@@ -57,7 +45,54 @@ function protecteds(dir: string) {
   })
 }
 
-export const hasNativeBinding = () => !!watcher()
+function toChokidarIgnore(patterns: string[]): (string | RegExp)[] {
+  return patterns.map((p) => {
+    if (p.startsWith("/") || p.includes("*")) {
+      return new RegExp(p.replace(/\*/g, ".*"))
+    }
+    return p
+  })
+}
+
+export const hasNativeBinding = () => true
+
+export function getWatcherStatus(): WatcherStatus {
+  return {
+    backend: currentBackend,
+    active: activeWatchers.length > 0,
+    directories: [...activeWatchers],
+  }
+}
+
+function createFsWatcher(
+  dir: string,
+  ignore: (string | RegExp)[],
+  onEvent: (eventType: string, filePath: string) => void,
+): FSWatcher | null {
+  try {
+    const watcher = fs.watch(dir, { recursive: true }, (eventType, filename) => {
+      if (!filename) return
+      const fullPath = path.join(dir, filename)
+      const isIgnored = ignore.some((pattern) => {
+        if (typeof pattern === "string") return filename.includes(pattern)
+        return pattern.test(filename)
+      })
+      if (isIgnored) return
+      onEvent(eventType === "rename" ? "unlink" : "change", fullPath)
+    })
+    return watcher as unknown as FSWatcher
+  } catch {
+    return null
+  }
+}
+
+function createNoopWatcher(): FSWatcher {
+  return {
+    close: () => Promise.resolve(),
+    on: () => ({}) as any,
+    unwatch: () => ({}) as any,
+  } as unknown as FSWatcher
+}
 
 export interface Interface {
   readonly init: () => Effect.Effect<void>
@@ -78,55 +113,64 @@ export const layer = Layer.effect(
 
           log.info("init", { directory: Instance.directory })
 
-          const backend = getBackend()
-          if (!backend) {
-            log.error("watcher backend not supported", { directory: Instance.directory, platform: process.platform })
-            return
-          }
-
-          const w = watcher()
-          if (!w) return
-
-          log.info("watcher backend", { directory: Instance.directory, platform: process.platform, backend })
-
-          const subs: ParcelWatcher.AsyncSubscription[] = []
+          const watchers: FSWatcher[] = []
           yield* Effect.addFinalizer(() =>
-            Effect.promise(() => Promise.allSettled(subs.map((sub) => sub.unsubscribe()))),
+            Effect.promise(() => Promise.allSettled(watchers.map((w) => w.close()))),
           )
 
-          const cb: ParcelWatcher.SubscribeCallback = Instance.bind((err, evts) => {
-            if (err) return
-            for (const evt of evts) {
-              if (evt.type === "create") void Bus.publish(Event.Updated, { file: evt.path, event: "add" })
-              if (evt.type === "update") void Bus.publish(Event.Updated, { file: evt.path, event: "change" })
-              if (evt.type === "delete") void Bus.publish(Event.Updated, { file: evt.path, event: "unlink" })
-            }
-          })
-
-          const subscribe = (dir: string, ignore: string[]) => {
-            const pending = w.subscribe(dir, cb, { ignore, backend })
-            return Effect.gen(function* () {
-              const sub = yield* Effect.promise(() => pending)
-              subs.push(sub)
-            }).pipe(
-              Effect.timeout(SUBSCRIBE_TIMEOUT_MS),
-              Effect.catchCause((cause) => {
-                log.error("failed to subscribe", { dir, cause: Cause.pretty(cause) })
-                pending.then((s) => s.unsubscribe()).catch(() => {})
-                return Effect.void
-              }),
-            )
+          const publishEvent = (eventType: string, filePath: string) => {
+            const rel = path.relative(Instance.directory, filePath)
+            if (rel.startsWith("..")) return
+            if (eventType === "add" || eventType === "addDir") void Bus.publish(Event.Updated, { file: rel, event: "add" })
+            if (eventType === "change") void Bus.publish(Event.Updated, { file: rel, event: "change" })
+            if (eventType === "unlink" || eventType === "unlinkDir") void Bus.publish(Event.Updated, { file: rel, event: "unlink" })
           }
 
           const cfg = yield* config.get()
           const cfgIgnores = cfg.watcher?.ignore ?? []
 
           if (yield* Flag.GLITCHCODE_EXPERIMENTAL_FILEWATCHER) {
-            yield* subscribe(Instance.directory, [
+            const ignorePatterns = toChokidarIgnore([
               ...FileIgnore.PATTERNS,
               ...cfgIgnores,
               ...protecteds(Instance.directory),
             ])
+
+            let w: FSWatcher | null = null
+            let backend: WatcherBackend = "noop"
+
+            try {
+              w = chokidar.watch(Instance.directory, {
+                ignored: ignorePatterns,
+                persistent: true,
+                ignoreInitial: true,
+                awaitWriteFinish: { stabilityThreshold: 100, pollInterval: 50 },
+              })
+              backend = "chokidar"
+            } catch (error) {
+              log.warn("chokidar failed, falling back to fs.watch", { error: (error as Error).message })
+              w = createFsWatcher(Instance.directory, ignorePatterns, publishEvent)
+              if (w) backend = "fs"
+            }
+
+            if (!w) {
+              w = createNoopWatcher()
+              backend = "noop"
+            }
+
+            if (backend === "chokidar") {
+              w.on("all", (eventType: string, filePath: string) => {
+                publishEvent(eventType, filePath)
+              })
+              w.on("error", (error: unknown) => {
+                log.error("watcher error", { error: String(error) })
+              })
+            }
+
+            watchers.push(w)
+            currentBackend = backend
+            activeWatchers.push(Instance.directory)
+            log.info("watcher started", { directory: Instance.directory, backend })
           }
 
           if (Instance.project.vcs === "git") {
@@ -136,10 +180,27 @@ export const layer = Layer.effect(
             const vcsDir =
               result.exitCode === 0 ? path.resolve(Instance.project.worktree, result.text().trim()) : undefined
             if (vcsDir && !cfgIgnores.includes(".git") && !cfgIgnores.includes(vcsDir)) {
-              const ignore = (yield* Effect.promise(() => readdir(vcsDir).catch(() => []))).filter(
+              const gitIgnore = (yield* Effect.promise(() => readdir(vcsDir).catch(() => []))).filter(
                 (entry) => entry !== "HEAD",
               )
-              yield* subscribe(vcsDir, ignore)
+
+              try {
+                const gitWatcher = chokidar.watch(vcsDir, {
+                  ignored: gitIgnore as any,
+                  persistent: true,
+                  ignoreInitial: true,
+                })
+
+                gitWatcher.on("all", (eventType: string, filePath: string) => {
+                  publishEvent(eventType, filePath)
+                })
+
+                watchers.push(gitWatcher)
+                activeWatchers.push(vcsDir)
+                log.info("git watcher started", { gitDir: vcsDir })
+              } catch (error) {
+                log.warn("git watcher failed", { error: (error as Error).message })
+              }
             }
           }
         },

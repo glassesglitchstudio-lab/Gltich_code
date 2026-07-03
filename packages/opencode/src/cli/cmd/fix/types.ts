@@ -42,12 +42,20 @@ export interface CodeProposal {
   explanation?: string
 }
 
+export interface ReviewIssue {
+  file: string
+  line: number
+  message: string
+  severity: "error" | "warning" | "info"
+}
+
 export interface ReviewFeedback {
   reviewer: "technical" | "style" | "security"
   approved: boolean
   score: number
   feedback: string
   suggestions: string[]
+  issues: ReviewIssue[]
 }
 
 export interface ApplyResult {

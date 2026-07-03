@@ -60,18 +60,26 @@ glitch --model anthropic/claude-sonnet-4-20250514
 
 ## Platform Desteği
 
-| Platform | Durum | Binary |
-|----------|-------|--------|
-| Linux x64 (glibc) | ✅ Tam destek | `linux-x64.tar.gz` |
-| Linux x64 (musl) | ✅ Tam destek | `linux-x64-musl.tar.gz` |
-| Linux x64 baseline | ✅ Tam destek | `linux-x64-baseline.tar.gz` |
-| Linux ARM64 | ✅ Tam destek | `linux-arm64.tar.gz` |
-| Linux ARM64 (musl) | ✅ Tam destek | `linux-arm64-musl.tar.gz` |
-| macOS x64 (Intel) | ✅ Tam destek | `darwin-x64.tar.gz` |
-| macOS ARM64 (Apple Silicon) | ✅ Tam destek | `darwin-arm64.tar.gz` |
-| Windows x64 | ✅ Tam destek | `windows-x64.zip` |
-| Windows x64 baseline | ✅ Tam destek | `windows-x64-baseline.zip` |
-| Windows ARM64 | ⚠️ Sınırlı | Native modül desteği yok |
+| Platform | ABI | AVX2 | CI | Not |
+|----------|-----|------|-----|-----|
+| Linux x64 | glibc | evet | ✅ | |
+| Linux x64 | glibc | hayır (baseline) | ✅ | Eski CPU'lar icin |
+| Linux x64 | musl | evet | ✅ | Alpine Linux icin |
+| Linux x64 | musl | hayır | ✅ | Alpine + eski CPU |
+| Linux ARM64 | glibc | - | ✅ | |
+| Linux ARM64 | musl | - | ✅ | |
+| macOS x64 | - | evet | ✅ | Intel |
+| macOS x64 | - | hayır | ✅ | Eski Intel |
+| macOS ARM64 | - | - | ✅ | Apple Silicon |
+| Windows x64 | - | evet | ✅ | Tam destek |
+| Windows x64 | - | hayır (baseline) | ✅ | Tam destek |
+| Windows ARM64 | - | - | ⚠️ | CI'da build edilmiyor, sinirli destek |
+
+### Sınırlı Destek
+
+- **Windows ARM64**: CI pipeline'inda desteklenmiyor. Yerel build ile olusturulabilir ama test edilmemis.
+- **musl (Alpine)**: glibc tabanli uygulamalar dogrudan calismaz. Sadece Alpine Linux ve benzeri musl-based dagitimlar icin.
+- **baseline (AVX2 yok)**: 2013 oncesi CPU'lar icin. Modern CPU'larda AVX2 versiyonu tercih edilmeli.
 
 ---
 

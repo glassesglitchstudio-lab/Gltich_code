@@ -112,8 +112,14 @@ export const PlusTwoCoderCommand = cmd({
                     }),
                   )
 
-                  const score = evaluateSolution(solution.text, critiqueResult.text)
-                  const hasLLMScore = parseLLMScore(critiqueResult.text) !== null
+                  const score = yield* Effect.promise(() =>
+                    scoreWithLLM({
+                      solution: solution.text,
+                      critique: critiqueResult.text,
+                      task: args.task as string,
+                      model: m.model,
+                    }),
+                  )
 
                   opinions.push({
                     model: m.modelID,
@@ -123,7 +129,7 @@ export const PlusTwoCoderCommand = cmd({
                     score,
                   })
 
-                  s.message(`${m.modelID} skoru: ${score}/100${hasLLMScore ? "" : " (keyword-based, dusuk guven)"}`)
+                  s.message(`${m.modelID} skoru: ${score}/100`)
                 }
 
                 opinions.sort((a, b) => b.score - a.score)
@@ -313,14 +319,28 @@ Cevabini su formatta ver:
 ## Elestiri
 [elestiri]
 
-## Skor: [0-100]
-[puan]
-
 ## Duzeltme Onerileri
-[suggestions]`
+[suggestions]
+
+SKOR: Bu cozumu 0-100 arasi degerlendir. Asagidaki JSON formatinda cevap ver:
+{"score": N}`
 }
 
 export function parseLLMScore(text: string): number | null {
+  // JSON format: {"score": N} or {score: N}
+  const jsonPatterns = [
+    /\{\s*"score"\s*:\s*(\d{1,3})\s*\}/i,
+    /\{\s*[^}]*"score"\s*:\s*(\d{1,3})[^}]*\}/i,
+  ]
+  for (const pattern of jsonPatterns) {
+    const match = text.match(pattern)
+    if (match) {
+      const score = parseInt(match[1], 10)
+      if (score >= 0 && score <= 100) return score
+    }
+  }
+
+  // Markdown/text patterns
   const patterns = [
     /##?\s*Skor:\s*(\d{1,3})/i,
     /##?\s*Score:\s*(\d{1,3})/i,
@@ -338,11 +358,7 @@ export function parseLLMScore(text: string): number | null {
   return null
 }
 
-export function evaluateSolution(solution: string, llmScoreText?: string | null): number {
-  if (llmScoreText) {
-    const parsed = parseLLMScore(llmScoreText)
-    if (parsed !== null) return parsed
-  }
+function keywordFallback(solution: string): number {
   let score = 40
   if (solution.includes("```")) score += 8
   if (solution.length > 200) score += 5
@@ -359,6 +375,53 @@ export function evaluateSolution(solution: string, llmScoreText?: string | null)
   if (solution.length < 100) score -= 10
   if (!solution.includes("```") && !solution.includes("function") && !solution.includes("class")) score -= 5
   return Math.max(0, Math.min(100, score))
+}
+
+export function evaluateSolution(solution: string, llmScoreText?: string | null): number {
+  if (llmScoreText) {
+    const parsed = parseLLMScore(llmScoreText)
+    if (parsed !== null) return parsed
+  }
+  return keywordFallback(solution)
+}
+
+export async function scoreWithLLM(params: {
+  solution: string
+  critique: string
+  task: string
+  model: LanguageModel
+}): Promise<number> {
+  const prompt = `Sen bir kod kalitesi degerlendiricisin. Asagidaki cozumu ve elestiriyi incele.
+
+GOREV: ${params.task}
+
+ONERILEN COZUM:
+${params.solution.substring(0, 2000)}
+
+ELESTIRI:
+${params.critique.substring(0, 1000)}
+
+Bu cozumu degerlendir. Su kriterlere gore 0-100 arasi skor ver:
+- Kod dogrulugu ve calisirligi (30 puan)
+- Performans ve verimlilik (20 puan)
+- Guvenlik ve dayaniklilik (20 puan)
+- Kod kalitesi ve okunabilirlik (15 puan)
+- Tamlik ve kapsam (15 puan)
+
+SADECE su JSON formatinda cevap ver, baska bir sey yazma:
+{"score": N}
+
+N = 0-100 arasi tam sayi`
+
+  try {
+    const result = await generateText({
+      model: params.model,
+      messages: [{ role: "user", content: prompt }],
+    })
+    const parsed = parseLLMScore(result.text)
+    if (parsed !== null) return parsed
+  } catch {}
+  return keywordFallback(params.solution)
 }
 
 export function buildConsensusContext(opinions: CoderOpinion[]): string {

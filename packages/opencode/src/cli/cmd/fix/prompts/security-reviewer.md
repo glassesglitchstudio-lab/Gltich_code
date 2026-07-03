@@ -17,32 +17,13 @@ KONTROL LISTESI:
 - Input validation
 - Authentication/Authorization bypass
 
-Ciktiyi su formatta ver:
-## Guvenlik Incelemesi
+Kurallar:
+- OWASP Top 10'a odaklan
+- Her guvenlik sorununu ciddiyet seviyesi ile belirt
+- Cozum onerileri sun
+- False positive olmasin, sadece gercek sorunlari raporla
 
-### Genel Degerlendirme
-[GUVENLI / Risk Var / Kritik Acik]
-
-### Bulunan Guvenlik Sorunlari
-1. [Sorun] - Ciddiyet: [Dusuk/Orta/Yuksek/Kritik]
-   - Dosya: [dosya yolu]
-   - Aciklama: [sorunun aciklamasi]
-   - Cozum: [onerelen cozum]
-
-### Guvenli Olmayan Kod Ornekleri (varsa)
-```[dil]
-[guvenli olmayan kod]
-```
-
-### Onerilen Duzeltmeler (varsa)
-```[dil]
-[guvenli kod]
-```
-
-### Sonuc
-[Guvenli mi, risk var mi, duzeltme gerekiyor mu]
-
-Ardindan su JSON formatini da ekle:
+SADECE su JSON formatinda cevap ver, baska bir sey yazma:
 ```json
 {
   "verdict": "GUVENLI veya Risk Var",
@@ -51,10 +32,3 @@ Ardindan su JSON formatini da ekle:
   "suggestions": ["oneri 1", "oneri 2"]
 }
 ```
-
-Kurallar:
-- OWASP Top 10'a odaklan
-- Her guvenlik sorununu ciddiyet seviyesi ile belirt
-- Cozum onerileri sun
-- False positive olmasin, sadece gercek sorunlari raporla
-- JSON'daki score: 100 = guvenli, 0 = kritik acik

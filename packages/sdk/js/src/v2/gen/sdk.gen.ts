@@ -13,9 +13,9 @@ import type {
   AuthRemoveResponses,
   AuthSetErrors,
   AuthSetResponses,
-  BashInteractiveListResponses,
-  BashInteractiveReplyErrors,
-  BashInteractiveReplyResponses,
+  BashİnteractiveListResponses,
+  BashİnteractiveReplyErrors,
+  BashİnteractiveReplyResponses,
   CommandListResponses,
   Config as Config3,
   ConfigGetResponses,
@@ -24,7 +24,7 @@ import type {
   ConfigUpdateResponses,
   EventSubscribeResponses,
   EventTuiCommandExecute,
-  EventTuiInstructionsLoaded,
+  EventTuiİnstructionsLoaded,
   EventTuiPromptAppend,
   EventTuiSessionSelect,
   EventTuiToastShow,
@@ -57,12 +57,12 @@ import type {
   GlobalDisposeResponses,
   GlobalEventResponses,
   GlobalHealthResponses,
-  GlobalImportRunErrors,
-  GlobalImportRunResponses,
-  GlobalImportScanResponses,
+  GlobalİmportRunErrors,
+  GlobalİmportRunResponses,
+  GlobalİmportScanResponses,
   GlobalUpgradeErrors,
   GlobalUpgradeResponses,
-  InstanceDisposeResponses,
+  İnstanceDisposeResponses,
   LspStatusResponses,
   McpAddErrors,
   McpAddResponses,
@@ -93,7 +93,7 @@ import type {
   PermissionRespondResponses,
   PermissionRuleset,
   ProjectCurrentResponses,
-  ProjectInitGitResponses,
+  ProjectİnitGitResponses,
   ProjectListResponses,
   ProjectUpdateErrors,
   ProjectUpdateResponses,
@@ -144,8 +144,8 @@ import type {
   SessionForkResponses,
   SessionGetErrors,
   SessionGetResponses,
-  SessionInitErrors,
-  SessionInitResponses,
+  SessionİnitErrors,
+  SessionİnitResponses,
   SessionListResponses,
   SessionMessageErrors,
   SessionMessageResponses,
@@ -184,8 +184,8 @@ import type {
   SyncReplayResponses,
   SyncStartResponses,
   TextPartInput,
-  ToolIdsErrors,
-  ToolIdsResponses,
+  ToolİdsErrors,
+  ToolİdsResponses,
   ToolListErrors,
   ToolListResponses,
   TuiAppendPromptErrors,
@@ -302,14 +302,14 @@ export class Config extends HeyApiClient {
   }
 }
 
-export class Import extends HeyApiClient {
+export class İmport extends HeyApiClient {
   /**
    * Scan external session sources
    *
    * Detect availability and session counts of external AI tool session stores (Claude Code, Codex, opencode). Read-only.
    */
   public scan<ThrowOnError extends boolean = false>(options?: Options<never, ThrowOnError>) {
-    return (options?.client ?? this.client).get<GlobalImportScanResponses, unknown, ThrowOnError>({
+    return (options?.client ?? this.client).get<GlobalİmportScanResponses, unknown, ThrowOnError>({
       url: "/global/import/scan",
       ...options,
     })
@@ -318,7 +318,7 @@ export class Import extends HeyApiClient {
   /**
    * Import external sessions
    *
-   * Import sessions from external AI tools (Claude Code, Codex, opencode) into mimocode. Idempotent; pass force to re-sync. Per-source failures are not thrown as HTTP errors — they are collected into the corresponding stats.errors[] while other sources continue.
+   * Import sessions from external AI tools (Claude Code, Codex, opencode) into glitchcode. Idempotent; pass force to re-sync. Per-source failures are not thrown as HTTP errors — they are collected into the corresponding stats.errors[] while other sources continue.
    */
   public run<ThrowOnError extends boolean = false>(
     parameters?: {
@@ -338,7 +338,7 @@ export class Import extends HeyApiClient {
         },
       ],
     )
-    return (options?.client ?? this.client).post<GlobalImportRunResponses, GlobalImportRunErrors, ThrowOnError>({
+    return (options?.client ?? this.client).post<GlobalİmportRunResponses, GlobalİmportRunErrors, ThrowOnError>({
       url: "/global/import/run",
       ...options,
       ...params,
@@ -417,9 +417,9 @@ export class Global extends HeyApiClient {
     return (this._config ??= new Config({ client: this.client }))
   }
 
-  private _import?: Import
-  get import(): Import {
-    return (this._import ??= new Import({ client: this.client }))
+  private _import?: İmport
+  get import(): İmport {
+    return (this._import ??= new İmport({ client: this.client }))
   }
 }
 
@@ -1094,7 +1094,7 @@ export class Project extends HeyApiClient {
         },
       ],
     )
-    return (options?.client ?? this.client).post<ProjectInitGitResponses, unknown, ThrowOnError>({
+    return (options?.client ?? this.client).post<ProjectİnitGitResponses, unknown, ThrowOnError>({
       url: "/project/git/init",
       ...options,
       ...params,
@@ -1528,7 +1528,7 @@ export class Tool extends HeyApiClient {
         },
       ],
     )
-    return (options?.client ?? this.client).get<ToolIdsResponses, ToolIdsErrors, ThrowOnError>({
+    return (options?.client ?? this.client).get<ToolİdsResponses, ToolİdsErrors, ThrowOnError>({
       url: "/experimental/tool/ids",
       ...options,
       ...params,
@@ -2065,7 +2065,7 @@ export class Session2 extends HeyApiClient {
         },
       ],
     )
-    return (options?.client ?? this.client).post<SessionInitResponses, SessionInitErrors, ThrowOnError>({
+    return (options?.client ?? this.client).post<SessionİnitResponses, SessionİnitErrors, ThrowOnError>({
       url: "/session/{sessionID}/init",
       ...options,
       ...params,
@@ -3216,7 +3216,7 @@ export class Question extends HeyApiClient {
   }
 }
 
-export class Interactive extends HeyApiClient {
+export class İnteractive extends HeyApiClient {
   /**
    * List pending interactive bash requests
    *
@@ -3240,7 +3240,7 @@ export class Interactive extends HeyApiClient {
         },
       ],
     )
-    return (options?.client ?? this.client).get<BashInteractiveListResponses, unknown, ThrowOnError>({
+    return (options?.client ?? this.client).get<BashİnteractiveListResponses, unknown, ThrowOnError>({
       url: "/bash-interactive",
       ...options,
       ...params,
@@ -3277,8 +3277,8 @@ export class Interactive extends HeyApiClient {
       ],
     )
     return (options?.client ?? this.client).post<
-      BashInteractiveReplyResponses,
-      BashInteractiveReplyErrors,
+      BashİnteractiveReplyResponses,
+      BashİnteractiveReplyErrors,
       ThrowOnError
     >({
       url: "/bash-interactive/{id}/reply",
@@ -3294,9 +3294,9 @@ export class Interactive extends HeyApiClient {
 }
 
 export class Bash extends HeyApiClient {
-  private _interactive?: Interactive
-  get interactive(): Interactive {
-    return (this._interactive ??= new Interactive({ client: this.client }))
+  private _interactive?: İnteractive
+  get interactive(): İnteractive {
+    return (this._interactive ??= new İnteractive({ client: this.client }))
   }
 }
 
@@ -4482,7 +4482,7 @@ export class Tui extends HeyApiClient {
         | EventTuiCommandExecute
         | EventTuiToastShow
         | EventTuiSessionSelect
-        | EventTuiInstructionsLoaded
+        | EventTuiİnstructionsLoaded
     },
     options?: Options<never, ThrowOnError>,
   ) {
@@ -4553,7 +4553,7 @@ export class Tui extends HeyApiClient {
   }
 }
 
-export class Instance extends HeyApiClient {
+export class İnstance extends HeyApiClient {
   /**
    * Dispose instance
    *
@@ -4577,7 +4577,7 @@ export class Instance extends HeyApiClient {
         },
       ],
     )
-    return (options?.client ?? this.client).post<InstanceDisposeResponses, unknown, ThrowOnError>({
+    return (options?.client ?? this.client).post<İnstanceDisposeResponses, unknown, ThrowOnError>({
       url: "/instance/dispose",
       ...options,
       ...params,
@@ -4895,9 +4895,9 @@ export class OpencodeClient extends HeyApiClient {
     return (this._tui ??= new Tui({ client: this.client }))
   }
 
-  private _instance?: Instance
-  get instance(): Instance {
-    return (this._instance ??= new Instance({ client: this.client }))
+  private _instance?: İnstance
+  get instance(): İnstance {
+    return (this._instance ??= new İnstance({ client: this.client }))
   }
 
   private _path?: Path

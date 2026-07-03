@@ -10,8 +10,8 @@ import { Instance } from "../../src/project/instance"
 import { GlobalBus } from "../../src/bus/global"
 import { Vcs } from "../../src/project"
 
-// Skip in CI — native @parcel/watcher binding needed
-const describeVcs = FileWatcher.hasNativeBinding() && !process.env.CI ? describe : describe.skip
+// Skip in CI — filesystem watcher tests are timing-sensitive
+const describeVcs = !process.env.CI ? describe : describe.skip
 
 // ---------------------------------------------------------------------------
 // Helpers

@@ -52,32 +52,63 @@ describe("plus-two-coder", () => {
     test("handles case insensitive", () => {
       expect(parseLLMScore("## SKOR: 60")).toBe(60)
     })
+
+    test("parses score from JSON format", () => {
+      expect(parseLLMScore('{"score": 85}')).toBe(85)
+    })
+
+    test("parses score from JSON with other fields", () => {
+      expect(parseLLMScore('{"verdict": "LGTM", "score": 72, "issues": []}')).toBe(72)
+    })
+
+    test("parses score from JSON with spaces", () => {
+      expect(parseLLMScore('{ "score" : 55 }')).toBe(55)
+    })
+
+    test("returns null for JSON without score", () => {
+      expect(parseLLMScore('{"verdict": "LGTM"}')).toBeNull()
+    })
+
+    test("returns null for JSON score > 100", () => {
+      expect(parseLLMScore('{"score": 150}')).toBeNull()
+    })
   })
 
   describe("evaluateSolution", () => {
     test("returns base score for empty solution", () => {
-      expect(evaluateSolution("")).toBe(50)
+      // 40 base - 10 (length < 100) - 5 (no ```/function/class) = 25
+      expect(evaluateSolution("")).toBe(25)
     })
 
     test("adds points for code blocks", () => {
-      expect(evaluateSolution("Here is the solution:\n```\nconsole.log('hello')\n```")).toBeGreaterThanOrEqual(60)
+      const result = evaluateSolution("Here is the solution:\n```\nconsole.log('hello')\n```")
+      // 40 + 8 (```) - 10 (length < 100) = 38
+      expect(result).toBe(38)
     })
 
     test("adds points for long solutions", () => {
       const longSolution = "a".repeat(600)
-      expect(evaluateSolution(longSolution)).toBeGreaterThanOrEqual(70)
+      const result = evaluateSolution(longSolution)
+      // 40 + 5 (>200) + 8 (>500) - 5 (no ```/function/class) = 48
+      expect(result).toBe(48)
     })
 
     test("adds points for performance mentions", () => {
-      expect(evaluateSolution("This solution has good performance")).toBeGreaterThanOrEqual(55)
+      const result = evaluateSolution("This solution has good performance")
+      // 40 + 3 (performance) - 10 (length < 100) - 5 (no markers) = 28
+      expect(result).toBe(28)
     })
 
     test("adds points for security mentions", () => {
-      expect(evaluateSolution("This handles security properly")).toBeGreaterThanOrEqual(55)
+      const result = evaluateSolution("This handles security properly")
+      // 40 + 3 (security) - 10 (length < 100) - 5 (no markers) = 28
+      expect(result).toBe(28)
     })
 
     test("adds points for test mentions", () => {
-      expect(evaluateSolution("Write a test for this")).toBeGreaterThanOrEqual(55)
+      const result = evaluateSolution("Write a test for this")
+      // 40 + 3 (test) - 10 (length < 100) - 5 (no markers) = 28
+      expect(result).toBe(28)
     })
 
     test("caps at 100", () => {
@@ -93,16 +124,26 @@ describe("plus-two-coder", () => {
       expect(evaluateSolution("anything", "## Skor: 0")).toBe(0)
     })
 
+    test("uses JSON format LLM score", () => {
+      expect(evaluateSolution("short", '{"score": 85}')).toBe(85)
+    })
+
     test("falls back to keyword when LLM score is null", () => {
-      expect(evaluateSolution("``` test performance", null)).toBeGreaterThanOrEqual(60)
+      const result = evaluateSolution("``` test performance", null)
+      // 40 + 8 (```) + 3 (performance) + 3 (test) - 10 (length < 100) = 44
+      expect(result).toBe(44)
     })
 
     test("falls back to keyword when LLM score text has no score", () => {
-      expect(evaluateSolution("``` test", "no score here")).toBeGreaterThanOrEqual(60)
+      const result = evaluateSolution("``` test", "no score here")
+      // 40 + 8 (```) + 3 (test) - 10 (length < 100) = 41
+      expect(result).toBe(41)
     })
 
     test("falls back when LLM score is out of range", () => {
-      expect(evaluateSolution("``` test", "## Skor: 200")).toBeGreaterThanOrEqual(60)
+      const result = evaluateSolution("``` test", "## Skor: 200")
+      // 40 + 8 (```) + 3 (test) - 10 (length < 100) = 41
+      expect(result).toBe(41)
     })
   })
 
@@ -162,8 +203,9 @@ describe("plus-two-coder", () => {
 
     test("includes scoring instructions", () => {
       const prompt = buildCritiquePrompt("task", "solution")
-      expect(prompt).toContain("## Skor")
-      expect(prompt).toContain("## Elestiri")
+      expect(prompt).toContain("SKOR")
+      expect(prompt).toContain("JSON")
+      expect(prompt).toContain("score")
     })
   })
 
@@ -177,7 +219,7 @@ describe("plus-two-coder", () => {
     test("identifies best and worst", () => {
       const ctx = buildConsensusContext(opinions)
       expect(ctx).toContain("En iyi cozum: a/best (Skor: 90)")
-      expect(ctx).toContain("En zayif cozum: a/worst (Skor: 50)")
+      expect(ctx).toContain("En zayif cozum: c/worst (Skor: 50)")
     })
 
     test("includes truncated solution and critique", () => {

@@ -57,6 +57,7 @@ import { ChangelogCommand } from "./cli/cmd/changelog"
 import { ReplayCommand } from "./cli/cmd/replay"
 import { AuditCommand } from "./cli/cmd/audit"
 import { BenchCommand } from "./cli/cmd/bench"
+import { DoctorCommand } from "./cli/cmd/doctor"
 import { Heap } from "./cli/heap"
 import { drizzle } from "drizzle-orm/bun-sqlite"
 import { ensureProcessMetadata } from "./util/glitch-process"
@@ -230,6 +231,7 @@ const cli = yargs(args)
   .command(ReplayCommand)
   .command(AuditCommand)
   .command(BenchCommand)
+  .command(DoctorCommand)
   .fail((msg, err) => {
     if (
       msg?.startsWith("Unknown argument") ||

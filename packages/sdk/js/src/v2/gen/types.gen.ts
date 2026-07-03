@@ -69,7 +69,7 @@ export type EventWriterCachePerf = {
   }
 }
 
-export type EventInboxArrived = {
+export type EventİnboxArrived = {
   type: "inbox.arrived"
   properties: {
     receiverSessionID: string
@@ -233,7 +233,7 @@ export type EventTuiSessionSelect = {
   }
 }
 
-export type EventTuiInstructionsLoaded = {
+export type EventTuiİnstructionsLoaded = {
   type: "tui.instructions.loaded"
   properties: {
     /**
@@ -335,7 +335,7 @@ export type EventProjectUpdated = {
   properties: Project
 }
 
-export type EventServerInstanceDisposed = {
+export type EventServerİnstanceDisposed = {
   type: "server.instance.disposed"
   properties: {
     directory: string
@@ -372,14 +372,14 @@ export type EventLspUpdated = {
   }
 }
 
-export type EventInstallationUpdated = {
+export type EventİnstallationUpdated = {
   type: "installation.updated"
   properties: {
     version: string
   }
 }
 
-export type EventInstallationUpdateAvailable = {
+export type EventİnstallationUpdateAvailable = {
   type: "installation.update-available"
   properties: {
     version: string
@@ -487,6 +487,15 @@ export type ContextOverflowError = {
   }
 }
 
+export type QuotaExceededError = {
+  name: "QuotaExceededError"
+  data: {
+    providerID: string
+    message: string
+    responseBody?: string
+  }
+}
+
 export type InvalidOutputError = {
   name: "InvalidOutputError"
   data: {
@@ -508,7 +517,7 @@ export type ModelError = {
   }
 }
 
-export type ApiError = {
+export type ApıError = {
   name: "APIError"
   data: {
     message: string
@@ -535,10 +544,11 @@ export type EventSessionError = {
       | MessageAbortedError
       | StructuredOutputError
       | ContextOverflowError
+      | QuotaExceededError
       | InvalidOutputError
       | ContentFilterError
       | ModelError
-      | ApiError
+      | ApıError
   }
 }
 
@@ -685,7 +695,7 @@ export type EventSessionCwd = {
   }
 }
 
-export type EventBashInteractiveAsked = {
+export type EventBashİnteractiveAsked = {
   type: "bash.interactive.asked"
   properties: {
     id: string
@@ -698,7 +708,7 @@ export type EventBashInteractiveAsked = {
   }
 }
 
-export type EventBashInteractiveReplied = {
+export type EventBashİnteractiveReplied = {
   type: "bash.interactive.replied"
   properties: {
     id: string
@@ -749,7 +759,7 @@ export type EventSessionStatus = {
   }
 }
 
-export type EventSessionIdle = {
+export type EventSessionİdle = {
   type: "session.idle"
   properties: {
     sessionID: string
@@ -965,10 +975,11 @@ export type AssistantMessage = {
     | MessageAbortedError
     | StructuredOutputError
     | ContextOverflowError
+    | QuotaExceededError
     | InvalidOutputError
     | ContentFilterError
     | ModelError
-    | ApiError
+    | ApıError
   parentID: string
   modelID: string
   providerID: string
@@ -1246,7 +1257,7 @@ export type RetryPart = {
   messageID: string
   type: "retry"
   attempt: number
-  error: ApiError
+  error: ApıError
   time: {
     created: number
   }
@@ -1504,7 +1515,7 @@ export type GlobalEvent = {
     | EventActorStatus
     | EventActorStuck
     | EventWriterCachePerf
-    | EventInboxArrived
+    | EventİnboxArrived
     | EventTaskCreated
     | EventTaskUpdated
     | EventTeamCreated
@@ -1516,7 +1527,7 @@ export type GlobalEvent = {
     | EventTuiCommandExecute
     | EventTuiToastShow
     | EventTuiSessionSelect
-    | EventTuiInstructionsLoaded
+    | EventTuiİnstructionsLoaded
     | EventWorkflowPhase
     | EventWorkflowLog
     | EventWorkflowStarted
@@ -1524,13 +1535,13 @@ export type GlobalEvent = {
     | EventWorkflowAgentFailed
     | EventWorkflowChildFailed
     | EventProjectUpdated
-    | EventServerInstanceDisposed
+    | EventServerİnstanceDisposed
     | EventFileEdited
     | EventFileWatcherUpdated
     | EventLspClientDiagnostics
     | EventLspUpdated
-    | EventInstallationUpdated
-    | EventInstallationUpdateAvailable
+    | EventİnstallationUpdated
+    | EventİnstallationUpdateAvailable
     | EventMessagePartDelta
     | EventPermissionAsked
     | EventPermissionReplied
@@ -1544,11 +1555,11 @@ export type GlobalEvent = {
     | EventQuestionReplied
     | EventQuestionRejected
     | EventSessionCwd
-    | EventBashInteractiveAsked
-    | EventBashInteractiveReplied
+    | EventBashİnteractiveAsked
+    | EventBashİnteractiveReplied
     | EventTodoUpdated
     | EventSessionStatus
-    | EventSessionIdle
+    | EventSessionİdle
     | EventSessionGoal
     | EventSessionCompacted
     | EventMcpToolsChanged
@@ -1587,7 +1598,7 @@ export type GlobalEvent = {
 export type LogLevel = "DEBUG" | "INFO" | "WARN" | "ERROR"
 
 /**
- * Server configuration for mimo serve and web commands
+ * Server configuration for glitch serve and web commands
  */
 export type ServerConfig = {
   /**
@@ -1746,7 +1757,11 @@ export type ProviderConfig = {
      * Timeout in milliseconds between streamed SSE chunks for this provider. If no chunk arrives within this window, the request is aborted.
      */
     chunkTimeout?: number
-    [key: string]: unknown | string | boolean | number | false | number | undefined
+    /**
+     * List of provider/model references to try when this provider hits quota or billing errors. Format: 'provider/model' (e.g., 'anthropic/claude-sonnet-4-20250514').
+     */
+    fallback_providers?: Array<string>
+    [key: string]: unknown | string | boolean | number | false | number | Array<string> | undefined
   }
   models?: {
     [key: string]: {
@@ -2191,7 +2206,7 @@ export type Config = {
   }
   memory?: {
     /**
-     * Index Claude Code memory (~/.claude/projects/<slug>/memory) and expose under scope='cc'. Default: false. Note: when enabled, every mimocode agent (build/explore/subagents) can search these memories via the builtin `memory` tool — including CC's `type: user` (your role/preferences) and `type: feedback` (your guidance) categories. CC originally writes them for future CC sessions; flipping this on widens the consumer set to mimocode agents on the same machine. Leave disabled (default) if you don't want personal context recallable from a prompt-injection-vulnerable agent.
+     * Index Claude Code memory (~/.claude/projects/<slug>/memory) and expose under scope='cc'. Default: false. Note: when enabled, every glitchcode agent (build/explore/subagents) can search these memories via the builtin `memory` tool — including CC's `type: user` (your role/preferences) and `type: feedback` (your guidance) categories. CC originally writes them for future CC sessions; flipping this on widens the consumer set to glitchcode agents on the same machine. Leave disabled (default) if you don't want personal context recallable from a prompt-injection-vulnerable agent.
      */
     cc_index?: boolean
   }
@@ -2263,6 +2278,14 @@ export type Config = {
      * Predict the user's likely next prompt after each turn and show it as inline ghost text (Tab to accept). Enabled by default; set to false to disable.
      */
     predict_next_prompt?: boolean
+    /**
+     * Max goal-driven main-loop re-entries per turn (default 12). Higher = more retries but more token cost.
+     */
+    maxGoalReact?: number
+    /**
+     * Max preStop ReAct re-entries per spawned actor (default 3). Prevents infinite loops.
+     */
+    maxPreReact?: number
     /**
      * Max mode (experimental): the 'max' agent runs N parallel reasoning candidates each step, picks the best via a judge call, and executes only the winner.
      */
@@ -2668,7 +2691,7 @@ export type Event =
   | EventActorStatus
   | EventActorStuck
   | EventWriterCachePerf
-  | EventInboxArrived
+  | EventİnboxArrived
   | EventTaskCreated
   | EventTaskUpdated
   | EventTeamCreated
@@ -2680,7 +2703,7 @@ export type Event =
   | EventTuiCommandExecute
   | EventTuiToastShow
   | EventTuiSessionSelect
-  | EventTuiInstructionsLoaded
+  | EventTuiİnstructionsLoaded
   | EventWorkflowPhase
   | EventWorkflowLog
   | EventWorkflowStarted
@@ -2688,13 +2711,13 @@ export type Event =
   | EventWorkflowAgentFailed
   | EventWorkflowChildFailed
   | EventProjectUpdated
-  | EventServerInstanceDisposed
+  | EventServerİnstanceDisposed
   | EventFileEdited
   | EventFileWatcherUpdated
   | EventLspClientDiagnostics
   | EventLspUpdated
-  | EventInstallationUpdated
-  | EventInstallationUpdateAvailable
+  | EventİnstallationUpdated
+  | EventİnstallationUpdateAvailable
   | EventMessagePartDelta
   | EventPermissionAsked
   | EventPermissionReplied
@@ -2708,11 +2731,11 @@ export type Event =
   | EventQuestionReplied
   | EventQuestionRejected
   | EventSessionCwd
-  | EventBashInteractiveAsked
-  | EventBashInteractiveReplied
+  | EventBashİnteractiveAsked
+  | EventBashİnteractiveReplied
   | EventTodoUpdated
   | EventSessionStatus
-  | EventSessionIdle
+  | EventSessionİdle
   | EventSessionGoal
   | EventSessionCompacted
   | EventMcpToolsChanged
@@ -2967,14 +2990,14 @@ export type GlobalUpgradeResponses = {
 
 export type GlobalUpgradeResponse = GlobalUpgradeResponses[keyof GlobalUpgradeResponses]
 
-export type GlobalImportScanData = {
+export type GlobalİmportScanData = {
   body?: never
   path?: never
   query?: never
   url: "/global/import/scan"
 }
 
-export type GlobalImportScanResponses = {
+export type GlobalİmportScanResponses = {
   /**
    * Per-source availability and counts
    */
@@ -2987,9 +3010,9 @@ export type GlobalImportScanResponses = {
   }
 }
 
-export type GlobalImportScanResponse = GlobalImportScanResponses[keyof GlobalImportScanResponses]
+export type GlobalİmportScanResponse = GlobalİmportScanResponses[keyof GlobalİmportScanResponses]
 
-export type GlobalImportRunData = {
+export type GlobalİmportRunData = {
   body?: {
     sources?: Array<"cc" | "codex" | "opencode">
     force?: boolean
@@ -2999,16 +3022,16 @@ export type GlobalImportRunData = {
   url: "/global/import/run"
 }
 
-export type GlobalImportRunErrors = {
+export type GlobalİmportRunErrors = {
   /**
    * Bad request
    */
   400: BadRequestError
 }
 
-export type GlobalImportRunError = GlobalImportRunErrors[keyof GlobalImportRunErrors]
+export type GlobalİmportRunError = GlobalİmportRunErrors[keyof GlobalİmportRunErrors]
 
-export type GlobalImportRunResponses = {
+export type GlobalİmportRunResponses = {
   /**
    * Per-source import stats
    */
@@ -3023,7 +3046,7 @@ export type GlobalImportRunResponses = {
   }
 }
 
-export type GlobalImportRunResponse = GlobalImportRunResponses[keyof GlobalImportRunResponses]
+export type GlobalİmportRunResponse = GlobalİmportRunResponses[keyof GlobalİmportRunResponses]
 
 export type AuthRemoveData = {
   body?: never
@@ -3334,7 +3357,7 @@ export type ProjectCurrentResponses = {
 
 export type ProjectCurrentResponse = ProjectCurrentResponses[keyof ProjectCurrentResponses]
 
-export type ProjectInitGitData = {
+export type ProjectİnitGitData = {
   body?: never
   path?: never
   query?: {
@@ -3344,14 +3367,14 @@ export type ProjectInitGitData = {
   url: "/project/git/init"
 }
 
-export type ProjectInitGitResponses = {
+export type ProjectİnitGitResponses = {
   /**
    * Project information after git initialization
    */
   200: Project
 }
 
-export type ProjectInitGitResponse = ProjectInitGitResponses[keyof ProjectInitGitResponses]
+export type ProjectİnitGitResponse = ProjectİnitGitResponses[keyof ProjectİnitGitResponses]
 
 export type ProjectUpdateData = {
   body?: {
@@ -3760,7 +3783,7 @@ export type ExperimentalConsoleSwitchOrgResponses = {
 export type ExperimentalConsoleSwitchOrgResponse =
   ExperimentalConsoleSwitchOrgResponses[keyof ExperimentalConsoleSwitchOrgResponses]
 
-export type ToolIdsData = {
+export type ToolİdsData = {
   body?: never
   path?: never
   query?: {
@@ -3770,23 +3793,23 @@ export type ToolIdsData = {
   url: "/experimental/tool/ids"
 }
 
-export type ToolIdsErrors = {
+export type ToolİdsErrors = {
   /**
    * Bad request
    */
   400: BadRequestError
 }
 
-export type ToolIdsError = ToolIdsErrors[keyof ToolIdsErrors]
+export type ToolİdsError = ToolİdsErrors[keyof ToolİdsErrors]
 
-export type ToolIdsResponses = {
+export type ToolİdsResponses = {
   /**
    * Tool IDs
    */
   200: ToolIds
 }
 
-export type ToolIdsResponse = ToolIdsResponses[keyof ToolIdsResponses]
+export type ToolİdsResponse = ToolİdsResponses[keyof ToolİdsResponses]
 
 export type ToolListData = {
   body?: never
@@ -4313,7 +4336,7 @@ export type SessionTaskResponses = {
 
 export type SessionTaskResponse = SessionTaskResponses[keyof SessionTaskResponses]
 
-export type SessionInitData = {
+export type SessionİnitData = {
   body?: {
     modelID: string
     providerID: string
@@ -4329,7 +4352,7 @@ export type SessionInitData = {
   url: "/session/{sessionID}/init"
 }
 
-export type SessionInitErrors = {
+export type SessionİnitErrors = {
   /**
    * Bad request
    */
@@ -4340,16 +4363,16 @@ export type SessionInitErrors = {
   404: NotFoundError
 }
 
-export type SessionInitError = SessionInitErrors[keyof SessionInitErrors]
+export type SessionİnitError = SessionİnitErrors[keyof SessionİnitErrors]
 
-export type SessionInitResponses = {
+export type SessionİnitResponses = {
   /**
    * 200
    */
   200: boolean
 }
 
-export type SessionInitResponse = SessionInitResponses[keyof SessionInitResponses]
+export type SessionİnitResponse = SessionİnitResponses[keyof SessionİnitResponses]
 
 export type SessionForkData = {
   body?: {
@@ -5381,7 +5404,7 @@ export type QuestionRejectResponses = {
 
 export type QuestionRejectResponse = QuestionRejectResponses[keyof QuestionRejectResponses]
 
-export type BashInteractiveListData = {
+export type BashİnteractiveListData = {
   body?: never
   path?: never
   query?: {
@@ -5391,7 +5414,7 @@ export type BashInteractiveListData = {
   url: "/bash-interactive"
 }
 
-export type BashInteractiveListResponses = {
+export type BashİnteractiveListResponses = {
   /**
    * List of pending interactive requests
    */
@@ -5403,9 +5426,9 @@ export type BashInteractiveListResponses = {
   }>
 }
 
-export type BashInteractiveListResponse = BashInteractiveListResponses[keyof BashInteractiveListResponses]
+export type BashİnteractiveListResponse = BashİnteractiveListResponses[keyof BashİnteractiveListResponses]
 
-export type BashInteractiveReplyData = {
+export type BashİnteractiveReplyData = {
   body?: {
     /**
      * Captured output from the interactive command
@@ -5426,7 +5449,7 @@ export type BashInteractiveReplyData = {
   url: "/bash-interactive/{id}/reply"
 }
 
-export type BashInteractiveReplyErrors = {
+export type BashİnteractiveReplyErrors = {
   /**
    * Bad request
    */
@@ -5437,16 +5460,16 @@ export type BashInteractiveReplyErrors = {
   404: NotFoundError
 }
 
-export type BashInteractiveReplyError = BashInteractiveReplyErrors[keyof BashInteractiveReplyErrors]
+export type BashİnteractiveReplyError = BashİnteractiveReplyErrors[keyof BashİnteractiveReplyErrors]
 
-export type BashInteractiveReplyResponses = {
+export type BashİnteractiveReplyResponses = {
   /**
    * Reply accepted
    */
   200: boolean
 }
 
-export type BashInteractiveReplyResponse = BashInteractiveReplyResponses[keyof BashInteractiveReplyResponses]
+export type BashİnteractiveReplyResponse = BashİnteractiveReplyResponses[keyof BashİnteractiveReplyResponses]
 
 export type ProviderListData = {
   body?: never
@@ -6282,7 +6305,7 @@ export type TuiPublishData = {
     | EventTuiCommandExecute
     | EventTuiToastShow
     | EventTuiSessionSelect
-    | EventTuiInstructionsLoaded
+    | EventTuiİnstructionsLoaded
   path?: never
   query?: {
     directory?: string
@@ -6387,7 +6410,7 @@ export type TuiControlResponseResponses = {
 
 export type TuiControlResponseResponse = TuiControlResponseResponses[keyof TuiControlResponseResponses]
 
-export type InstanceDisposeData = {
+export type İnstanceDisposeData = {
   body?: never
   path?: never
   query?: {
@@ -6397,14 +6420,14 @@ export type InstanceDisposeData = {
   url: "/instance/dispose"
 }
 
-export type InstanceDisposeResponses = {
+export type İnstanceDisposeResponses = {
   /**
    * Instance disposed
    */
   200: boolean
 }
 
-export type InstanceDisposeResponse = InstanceDisposeResponses[keyof InstanceDisposeResponses]
+export type İnstanceDisposeResponse = İnstanceDisposeResponses[keyof İnstanceDisposeResponses]
 
 export type PathGetData = {
   body?: never

@@ -11,26 +11,13 @@ PROJE STIL KURALLARI:
 ONERILEN DEGISIKLIKLER:
 {proposals}
 
-Ciktiyi su formatta ver:
-## Stil Incelemesi
+Kurallar:
+- Projenin mevcut stilini takip et
+- Kucuk stil tercihlerini raporlama (noktalı virgül vs.)
+- Buyuk sorunlara odaklan
+- "LGTM!" sadece gercekten sorunsuzsa ver
 
-### Genel Degerlendirme
-[LGTM! / Duzeltme Gerekli]
-
-### Analiz
-- Okunabilirlik: [okunabilir mi]
-- Tutarlilik: [projenin diger kisimlariyla tutarli mi]
-- Isimlendirme: [degisken/fonksiyon isimleri uygun mu]
-- Yorum: [yeterli aciklama var mi]
-- Yapilandirma: [dosya yapisi uygun mu]
-
-### Sorunlar (varsa)
-1. [Sorun 1 - dosya: satir]
-
-### Oneriler (varsa)
-1. [Oneri 1]
-
-Ardindan su JSON formatini da ekle:
+SADECE su JSON formatinda cevap ver, baska bir sey yazma:
 ```json
 {
   "verdict": "LGTM veya Duzeltme Gerekli",
@@ -39,10 +26,3 @@ Ardindan su JSON formatini da ekle:
   "suggestions": ["oneri 1", "oneri 2"]
 }
 ```
-
-Kurallar:
-- Projenin mevcut stilini takip et
-- Kucuk stil tercihlerini raporlama (noktalı virgül vs.)
-- Buyuk sorunlara odaklan
-- "LGTM!" sadece gercekten sorunsuzsa ver
-- JSON'daki score: 100 = sorunsuz, 0 = ciddi stil sorunlari

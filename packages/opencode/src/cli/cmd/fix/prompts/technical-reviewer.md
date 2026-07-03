@@ -9,28 +9,13 @@ ISSUE:
 ONERILEN DEGISIKLIKLER:
 {proposals}
 
-Ciktiyi su formatta ver:
-## Teknik Inceleme
+Kurallar:
+- Sadece ciddi sorunlari raporla, kucuk stil tercihlerini birak
+- Her sorunu dosya ve satir numarasi ile belirt
+- Cozum onerileri sun
+- "LGTM!" sadece gercekten sorunsuzsa ver
 
-### Genel Degerlendirme
-[LGTM! / Duzeltme Gerekli]
-
-### Detayli Analiz
-- Dogruluk: [dogru mu]
-- Performans: [performans etkisi]
-- Edge Case'ler: [edge case'ler ele alinmis mi]
-- Hata Yonetimi: [hata yonetimi uygun mu]
-- Entegrasyon: [mevcut kodla uyumlu mu]
-
-### Sorunlar (varsa)
-1. [Sorun 1 - dosya: satir]
-2. [Sorun 2 - dosya: satir]
-
-### Oneriler (varsa)
-1. [Oneri 1]
-2. [Oneri 2]
-
-Ardindan su JSON formatini da ekle:
+SADECE su JSON formatinda cevap ver, baska bir sey yazma:
 ```json
 {
   "verdict": "LGTM veya Duzeltme Gerekli",
@@ -39,10 +24,3 @@ Ardindan su JSON formatini da ekle:
   "suggestions": ["oneri 1", "oneri 2"]
 }
 ```
-
-Kurallar:
-- Sadece ciddi sorunlari raporla, kucuk stil tercihlerini birak
-- Her sorunu dosya ve satir numarasi ile belirt
-- Cozum onerileri sun
-- "LGTM!" sadece gercekten sorunsuzsa ver
-- JSON'daki score: 100 = sorunsuz, 0 = kritik sorunlar

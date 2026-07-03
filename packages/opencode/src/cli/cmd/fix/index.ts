@@ -21,7 +21,7 @@ import {
 import { parseFileOperations, extractJsonFromMarkdown, extractFileList } from "./parser"
 import { loadPrompt, fillTemplate } from "./prompts-loader"
 import type { FixOptions, FixContext } from "./types"
-import { evaluateSolution, buildCritiquePrompt, parseLLMScore } from "../plus-two-coder"
+import { scoreWithLLM, buildCritiquePrompt, parseLLMScore } from "../plus-two-coder"
 
 interface ModelRef {
   providerID: ProviderID
@@ -34,32 +34,59 @@ interface ParsedReview {
   score: number
   feedback: string
   suggestions: string[]
+  issues: Array<{ file: string; line: number; message: string; severity: "error" | "warning" | "info" }>
 }
 
 export function parseReviewResponse(text: string): ParsedReview {
+  // Try JSON in code block first
   const jsonMatch = text.match(/```json\s*([\s\S]*?)```/)
   if (jsonMatch) {
     try {
       const data = JSON.parse(jsonMatch[1])
-      const verdict = (data.verdict ?? "").toLowerCase()
-      const approved =
-        verdict.includes("lgtm") ||
-        verdict.includes("guvenli") ||
-        verdict.includes("safe") ||
-        verdict.includes("no issues")
-      return {
-        approved,
-        score: typeof data.score === "number" ? Math.min(100, Math.max(0, data.score)) : 0,
-        feedback: text,
-        suggestions: Array.isArray(data.suggestions) ? data.suggestions : [],
-      }
+      return parseReviewJson(data, text)
     } catch {}
   }
+
+  // Try bare JSON object in text
+  const bareJsonMatch = text.match(/\{[\s\S]*"verdict"[\s\S]*\}/)
+  if (bareJsonMatch) {
+    try {
+      const data = JSON.parse(bareJsonMatch[0])
+      return parseReviewJson(data, text)
+    } catch {}
+  }
+
   return {
     approved: /lgtm|satisfactory|approved|guvenli|safe|no issues/i.test(text),
     score: 0,
     feedback: text,
     suggestions: [],
+    issues: [],
+  }
+}
+
+function parseReviewJson(data: Record<string, any>, text: string): ParsedReview {
+  const verdict = (data.verdict ?? "").toLowerCase()
+  const approved =
+    verdict.includes("lgtm") ||
+    verdict.includes("guvenli") ||
+    verdict.includes("safe") ||
+    verdict.includes("no issues")
+
+  const rawIssues = Array.isArray(data.issues) ? data.issues : []
+  const issues = rawIssues.map((i: any) => ({
+    file: String(i.file ?? ""),
+    line: typeof i.line === "number" ? i.line : 0,
+    message: String(i.message ?? ""),
+    severity: (["error", "warning", "info"].includes(i.severity) ? i.severity : "info") as "error" | "warning" | "info",
+  }))
+
+  return {
+    approved,
+    score: typeof data.score === "number" ? Math.min(100, Math.max(0, data.score)) : 0,
+    feedback: text,
+    suggestions: Array.isArray(data.suggestions) ? data.suggestions : [],
+    issues,
   }
 }
 
@@ -344,9 +371,9 @@ export const FixCommand = cmd({
                 const secReview = parseReviewResponse(secResult.text)
 
                 ctx.reviews = [
-                  { reviewer: "technical", approved: techReview.approved, score: techReview.score, feedback: techReview.feedback, suggestions: techReview.suggestions },
-                  { reviewer: "style", approved: styleReview.approved, score: styleReview.score, feedback: styleReview.feedback, suggestions: styleReview.suggestions },
-                  { reviewer: "security", approved: secReview.approved, score: secReview.score, feedback: secReview.feedback, suggestions: secReview.suggestions },
+                  { reviewer: "technical", approved: techReview.approved, score: techReview.score, feedback: techReview.feedback, suggestions: techReview.suggestions, issues: techReview.issues },
+                  { reviewer: "style", approved: styleReview.approved, score: styleReview.score, feedback: styleReview.feedback, suggestions: styleReview.suggestions, issues: styleReview.issues },
+                  { reviewer: "security", approved: secReview.approved, score: secReview.score, feedback: secReview.feedback, suggestions: secReview.suggestions, issues: secReview.issues },
                 ]
 
                 s.message(`Teknik: ${techReview.approved ? "OK" : "REVIZE"} (Skor: ${techReview.score}) | Stil: ${styleReview.approved ? "OK" : "REVIZE"} (Skor: ${styleReview.score}) | Guvenlik: ${secReview.approved ? "OK" : "REVIZE"} (Skor: ${secReview.score})`)
@@ -538,7 +565,12 @@ Neden bu cozumu sectigini kisa kisa acikla.`
       messages: [{ role: "user", content: buildCritiquePrompt(context.title + "\n" + context.body, result.text) }],
     })
 
-    const score = evaluateSolution(result.text, critiqueResult.text)
+    const score = await scoreWithLLM({
+      solution: result.text,
+      critique: critiqueResult.text,
+      task: context.title + "\n" + context.body,
+      model: m.model,
+    })
     opinions.push({
       model: `${m.providerID}/${m.modelID}`,
       solution: result.text,

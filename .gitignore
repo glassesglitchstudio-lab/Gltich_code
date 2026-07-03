@@ -50,3 +50,6 @@ experiment/last-outcome.json
 
 /mimoapi/
 /packages/opencode/src/ext
+
+# Local Netlify folder
+.netlify

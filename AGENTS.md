@@ -24,9 +24,10 @@
 - `script/postinstall.mjs` → `ensureProjectConfig()` eklendi
 - İlk çalıştırmada `.glitchcode/` otomatik oluşturuluyor
 
-### 2. Windows build
-- `--skip-install` flag'i zorunlu (node-gyp/tree-sitter sorunları)
-- `node-gyp` global kurulumu tek başına çözüm olmadı
+### 2. Windows build ✅ ÇÖZÜLDÜ
+- `--skip-install` artık sorun değil — WASM fallback tree-sitter'ı destekliyor
+- Windows'da otomatik `--skip-install` aktif ediliyor (native binding compile edilemez)
+- `@opentui/core` + `@parcel/watcher` kurulumu korunuyor
 
 ### 3. npm token
 - CLI'da sorunlu — web UI üzerinden Automation tipinde oluşturulmalı
