@@ -53,12 +53,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Bun
-        uses: ./.github/actions/setup-bun
+      - name: Setup Bun (no install)
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
 
       - name: Build binary
         run: bun run --cwd packages/opencode script/build.ts --single
         shell: bash
+        timeout-minutes: 5
 
       - name: Smoke test (Linux/macOS)
         if: runner.os != 'Windows'
