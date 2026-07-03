@@ -65,3 +65,82 @@ jobs:
         run: |
           chmod +x ./packages/opencode/dist/glitchcode-*/bin/glitch
           ./packages/opencode/dist/glitchcode-*/bin/glitch --version
+
+  os-eval:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            name: "Ubuntu 22.04 LTS"
+          - os: ubuntu-24.04
+            name: "Ubuntu 24.04 LTS"
+          - os: macos-13
+            name: "macOS 13 (Intel)"
+          - os: macos-14
+            name: "macOS 14 (ARM)"
+          - os: macos-15
+            name: "macOS 15 (ARM)"
+          - os: windows-latest
+            name: "Windows Server 2025"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: ./.github/actions/setup-bun
+
+      - name: Build binary
+        run: bun run --cwd packages/opencode script/build.ts --single
+        shell: bash
+        timeout-minutes: 5
+
+      - name: "Eval: --version (Linux/macOS)"
+        if: runner.os != 'Windows'
+        run: |
+          chmod +x ./packages/opencode/dist/glitchcode-*/bin/glitch
+          ./packages/opencode/dist/glitchcode-*/bin/glitch --version
+
+      - name: "Eval: --version (Windows)"
+        if: runner.os == 'Windows'
+        run: |
+          & ./packages/opencode/dist/glitchcode-*/bin/glitch.exe --version
+
+      - name: "Eval: --help (Linux/macOS)"
+        if: runner.os != 'Windows'
+        run: ./packages/opencode/dist/glitchcode-*/bin/glitch --help
+
+      - name: "Eval: --help (Windows)"
+        if: runner.os == 'Windows'
+        run: & ./packages/opencode/dist/glitchcode-*/bin/glitch.exe --help
+
+      - name: "Eval: doctor (Linux/macOS)"
+        if: runner.os != 'Windows'
+        run: ./packages/opencode/dist/glitchcode-*/bin/glitch doctor || true
+
+      - name: "Eval: doctor (Windows)"
+        if: runner.os == 'Windows'
+        run: & ./packages/opencode/dist/glitchcode-*/bin/glitch.exe doctor
+        continue-on-error: true
+
+      - name: "Eval: models (Linux/macOS)"
+        if: runner.os != 'Windows'
+        run: ./packages/opencode/dist/glitchcode-*/bin/glitch models || true
+
+      - name: "Eval: models (Windows)"
+        if: runner.os == 'Windows'
+        run: & ./packages/opencode/dist/glitchcode-*/bin/glitch.exe models
+        continue-on-error: true
+
+      - name: "Eval: binary info (Linux/macOS)"
+        if: runner.os != 'Windows'
+        run: |
+          ls -lh ./packages/opencode/dist/glitchcode-*/bin/glitch
+          file ./packages/opencode/dist/glitchcode-*/bin/glitch
+
+      - name: "Eval: binary info (Windows)"
+        if: runner.os == 'Windows'
+        run: |
+          Get-ChildItem ./packages/opencode/dist/glitchcode-*/bin/glitch.exe | Select-Object Name, Length
