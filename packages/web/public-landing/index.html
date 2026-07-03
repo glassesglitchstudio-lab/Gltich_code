@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glitch Code — AI-Powered CLI</title>
+  <meta name="description" content="40+ provider, 7 fazlı otomatik kod düzeltme, multi-model debate sistemi. Tek terminal komutuyla.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#09090f;--surface:rgba(139,92,246,.05);--surface2:rgba(139,92,246,.08);--border:rgba(139,92,246,.12);--violet:#8b5cf6;--violet-dim:#7c3aed;--violet-light:#a78bfa;--orange:#ff6b00;--text:#eeeef0;--text2:#8b8a9e;--text3:#5c5b6e}*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}code,.cmd{font-family:'JetBrains Mono','Fira Code',monospace}.container{max-width:1100px;margin:0 auto;padding:0 24px}
+
+    /* NAV */
+    .topnav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(9,9,15,.8);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}.nav-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px}.nav-logo{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:16px;color:var(--violet);text-decoration:none;letter-spacing:2px}.nav-links{display:flex;gap:28px}.nav-links a{color:var(--text2);text-decoration:none;font-size:14px;transition:color .2s}.nav-links a:hover{color:var(--text)}
+
+    /* HERO */
+    .hero{position:relative;padding:140px 0 80px;text-align:center;overflow:hidden}.hero-glow{position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:800px;height:600px;background:radial-gradient(ellipse,rgba(139,92,246,.12) 0%,transparent 70%);pointer-events:none}.hero-logo{font-family:'Courier New',monospace;font-size:11px;line-height:1.15;color:var(--violet);display:inline-block;text-align:left;margin-bottom:40px;opacity:.9}.hero h1{font-size:52px;font-weight:800;line-height:1.1;margin-bottom:20px}.hero-line{display:block}.hero-accent{background:linear-gradient(135deg,var(--violet),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.hero-sub{font-size:18px;color:var(--text2);max-width:560px;margin:0 auto 48px}
+
+    /* INSTALL */
+    .install-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;max-width:600px;margin:0 auto;overflow:hidden}.install-tabs{display:flex;border-bottom:1px solid var(--border)}.install-tab{flex:1;padding:10px;background:none;border:none;color:var(--text3);font-size:13px;font-family:inherit;cursor:pointer;transition:all .2s}.install-tab.active{color:var(--violet);background:rgba(139,92,246,.08);border-bottom:2px solid var(--violet)}.install-tab:hover{color:var(--text2)}.install-row{display:flex;align-items:center;padding:12px 16px;gap:12px}.install-cmd{flex:1;font-size:14px;color:var(--violet-light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.copy-btn{background:var(--violet);color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;transition:background .2s}.copy-btn:hover{background:var(--violet-dim)}
+
+    /* TERMINAL */
+    .demo-section{padding:0 0 100px}.terminal-frame{background:#0d0d14;border:1px solid var(--border);border-radius:12px;overflow:hidden;max-width:720px;margin:0 auto;box-shadow:0 24px 80px rgba(0,0,0,.4)}.terminal-bar{display:flex;align-items:center;gap:8px;padding:12px 16px;background:rgba(139,92,246,.06);border-bottom:1px solid var(--border)}.terminal-dot{width:12px;height:12px;border-radius:50%}.terminal-dot.red{background:#ff5f57}.terminal-dot.yellow{background:#febc2e}.terminal-dot.green{background:#28c840}.terminal-title{margin-left:8px;font-size:12px;color:var(--text3);font-family:'JetBrains Mono',monospace}.terminal-body{padding:20px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.8}.terminal-line{white-space:nowrap}.t-prompt{color:var(--orange)}.t-cmd{color:var(--text)}.t-dim{color:var(--text3)}.t-info{color:var(--violet-light)}.t-ok{color:#22c55e}.t-success{color:var(--orange)}.t-bold{color:var(--text);font-weight:700}
+
+    /* SECTIONS */
+    .section{padding:100px 0}.section--alt{background:var(--surface)}.section-title{font-size:36px;font-weight:800;text-align:center;margin-bottom:12px}.section-desc{font-size:17px;color:var(--text2);text-align:center;max-width:520px;margin:0 auto 56px}
+
+    /* FEATURES */
+    .feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.feature-card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:28px;transition:border-color .3s,transform .3s}.feature-card:hover{border-color:var(--violet);transform:translateY(-2px)}.feature-icon{font-size:28px;margin-bottom:14px}.feature-card h3{font-size:17px;font-weight:700;margin-bottom:8px}.feature-card p{color:var(--text2);font-size:14px}.feature-card code{background:rgba(139,92,246,.15);padding:1px 5px;border-radius:3px;font-size:12px;color:var(--violet-light)}
+
+    /* STEPS */
+    .steps{max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:40px}.step{display:flex;gap:20px;align-items:flex-start}.step-num{flex-shrink:0;width:44px;height:44px;background:var(--violet);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800}.step-body h3{font-size:20px;margin-bottom:6px}.step-body p{color:var(--text2);font-size:15px}.step-body code{background:rgba(139,92,246,.15);padding:1px 5px;border-radius:3px;font-size:13px;color:var(--violet-light)}
+
+    /* BUILT */
+    .built-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.built-card{display:flex;align-items:flex-start;gap:14px;padding:20px;background:var(--surface2);border:1px solid var(--border);border-radius:10px}.built-check{flex-shrink:0;width:28px;height:28px;background:rgba(34,197,94,.15);color:#22c55e;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}.built-card h3{font-size:15px;font-weight:700;margin-bottom:4px}.built-card p{color:var(--text2);font-size:13px}
+
+    /* PLATFORMS */
+    .platform-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:600px;margin:0 auto 32px}.platform-card{display:flex;align-items:center;gap:10px;padding:14px 18px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:14px}.platform-icon{font-size:20px}.alt-install{display:flex;gap:16px;justify-content:center}.link-btn{padding:10px 20px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);text-decoration:none;font-size:14px;transition:border-color .2s}.link-btn:hover{border-color:var(--violet)}
+
+    /* FOOTER */
+    .site-footer{padding:48px 0 32px;border-top:1px solid var(--border)}.footer-inner{display:flex;justify-content:space-between;align-items:center}.footer-brand{display:flex;flex-direction:column;gap:4px}.footer-logo{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:800;color:var(--violet);letter-spacing:1px}.footer-copy{font-size:13px;color:var(--text3)}.footer-links{display:flex;gap:24px}.footer-links a{color:var(--text2);text-decoration:none;font-size:13px;transition:color .2s}.footer-links a:hover{color:var(--violet)}
+
+    @media(max-width:768px){.hero h1{font-size:34px}.hero-logo{font-size:7px}.feature-grid,.built-grid{grid-template-columns:1fr}.platform-grid{grid-template-columns:repeat(2,1fr)}.nav-links{display:none}.footer-inner{flex-direction:column;gap:20px;text-align:center}}
+  </style>
+</head>
+<body>
+  <nav class="topnav"><div class="nav-inner"><a href="/" class="nav-logo">GLITCH</a><div class="nav-links"><a href="#features">Özellikler</a><a href="#how">Nasıl Çalışır</a><a href="#install">Kurulum</a><a href="https://github.com/glassesglitchstudio-lab/Gltich_code" target="_blank">GitHub</a></div></div></nav>
+
+  <header class="hero">
+    <div class="hero-glow"></div>
+    <div class="container">
+      <pre class="hero-logo" aria-hidden="true">
+ ██╗███╗   ██╗████████╗███████╗██╗          ██╗
+███║████╗  ██║╚══██╔══╝██╔════╝██║          ██║
+╚██║██╔██╗ ██║   ██║   █████╗  ██║          ██║
+ ██║██║╚██╗██║   ██║   ██╔══╝  ██║          ╚═╝
+ ██║██║ ╚████║   ██║   ███████╗███████╗     ██╗
+ ╚═╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚══════╝     ╚═╝
+      </pre>
+      <h1><span class="hero-line">Yapay zeka destekli</span><span class="hero-line hero-accent">geliştirici aracı</span></h1>
+      <p class="hero-sub">40+ provider, 7 fazlı otomatik kod düzeltme, multi-model debate ve sınırsız hafıza.<br>Tek terminal komutuyla.</p>
+      <div class="install-box">
+        <div class="install-tabs" role="tablist">
+          <button class="install-tab active" data-tab="npm">npm</button>
+          <button class="install-tab" data-tab="bun">bun</button>
+          <button class="install-tab" data-tab="curl">curl</button>
+          <button class="install-tab" data-tab="powershell">PowerShell</button>
+        </div>
+        <div class="install-row">
+          <code class="install-cmd" data-panel="npm">npm install -g glitchcode-cli && glitch</code>
+          <code class="install-cmd" data-panel="bun" hidden>bun add -g glitchcode-cli && glitch</code>
+          <code class="install-cmd" data-panel="curl" hidden>curl -fsSL https://glitchcode.dev/install.sh | sh</code>
+          <code class="install-cmd" data-panel="powershell" hidden>powershell -c "irm https://glitchcode.dev/install.ps1 | iex"</code>
+          <button class="copy-btn" data-copy>Kopyala</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="demo-section"><div class="container">
+    <div class="terminal-frame">
+      <div class="terminal-bar"><span class="terminal-dot red"></span><span class="terminal-dot yellow"></span><span class="terminal-dot green"></span><span class="terminal-title">glitch</span></div>
+      <div class="terminal-body">
+        <div class="terminal-line"><span class="t-prompt">$</span> <span class="t-cmd">glitch fix https://github.com/user/repo/issues/42</span></div>
+        <div class="terminal-line t-dim">Glitch Fix başlatılıyor...</div>
+        <div class="terminal-line"><span class="t-info">→</span> Model: anthropic/claude-sonnet-4-20250514</div>
+        <div class="terminal-line"><span class="t-info">→</span> Issue: user/repo#42</div>
+        <div class="terminal-line t-dim">Faz 1: Issue triage ediliyor...</div>
+        <div class="terminal-line"><span class="t-ok">✓</span> Triage: bug / high</div>
+        <div class="terminal-line t-dim">Faz 2: Çözüm planı oluşturuluyor...</div>
+        <div class="terminal-line"><span class="t-ok">✓</span> Plan oluşturuldu.</div>
+        <div class="terminal-line t-dim">Faz 3: Dosyalar keşfediliyor...</div>
+        <div class="terminal-line"><span class="t-ok">✓</span> 3 dosya keşfedildi.</div>
+        <div class="terminal-line t-dim">Faz 4: Kod önerisi üretiliyor...</div>
+        <div class="terminal-line"><span class="t-ok">✓</span> 2 dosya işlemi önerildi.</div>
+        <div class="terminal-line t-dim">Faz 5: Kod inceleniyor...</div>
+        <div class="terminal-line"><span class="t-ok">✓</span> Teknik: OK | Stil: OK | Güvenlik: OK</div>
+        <div class="terminal-line t-dim">Faz 6: Değişiklikler uygulanıyor...</div>
+        <div class="terminal-line t-dim">Faz 7: Git işlemleri...</div>
+        <div class="terminal-line"><span class="t-ok">✓</span> Branch: fix/issue-42</div>
+        <div class="terminal-line"><span class="t-ok">✓</span> Commit: a1b2c3d</div>
+        <div class="terminal-line"><span class="t-ok">✓</span> PR: https://github.com/user/repo/pull/43</div>
+        <div class="terminal-line"><span class="t-success">▸</span> <span class="t-bold">Glitch Fix tamamlandı!</span></div>
+      </div>
+    </div>
+  </div></section>
+
+  <section class="section" id="features"><div class="container">
+    <h2 class="section-title">Neden Glitch Code?</h2>
+    <p class="section-desc">Diğer agent'lardan farkı ne? Her şeyi kendin şekillendirirsin.</p>
+    <div class="feature-grid">
+      <div class="feature-card"><div class="feature-icon">⚔️</div><h3>PlusTwoCoder Debate</h3><p>2-3 model aynı kodu tartışır. Cross-critique ile her turda güçlenir.</p></div>
+      <div class="feature-card"><div class="feature-icon">🔧</div><h3>7 Fazlı Otomatik Düzeltme</h3><p><code>glitch fix</code> ile GitHub issue'larını otomatik çöz. Triage → Plan → PR.</p></div>
+      <div class="feature-card"><div class="feature-icon">🧠</div><h3>Obsidian Hafıza</h3><p>.md dosyalarıyla sınırsız hafıza. Geçmiş oturumları hatırla.</p></div>
+      <div class="feature-card"><div class="feature-icon">🌐</div><h3>40+ Provider</h3><p>OpenAI, Anthropic, Google, Ollama, Copilot ve daha fazlası.</p></div>
+      <div class="feature-card"><div class="feature-icon">📊</div><h3>Görev Yönetimi</h3><p><code>glitch solve</code> ile karmaşık görevleri parçalara böl.</p></div>
+      <div class="feature-card"><div class="feature-icon">🔒</div><h3>Güvenlik Denetimi</h3><p>OWASP kontrollü security review. Otomatik tarama.</p></div>
+    </div>
+  </div></section>
+
+  <section class="section section--alt" id="how"><div class="container">
+    <h2 class="section-title">Nasıl Çalışır?</h2>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><h3>Kur</h3><p>Tek komutla global kurulum. İlk çalıştırmada <code>.glitchcode/</code> dizini otomatik oluşur.</p></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><h3>Yapılandır</h3><p><code>glitch onboard</code> ile provider seçimi, API key, tema tercihi.</p></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><h3>Geliştir</h3><p>AI ile kod üret, düzelt, incele. Terminalinden çıkma.</p></div></div>
+    </div>
+  </div></section>
+
+  <section class="section"><div class="container">
+    <h2 class="section-title">Neler var?</h2>
+    <p class="section-desc">Diğerlerinin aksine, her şeyi önceden inşa ettik.</p>
+    <div class="built-grid">
+      <div class="built-card"><span class="built-check">✓</span><div><h3>MCP Desteği</h3><p>Model Context Protocol ile dış araçları bağla.</p></div></div>
+      <div class="built-card"><span class="built-check">✓</span><div><h3>Sub-agent Sistemi</h3><p>Alt ajanları paralel çalıştır, görevleri delege et.</p></div></div>
+      <div class="built-card"><span class="built-check">✓</span><div><h3>Plan Mode</h3><p>Çok adımlı görevleri planla ve sırayla uygula.</p></div></div>
+      <div class="built-card"><span class="built-check">✓</span><div><h3>Permission Gates</h3><p>Dosya erişimi, komut çalıştırma izinleri.</p></div></div>
+      <div class="built-card"><span class="built-check">✓</span><div><h3>Theme Sistemi</h3><p>7 hazır tema, neon-turuncu Glassmorphism.</p></div></div>
+      <div class="built-card"><span class="built-check">✓</span><div><h3>Offline Çalışma</h3><p>Ollama/LMStudio ile internet olmadan.</p></div></div>
+    </div>
+  </div></section>
+
+  <section class="section section--alt" id="install"><div class="container">
+    <h2 class="section-title">Kurulum</h2>
+    <p class="section-desc">13 platform, her yerde çalışır.</p>
+    <div class="platform-grid">
+      <div class="platform-card"><span class="platform-icon">🐧</span><span>Linux x64</span></div>
+      <div class="platform-card"><span class="platform-icon">🐧</span><span>Linux ARM64</span></div>
+      <div class="platform-card"><span class="platform-icon">🍎</span><span>macOS Intel</span></div>
+      <div class="platform-card"><span class="platform-icon">🍎</span><span>macOS Apple Silicon</span></div>
+      <div class="platform-card"><span class="platform-icon">🪟</span><span>Windows x64</span></div>
+      <div class="platform-card"><span class="platform-icon">🪟</span><span>Windows ARM64</span></div>
+    </div>
+    <div class="alt-install">
+      <a href="https://github.com/glassesglitchstudio-lab/Gltich_code/releases" target="_blank" class="link-btn">GitHub Releases</a>
+      <a href="https://www.npmjs.com/package/glitchcode-cli" target="_blank" class="link-btn">npmjs.com</a>
+    </div>
+  </div></section>
+
+  <footer class="site-footer"><div class="container"><div class="footer-inner">
+    <div class="footer-brand"><span class="footer-logo">GLITCH CODE</span><span class="footer-copy">GlassesCat AI tarafından geliştirildi.</span></div>
+    <div class="footer-links"><a href="https://github.com/glassesglitchstudio-lab/Gltich_code" target="_blank">GitHub</a><a href="https://www.npmjs.com/package/glitchcode-cli" target="_blank">npm</a><a href="#features">Özellikler</a><a href="#install">Kurulum</a></div>
+  </div></div></footer>
+
+  <script>
+    document.querySelectorAll('.install-tab').forEach(t=>t.addEventListener('click',()=>{document.querySelectorAll('.install-tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');const p=t.dataset.tab;document.querySelectorAll('.install-cmd').forEach(c=>{c.hidden=c.dataset.panel!==p})}));
+    document.querySelectorAll('.copy-btn').forEach(b=>b.addEventListener('click',async()=>{const c=document.querySelector('.install-cmd:not([hidden])');if(c){await navigator.clipboard.writeText(c.textContent||'');b.textContent='Kopyalandı!';setTimeout(()=>{b.textContent='Kopyala'},2000)}}));
+  </script>
+</body>
+</html>
