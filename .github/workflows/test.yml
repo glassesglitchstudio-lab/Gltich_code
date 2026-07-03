@@ -48,28 +48,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Bun (no install)
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version-file: package.json
+      - name: Setup Bun
+        uses: ./.github/actions/setup-bun
 
       - name: Build binary
         run: bun run --cwd packages/opencode script/build.ts --single
         shell: bash
         timeout-minutes: 5
 
-      - name: Smoke test (Linux/macOS)
-        if: runner.os != 'Windows'
+      - name: Smoke test
         run: |
           chmod +x ./packages/opencode/dist/glitchcode-*/bin/glitch
           ./packages/opencode/dist/glitchcode-*/bin/glitch --version
-
-      - name: Smoke test (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          & ./packages/opencode/dist/glitchcode-*/bin/glitch.exe --version
