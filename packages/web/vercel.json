@@ -1,0 +1,6 @@
+{
+  "buildCommand": "astro build --config astro.config.vercel.mjs",
+  "outputDirectory": "dist",
+  "framework": "astro",
+  "installCommand": "npm install"
+}
