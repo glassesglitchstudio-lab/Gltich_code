@@ -43,8 +43,9 @@ const QueryCommand = cmd({
       } catch (err) {
         UI.error(errorMessage(err))
         process.exit(1)
+      } finally {
+        db.close()
       }
-      db.close()
       return
     }
     const child = spawn("sqlite3", [Database.Path], {

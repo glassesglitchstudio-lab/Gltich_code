@@ -54,6 +54,9 @@ await Bun.file(`./dist/${pkg.name}/package.json`).write(
         url: "https://github.com/glassesglitchstudio-lab/Gltich_code/issues",
       },
       keywords: ["ai", "cli", "code", "glitch", "glitchcode", "glassescat"],
+      scripts: {
+        postinstall: "node postinstall.mjs",
+      },
       bin: {
         glitch: "./bin/glitch",
       },

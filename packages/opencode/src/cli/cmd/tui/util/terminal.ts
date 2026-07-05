@@ -55,7 +55,11 @@ export async function colors(): Promise<{
     let timeout: NodeJS.Timeout
 
     const cleanup = () => {
-      process.stdin.setRawMode(false)
+      try {
+        if (process.stdin.isTTY) {
+          process.stdin.setRawMode(false)
+        }
+      } catch {}
       process.stdin.removeListener("data", handler)
       clearTimeout(timeout)
     }

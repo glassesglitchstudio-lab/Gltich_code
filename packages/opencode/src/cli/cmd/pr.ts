@@ -65,13 +65,14 @@ export const PrCommand = cmd({
             if (prInfo && prInfo.isCrossRepository && prInfo.headRepository && prInfo.headRepositoryOwner) {
               const forkOwner = prInfo.headRepositoryOwner.login
               const forkName = prInfo.headRepository.name
-              const remoteName = forkOwner
+              const remoteName = `fork-${forkOwner}`
 
               // Check if remote already exists
               const remotes = await AppRuntime.runPromise(
                 Git.Service.use((git) => git.run(["remote"], { cwd: Instance.worktree })),
               ).then((x) => x.text().trim())
-              if (!remotes.split("\n").includes(remoteName)) {
+              const remoteList = remotes.split(/\r?\n/).map((r) => r.trim()).filter(Boolean)
+              if (!remoteList.includes(remoteName)) {
                 await AppRuntime.runPromise(
                   Git.Service.use((git) =>
                     git.run(["remote", "add", remoteName, `https://github.com/${forkOwner}/${forkName}.git`], {

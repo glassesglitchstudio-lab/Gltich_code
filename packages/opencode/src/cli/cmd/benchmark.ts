@@ -183,6 +183,13 @@ function printTable(results: BenchmarkResult[], sort: string, top: number) {
   console.log("└" + "─".repeat(width) + "┘")
 }
 
+function escapeCSV(value: string): string {
+  if (value.includes('"') || value.includes(',') || value.includes('\n')) {
+    return `"${value.replace(/"/g, '""')}"`
+  }
+  return value
+}
+
 function printCSV(results: BenchmarkResult[], sort: string, top: number) {
   const sorted = sortResults(results, sort)
   const topResults = sorted.slice(0, top)
@@ -190,7 +197,7 @@ function printCSV(results: BenchmarkResult[], sort: string, top: number) {
   console.log("session_id,title,total_tokens,total_cost,duration,tokens_per_second,cost_per_token,tool_calls,messages")
   for (const r of topResults) {
     console.log(
-      `${r.sessionID},"${r.title}",${r.totalTokens},${r.totalCost.toFixed(4)},${r.duration.toFixed(1)},${r.tokensPerSecond.toFixed(2)},${r.costPerToken.toFixed(6)},${r.toolCalls},${r.messages}`,
+      `${r.sessionID},${escapeCSV(r.title)},${r.totalTokens},${r.totalCost.toFixed(4)},${r.duration.toFixed(1)},${r.tokensPerSecond.toFixed(2)},${r.costPerToken.toFixed(6)},${r.toolCalls},${r.messages}`,
     )
   }
 }

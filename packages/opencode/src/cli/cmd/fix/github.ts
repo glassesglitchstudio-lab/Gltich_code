@@ -1,6 +1,9 @@
 import type { GitHubIssue, FileContent } from "./types"
 
 const GITHUB_API = "https://api.github.com"
+const DEFAULT_TIMEOUT = 30000
+const MAX_RETRIES = 3
+const RETRY_DELAY = 1000
 
 function getHeaders(): Record<string, string> {
   const token = process.env.GITHUB_TOKEN
@@ -11,6 +14,45 @@ function getHeaders(): Record<string, string> {
   }
 }
 
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit = {},
+  retries = MAX_RETRIES,
+): Promise<Response> {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT)
+
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal })
+
+    if (response.status === 403) {
+      const rateRemaining = response.headers.get("x-ratelimit-remaining")
+      if (rateRemaining === "0") {
+        const resetTime = response.headers.get("x-ratelimit-reset")
+        const waitMs = resetTime ? Math.max(0, parseInt(resetTime) * 1000 - Date.now()) : 60000
+        console.log(`Rate limit asildi. ${Math.ceil(waitMs / 1000)} saniye bekleniyor...`)
+        await new Promise((r) => setTimeout(r, waitMs))
+        return fetchWithRetry(url, options, retries)
+      }
+    }
+
+    if ((response.status === 502 || response.status === 503 || response.status === 504) && retries > 0) {
+      await new Promise((r) => setTimeout(r, RETRY_DELAY * (MAX_RETRIES - retries + 1)))
+      return fetchWithRetry(url, options, retries - 1)
+    }
+
+    return response
+  } catch (error: any) {
+    if (error.name === "AbortError" && retries > 0) {
+      console.log(`Timeout. Tekrar deneniyor... (${retries} hak kaldi)`)
+      return fetchWithRetry(url, options, retries - 1)
+    }
+    throw error
+  } finally {
+    clearTimeout(timeoutId)
+  }
+}
+
 export function parseIssueUrl(url: string): { owner: string; repo: string; number: number } | null {
   const match = url.match(/github\.com\/([^/]+)\/([^/]+)\/issues\/(\d+)/)
   if (!match) return null
@@ -18,7 +60,7 @@ export function parseIssueUrl(url: string): { owner: string; repo: string; numbe
 }
 
 export async function fetchIssue(owner: string, repo: string, number: number): Promise<GitHubIssue> {
-  const res = await fetch(`${GITHUB_API}/repos/${owner}/${repo}/issues/${number}`, {
+  const res = await fetchWithRetry(`${GITHUB_API}/repos/${owner}/${repo}/issues/${number}`, {
     headers: getHeaders(),
   })
   if (!res.ok) throw new Error(`Failed to fetch issue: ${res.status} ${res.statusText}`)
@@ -35,7 +77,7 @@ export async function fetchIssue(owner: string, repo: string, number: number): P
 }
 
 export async function getDefaultBranch(owner: string, repo: string): Promise<string> {
-  const res = await fetch(`${GITHUB_API}/repos/${owner}/${repo}`, { headers: getHeaders() })
+  const res = await fetchWithRetry(`${GITHUB_API}/repos/${owner}/${repo}`, { headers: getHeaders() })
   if (!res.ok) throw new Error(`Failed to get repo info: ${res.status}`)
   const data = await res.json() as any
   return data.default_branch
@@ -47,7 +89,7 @@ export async function fetchFileContent(
   path: string,
   branch: string,
 ): Promise<FileContent> {
-  const res = await fetch(`${GITHUB_API}/repos/${owner}/${repo}/contents/${path}?ref=${branch}`, {
+  const res = await fetchWithRetry(`${GITHUB_API}/repos/${owner}/${repo}/contents/${path}?ref=${branch}`, {
     headers: getHeaders(),
   })
   if (res.status === 404) {
@@ -65,14 +107,14 @@ export async function createBranch(
   branchName: string,
   baseBranch: string,
 ): Promise<{ created: boolean; branch: string }> {
-  const baseRes = await fetch(`${GITHUB_API}/repos/${owner}/${repo}/branches/${baseBranch}`, {
+  const baseRes = await fetchWithRetry(`${GITHUB_API}/repos/${owner}/${repo}/branches/${baseBranch}`, {
     headers: getHeaders(),
   })
   if (!baseRes.ok) throw new Error(`Base branch ${baseBranch} not found`)
   const baseData = await baseRes.json() as any
   const sha = baseData.commit.sha
 
-  const createRes = await fetch(`${GITHUB_API}/repos/${owner}/${repo}/git/refs`, {
+  const createRes = await fetchWithRetry(`${GITHUB_API}/repos/${owner}/${repo}/git/refs`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify({ ref: `refs/heads/${branchName}`, sha }),
@@ -95,7 +137,7 @@ export async function createCommit(
   let lastSha = await getLatestCommitSha(owner, repo, branch)
 
   for (const file of files) {
-    const existingFile = await fetch(`${GITHUB_API}/repos/${owner}/${repo}/contents/${file.path}?ref=${branch}`, {
+    const existingFile = await fetchWithRetry(`${GITHUB_API}/repos/${owner}/${repo}/contents/${file.path}?ref=${branch}`, {
       headers: getHeaders(),
     })
 
@@ -110,7 +152,7 @@ export async function createCommit(
       body.sha = existingData.sha
     }
 
-    const res = await fetch(`${GITHUB_API}/repos/${owner}/${repo}/contents/${file.path}`, {
+    const res = await fetchWithRetry(`${GITHUB_API}/repos/${owner}/${repo}/contents/${file.path}`, {
       method: "PUT",
       headers: getHeaders(),
       body: JSON.stringify(body),
@@ -129,7 +171,7 @@ export async function createCommit(
 }
 
 async function getLatestCommitSha(owner: string, repo: string, branch: string): Promise<string> {
-  const res = await fetch(`${GITHUB_API}/repos/${owner}/${repo}/branches/${branch}`, {
+  const res = await fetchWithRetry(`${GITHUB_API}/repos/${owner}/${repo}/branches/${branch}`, {
     headers: getHeaders(),
   })
   if (!res.ok) throw new Error(`Failed to get branch ${branch}`)
@@ -145,7 +187,7 @@ export async function createPullRequest(
   head: string,
   base: string,
 ): Promise<{ url: string; number: number }> {
-  const res = await fetch(`${GITHUB_API}/repos/${owner}/${repo}/pulls`, {
+  const res = await fetchWithRetry(`${GITHUB_API}/repos/${owner}/${repo}/pulls`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify({ title, body, head, base }),
@@ -164,7 +206,7 @@ export async function postComment(
   issueNumber: number,
   body: string,
 ): Promise<void> {
-  const res = await fetch(`${GITHUB_API}/repos/${owner}/${repo}/issues/${issueNumber}/comments`, {
+  const res = await fetchWithRetry(`${GITHUB_API}/repos/${owner}/${repo}/issues/${issueNumber}/comments`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify({ body }),

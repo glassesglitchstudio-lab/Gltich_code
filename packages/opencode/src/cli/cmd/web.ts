@@ -76,7 +76,14 @@ export const WebCommand = cmd({
       open(displayUrl).catch(() => {})
     }
 
-    await new Promise(() => {})
-    await server.stop()
+    await new Promise<void>((resolve) => {
+      const shutdown = async () => {
+        console.log("\nSunucu kapatiliyor...")
+        await server.stop()
+        resolve()
+      }
+      process.on("SIGINT", shutdown)
+      process.on("SIGTERM", shutdown)
+    })
   },
 })

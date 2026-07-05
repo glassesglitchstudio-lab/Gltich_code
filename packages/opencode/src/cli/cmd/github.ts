@@ -1052,14 +1052,18 @@ export const GithubRunCommand = cmd({
               },
             })
 
+        const responseJson = (await response.json()) as { error?: string; token?: string }
+
         if (!response.ok) {
-          const responseJson = (await response.json()) as { error?: string }
           throw new Error(
             `App token exchange failed: ${response.status} ${response.statusText} - ${responseJson.error}`,
           )
         }
 
-        const responseJson = (await response.json()) as { token: string }
+        if (!responseJson.token) {
+          throw new Error("No token in response")
+        }
+
         return responseJson.token
       }
 

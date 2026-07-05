@@ -140,9 +140,15 @@ export const ImportCommand = cmd({
 
         exportData = transformed
       } else {
-        exportData = await Filesystem.readJson<NonNullable<typeof exportData>>(args.file).catch(() => undefined)
+        exportData = await Filesystem.readJson<NonNullable<typeof exportData>>(args.file).catch((err) => {
+          if (err instanceof SyntaxError) {
+            process.stdout.write(`Invalid JSON in file: ${args.file}`)
+          } else {
+            process.stdout.write(`File not found: ${args.file}`)
+          }
+          return undefined
+        })
         if (!exportData) {
-          process.stdout.write(`File not found: ${args.file}`)
           process.stdout.write(EOL)
           return
         }

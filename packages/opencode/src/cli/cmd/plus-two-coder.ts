@@ -420,7 +420,9 @@ N = 0-100 arasi tam sayi`
     })
     const parsed = parseLLMScore(result.text)
     if (parsed !== null) return parsed
-  } catch {}
+  } catch (err) {
+    console.warn(`LLM skorlama basarisiz, keyword fallback kullaniliyor: ${err instanceof Error ? err.message : String(err)}`)
+  }
   return keywordFallback(params.solution)
 }
 

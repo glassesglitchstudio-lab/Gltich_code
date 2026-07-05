@@ -10,6 +10,29 @@ const MAX_RESPONSE_SIZE = 5 * 1024 * 1024 // 5MB
 const DEFAULT_TIMEOUT = 30 * 1000 // 30 seconds
 const MAX_TIMEOUT = 120 * 1000 // 2 minutes
 
+function isPrivateIP(hostname: string): boolean {
+  if (/^127\./.test(hostname)) return true
+  if (/^10\./.test(hostname)) return true
+  if (/^172\.(1[6-9]|2\d|3[01])\./.test(hostname)) return true
+  if (/^192\.168\./.test(hostname)) return true
+  if (/^169\.254\./.test(hostname)) return true
+  if (hostname === "localhost" || hostname === "0.0.0.0") return true
+  if (hostname === "::1" || hostname === "[::1]") return true
+  return false
+}
+
+function isBlockedURL(url: string): boolean {
+  try {
+    const parsed = new URL(url)
+    if (isPrivateIP(parsed.hostname)) return true
+    if (parsed.hostname.endsWith(".internal")) return true
+    if (parsed.hostname.endsWith(".local")) return true
+    return false
+  } catch {
+    return true
+  }
+}
+
 const parameters = z.object({
   url: z.string().describe("The URL to fetch content from"),
   format: z
@@ -32,6 +55,10 @@ export const WebFetchTool = Tool.define(
         Effect.gen(function* () {
           if (!params.url.startsWith("http://") && !params.url.startsWith("https://")) {
             throw new Error("URL must start with http:// or https://")
+          }
+
+          if (isBlockedURL(params.url)) {
+            throw new Error("Access to private/internal network addresses is blocked for security reasons")
           }
 
           yield* ctx.ask({

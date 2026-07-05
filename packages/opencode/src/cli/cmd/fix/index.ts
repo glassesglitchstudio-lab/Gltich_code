@@ -8,6 +8,8 @@ import { ProviderID } from "../../../provider/schema"
 import { Effect } from "effect"
 import { generateText } from "ai"
 import type { LanguageModel } from "ai"
+import { writeFileSync, mkdirSync } from "fs"
+import { join, dirname } from "path"
 import {
   parseIssueUrl,
   fetchIssue,
@@ -44,7 +46,9 @@ export function parseReviewResponse(text: string): ParsedReview {
     try {
       const data = JSON.parse(jsonMatch[1])
       return parseReviewJson(data, text)
-    } catch {}
+    } catch (err) {
+      console.warn(`JSON parse hatasi (code block): ${err instanceof Error ? err.message : String(err)}`)
+    }
   }
 
   // Try bare JSON object in text
@@ -53,7 +57,9 @@ export function parseReviewResponse(text: string): ParsedReview {
     try {
       const data = JSON.parse(bareJsonMatch[0])
       return parseReviewJson(data, text)
-    } catch {}
+    } catch (err) {
+      console.warn(`JSON parse hatasi (bare): ${err instanceof Error ? err.message : String(err)}`)
+    }
   }
 
   return {
@@ -415,10 +421,25 @@ export const FixCommand = cmd({
                 .filter((p) => p.action !== "no_change" && p.code)
                 .map((p) => ({ path: p.file_path, content: p.code! }))
 
+              const applyErrors: string[] = []
+              for (const file of filesToCommit) {
+                try {
+                  const fullPath = join(process.cwd(), file.path)
+                  mkdirSync(dirname(fullPath), { recursive: true })
+                  writeFileSync(fullPath, file.content, "utf-8")
+                } catch (error: any) {
+                  applyErrors.push(`${file.path}: ${error.message}`)
+                }
+              }
+
               ctx.applyResult = {
-                success: filesToCommit.length > 0,
+                success: applyErrors.length === 0 && filesToCommit.length > 0,
                 filesChanged: filesToCommit.map((f) => f.path),
-                errors: [],
+                errors: applyErrors,
+              }
+
+              if (applyErrors.length > 0) {
+                s.message(`Uyari: ${applyErrors.length} dosya yazilamadi`)
               }
 
               // ─── FAZ 7: Git & PR ───

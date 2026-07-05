@@ -135,17 +135,23 @@ export const SolveCommand = cmd({
                 return
               }
 
-              ctx.plan = {
-                goal: analysis?.goal || options.task,
-                subTasks: planData.subTasks.map((t: any, i: number) => ({
+              const allSubTasks = planData.subTasks.map((t: any, i: number) => ({
                   id: t.id || `T${i + 1}`,
                   title: t.title || `Alt gorev ${i + 1}`,
                   description: t.description || "",
                   dependencies: t.dependencies || [],
                   status: "pending" as const,
-                  filesChanged: [],
-                })),
-                estimatedSteps: planData.subTasks.length,
+                  filesChanged: [] as string[],
+                }))
+
+              if (allSubTasks.length > options.maxSteps) {
+                s.message(`Uyari: ${allSubTasks.length} gorev olusturuldu ama limit ${options.maxSteps}. Ilk ${options.maxSteps} gorev secildi.`)
+              }
+
+              ctx.plan = {
+                goal: analysis?.goal || options.task,
+                subTasks: allSubTasks.slice(0, options.maxSteps),
+                estimatedSteps: Math.min(allSubTasks.length, options.maxSteps),
                 complexity: analysis?.complexity || "medium",
               }
 
@@ -162,14 +168,13 @@ export const SolveCommand = cmd({
               }
 
               // ─── FAZ 4: Alt Gorevleri Calistir ───
-              s.message("\nFaz 3: Alt gorevler calistiriliyor...")
+              s.message("\nFaz 4: Alt gorevler calistiriliyor...")
               const completedOrder = topologicalSort(ctx.plan.subTasks)
 
-              for (const taskId of completedOrder) {
+              async function executeSingleSubTask(taskId: string) {
                 const subTask = ctx.plan.subTasks.find((t) => t.id === taskId)
-                if (!subTask) continue
+                if (!subTask) return
 
-                // Bagimlilik kontrolu
                 const depsOk = subTask.dependencies.every((dep) => {
                   const depTask = ctx.plan.subTasks.find((t) => t.id === dep)
                   return depTask?.status === "done"
@@ -179,13 +184,12 @@ export const SolveCommand = cmd({
                   subTask.status = "skipped"
                   subTask.error = "Bagimliliklar tamamlanamadi"
                   s.message(`  ${subTask.id}: ATLANDI (bagimlilik)`)
-                  continue
+                  return
                 }
 
                 s.message(`  ${subTask.id}: ${subTask.title} baslatiliyor...`)
                 subTask.status = "running"
 
-                // Baglilanmis gorevlerin sonuclarini topla
                 const contextParts = ctx.completedTasks
                   .filter((t) => subTask.dependencies.includes(t.id))
                   .map((t) => `${t.id} (${t.title}): ${t.result?.substring(0, 500) || "tamamlandi"}`)
@@ -200,15 +204,12 @@ export const SolveCommand = cmd({
                 })
 
                 try {
-                  const execResult = yield* Effect.promise(() =>
-                    generateText({ model: selectedModel.model, messages: [{ role: "user", content: execPrompt }] }),
-                  )
+                  const execResult = await generateText({ model: selectedModel!.model, messages: [{ role: "user", content: execPrompt }] })
 
                   subTask.result = execResult.text
                   subTask.status = "done"
                   ctx.completedTasks.push(subTask)
 
-                  // Dosya degisikliklerini cikar
                   const fileMatches = execResult.text.match(/Changes for `([^`]+)`/g)
                   if (fileMatches) {
                     subTask.filesChanged = fileMatches.map((m: string) =>
@@ -225,6 +226,44 @@ export const SolveCommand = cmd({
                   subTask.status = "failed"
                   subTask.error = err instanceof Error ? err.message : String(err)
                   s.message(`  ${subTask.id}: BASARISIZ - ${subTask.error}`)
+                }
+              }
+
+              // Bagimliliklara gore sirali calistir, paralel olabilecekleri grupla
+              const remaining = [...completedOrder]
+              while (remaining.length > 0) {
+                const readyBatch: string[] = []
+                for (const taskId of remaining) {
+                  const subTask = ctx.plan.subTasks.find((t) => t.id === taskId)
+                  if (!subTask) continue
+                  const depsOk = subTask.dependencies.every((dep) => {
+                    const depTask = ctx.plan.subTasks.find((t) => t.id === dep)
+                    return depTask?.status === "done" || depTask?.status === "skipped"
+                  })
+                  if (depsOk) readyBatch.push(taskId)
+                }
+
+                if (readyBatch.length === 0) {
+                  for (const taskId of remaining) {
+                    const subTask = ctx.plan.subTasks.find((t) => t.id === taskId)
+                    if (subTask && subTask.status === "pending") {
+                      subTask.status = "skipped"
+                      subTask.error = "Bagimli oldugu gorevler tamamlanamadi"
+                      s.message(`  ${subTask.id}: ATLANDI (kalan bagimlilik)`)
+                    }
+                  }
+                  break
+                }
+
+                const parallelBatch = readyBatch.slice(0, options.maxParallel)
+                const batchRemaining = readyBatch.slice(options.maxParallel)
+                remaining.splice(0, parallelBatch.length + batchRemaining.length)
+
+                if (parallelBatch.length > 1) {
+                  s.message(`  Paralel calistiriliyor: ${parallelBatch.join(", ")}`)
+                  yield* Effect.promise(() => Promise.all(parallelBatch.map((id) => executeSingleSubTask(id))))
+                } else {
+                  yield* Effect.promise(() => executeSingleSubTask(parallelBatch[0]))
                 }
               }
 
@@ -257,26 +296,38 @@ export function topologicalSort(tasks: SubTask[]): string[] {
   const sorted: string[] = []
   const visited = new Set<string>()
   const visiting = new Set<string>()
+  const skipped: string[] = []
 
-  function visit(id: string) {
-    if (visited.has(id)) return
-    if (visiting.has(id)) return // cycle detected, skip
+  function visit(id: string): boolean {
+    if (visited.has(id)) return true
+    if (visiting.has(id)) {
+      skipped.push(id)
+      return false // cycle detected
+    }
     visiting.add(id)
 
     const task = tasks.find((t) => t.id === id)
     if (task) {
       for (const dep of task.dependencies) {
-        visit(dep)
+        if (!visit(dep)) {
+          visiting.delete(id)
+          return false
+        }
       }
     }
 
     visiting.delete(id)
     visited.add(id)
     sorted.push(id)
+    return true
   }
 
   for (const task of tasks) {
     visit(task.id)
+  }
+
+  if (skipped.length > 0) {
+    console.warn(`  Uyari: Döngüsel bagimlilik tespit edildi, atlanan gorevler: ${skipped.join(", ")}`)
   }
 
   return sorted

@@ -28,10 +28,8 @@ export function start() {
 
     lock = true
     armed = false
-    const file = path.join(
-      Global.Path.log,
-      `heap-${process.pid}-${new Date().toISOString().replace(/[:.]/g, "")}.heapsnapshot`,
-    )
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "")
+    const file = path.join(Global.Path.log, `heap-${process.pid}-${timestamp}.heapsnapshot`)
     log.warn("heap usage exceeded limit", {
       rss: stat.rss,
       heap: stat.heapUsed,

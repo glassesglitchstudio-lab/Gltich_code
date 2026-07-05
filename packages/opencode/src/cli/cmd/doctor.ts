@@ -63,20 +63,10 @@ function checkRuntime(): HealthCheck {
       message: `Bun ${bunVersion}`,
     }
   } catch {
-    try {
-      const nodeVersion = process.version
-      return {
-        name: "Runtime (Node)",
-        status: "warn",
-        message: `Node ${nodeVersion} (Bun recommended for optimal performance)`,
-      }
-    } catch {
-      return {
-        name: "Runtime",
-        status: "error",
-        message: "No compatible runtime found",
-        details: "Install Bun: curl -fsSL https://bun.sh/install | bash",
-      }
+    return {
+      name: "Runtime (Node)",
+      status: "warn",
+      message: `Node ${process.version} (Bun recommended for optimal performance)`,
     }
   }
 }
@@ -243,21 +233,42 @@ function displayResults(checks: HealthCheck[], verbose: boolean) {
 }
 
 async function attemptFixes(checks: HealthCheck[]) {
-  const failures = checks.filter((c) => c.status === "error")
-  if (failures.length === 0) {
+  const issues = checks.filter((c) => c.status === "error" || c.status === "warn")
+  if (issues.length === 0) {
     console.log("No issues to fix.")
     return
   }
 
   console.log("\nAttempting automatic fixes...\n")
 
-  for (const check of failures) {
+  let fixedCount = 0
+
+  for (const check of issues) {
     if (check.name === "Permissions") {
       console.log(`  → ${check.name}: Cannot auto-fix. Please check directory permissions manually.`)
     } else if (check.name === "Disk Space") {
       console.log(`  → ${check.name}: Cannot auto-fix. Please free up disk space.`)
+    } else if (check.name === "Database") {
+      const dbDir = path.join(process.cwd(), ".glitchcode")
+      if (!fs.existsSync(dbDir)) {
+        fs.mkdirSync(dbDir, { recursive: true })
+        fs.mkdirSync(path.join(dbDir, "command"), { recursive: true })
+        fs.mkdirSync(path.join(dbDir, "skills"), { recursive: true })
+        fs.writeFileSync(path.join(dbDir, "command", "README.md"), "# Glitch Code - Commands\n")
+        fs.writeFileSync(path.join(dbDir, "skills", "README.md"), "# Glitch Code - Skills\n")
+        console.log(`  → ${check.name}: .glitchcode directory created.`)
+        fixedCount++
+      } else {
+        console.log(`  → ${check.name}: Already configured.`)
+      }
+    } else if (check.name === "Runtime (Node)") {
+      console.log(`  → ${check.name}: Install Bun for better performance: curl -fsSL https://bun.sh/install | bash`)
     } else {
       console.log(`  → ${check.name}: No automatic fix available.`)
     }
+  }
+
+  if (fixedCount > 0) {
+    console.log(`\nFixed ${fixedCount} issue(s).`)
   }
 }

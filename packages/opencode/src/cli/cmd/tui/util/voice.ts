@@ -130,10 +130,15 @@ export function startStreaming(opts: {
   const handle: StreamingHandle = { proc, vad, startTime: Date.now(), aborted: false, reading: Promise.resolve() }
 
   const stderrChunks: Buffer[] = []
+  let stderrSize = 0
+  const MAX_STDERR_SIZE = 1024 * 1024 // 1MB limit
   if (proc.stderr) {
     ;(async () => {
       for await (const chunk of proc.stderr as AsyncIterable<Buffer>) {
-        stderrChunks.push(chunk)
+        if (stderrSize < MAX_STDERR_SIZE) {
+          stderrChunks.push(chunk)
+          stderrSize += chunk.length
+        }
       }
     })().catch(() => {})
   }

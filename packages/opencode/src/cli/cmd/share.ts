@@ -95,7 +95,11 @@ function anonymizeText(text: string): string {
     .replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, "[EMAIL]")
     .replace(/sk-[a-zA-Z0-9]{20,}/g, "[API_KEY]")
     .replace(/ghp_[a-zA-Z0-9]{36}/g, "[GITHUB_TOKEN]")
-    .replace(/(?:password|sifre|parola)\s*[:=]\s*\S+/gi, "[REDACTED]")
+    .replace(/glc-[a-zA-Z0-9]{20,}/g, "[GLITCH_TOKEN]")
+    .replace(/ak-[a-zA-Z0-9]{20,}/g, "[API_KEY]")
+    .replace(/xox[bpsa]-[a-zA-Z0-9-]+/g, "[SLACK_TOKEN]")
+    .replace(/(?:password|sifre|parola|passwd|secret|token|api_key|apikey|access_token)\s*[:=]\s*\S+/gi, "[REDACTED]")
+    .replace(/-----BEGIN (?:RSA |EC |DSA )?PRIVATE KEY-----[\s\S]*?-----END (?:RSA |EC |DSA )?PRIVATE KEY-----/g, "[PRIVATE_KEY]")
 }
 
 function formatAsMarkdown(
@@ -207,7 +211,7 @@ function formatAsHTML(
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${session.title}</title>
+  <title>${escapeHtml(session.title)}</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #1a1a2e; color: #eee; }
     h1 { color: #FF6B00; }
@@ -221,7 +225,7 @@ function formatAsHTML(
   </style>
 </head>
 <body>
-  <h1>${session.title}</h1>
+  <h1>${escapeHtml(session.title)}</h1>
   <p><strong>Session:</strong> ${session.id}</p>
   <p><strong>Tarih:</strong> ${new Date(session.time.created).toLocaleString("tr-TR")}</p>
   <hr>`)
