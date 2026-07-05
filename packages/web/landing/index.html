@@ -127,7 +127,213 @@
       .stats-grid { grid-template-columns: repeat(2, 1fr); }
       .install-grid { grid-template-columns: 1fr; }
       .footer-top { flex-direction: column; gap: 20px; }
+      .changelog-item, .changelog-item.right { padding-left: 0; padding-right: 0; }
+      .timeline-line { left: 20px; }
+      .changelog-badge { left: 20px; }
     }
+
+    /* ═══════════════════════════════════════════════ */
+    /* Changelog & Roadmap Section - Showy Animations  */
+    /* ═══════════════════════════════════════════════ */
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes glowPulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(139,92,246,0.3); }
+      50% { box-shadow: 0 0 40px rgba(255,107,0,0.5); }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+    @keyframes slideFromLeft {
+      from { opacity: 0; transform: translateX(-60px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideFromRight {
+      from { opacity: 0; transform: translateX(60px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes neonGlow {
+      0%, 100% { text-shadow: 0 0 10px rgba(139,92,246,0.5); }
+      50% { text-shadow: 0 0 20px rgba(255,107,0,0.8), 0 0 40px rgba(139,92,246,0.4); }
+    }
+    @keyframes particleFloat {
+      0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+      10% { opacity: 0.6; }
+      90% { opacity: 0.6; }
+      100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+    }
+    @keyframes drawLine {
+      from { height: 0; }
+      to { height: 100%; }
+    }
+
+    /* Changelog Section */
+    .changelog { position: relative; overflow: hidden; background: var(--bg); }
+    .changelog::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(circle at 20% 50%, rgba(139,92,246,0.08), transparent 50%),
+                  radial-gradient(circle at 80% 50%, rgba(255,107,0,0.06), transparent 50%);
+      pointer-events: none;
+    }
+    #particles {
+      position: absolute; inset: 0; pointer-events: none; z-index: 0;
+    }
+    .changelog > .container { position: relative; z-index: 1; }
+
+    /* Timeline */
+    .timeline { position: relative; max-width: 900px; margin: 0 auto; padding: 40px 0; }
+    .timeline-line {
+      position: absolute; left: 50%; top: 0; bottom: 0; width: 2px;
+      background: linear-gradient(180deg, var(--violet), var(--orange), transparent);
+      transform: translateX(-50%);
+    }
+
+    /* Changelog Item */
+    .changelog-item {
+      position: relative; margin-bottom: 60px; display: flex;
+      justify-content: flex-start; padding-right: 55%;
+      opacity: 0; transform: translateX(-60px);
+      transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .changelog-item.visible { opacity: 1; transform: translateX(0); }
+    .changelog-item.right {
+      justify-content: flex-end; padding-right: 0; padding-left: 55%;
+      transform: translateX(60px);
+    }
+    .changelog-item.right.visible { transform: translateX(0); }
+
+    /* Badge */
+    .changelog-badge {
+      position: absolute; left: 50%; top: -12px; transform: translateX(-50%);
+      padding: 4px 16px; background: var(--violet); border-radius: 100px;
+      font-size: 12px; font-weight: 600; color: white; z-index: 2;
+      box-shadow: 0 0 20px rgba(139,92,246,0.4);
+      white-space: nowrap;
+    }
+    .changelog-badge.upcoming {
+      background: linear-gradient(135deg, var(--violet), var(--orange));
+      animation: glowPulse 2s infinite;
+    }
+
+    /* Card */
+    .changelog-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 28px; width: 100%;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .changelog-card.glass {
+      background: rgba(139,92,246,0.04);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(139,92,246,0.2);
+    }
+    .changelog-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 60px rgba(139,92,246,0.2);
+      border-color: var(--violet);
+    }
+
+    /* Icon */
+    .changelog-icon {
+      font-size: 36px; margin-bottom: 16px;
+      filter: drop-shadow(0 0 10px rgba(139,92,246,0.3));
+    }
+    .changelog-icon.float { animation: float 3s ease-in-out infinite; }
+
+    /* Details */
+    .changelog-details, .roadmap-details {
+      margin-top: 16px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .detail-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 13px; color: var(--text2);
+    }
+    .detail-icon { color: var(--orange); font-weight: bold; flex-shrink: 0; }
+
+    /* Terminal */
+    .changelog-terminal {
+      background: rgba(0,0,0,0.6); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 16px; margin-top: 12px;
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    }
+    .changelog-terminal code { color: var(--violet-light); }
+    .terminal-cursor { animation: blink 1s infinite; color: var(--orange); }
+
+    /* Pipeline Steps */
+    .pipeline-steps {
+      display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap;
+    }
+    .pipeline-step {
+      padding: 6px 12px; background: rgba(139,92,246,0.1);
+      border: 1px solid rgba(139,92,246,0.3); border-radius: 6px;
+      font-size: 11px; color: var(--violet-light);
+      transition: all 0.3s; cursor: default;
+    }
+    .pipeline-step:hover {
+      background: rgba(139,92,246,0.2);
+      border-color: var(--orange);
+      transform: scale(1.05);
+      color: var(--orange);
+    }
+
+    /* Provider Grid */
+    .provider-grid {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+    }
+    .provider-tag {
+      padding: 6px 14px; background: rgba(139,92,246,0.1);
+      border: 1px solid rgba(139,92,246,0.2); border-radius: 100px;
+      font-size: 12px; color: var(--text2);
+      transition: all 0.3s; cursor: default;
+    }
+    .provider-tag:hover {
+      background: rgba(255,107,0,0.1);
+      border-color: var(--orange);
+      color: var(--orange);
+      transform: translateY(-2px);
+    }
+
+    /* Roadmap Header */
+    .roadmap-header {
+      text-align: center; padding: 60px 0 40px; position: relative;
+      opacity: 0; transform: scale(0.9);
+      transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .roadmap-header.visible { opacity: 1; transform: scale(1); }
+    .roadmap-header::before {
+      content: 'YOL HARITASI'; display: block;
+      font-size: 11px; letter-spacing: 4px; color: var(--orange);
+      margin-bottom: 12px; font-weight: 600;
+    }
+    .roadmap-header h3 {
+      font-size: 28px; font-weight: 800;
+      background: linear-gradient(135deg, var(--violet), var(--orange));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .roadmap-header p { color: var(--text3); margin-top: 8px; }
+
+    /* Roadmap Status */
+    .roadmap-status {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 16px; font-size: 12px; color: var(--text3);
+    }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .status-dot.planning { background: #fbbf24; animation: glowPulse 2s infinite; }
+    .status-dot.planned { background: #60a5fa; }
+    .status-dot.development { background: #34d399; animation: glowPulse 2s infinite; }
   </style>
 </head>
 <body>
@@ -137,6 +343,7 @@
       <a href="#" class="nav-brand">GLITCH<span>CODE</span></a>
       <div class="nav-links">
         <a href="#features">Özellikler</a>
+        <a href="#changelog">Yenilikler</a>
         <a href="#how">Nasıl Çalışır</a>
         <a href="#install">Kurulum</a>
         <a href="#commands">Komutlar</a>
@@ -224,6 +431,166 @@
           <h3>Offline Çalışma</h3>
           <p>Ollama ve LMStudio ile internet olmadan çalış. Yerel modellerle geliştir.</p>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- Changelog & Roadmap                            -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="changelog" id="changelog">
+    <canvas id="particles"></canvas>
+    <div class="container">
+      <h2 class="section-title">Yenilikler</h2>
+      <p class="section-desc">Glitch Code'un en son gelişmeleri ve yol haritası.</p>
+
+      <div class="timeline">
+        <div class="timeline-line"></div>
+
+        <!-- v0.2.35 -->
+        <div class="changelog-item" data-animate>
+          <div class="changelog-badge">v0.2.35</div>
+          <div class="changelog-card">
+            <div class="changelog-icon">🛡️</div>
+            <h3>22 Bug Düzeltmesi</h3>
+            <p>Kritik güvenlik ve performans düzeltmeleri.</p>
+            <div class="changelog-details">
+              <div class="detail-item"><span class="detail-icon">✓</span><span>Postinstall script — npm kurulumu artık çalışıyor</span></div>
+              <div class="detail-item"><span class="detail-icon">✓</span><span>SSRF koruması — private IP adreslerine erişim engellendi</span></div>
+              <div class="detail-item"><span class="detail-icon">✓</span><span>XSS koruması — session.title escape edildi</span></div>
+              <div class="detail-item"><span class="detail-icon">✓</span><span>Fix pipeline — timeout/retry mekanizması eklendi</span></div>
+              <div class="detail-item"><span class="detail-icon">✓</span><span>DB temizliği — resource sızıntısı önlendi</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Multi-Model Debate -->
+        <div class="changelog-item right" data-animate>
+          <div class="changelog-badge">Özellik</div>
+          <div class="changelog-card">
+            <div class="changelog-icon">🤖</div>
+            <h3>Multi-Model Debate</h3>
+            <p>2-3 model aynı sorunu tartışır.</p>
+            <div class="changelog-terminal">
+              <code>$ glitch fix --debate https://github.com/user/repo/issues/42</code>
+              <span class="terminal-cursor">|</span>
+            </div>
+            <div class="changelog-details">
+              <div class="detail-item"><span class="detail-icon">→</span><span>Cross-critique: Her model diğerinin çözümünü eleştirir</span></div>
+              <div class="detail-item"><span class="detail-icon">→</span><span>LLM-based scoring ile skorlama</span></div>
+              <div class="detail-item"><span class="detail-icon">→</span><span>Consensus: Moderatör nihai kararı verir</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7 Fazlı Pipeline -->
+        <div class="changelog-item" data-animate>
+          <div class="changelog-badge">Pipeline</div>
+          <div class="changelog-card">
+            <div class="changelog-icon">🔧</div>
+            <h3>7 Fazlı Fix Pipeline</h3>
+            <p>GitHub issue'sunu otomatik çözer.</p>
+            <div class="pipeline-steps">
+              <div class="pipeline-step">1. Triage</div>
+              <div class="pipeline-step">2. Plan</div>
+              <div class="pipeline-step">3. Discover</div>
+              <div class="pipeline-step">4. Propose</div>
+              <div class="pipeline-step">5. Review</div>
+              <div class="pipeline-step">6. Apply</div>
+              <div class="pipeline-step">7. PR</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 40+ Provider -->
+        <div class="changelog-item right" data-animate>
+          <div class="changelog-badge">Ekosistem</div>
+          <div class="changelog-card">
+            <div class="changelog-icon">🌐</div>
+            <h3>40+ AI Provider</h3>
+            <p>Tek arayüzde tüm modeller.</p>
+            <div class="provider-grid">
+              <span class="provider-tag">OpenAI</span>
+              <span class="provider-tag">Anthropic</span>
+              <span class="provider-tag">Google</span>
+              <span class="provider-tag">Mistral</span>
+              <span class="provider-tag">Cohere</span>
+              <span class="provider-tag">Ollama</span>
+              <span class="provider-tag">+34 daha</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ Roadmap Başlığı ═══ -->
+        <div class="roadmap-header" data-animate>
+          <h3>Yol Haritası</h3>
+          <p>Gelecek özellikler ve geliştirmeler.</p>
+        </div>
+
+        <!-- Repo Map -->
+        <div class="changelog-item" data-animate>
+          <div class="changelog-badge upcoming">Yakında</div>
+          <div class="changelog-card glass">
+            <div class="changelog-icon float">🗺️</div>
+            <h3>Repo Map</h3>
+            <p>Büyük projelerde akıllı bağlam yönetimi.</p>
+            <div class="roadmap-details">
+              <div class="detail-item"><span class="detail-icon">→</span><span>1000+ dosyalık projelerde LLM'e sadece ilgili dosyalar gönderilir</span></div>
+              <div class="detail-item"><span class="detail-icon">→</span><span>TypeScript AST parser ile export/import haritası</span></div>
+              <div class="detail-item"><span class="detail-icon">→</span><span>Fonksiyon/sınıf bağımlılık graph'ı</span></div>
+            </div>
+            <div class="roadmap-status"><span class="status-dot planning"></span>Planlama aşamasında</div>
+          </div>
+        </div>
+
+        <!-- VS Code Extension -->
+        <div class="changelog-item right" data-animate>
+          <div class="changelog-badge upcoming">Yakında</div>
+          <div class="changelog-card glass">
+            <div class="changelog-icon float">🔌</div>
+            <h3>VS Code Extension</h3>
+            <p>IDE içinde Glitch Code deneyimi.</p>
+            <div class="roadmap-details">
+              <div class="detail-item"><span class="detail-icon">→</span><span>WebSocket ile Glitch Code server'a bağlanır</span></div>
+              <div class="detail-item"><span class="detail-icon">→</span><span>Webview panel ile chat arayüzü</span></div>
+              <div class="detail-item"><span class="detail-icon">→</span><span>Diff view ile dosya değişiklikleri</span></div>
+            </div>
+            <div class="roadmap-status"><span class="status-dot planned"></span>Planlandı</div>
+          </div>
+        </div>
+
+        <!-- Plugin Ekosistemi -->
+        <div class="changelog-item" data-animate>
+          <div class="changelog-badge upcoming">Yakında</div>
+          <div class="changelog-card glass">
+            <div class="changelog-icon float">🧩</div>
+            <h3>Plugin Ekosistemi</h3>
+            <p>Topluluğun kendi araçlarını yazması.</p>
+            <div class="roadmap-details">
+              <div class="detail-item"><span class="detail-icon">→</span><span>Plugin API: Tool, Provider, Command tanımları</span></div>
+              <div class="detail-item"><span class="detail-icon">→</span><span>Plugin market: GitHub'dan keşif ve kurulum</span></div>
+              <div class="detail-item"><span class="detail-icon">→</span><span>Hot reload: Restart olmadan yükleme</span></div>
+            </div>
+            <div class="roadmap-status"><span class="status-dot planned"></span>Planlandı</div>
+          </div>
+        </div>
+
+        <!-- GitHub Entegrasyonu -->
+        <div class="changelog-item right" data-animate>
+          <div class="changelog-badge upcoming">Yakında</div>
+          <div class="changelog-card glass">
+            <div class="changelog-icon float">🐙</div>
+            <h3>GitHub Entegrasyonu</h3>
+            <p>Tek komutla GitHub işleri.</p>
+            <div class="roadmap-details">
+              <div class="detail-item"><span class="detail-icon">→</span><span><code>glitch pr create</code> — PR oluşturma</span></div>
+              <div class="detail-item"><span class="detail-icon">→</span><span><code>glitch pr review</code> — Otomatik inceleme</span></div>
+              <div class="detail-item"><span class="detail-icon">→</span><span><code>glitch issue list</code> — Issue yönetimi</span></div>
+            </div>
+            <div class="roadmap-status"><span class="status-dot development"></span>Geliştirme aşamasında</div>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
@@ -320,6 +687,7 @@
           <a href="https://github.com/glassesglitchstudio-lab/Gltich_code" target="_blank">GitHub</a>
           <a href="https://www.npmjs.com/package/glitchcode-cli" target="_blank">npm</a>
           <a href="#features">Özellikler</a>
+          <a href="#changelog">Yenilikler</a>
           <a href="#install">Kurulum</a>
         </div>
       </div>
@@ -328,6 +696,76 @@
       </div>
     </div>
   </footer>
+
+  <script>
+    // ═══════════════════════════════════════════════
+    // Particle Effects
+    // ═══════════════════════════════════════════════
+    const canvas = document.getElementById('particles');
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      const particles = [];
+      const PARTICLE_COUNT = 30;
+
+      function resizeCanvas() {
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+      }
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+
+      function createParticle() {
+        return {
+          x: Math.random() * canvas.width,
+          y: canvas.height + 10,
+          size: Math.random() * 3 + 1,
+          speedY: Math.random() * 0.8 + 0.3,
+          speedX: (Math.random() - 0.5) * 0.4,
+          opacity: Math.random() * 0.5 + 0.1,
+          color: Math.random() > 0.5 ? '#8b5cf6' : '#ff6b00'
+        };
+      }
+
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        const p = createParticle();
+        p.y = Math.random() * canvas.height;
+        particles.push(p);
+      }
+
+      function animateParticles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach((p, i) => {
+          p.y -= p.speedY;
+          p.x += p.speedX;
+          p.opacity -= 0.0005;
+          if (p.y < -10 || p.opacity <= 0) {
+            particles[i] = createParticle();
+          }
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = p.color.replace(')', `, ${p.opacity})`).replace('rgb', 'rgba');
+          ctx.fill();
+        });
+        requestAnimationFrame(animateParticles);
+      }
+      animateParticles();
+    }
+
+    // ═══════════════════════════════════════════════
+    // Scroll Animations (Intersection Observer)
+    // ═══════════════════════════════════════════════
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+
+    document.querySelectorAll('[data-animate]').forEach(el => {
+      observer.observe(el);
+    });
+  </script>
 
 </body>
 </html>
