@@ -260,28 +260,87 @@ export const FixCommand = cmd({
               if (options.targetFile) {
                 discoveredPaths = options.targetFile.split(",").map((f) => f.trim())
               } else {
-                const treeRes = yield* Effect.promise(() =>
-                  fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/${defaultBranch}?recursive=1`, {
-                    headers: { Accept: "application/vnd.github.v3+json" },
-                  }),
-                )
-                if (treeRes.ok) {
-                  const treeData = (yield* Effect.promise(() => treeRes.json())) as any
-                  const allFiles = (treeData.tree || [])
-                    .filter((f: any) => f.type === "blob")
-                    .map((f: any) => f.path as string)
+                // Repo Map ile akıllı dosya keşfi (yerel proje için)
+                const repoMapDiscovery = async () => {
+                  const { RepoMapAnalyzer } = await import("../../../repo-map/analyzer")
+                  const { RepoMapGraph } = await import("../../../repo-map/graph")
+                  const { RepoMapScanner } = await import("../../../repo-map/scanner")
 
-                  const discoveryPrompt = fillTemplate(loadPrompt("file-discovery"), {
-                    title: ctx.issue.title,
-                    body: ctx.issue.body.substring(0, 2000),
-                    plan: planResult.text.substring(0, 2000),
-                    fileTree: allFiles.slice(0, 200).join("\n"),
-                    fileContents: "(dosya icerikleri sonraki adimda okunacak)",
+                  const repoRoot = process.cwd()
+                  const scanner = new RepoMapScanner({ root: repoRoot })
+                  const { files } = await scanner.scanWithStats()
+
+                  if (files.length > 0) {
+                    s.message(`Repo Map: ${files.length} dosya tarandı`)
+                    const analyzer = new RepoMapAnalyzer(repoRoot)
+                    await analyzer.init()
+
+                    const entries = []
+                    for (const file of files.slice(0, 500)) { // Limit 500
+                      try {
+                        const entry = await analyzer.analyzeFile(file)
+                        entries.push(entry)
+                      } catch {
+                        // Skip unparseable files
+                      }
+                    }
+
+                    const index = await analyzer.buildIndex(entries, repoRoot)
+                    const graph = new RepoMapGraph(index)
+
+                    // Issue'dan anahtar kelimeleri çıkar
+                    const keywords = extractKeywords(ctx.issue.title + " " + ctx.issue.body)
+                    const paths: string[] = []
+                    for (const keyword of keywords) {
+                      const result = graph.execute({ type: "search", target: keyword })
+                      for (const file of result.results) {
+                        const relativePath = file.path.replace(repoRoot, "").replace(/\\/g, "/").slice(1)
+                        if (!paths.includes(relativePath)) {
+                          paths.push(relativePath)
+                        }
+                      }
+                    }
+                    return paths
+                  }
+                  return []
+                }
+
+                try {
+                  const paths = yield* Effect.tryPromise({
+                    try: repoMapDiscovery,
+                    catch: () => new Error("Repo Map discovery failed"),
                   })
-                  const discoveryResult = yield* Effect.promise(() =>
-                    generateText({ model: selectedModel.model, messages: [{ role: "user", content: discoveryPrompt }] }),
+                  discoveredPaths = paths
+                  s.message(`Repo Map: ${discoveredPaths.length} dosya keşfedildi`)
+                } catch {
+                  // Fallback to GitHub tree API
+                }
+
+                // GitHub tree API (fallback veya tamamlama)
+                if (discoveredPaths.length === 0) {
+                  const treeRes = yield* Effect.promise(() =>
+                    fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/${defaultBranch}?recursive=1`, {
+                      headers: { Accept: "application/vnd.github.v3+json" },
+                    }),
                   )
-                  discoveredPaths = extractFileList(discoveryResult.text)
+                  if (treeRes.ok) {
+                    const treeData = (yield* Effect.promise(() => treeRes.json())) as any
+                    const allFiles = (treeData.tree || [])
+                      .filter((f: any) => f.type === "blob")
+                      .map((f: any) => f.path as string)
+
+                    const discoveryPrompt = fillTemplate(loadPrompt("file-discovery"), {
+                      title: ctx.issue.title,
+                      body: ctx.issue.body.substring(0, 2000),
+                      plan: planResult.text.substring(0, 2000),
+                      fileTree: allFiles.slice(0, 200).join("\n"),
+                      fileContents: "(dosya icerikleri sonraki adimda okunacak)",
+                    })
+                    const discoveryResult = yield* Effect.promise(() =>
+                      generateText({ model: selectedModel.model, messages: [{ role: "user", content: discoveryPrompt }] }),
+                    )
+                    discoveredPaths = extractFileList(discoveryResult.text)
+                  }
                 }
               }
 
@@ -676,4 +735,50 @@ function printDryRun(ctx: FixContext) {
     console.log(`  ${r.reviewer}: ${r.approved ? "ONAY" : "REVIZE"}`)
   }
   console.log("\n" + "═".repeat(60))
+}
+
+function extractKeywords(text: string): string[] {
+  // Stop words
+  const stopWords = new Set([
+    "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for",
+    "of", "with", "by", "from", "is", "are", "was", "were", "be", "been",
+    "being", "have", "has", "had", "do", "does", "did", "will", "would",
+    "could", "should", "may", "might", "can", "shall", "this", "that",
+    "these", "those", "it", "its", "i", "you", "he", "she", "we", "they",
+    "what", "which", "who", "whom", "where", "when", "why", "how", "all",
+    "each", "every", "both", "few", "more", "most", "other", "some", "such",
+    "no", "not", "only", "own", "same", "so", "than", "too", "very",
+    "just", "because", "as", "until", "while", "about", "between", "through",
+    "during", "before", "after", "above", "below", "up", "down", "out",
+    "off", "over", "under", "again", "further", "then", "once", "here",
+    "there", "when", "where", "why", "how", "all", "any", "both", "each",
+    "few", "more", "most", "other", "some", "such", "no", "nor", "not",
+    "only", "own", "same", "so", "than", "too", "very", "s", "t", "don",
+    "now",
+  ])
+
+  // Common programming terms to keep
+  const keepTerms = new Set([
+    "auth", "login", "user", "admin", "api", "route", "endpoint",
+    "database", "db", "sql", "query", "model", "schema",
+    "component", "page", "view", "layout", "template",
+    "service", "controller", "handler", "middleware",
+    "test", "spec", "mock", "fixture",
+    "error", "bug", "fix", "issue", "crash",
+    "config", "settings", "env", "environment",
+    "type", "interface", "class", "function", "method",
+    "import", "export", "module", "package",
+    "git", "github", "ci", "cd", "deploy",
+  ])
+
+  const words = text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, " ")
+    .split(/\s+/)
+    .filter(word => word.length > 2)
+    .filter(word => !stopWords.has(word))
+
+  // Deduplicate and take top keywords
+  const unique = [...new Set(words)]
+  return unique.slice(0, 10)
 }
