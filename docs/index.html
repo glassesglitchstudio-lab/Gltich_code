@@ -4,1299 +4,210 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Glitch Code — AI-Powered CLI</title>
-  <meta name="description" content="40+ provider, 7 fazlı otomatik kod düzeltme, multi-model debate sistemi. Tek komutla.">
+  <meta name="description" content="40+ provider, 7 fazlı otomatik kod düzeltme, multi-model debate sistemi. Tek terminal komutuyla.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: #09090f;
-      --surface: rgba(139,92,246,.05);
-      --border: rgba(139,92,246,.12);
-      --violet: #8b5cf6;
-      --violet-d: #7c3aed;
-      --violet-l: #a78bfa;
-      --orange: #ff6b00;
-      --orange-l: #ff8533;
-      --text: #eeeef0;
-      --text2: #8b8a9e;
-      --text3: #5c5b6e;
-      --green: #22c55e;
-    }
-    * { margin:0; padding:0; box-sizing:border-box; }
-    html { scroll-behavior:smooth; }
-    body {
-      font-family:'Inter',sans-serif;
-      background:var(--bg);
-      color:var(--text);
-      line-height:1.6;
-      -webkit-font-smoothing:antialiased;
-      overflow-x:hidden;
-    }
-    code,pre,.mono { font-family:'JetBrains Mono','Fira Code',monospace; }
-
-    /* KEYFRAMES */
-    @keyframes glitchShift {
-      0%,100% { clip-path:inset(0); transform:translate(0); }
-      5% { clip-path:inset(20% 0 60% 0); transform:translate(-4px,2px); }
-      10% { clip-path:inset(50% 0 30% 0); transform:translate(4px,-2px); }
-      15% { clip-path:inset(10% 0 70% 0); transform:translate(-2px,3px); }
-      20% { clip-path:inset(80% 0 5% 0); transform:translate(2px,-3px); }
-      25% { clip-path:inset(30% 0 50% 0); transform:translate(-3px,1px); }
-      30% { clip-path:inset(70% 0 15% 0); transform:translate(3px,-1px); }
-      35% { clip-path:inset(5% 0 85% 0); transform:translate(-4px,2px); }
-      40% { clip-path:inset(60% 0 25% 0); transform:translate(4px,-2px); }
-      45% { clip-path:inset(40% 0 40% 0); transform:translate(-2px,3px); }
-      50% { clip-path:inset(90% 0 2% 0); transform:translate(2px,-3px); }
-      55% { clip-path:inset(15% 0 65% 0); transform:translate(-3px,1px); }
-      60% { clip-path:inset(55% 0 25% 0); transform:translate(3px,-1px); }
-      65% { clip-path:inset(8% 0 80% 0); transform:translate(-4px,2px); }
-      70% { clip-path:inset(65% 0 20% 0); transform:translate(4px,-2px); }
-      75% { clip-path:inset(35% 0 45% 0); transform:translate(-2px,3px); }
-      80% { clip-path:inset(75% 0 10% 0); transform:translate(2px,-3px); }
-      85% { clip-path:inset(25% 0 55% 0); transform:translate(-3px,1px); }
-      90% { clip-path:inset(45% 0 35% 0); transform:translate(3px,-1px); }
-      95% { clip-path:inset(60% 0 30% 0); transform:translate(-2px,2px); }
-    }
-    @keyframes glitchShift2 {
-      0%,100% { clip-path:inset(0); transform:translate(0); }
-      5% { clip-path:inset(60% 0 20% 0); transform:translate(4px,-2px); }
-      10% { clip-path:inset(30% 0 50% 0); transform:translate(-4px,2px); }
-      15% { clip-path:inset(70% 0 10% 0); transform:translate(2px,-3px); }
-      20% { clip-path:inset(5% 0 80% 0); transform:translate(-2px,3px); }
-      25% { clip-path:inset(50% 0 30% 0); transform:translate(3px,-1px); }
-      30% { clip-path:inset(15% 0 70% 0); transform:translate(-3px,1px); }
-      35% { clip-path:inset(85% 0 5% 0); transform:translate(4px,-2px); }
-      40% { clip-path:inset(25% 0 60% 0); transform:translate(-4px,2px); }
-      45% { clip-path:inset(40% 0 40% 0); transform:translate(2px,-3px); }
-      50% { clip-path:inset(75% 0 10% 0); transform:translate(-2px,3px); }
-      55% { clip-path:inset(20% 0 60% 0); transform:translate(3px,-1px); }
-      60% { clip-path:inset(55% 0 25% 0); transform:translate(-3px,1px); }
-      65% { clip-path:inset(80% 0 8% 0); transform:translate(4px,-2px); }
-      70% { clip-path:inset(35% 0 45% 0); transform:translate(-4px,2px); }
-      75% { clip-path:inset(65% 0 20% 0); transform:translate(2px,-3px); }
-      80% { clip-path:inset(10% 0 75% 0); transform:translate(-2px,3px); }
-      85% { clip-path:inset(45% 0 35% 0); transform:translate(3px,-1px); }
-      90% { clip-path:inset(70% 0 15% 0); transform:translate(-3px,1px); }
-      95% { clip-path:inset(30% 0 50% 0); transform:translate(2px,-2px); }
-    }
-    @keyframes glitchFlicker {
-      0%,100% { opacity:1; }
-      3% { opacity:0; }
-      6% { opacity:1; }
-      7% { opacity:0; }
-      8% { opacity:1; }
-      50% { opacity:1; }
-      51% { opacity:0.8; }
-      52% { opacity:1; }
-      80% { opacity:1; }
-      81% { opacity:0; }
-      82% { opacity:1; }
-    }
-    @keyframes neonPulse {
-      0%,100% { text-shadow: 0 0 10px var(--violet), 0 0 20px var(--violet), 0 0 40px var(--violet); }
-      50% { text-shadow: 0 0 5px var(--violet), 0 0 10px var(--violet), 0 0 20px var(--violet); }
-    }
-    @keyframes scanline {
-      0% { top: -10%; }
-      100% { top: 110%; }
-    }
-    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
-    @keyframes floatSlow { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-8px) rotate(3deg)} }
-    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.7;transform:scale(1.05)} }
-    @keyframes slideUp { from{opacity:0;transform:translateY(40px)} to{opacity:1;transform:translateY(0)} }
-    @keyframes slideLeft { from{opacity:0;transform:translateX(40px)} to{opacity:1;transform:translateX(0)} }
-    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-    @keyframes glow { 0%,100%{box-shadow:0 0 20px rgba(139,92,246,.3)} 50%{box-shadow:0 0 50px rgba(139,92,246,.6)} }
-    @keyframes rotate { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-    @keyframes particle {
-      0% { transform:translateY(0) translateX(0) scale(1); opacity:0; }
-      10% { opacity:1; }
-      90% { opacity:1; }
-      100% { transform:translateY(-100vh) translateX(50px) scale(0); opacity:0; }
-    }
-    @keyframes borderGlow {
-      0%,100% { border-color:rgba(139,92,246,.2); }
-      50% { border-color:rgba(139,92,246,.5); }
-    }
-    @keyframes textReveal {
-      from { clip-path:inset(0 100% 0 0); }
-      to { clip-path:inset(0 0 0 0); }
-    }
-    @keyframes bounce {
-      0%,20%,50%,80%,100% { transform:translateY(0); }
-      40% { transform:translateY(-15px); }
-      60% { transform:translateY(-7px); }
-    }
-    @keyframes shake {
-      0%,100% { transform:translateX(0); }
-      10%,30%,50%,70%,90% { transform:translateX(-3px); }
-      20%,40%,60%,80% { transform:translateX(3px); }
-    }
-    @keyframes typewriter {
-      from { width:0; }
-      to { width:100%; }
-    }
-    @keyframes cursorBlink {
-      0%,100% { border-right-color:var(--violet); }
-      50% { border-right-color:transparent; }
-    }
-    @keyframes ripple {
-      0% { transform:scale(0); opacity:1; }
-      100% { transform:scale(4); opacity:0; }
-    }
-    @keyframes morphBg {
-      0%,100% { border-radius:60% 40% 30% 70%/60% 30% 70% 40%; }
-      50% { border-radius:30% 60% 70% 40%/50% 60% 30% 60%; }
-    }
-    @keyframes countUp {
-      from { opacity:0; transform:translateY(20px); }
-      to { opacity:1; transform:translateY(0); }
-    }
-    @keyframes sparkle {
-      0%,100% { opacity:0; transform:scale(0) rotate(0deg); }
-      50% { opacity:1; transform:scale(1) rotate(180deg); }
-    }
-    @keyframes slideDown {
-      from { opacity:0; transform:translateY(-20px); }
-      to { opacity:1; transform:translateY(0); }
-    }
-    @keyframes scaleIn {
-      from { opacity:0; transform:scale(0.8); }
-      to { opacity:1; transform:scale(1); }
-    }
-
-    .animate-on-scroll { opacity:0; transform:translateY(30px); transition:all .8s cubic-bezier(.16,1,.3,1); }
-    .animate-on-scroll.visible { opacity:1; transform:translateY(0); }
-    .delay-1 { transition-delay:.1s; }
-    .delay-2 { transition-delay:.2s; }
-    .delay-3 { transition-delay:.3s; }
-    .delay-4 { transition-delay:.4s; }
-    .delay-5 { transition-delay:.5s; }
-    .delay-6 { transition-delay:.6s; }
+    :root{--bg:#09090f;--surface:rgba(139,92,246,.05);--surface2:rgba(139,92,246,.08);--border:rgba(139,92,246,.12);--violet:#8b5cf6;--violet-dim:#7c3aed;--violet-light:#a78bfa;--orange:#ff6b00;--text:#eeeef0;--text2:#8b8a9e;--text3:#5c5b6e}*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}code,.cmd{font-family:'JetBrains Mono','Fira Code',monospace}.container{max-width:1100px;margin:0 auto;padding:0 24px}
 
     /* NAV */
-    .nav {
-      position:fixed;top:0;left:0;right:0;z-index:100;
-      background:rgba(9,9,15,.85);
-      backdrop-filter:blur(20px) saturate(180%);
-      border-bottom:1px solid var(--border);
-      transition:all .3s;
-      animation:slideDown .8s ease;
-    }
-    .nav.scrolled { background:rgba(9,9,15,.95); box-shadow:0 4px 30px rgba(0,0,0,.3); }
-    .nav-in { max-width:1200px;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:64px; }
-    .nav-logo { font-weight:900;font-size:18px;color:var(--violet);text-decoration:none;letter-spacing:3px;animation:neonPulse 2s ease-in-out infinite; }
-    .nav-links { display:flex;gap:32px;align-items:center; }
-    .nav-links a { color:var(--text2);text-decoration:none;font-size:14px;font-weight:500;transition:all .3s;position:relative; }
-    .nav-links a:hover { color:var(--text);transform:translateY(-2px); }
-    .nav-links a::after { content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:linear-gradient(90deg,var(--violet),var(--orange));transition:width .3s;border-radius:2px; }
-    .nav-links a:hover::after { width:100%; }
-    .nav-cta {
-      background:linear-gradient(135deg,var(--violet),var(--violet-d));
-      color:#fff!important;padding:8px 20px;border-radius:8px;font-weight:600;
-      transition:all .3s;position:relative;overflow:hidden;
-    }
-    .nav-cta:hover { transform:translateY(-2px);box-shadow:0 4px 20px rgba(139,92,246,.4); }
-    .nav-cta::after {
-      content:'';position:absolute;top:50%;left:50%;width:0;height:0;
-      background:rgba(255,255,255,.2);border-radius:50%;
-      transform:translate(-50%,-50%);transition:width .3s,height .3s;
-    }
-    .nav-cta:active::after { width:200px;height:200px; }
-
-    .container { max-width:1200px;margin:0 auto;padding:0 32px; }
+    .topnav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(9,9,15,.8);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}.nav-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px}.nav-logo{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:16px;color:var(--violet);text-decoration:none;letter-spacing:2px}.nav-links{display:flex;gap:28px}.nav-links a{color:var(--text2);text-decoration:none;font-size:14px;transition:color .2s}.nav-links a:hover{color:var(--text)}
 
     /* HERO */
-    .hero {
-      position:relative;
-      padding:180px 0 120px;
-      text-align:center;
-      overflow:hidden;
-      min-height:100vh;
-      display:flex;
-      align-items:center;
-    }
-    .hero-bg {
-      position:absolute;inset:0;
-      background:
-        radial-gradient(ellipse 80% 60% at 50% 0%,rgba(139,92,246,.15) 0%,transparent 60%),
-        radial-gradient(ellipse 60% 40% at 80% 50%,rgba(255,107,0,.08) 0%,transparent 50%),
-        radial-gradient(ellipse 60% 40% at 20% 80%,rgba(139,92,246,.06) 0%,transparent 50%);
-      pointer-events:none;
-    }
-    .hero-morph {
-      position:absolute;
-      width:500px;height:500px;
-      background:radial-gradient(circle,rgba(139,92,246,.12) 0%,transparent 70%);
-      animation:morphBg 15s ease-in-out infinite,rotate 20s linear infinite;
-      filter:blur(60px);
-      opacity:.6;
-    }
-    .hero-morph.m1 { top:-100px;left:-100px; }
-    .hero-morph.m2 { bottom:-100px;right:-100px;background:radial-gradient(circle,rgba(255,107,0,.1) 0%,transparent 70%);animation-delay:-5s; }
-
-    .particles { position:absolute;inset:0;pointer-events:none;overflow:hidden; }
-    .particle {
-      position:absolute;
-      border-radius:50%;
-      animation:particle linear infinite;
-      opacity:0;
-    }
-
-    .hero-content { position:relative;z-index:2; }
-    .hero-badge {
-      display:inline-flex;align-items:center;gap:8px;
-      padding:8px 16px;
-      background:rgba(139,92,246,.1);
-      border:1px solid rgba(139,92,246,.2);
-      border-radius:20px;
-      font-size:12px;color:var(--violet-l);
-      font-weight:600;
-      margin-bottom:32px;
-      animation:slideUp .8s ease;
-    }
-    .hero-badge-dot {
-      width:8px;height:8px;
-      background:var(--green);
-      border-radius:50%;
-      animation:pulse 2s infinite;
-    }
-
-    /* GLITCH ASCII LOGO */
-    .glitch-container {
-      position:relative;
-      display:inline-block;
-      margin-bottom:40px;
-      animation:scaleIn 1s ease;
-    }
-    .glitch-ascii {
-      font-size:clamp(5px,1.2vw,11px);
-      line-height:1.15;
-      color:var(--violet);
-      font-weight:700;
-      position:relative;
-      padding:16px 24px;
-      display:inline-block;
-      animation:glitchFlicker 4s infinite;
-    }
-    .glitch-ascii::before,
-    .glitch-ascii::after {
-      content:attr(data-text);
-      position:absolute;top:16px;left:24px;
-      font-size:inherit;line-height:1.15;
-      white-space:pre;
-    }
-    .glitch-ascii::before {
-      color:var(--orange);
-      animation:glitchShift 3s infinite linear;
-      mix-blend-mode:screen;
-    }
-    .glitch-ascii::after {
-      color:var(--violet-l);
-      animation:glitchShift2 2.5s infinite linear;
-      mix-blend-mode:screen;
-    }
-    .glitch-scanline {
-      position:absolute;top:0;left:0;right:0;height:4px;
-      background:linear-gradient(transparent,rgba(139,92,246,.15),transparent);
-      animation:scanline 3s linear infinite;
-      pointer-events:none;
-    }
-    .glitch-border {
-      position:absolute;inset:0;
-      border:1px solid rgba(139,92,246,.15);
-      border-radius:8px;
-      animation:borderGlow 2s ease-in-out infinite;
-      pointer-events:none;
-    }
-
-    .hero h1 {
-      font-size:clamp(36px,6vw,72px);
-      font-weight:900;
-      line-height:1.05;
-      margin-bottom:24px;
-      letter-spacing:-1px;
-      animation:slideUp 1s ease .2s both;
-    }
-    .hero-line { display:block; }
-    .hero-accent {
-      background:linear-gradient(135deg,var(--violet),var(--orange));
-      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-      background-clip:text;
-      background-size:200% 200%;
-      animation:slideUp 1s ease .4s both,gradientShift 3s ease infinite;
-    }
-    @keyframes gradientShift {
-      0%,100% { background-position:0% 50%; }
-      50% { background-position:100% 50%; }
-    }
-    .hero-sub {
-      font-size:20px;color:var(--text2);
-      max-width:640px;margin:0 auto 48px;
-      line-height:1.7;
-      animation:slideUp 1s ease .6s both;
-    }
-    .hero-sub strong { color:var(--violet-l); }
-
-    /* STATS BAR */
-    .stats-bar {
-      display:flex;justify-content:center;gap:48px;
-      margin-bottom:56px;flex-wrap:wrap;
-      animation:slideUp 1s ease .8s both;
-    }
-    .stat { text-align:center; }
-    .stat-num {
-      font-size:36px;font-weight:900;
-      background:linear-gradient(135deg,var(--violet),var(--orange));
-      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-      background-clip:text;
-      animation:countUp .6s ease both;
-    }
-    .stat:nth-child(2) .stat-num { animation-delay:.1s; }
-    .stat:nth-child(3) .stat-num { animation-delay:.2s; }
-    .stat:nth-child(4) .stat-num { animation-delay:.3s; }
-    .stat-label { font-size:13px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-top:4px; }
+    .hero{position:relative;padding:140px 0 80px;text-align:center;overflow:hidden}.hero-glow{position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:800px;height:600px;background:radial-gradient(ellipse,rgba(139,92,246,.12) 0%,transparent 70%);pointer-events:none}.hero-logo{font-family:'Courier New',monospace;font-size:11px;line-height:1.15;color:var(--violet);display:inline-block;text-align:left;margin-bottom:40px;opacity:.9}.hero h1{font-size:52px;font-weight:800;line-height:1.1;margin-bottom:20px}.hero-line{display:block}.hero-accent{background:linear-gradient(135deg,var(--violet),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.hero-sub{font-size:18px;color:var(--text2);max-width:560px;margin:0 auto 48px}
 
     /* INSTALL */
-    .install-box {
-      background:rgba(13,13,20,.8);
-      border:1px solid var(--border);
-      border-radius:16px;
-      max-width:640px;margin:0 auto;
-      overflow:hidden;
-      backdrop-filter:blur(10px);
-      transition:all .4s;
-      animation:slideUp 1s ease 1s both;
-    }
-    .install-box:hover { border-color:var(--violet);box-shadow:0 0 40px rgba(139,92,246,.15);transform:translateY(-4px); }
-    .install-tabs { display:flex;border-bottom:1px solid var(--border); }
-    .install-tab {
-      flex:1;padding:14px;background:none;border:none;
-      color:var(--text3);font-size:13px;font-family:inherit;
-      cursor:pointer;transition:all .3s;font-weight:500;
-    }
-    .install-tab.active { color:var(--violet);background:rgba(139,92,246,.08);border-bottom:2px solid var(--violet); }
-    .install-tab:hover { color:var(--text2); }
-    .install-row { display:flex;align-items:center;padding:16px 20px;gap:16px; }
-    .install-cmd { flex:1;font-size:15px;color:var(--violet-l);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
-    .copy-btn {
-      background:linear-gradient(135deg,var(--violet),var(--violet-d));
-      color:#fff;border:none;padding:8px 18px;border-radius:8px;
-      font-size:13px;cursor:pointer;white-space:nowrap;transition:all .3s;font-weight:600;
-    }
-    .copy-btn:hover { transform:scale(1.05);box-shadow:0 4px 20px rgba(139,92,246,.4); }
-    .copy-btn.copied { background:linear-gradient(135deg,var(--green),#16a34a); }
+    .install-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;max-width:600px;margin:0 auto;overflow:hidden}.install-tabs{display:flex;border-bottom:1px solid var(--border)}.install-tab{flex:1;padding:10px;background:none;border:none;color:var(--text3);font-size:13px;font-family:inherit;cursor:pointer;transition:all .2s}.install-tab.active{color:var(--violet);background:rgba(139,92,246,.08);border-bottom:2px solid var(--violet)}.install-tab:hover{color:var(--text2)}.install-row{display:flex;align-items:center;padding:12px 16px;gap:12px}.install-cmd{flex:1;font-size:14px;color:var(--violet-light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.copy-btn{background:var(--violet);color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;transition:background .2s}.copy-btn:hover{background:var(--violet-dim)}
 
     /* TERMINAL */
-    .demo { padding:40px 0 120px; }
-    .term {
-      background:#0a0a12;
-      border:1px solid var(--border);
-      border-radius:16px;
-      overflow:hidden;
-      max-width:800px;margin:0 auto;
-      box-shadow:0 32px 100px rgba(0,0,0,.5);
-      transition:all .4s;
-      animation:scaleIn .8s ease;
-    }
-    .term:hover { border-color:rgba(139,92,246,.3);box-shadow:0 32px 100px rgba(0,0,0,.5),0 0 50px rgba(139,92,246,.1);transform:scale(1.02); }
-    .term-bar {
-      display:flex;align-items:center;gap:8px;
-      padding:14px 18px;
-      background:rgba(139,92,246,.04);
-      border-bottom:1px solid var(--border);
-    }
-    .dot { width:12px;height:12px;border-radius:50%;transition:transform .3s; }
-    .dot:hover { transform:scale(1.3); }
-    .dot-r { background:#ff5f57; }
-    .dot-y { background:#febc2e; }
-    .dot-g { background:#28c840; }
-    .term-title { margin-left:12px;font-size:12px;color:var(--text3);font-weight:500; }
-    .term-body { padding:24px;font-size:14px;line-height:2; }
-    .tl { white-space:nowrap; }
-    .tp { color:var(--orange); }
-    .td { color:var(--text3); }
-    .ti { color:var(--violet-l); }
-    .tok { color:var(--green); }
-    .ts { color:var(--orange); }
-    .tb { font-weight:700; }
-    .term-line { opacity:0;transform:translateX(-10px); }
+    .demo-section{padding:0 0 100px}.terminal-frame{background:#0d0d14;border:1px solid var(--border);border-radius:12px;overflow:hidden;max-width:720px;margin:0 auto;box-shadow:0 24px 80px rgba(0,0,0,.4)}.terminal-bar{display:flex;align-items:center;gap:8px;padding:12px 16px;background:rgba(139,92,246,.06);border-bottom:1px solid var(--border)}.terminal-dot{width:12px;height:12px;border-radius:50%}.terminal-dot.red{background:#ff5f57}.terminal-dot.yellow{background:#febc2e}.terminal-dot.green{background:#28c840}.terminal-title{margin-left:8px;font-size:12px;color:var(--text3);font-family:'JetBrains Mono',monospace}.terminal-body{padding:20px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.8}.terminal-line{white-space:nowrap}.t-prompt{color:var(--orange)}.t-cmd{color:var(--text)}.t-dim{color:var(--text3)}.t-info{color:var(--violet-light)}.t-ok{color:#22c55e}.t-success{color:var(--orange)}.t-bold{color:var(--text);font-weight:700}
 
     /* SECTIONS */
-    .sec { padding:120px 0; }
-    .sec-alt { background:var(--surface); }
-    .sec-header { text-align:center;margin-bottom:64px; }
-    .sec-badge {
-      display:inline-block;padding:6px 16px;
-      background:rgba(139,92,246,.1);
-      border:1px solid rgba(139,92,246,.2);
-      border-radius:20px;font-size:12px;color:var(--violet-l);
-      font-weight:600;text-transform:uppercase;letter-spacing:1px;
-      margin-bottom:16px;
-    }
-    .sec-title { font-size:clamp(28px,4vw,42px);font-weight:900;text-align:center;margin-bottom:16px;letter-spacing:-0.5px; }
-    .sec-desc { font-size:18px;color:var(--text2);text-align:center;max-width:560px;margin:0 auto; }
+    .section{padding:100px 0}.section--alt{background:var(--surface)}.section-title{font-size:36px;font-weight:800;text-align:center;margin-bottom:12px}.section-desc{font-size:17px;color:var(--text2);text-align:center;max-width:520px;margin:0 auto 56px}
 
     /* FEATURES */
-    .feat-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:24px; }
-    .feat-card {
-      background:rgba(13,13,20,.6);
-      border:1px solid var(--border);
-      border-radius:16px;padding:32px;
-      transition:all .4s cubic-bezier(.16,1,.3,1);
-      position:relative;overflow:hidden;
-    }
-    .feat-card::before {
-      content:'';position:absolute;top:0;left:0;right:0;height:3px;
-      background:linear-gradient(90deg,var(--violet),var(--orange));
-      opacity:0;transition:opacity .3s;
-    }
-    .feat-card:hover { border-color:var(--violet);transform:translateY(-8px);box-shadow:0 20px 60px rgba(139,92,246,.15); }
-    .feat-card:hover::before { opacity:1; }
-    .feat-icon {
-      font-size:32px;margin-bottom:16px;
-      display:inline-block;
-      animation:floatSlow 3s ease-in-out infinite;
-    }
-    .feat-card:nth-child(2) .feat-icon { animation-delay:.5s; }
-    .feat-card:nth-child(3) .feat-icon { animation-delay:1s; }
-    .feat-card:nth-child(4) .feat-icon { animation-delay:1.5s; }
-    .feat-card:nth-child(5) .feat-icon { animation-delay:2s; }
-    .feat-card:nth-child(6) .feat-icon { animation-delay:2.5s; }
-    .feat-card h3 { font-size:18px;font-weight:700;margin-bottom:10px; }
-    .feat-card p { color:var(--text2);font-size:14px;line-height:1.7; }
-    .feat-card code {
-      background:rgba(139,92,246,.15);padding:2px 8px;border-radius:4px;
-      font-size:12px;color:var(--violet-l);
-    }
-    .feat-example {
-      margin-top:16px;padding:12px;
-      background:rgba(0,0,0,.3);border-radius:8px;
-      border:1px solid rgba(139,92,246,.1);
-      font-size:12px;color:var(--text3);
-      font-family:'JetBrains Mono',monospace;
-      transition:all .3s;
-    }
-    .feat-card:hover .feat-example { border-color:rgba(139,92,246,.3);color:var(--violet-l); }
-
-    /* COMMAND SHOWCASE */
-    .cmd-showcase { display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:64px; }
-    .cmd-card {
-      background:rgba(13,13,20,.8);
-      border:1px solid var(--border);
-      border-radius:12px;padding:24px;text-align:center;
-      transition:all .4s;position:relative;overflow:hidden;
-    }
-    .cmd-card::after {
-      content:'';position:absolute;inset:0;
-      background:radial-gradient(circle at center,rgba(139,92,246,.1) 0%,transparent 70%);
-      opacity:0;transition:opacity .3s;
-    }
-    .cmd-card:hover { border-color:var(--violet);transform:scale(1.05); }
-    .cmd-card:hover::after { opacity:1; }
-    .cmd-name {
-      font-family:'JetBrains Mono',monospace;
-      font-size:16px;font-weight:700;color:var(--orange);
-      margin-bottom:8px;position:relative;z-index:1;
-    }
-    .cmd-desc { font-size:13px;color:var(--text2);position:relative;z-index:1; }
+    .feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.feature-card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:28px;transition:border-color .3s,transform .3s}.feature-card:hover{border-color:var(--violet);transform:translateY(-2px)}.feature-icon{font-size:28px;margin-bottom:14px}.feature-card h3{font-size:17px;font-weight:700;margin-bottom:8px}.feature-card p{color:var(--text2);font-size:14px}.feature-card code{background:rgba(139,92,246,.15);padding:1px 5px;border-radius:3px;font-size:12px;color:var(--violet-light)}
 
     /* STEPS */
-    .steps { max-width:700px;margin:0 auto;display:flex;flex-direction:column;gap:48px; }
-    .step { display:flex;gap:24px;align-items:flex-start;position:relative; }
-    .step::before {
-      content:'';position:absolute;left:22px;top:52px;bottom:-48px;width:2px;
-      background:linear-gradient(180deg,var(--violet),transparent);
-    }
-    .step:last-child::before { display:none; }
-    .step-num {
-      flex-shrink:0;width:48px;height:48px;
-      background:linear-gradient(135deg,var(--violet),var(--violet-d));
-      border-radius:14px;
-      display:flex;align-items:center;justify-content:center;
-      font-size:20px;font-weight:800;
-      box-shadow:0 4px 20px rgba(139,92,246,.3);
-      transition:all .3s;
-    }
-    .step:hover .step-num { transform:scale(1.1);box-shadow:0 8px 30px rgba(139,92,246,.5); }
-    .step-body h3 { font-size:22px;font-weight:700;margin-bottom:8px; }
-    .step-body p { color:var(--text2);font-size:16px; }
-    .step-body code {
-      background:rgba(139,92,246,.15);padding:2px 8px;border-radius:4px;
-      font-size:13px;color:var(--violet-l);
-    }
+    .steps{max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:40px}.step{display:flex;gap:20px;align-items:flex-start}.step-num{flex-shrink:0;width:44px;height:44px;background:var(--violet);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800}.step-body h3{font-size:20px;margin-bottom:6px}.step-body p{color:var(--text2);font-size:15px}.step-body code{background:rgba(139,92,246,.15);padding:1px 5px;border-radius:3px;font-size:13px;color:var(--violet-light)}
 
     /* BUILT */
-    .built-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:20px; }
-    .built-card {
-      display:flex;align-items:flex-start;gap:16px;
-      padding:24px;background:rgba(13,13,20,.6);
-      border:1px solid var(--border);border-radius:12px;
-      transition:all .3s;
-    }
-    .built-card:hover { border-color:var(--violet);transform:translateY(-4px); }
-    .built-check {
-      flex-shrink:0;width:32px;height:32px;
-      background:rgba(34,197,94,.15);color:var(--green);
-      border-radius:8px;
-      display:flex;align-items:center;justify-content:center;
-      font-size:16px;font-weight:700;
-    }
-    .built-card h3 { font-size:16px;font-weight:700;margin-bottom:4px; }
-    .built-card p { color:var(--text2);font-size:13px; }
+    .built-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.built-card{display:flex;align-items:flex-start;gap:14px;padding:20px;background:var(--surface2);border:1px solid var(--border);border-radius:10px}.built-check{flex-shrink:0;width:28px;height:28px;background:rgba(34,197,94,.15);color:#22c55e;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}.built-card h3{font-size:15px;font-weight:700;margin-bottom:4px}.built-card p{color:var(--text2);font-size:13px}
 
     /* PLATFORMS */
-    .plat-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:700px;margin:0 auto 40px; }
-    .plat-card {
-      display:flex;align-items:center;gap:12px;
-      padding:16px 20px;background:rgba(13,13,20,.6);
-      border:1px solid var(--border);border-radius:10px;
-      font-size:14px;transition:all .3s;
-    }
-    .plat-card:hover { border-color:var(--violet);transform:translateY(-4px) scale(1.02); }
-    .plat-icon { font-size:22px; }
-    .alt-install { display:flex;gap:16px;justify-content:center;flex-wrap:wrap; }
-    .link-btn {
-      padding:12px 24px;
-      background:rgba(139,92,246,.1);
-      border:1px solid var(--border);border-radius:10px;
-      color:var(--text);text-decoration:none;font-size:14px;
-      font-weight:600;transition:all .3s;
-    }
-    .link-btn:hover { border-color:var(--violet);background:rgba(139,92,246,.15);transform:translateY(-2px); }
-
-    /* CODE EXAMPLES */
-    .code-examples { display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-top:64px; }
-    .code-block {
-      background:#0a0a12;border:1px solid var(--border);
-      border-radius:12px;overflow:hidden;transition:all .3s;
-    }
-    .code-block:hover { border-color:rgba(139,92,246,.3);transform:translateY(-4px); }
-    .code-block-header {
-      display:flex;align-items:center;gap:8px;
-      padding:12px 16px;background:rgba(139,92,246,.04);
-      border-bottom:1px solid var(--border);
-      font-size:12px;color:var(--text3);
-    }
-    .code-block-body { padding:16px;font-size:13px;line-height:1.8;overflow-x:auto; }
-    .code-block-body .line { white-space:pre; }
-    .code-block-body .comment { color:var(--text3); }
-    .code-block-body .keyword { color:var(--violet-l); }
-    .code-block-body .string { color:var(--green); }
-    .code-block-body .function { color:var(--orange); }
+    .platform-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:600px;margin:0 auto 32px}.platform-card{display:flex;align-items:center;gap:10px;padding:14px 18px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:14px}.platform-icon{font-size:20px}.alt-install{display:flex;gap:16px;justify-content:center}.link-btn{padding:10px 20px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);text-decoration:none;font-size:14px;transition:border-color .2s}.link-btn:hover{border-color:var(--violet)}
 
     /* FOOTER */
-    .footer {
-      padding:64px 0 40px;border-top:1px solid var(--border);
-      background:rgba(0,0,0,.2);
-    }
-    .footer-in { display:flex;justify-content:space-between;align-items:center; }
-    .footer-brand { display:flex;flex-direction:column;gap:6px; }
-    .footer-logo { font-size:16px;font-weight:900;color:var(--violet);letter-spacing:2px; }
-    .footer-copy { font-size:13px;color:var(--text3); }
-    .footer-links { display:flex;gap:28px; }
-    .footer-links a { color:var(--text2);text-decoration:none;font-size:13px;transition:all .3s;font-weight:500; }
-    .footer-links a:hover { color:var(--violet);transform:translateY(-2px); }
+    .site-footer{padding:48px 0 32px;border-top:1px solid var(--border)}.footer-inner{display:flex;justify-content:space-between;align-items:center}.footer-brand{display:flex;flex-direction:column;gap:4px}.footer-logo{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:800;color:var(--violet);letter-spacing:1px}.footer-copy{font-size:13px;color:var(--text3)}.footer-links{display:flex;gap:24px}.footer-links a{color:var(--text2);text-decoration:none;font-size:13px;transition:color .2s}.footer-links a:hover{color:var(--violet)}
 
-    /* RESPONSIVE */
-    @media(max-width:768px){
-      .hero h1 { font-size:36px; }
-      .glitch-ascii { font-size:5px; }
-      .feat-grid,.built-grid,.cmd-showcase { grid-template-columns:1fr; }
-      .code-examples { grid-template-columns:1fr; }
-      .plat-grid { grid-template-columns:repeat(2,1fr); }
-      .nav-links { display:none; }
-      .footer-in { flex-direction:column;gap:24px;text-align:center; }
-      .stats-bar { gap:24px; }
-      .stat-num { font-size:28px; }
-    }
-
-    ::-webkit-scrollbar { width:8px; }
-    ::-webkit-scrollbar-track { background:var(--bg); }
-    ::-webkit-scrollbar-thumb { background:var(--violet);border-radius:4px; }
-    ::-webkit-scrollbar-thumb:hover { background:var(--violet-d); }
+    @media(max-width:768px){.hero h1{font-size:34px}.hero-logo{font-size:7px}.feature-grid,.built-grid{grid-template-columns:1fr}.platform-grid{grid-template-columns:repeat(2,1fr)}.nav-links{display:none}.footer-inner{flex-direction:column;gap:20px;text-align:center}}
   </style>
 </head>
 <body>
+  <nav class="topnav"><div class="nav-inner"><a href="/" class="nav-logo">GLITCH</a><div class="nav-links"><a href="#features">Özellikler</a><a href="#how">Nasıl Çalışır</a><a href="#install">Kurulum</a><a href="https://github.com/glassesglitchstudio-lab/Gltich_code" target="_blank">GitHub</a></div></div></nav>
 
-<!-- NAV -->
-<nav class="nav" id="nav"><div class="nav-in">
-  <a href="/" class="nav-logo">GLITCH</a>
-  <div class="nav-links">
-    <a href="#features">Özellikler</a>
-    <a href="#changelog">Yenilikler</a>
-    <a href="#commands">Komutlar</a>
-    <a href="#how">Nasıl Çalışır</a>
-    <a href="#examples">Örnekler</a>
-    <a href="#install">Kurulum</a>
-    <a href="https://github.com/glassesglitchstudio-lab/Gltich_code" target="_blank" class="nav-cta">GitHub</a>
-  </div>
-</div></nav>
-
-<!-- HERO -->
-<header class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-morph m1"></div>
-  <div class="hero-morph m2"></div>
-  <div class="particles" id="particles"></div>
-  <div class="hero-content container">
-
-    <div class="hero-badge">
-      <span class="hero-badge-dot"></span>
-      v0.2.34 — Şimdi Yayında
-    </div>
-
-    <div class="glitch-container">
-      <div class="glitch-scanline"></div>
-      <div class="glitch-border"></div>
-      <pre class="glitch-ascii" data-text="  ██████╗ ██╗  ██╗██╗███████╗██╗ ██████╗
- ██╔════╝ ██║  ██║██║██╔════╝██║██╔════╝
- ██║  ███╗███████║██║███████╗██║██║     
- ██║   ██║██╔══██║██║╚════██║██║██║     
- ╚██████╔╝██║  ██║██║███████║██║╚██████╗
-  ╚═════╝ ╚═╝  ╚═╝╚═╝╚══════╝╚═╝ ╚═════╝" aria-hidden="true">  ██████╗ ██╗  ██╗██╗███████╗██╗ ██████╗
- ██╔════╝ ██║  ██║██║██╔════╝██║██╔════╝
- ██║  ███╗███████║██║███████╗██║██║     
- ██║   ██║██╔══██║██║╚════██║██║██║     
- ╚██████╔╝██║  ██║██║███████║██║╚██████╗
-  ╚═════╝ ╚═╝  ╚═╝╚═╝╚══════╝╚═╝ ╚═════╝</pre>
-    </div>
-
-    <h1>
-      <span class="hero-line">Yapay zeka destekli</span>
-      <span class="hero-line hero-accent">geliştirici aracı</span>
-    </h1>
-
-    <p class="hero-sub">
-      40+ provider, 7 fazlı otomatik kod düzeltme, multi-model debate ve sınırsız hafıza.<br>
-      <strong>Tek komutla.</strong>
-    </p>
-
-    <div class="stats-bar">
-      <div class="stat"><div class="stat-num">40+</div><div class="stat-label">Provider</div></div>
-      <div class="stat"><div class="stat-num">10</div><div class="stat-label">Platform</div></div>
-      <div class="stat"><div class="stat-num">7</div><div class="stat-label">Faz Pipeline</div></div>
-      <div class="stat"><div class="stat-num">∞</div><div class="stat-label">Hafıza</div></div>
-    </div>
-
-    <div class="install-box">
-      <div class="install-tabs" role="tablist">
-        <button class="install-tab active" data-tab="npm">npm</button>
-        <button class="install-tab" data-tab="bun">bun</button>
-        <button class="install-tab" data-tab="curl">curl</button>
-        <button class="install-tab" data-tab="ps">PowerShell</button>
-      </div>
-      <div class="install-row">
-        <code class="install-cmd" data-panel="npm">$ npm install -g glitchcode-cli && glitch</code>
-        <code class="install-cmd" data-panel="bun" hidden>$ bun add -g glitchcode-cli && glitch</code>
-        <code class="install-cmd" data-panel="curl" hidden>$ curl -fsSL https://glitchcode.dev/install.sh | sh</code>
-        <code class="install-cmd" data-panel="ps" hidden>$ powershell -c "irm https://glitchcode.dev/install.ps1 | iex"</code>
-        <button class="copy-btn">Kopyala</button>
-      </div>
-    </div>
-  </div>
-</header>
-
-<!-- TERMINAL DEMO -->
-<section class="demo"><div class="container">
-  <div class="term" id="terminal">
-    <div class="term-bar">
-      <span class="dot dot-r"></span>
-      <span class="dot dot-y"></span>
-      <span class="dot dot-g"></span>
-      <span class="term-title">glitch — ~/my-project</span>
-    </div>
-    <div class="term-body" id="term-body">
-      <div class="tl term-line"><span class="tp">❯</span> <span class="mono">glitch fix https://github.com/user/repo/issues/42</span></div>
-    </div>
-  </div>
-</div></section>
-
-<!-- FEATURES -->
-<section class="sec" id="features"><div class="container">
-  <div class="sec-header animate-on-scroll">
-    <span class="sec-badge">Özellikler</span>
-    <h2 class="sec-title">Neden Glitch Code?</h2>
-    <p class="sec-desc">Diğer agent'lardan farkı ne? Her şeyi kendin şekillendirirsin.</p>
-  </div>
-  <div class="feat-grid">
-    <div class="feat-card animate-on-scroll delay-1">
-      <div class="feat-icon">⚔️</div>
-      <h3>PlusTwoCoder Debate</h3>
-      <p>2-3 model aynı kodu tartışır. Cross-critique ile her turda güçlenir. Sektörde ilk.</p>
-      <div class="feat-example">$ glitch plus-two-coder "React auth ekle"</div>
-    </div>
-    <div class="feat-card animate-on-scroll delay-2">
-      <div class="feat-icon">🔧</div>
-      <h3>7 Fazlı Otomatik Düzeltme</h3>
-      <p><code>glitch fix</code> ile GitHub issue'larını otomatik çöz. Triage'dan PR'a kadar.</p>
-      <div class="feat-example">$ glitch fix https://github.com/user/repo/issues/42</div>
-    </div>
-    <div class="feat-card animate-on-scroll delay-3">
-      <div class="feat-icon">🧠</div>
-      <h3>Obsidian Hafıza</h3>
-      <p>.md dosyalarıyla sınırsız hafıza. Geçmiş oturumları hatırla, bağlam kaybetme.</p>
-      <div class="feat-example">$ glitch hafizada ara "authentication"</div>
-    </div>
-    <div class="feat-card animate-on-scroll delay-4">
-      <div class="feat-icon">🌐</div>
-      <h3>40+ Provider</h3>
-      <p>OpenAI, Anthropic, Google, Ollama, Copilot ve daha fazlası. Tek yerden yönet.</p>
-      <div class="feat-example">Model: anthropic/claude-sonnet-4-20250514</div>
-    </div>
-    <div class="feat-card animate-on-scroll delay-5">
-      <div class="feat-icon">📊</div>
-      <h3>Görev Yönetimi</h3>
-      <p><code>glitch solve</code> ile karmaşık görevleri parçalara böl. Sub-agent ile çalıştır.</p>
-      <div class="feat-example">$ glitch solve "JWT authentication ekle"</div>
-    </div>
-    <div class="feat-card animate-on-scroll delay-6">
-      <div class="feat-icon">🔒</div>
-      <h3>Güvenlik Denetimi</h3>
-      <p>OWASP kontrollü security review. Otomatik tarama ve raporlama.</p>
-      <div class="feat-example">✓ Teknik: OK | Stil: OK | Güvenlik: OK</div>
-    </div>
-  </div>
-</div></section>
-
-<!-- COMMANDS -->
-<section class="sec sec-alt" id="commands"><div class="container">
-  <div class="sec-header animate-on-scroll">
-    <span class="sec-badge">Komutlar</span>
-    <h2 class="sec-title">Her Şey İçin Bir Komut</h2>
-    <p class="sec-desc">Tek komutla başla, ihtiyacın olan her şey hazır.</p>
-  </div>
-  <div class="cmd-showcase">
-    <div class="cmd-card animate-on-scroll delay-1"><div class="cmd-name">glitch fix</div><div class="cmd-desc">GitHub issue'larını otomatik çöz. 7 fazlı pipeline.</div></div>
-    <div class="cmd-card animate-on-scroll delay-2"><div class="cmd-name">glitch solve</div><div class="cmd-desc">Karmaşık görevleri parçala ve çalıştır.</div></div>
-    <div class="cmd-card animate-on-scroll delay-3"><div class="cmd-name">glitch plus-two-coder</div><div class="cmd-desc">Multi-model debate ile kod üret.</div></div>
-    <div class="cmd-card animate-on-scroll delay-4"><div class="cmd-name">glitch onboard</div><div class="cmd-desc">İlk kurulum ve yapılandırma.</div></div>
-    <div class="cmd-card animate-on-scroll delay-5"><div class="cmd-name">glitch cost</div><div class="cmd-desc">Token ve maliyet takibi.</div></div>
-    <div class="cmd-card animate-on-scroll delay-6"><div class="cmd-name">glitch bench</div><div class="cmd-desc">Multi-model benchmark karşılaştırması.</div></div>
-  </div>
-</div></section>
-
-<!-- HOW IT WORKS -->
-<section class="sec" id="how"><div class="container">
-  <div class="sec-header animate-on-scroll">
-    <span class="sec-badge">Nasıl Çalışır</span>
-    <h2 class="sec-title">3 Adımda Başla</h2>
-  </div>
-  <div class="steps">
-    <div class="step animate-on-scroll">
-      <div class="step-num">1</div>
-      <div class="step-body"><h3>Kur</h3><p>Tek komutla global kurulum. İlk çalıştırmada <code>.glitchcode/</code> klasörü otomatik oluşur.</p></div>
-    </div>
-    <div class="step animate-on-scroll">
-      <div class="step-num">2</div>
-      <div class="step-body"><h3>Yapılandır</h3><p><code>glitch onboard</code> ile provider seçimi, API key ve tema yapılandırması.</p></div>
-    </div>
-    <div class="step animate-on-scroll">
-      <div class="step-num">3</div>
-      <div class="step-body"><h3>Geliştir</h3><p>AI ile kod üret, düzelt, incele. Terminalinden çıkma. Hızlı ve verimli.</p></div>
-    </div>
-  </div>
-</div></section>
-
-<!-- CODE EXAMPLES -->
-<section class="sec sec-alt" id="examples"><div class="container">
-  <div class="sec-header animate-on-scroll">
-    <span class="sec-badge">Örnekler</span>
-    <h2 class="sec-title">Gerçek Kullanım Senaryoları</h2>
-    <p class="sec-desc">Glitch Code ile neler yapabileceğini keşfet.</p>
-  </div>
-  <div class="code-examples">
-    <div class="code-block animate-on-scroll">
-      <div class="code-block-header"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span style="margin-left:8px">Terminal — GitHub Issue Çözümü</span></div>
-      <div class="code-block-body">
-        <div class="line"><span class="comment"># GitHub issue'sunu otomatik çöz</span></div>
-        <div class="line"><span class="function">$ glitch fix</span> https://github.com/user/repo/issues/42</div>
-        <div class="line"> </div>
-        <div class="line"><span class="keyword">→</span> Model: anthropic/claude-sonnet-4-20250514</div>
-        <div class="line"><span class="keyword">→</span> Issue: user/repo#42</div>
-        <div class="line"><span class="string">✓</span> Faz 1: Triage — bug / high priority</div>
-        <div class="line"><span class="string">✓</span> Faz 2: Plan — 3 adımlık çözüm</div>
-        <div class="line"><span class="string">✓</span> Faz 3: 3 dosya keşfedildi</div>
-        <div class="line"><span class="string">✓</span> Faz 4: 2 dosya değiştirildi</div>
-        <div class="line"><span class="string">✓</span> Faz 5: Teknik: OK | Stil: OK | Güvenlik: OK</div>
-        <div class="line"><span class="string">✓</span> Faz 6-7: Branch + PR oluşturuldu</div>
-        <div class="line"><span class="function">▸ Glitch Fix tamamlandı!</span></div>
-      </div>
-    </div>
-    <div class="code-block animate-on-scroll">
-      <div class="code-block-header"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span style="margin-left:8px">Terminal — Multi-Model Debate</span></div>
-      <div class="code-block-body">
-        <div class="line"><span class="comment"># PlusTwoCoder ile debate başlat</span></div>
-        <div class="line"><span class="function">$ glitch plus-two-coder</span> "React auth ekle"</div>
-        <div class="line"> </div>
-        <div class="line"><span class="keyword">→</span> Modeller: claude, gpt-4o, gemini</div>
-        <div class="line"><span class="string">✓</span> Tur 1: Claude JWT, GPT Session, Gemini OAuth</div>
-        <div class="line"><span class="string">✓</span> Tur 2: Cross-critique — eksikler belirlendi</div>
-        <div class="line"><span class="string">✓</span> Tur 3: Hybrid çözüm: JWT + refresh + rotation</div>
-        <div class="line"><span class="function">▸ Skor: 87/100 — Debate tamamlandı!</span></div>
-      </div>
-    </div>
-    <div class="code-block animate-on-scroll">
-      <div class="code-block-header"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span style="margin-left:8px">Terminal — Görev Çözümleme</span></div>
-      <div class="code-block-body">
-        <div class="line"><span class="comment"># Karmaşık görevi parçala ve çalıştır</span></div>
-        <div class="line"><span class="function">$ glitch solve</span> "JWT authentication ekle"</div>
-        <div class="line"> </div>
-        <div class="line"><span class="string">✓</span> 4 alt görev belirlendi</div>
-        <div class="line"><span class="string">✓</span> Topological sort tamamlandı</div>
-        <div class="line"><span class="string">✓</span> T1.1: User model oluşturuldu</div>
-        <div class="line"><span class="string">✓</span> T1.2: Auth middleware yazıldı</div>
-        <div class="line"><span class="string">✓</span> T1.3: Login endpoint eklendi</div>
-        <div class="line"><span class="string">✓</span> T1.4: Testler yazıldı</div>
-        <div class="line"><span class="function">▸ Solve tamamlandı — 4/4 görev başarılı!</span></div>
-      </div>
-    </div>
-    <div class="code-block animate-on-scroll">
-      <div class="code-block-header"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span style="margin-left:8px">Terminal — Maliyet Takibi</span></div>
-      <div class="code-block-body">
-        <div class="line"><span class="comment"># Token ve maliyet istatistikleri</span></div>
-        <div class="line"><span class="function">$ glitch cost</span></div>
-        <div class="line"> </div>
-        <div class="line"><span class="keyword">Bu Ay:</span></div>
-        <div class="line">  Toplam token: <span class="string">1,247,832</span></div>
-        <div class="line">  Tahmini maliyet: <span class="string">$12.47</span></div>
-        <div class="line"><span class="keyword">Model Dağılımı:</span></div>
-        <div class="line">  Claude Sonnet: <span class="string">45%</span> — GPT-4o: <span class="string">30%</span></div>
-        <div class="line">  Gemini: <span class="string">15%</span> — Diğer: <span class="string">10%</span></div>
-        <div class="line"><span class="keyword">En Çok Kullanılan:</span></div>
-        <div class="line">  glitch fix: <span class="string">34</span> — solve: <span class="string">12</span> — ptc: <span class="string">8</span></div>
-      </div>
-    </div>
-  </div>
-</div></section>
-
-<!-- BUILT -->
-<section class="sec"><div class="container">
-  <div class="sec-header animate-on-scroll">
-    <span class="sec-badge">Hazır</span>
-    <h2 class="sec-title">Neler Var?</h2>
-    <p class="sec-desc">Diğerlerinin aksine, her şeyi önceden inşa ettik.</p>
-  </div>
-  <div class="built-grid">
-    <div class="built-card animate-on-scroll"><span class="built-check">✓</span><div><h3>MCP Desteği</h3><p>Model Context Protocol ile dış araçları bağla.</p></div></div>
-    <div class="built-card animate-on-scroll"><span class="built-check">✓</span><div><h3>Sub-agent Sistemi</h3><p>Alt ajanları paralel çalıştır.</p></div></div>
-    <div class="built-card animate-on-scroll"><span class="built-check">✓</span><div><h3>Plan Mode</h3><p>Çok adımlı görevleri planla ve uygula.</p></div></div>
-    <div class="built-card animate-on-scroll"><span class="built-check">✓</span><div><h3>Permission Gates</h3><p>Dosya erişimi izinleri.</p></div></div>
-    <div class="built-card animate-on-scroll"><span class="built-check">✓</span><div><h3>Theme Sistemi</h3><p>7 hazır tema, Glassmorphism.</p></div></div>
-    <div class="built-card animate-on-scroll"><span class="built-check">✓</span><div><h3>Offline Çalışma</h3><p>Ollama/LMStudio ile internet olmadan.</p></div></div>
-  </div>
-</div></section>
-
-<!-- ═══════════════════════════════════════════════ -->
-<!-- CHANGELOG & ROADMAP                            -->
-<!-- ═══════════════════════════════════════════════ -->
-<style>
-  /* Changelog Section */
-  .changelog { position:relative; overflow:hidden; background:var(--bg); padding:120px 0; }
-  .changelog::before {
-    content:''; position:absolute; inset:0;
-    background: radial-gradient(circle at 20% 50%, rgba(139,92,246,0.08), transparent 50%),
-                radial-gradient(circle at 80% 50%, rgba(255,107,0,0.06), transparent 50%);
-    pointer-events:none;
-  }
-  #cl-particles { position:absolute; inset:0; pointer-events:none; z-index:0; }
-  .changelog > .container { position:relative; z-index:1; }
-  .cl-badge { display:inline-block; padding:4px 16px; background:var(--violet); border-radius:100px; font-size:12px; font-weight:600; color:white; margin-bottom:12px; }
-  .cl-badge.upcoming { background:linear-gradient(135deg,var(--violet),var(--orange)); animation:glowPulse 2s infinite; }
-  .cl-title { font-size:40px; font-weight:800; text-align:center; margin-bottom:8px; }
-  .cl-desc { font-size:18px; color:var(--text2); text-align:center; max-width:600px; margin:0 auto 64px; }
-
-  /* Timeline */
-  .cl-timeline { position:relative; max-width:900px; margin:0 auto; padding:40px 0; }
-  .cl-timeline::before {
-    content:''; position:absolute; left:50%; top:0; bottom:0; width:2px;
-    background:linear-gradient(180deg,var(--violet),var(--orange),transparent);
-    transform:translateX(-50%);
-  }
-  .cl-item { position:relative; margin-bottom:60px; display:flex; justify-content:flex-start; padding-right:55%; opacity:0; transform:translateX(-60px); transition:all 0.8s cubic-bezier(0.175,0.885,0.32,1.275); }
-  .cl-item.visible { opacity:1; transform:translateX(0); }
-  .cl-item.right { justify-content:flex-end; padding-right:0; padding-left:55%; transform:translateX(60px); }
-  .cl-item.right.visible { transform:translateX(0); }
-  .cl-dot { position:absolute; left:50%; top:24px; transform:translateX(-50%); width:14px; height:14px; background:var(--violet); border-radius:50%; border:3px solid var(--bg); z-index:2; box-shadow:0 0 20px rgba(139,92,246,0.4); }
-  .cl-dot.upcoming { background:linear-gradient(135deg,var(--violet),var(--orange)); animation:glowPulse 2s infinite; }
-  .cl-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:28px; width:100%; transition:all 0.4s cubic-bezier(0.175,0.885,0.32,1.275); }
-  .cl-card.glass { background:rgba(139,92,246,0.04); backdrop-filter:blur(10px); border-color:rgba(139,92,246,0.2); }
-  .cl-card:hover { transform:translateY(-8px); box-shadow:0 20px 60px rgba(139,92,246,0.2); border-color:var(--violet); }
-  .cl-icon { font-size:36px; margin-bottom:12px; filter:drop-shadow(0 0 10px rgba(139,92,246,0.3)); }
-  .cl-icon.float { animation:float 3s ease-in-out infinite; }
-  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-  @keyframes glowPulse { 0%,100%{box-shadow:0 0 20px rgba(139,92,246,0.3)} 50%{box-shadow:0 0 40px rgba(255,107,0,0.5)} }
-  .cl-details { margin-top:12px; display:flex; flex-direction:column; gap:8px; }
-  .cl-detail { display:flex; align-items:flex-start; gap:10px; font-size:13px; color:var(--text2); }
-  .cl-detail b { color:var(--orange); flex-shrink:0; }
-  .cl-terminal { background:rgba(0,0,0,0.6); border:1px solid var(--border); border-radius:8px; padding:12px 16px; margin-top:12px; font-family:'JetBrains Mono',monospace; font-size:12px; }
-  .cl-terminal code { color:var(--violet-l); }
-  .cl-cursor { animation:blink 1s infinite; color:var(--orange); }
-  @keyframes blink { 0%,50%{opacity:1} 51%,100%{opacity:0} }
-  .cl-steps { display:flex; gap:6px; margin-top:12px; flex-wrap:wrap; }
-  .cl-step { padding:6px 12px; background:rgba(139,92,246,0.1); border:1px solid rgba(139,92,246,0.3); border-radius:6px; font-size:11px; color:var(--violet-l); transition:all 0.3s; cursor:default; }
-  .cl-step:hover { background:rgba(139,92,246,0.2); border-color:var(--orange); transform:scale(1.05); color:var(--orange); }
-  .cl-providers { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
-  .cl-tag { padding:6px 14px; background:rgba(139,92,246,0.1); border:1px solid rgba(139,92,246,0.2); border-radius:100px; font-size:12px; color:var(--text2); transition:all 0.3s; cursor:default; }
-  .cl-tag:hover { background:rgba(255,107,0,0.1); border-color:var(--orange); color:var(--orange); transform:translateY(-2px); }
-  .cl-roadmap-header { text-align:center; padding:60px 0 40px; }
-  .cl-roadmap-header::before { content:'YOL HARITASI'; display:block; font-size:11px; letter-spacing:4px; color:var(--orange); margin-bottom:12px; font-weight:600; }
-  .cl-roadmap-header h3 { font-size:28px; font-weight:800; background:linear-gradient(135deg,var(--violet),var(--orange)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-  .cl-roadmap-header p { color:var(--text3); margin-top:8px; }
-  .cl-status { display:flex; align-items:center; gap:8px; margin-top:16px; font-size:12px; color:var(--text3); }
-  .cl-status-dot { width:8px; height:8px; border-radius:50%; }
-  .cl-status-dot.planning { background:#fbbf24; animation:glowPulse 2s infinite; }
-  .cl-status-dot.planned { background:#60a5fa; }
-  .cl-status-dot.development { background:#34d399; animation:glowPulse 2s infinite; }
-  @media(max-width:768px) {
-    .cl-item,.cl-item.right { padding-left:40px!important; padding-right:0!important; justify-content:flex-start!important; }
-    .cl-timeline::before { left:20px; }
-    .cl-dot { left:20px; }
-  }
-</style>
-
-<section class="changelog" id="changelog">
-  <canvas id="cl-particles"></canvas>
-  <div class="container">
-    <div class="sec-header animate-on-scroll">
-      <span class="sec-badge">Yenilikler</span>
-      <h2 class="cl-title">Yenilikler & Yol Haritası</h2>
-      <p class="cl-desc">Glitch Code'un en son gelişmeleri ve gelecek planları.</p>
-    </div>
-
-    <div class="cl-timeline">
-
-      <!-- v0.2.35 -->
-      <div class="cl-item animate-on-scroll">
-        <div class="cl-dot"></div>
-        <div class="cl-card">
-          <div class="cl-badge">v0.2.35</div>
-          <div class="cl-icon">🛡️</div>
-          <h3>22 Bug Düzeltmesi</h3>
-          <p style="color:var(--text2);font-size:14px">Kritik güvenlik ve performans düzeltmeleri.</p>
-          <div class="cl-details">
-            <div class="cl-detail"><b>✓</b><span>Postinstall script — npm kurulumu artık çalışıyor</span></div>
-            <div class="cl-detail"><b>✓</b><span>SSRF koruması — private IP adreslerine erişim engellendi</span></div>
-            <div class="cl-detail"><b>✓</b><span>XSS koruması — session.title escape edildi</span></div>
-            <div class="cl-detail"><b>✓</b><span>Fix pipeline — timeout/retry mekanizması eklendi</span></div>
-            <div class="cl-detail"><b>✓</b><span>DB temizliği — resource sızıntısı önlendi</span></div>
-          </div>
+  <header class="hero">
+    <div class="hero-glow"></div>
+    <div class="container">
+      <pre class="hero-logo" aria-hidden="true">
+ ██╗███╗   ██╗████████╗███████╗██╗          ██╗
+███║████╗  ██║╚══██╔══╝██╔════╝██║          ██║
+╚██║██╔██╗ ██║   ██║   █████╗  ██║          ██║
+ ██║██║╚██╗██║   ██║   ██╔══╝  ██║          ╚═╝
+ ██║██║ ╚████║   ██║   ███████╗███████╗     ██╗
+ ╚═╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚══════╝     ╚═╝
+      </pre>
+      <h1><span class="hero-line">Yapay zeka destekli</span><span class="hero-line hero-accent">geliştirici aracı</span></h1>
+      <p class="hero-sub">40+ provider, 7 fazlı otomatik kod düzeltme, multi-model debate ve sınırsız hafıza.<br>Tek terminal komutuyla.</p>
+      <div class="install-box">
+        <div class="install-tabs" role="tablist">
+          <button class="install-tab active" data-tab="npm">npm</button>
+          <button class="install-tab" data-tab="bun">bun</button>
+          <button class="install-tab" data-tab="curl">curl</button>
+          <button class="install-tab" data-tab="powershell">PowerShell</button>
+        </div>
+        <div class="install-row">
+          <code class="install-cmd" data-panel="npm">npm install -g glitchcode-cli && glitch</code>
+          <code class="install-cmd" data-panel="bun" hidden>bun add -g glitchcode-cli && glitch</code>
+          <code class="install-cmd" data-panel="curl" hidden>curl -fsSL https://glitchcode.dev/install.sh | sh</code>
+          <code class="install-cmd" data-panel="powershell" hidden>powershell -c "irm https://glitchcode.dev/install.ps1 | iex"</code>
+          <button class="copy-btn" data-copy>Kopyala</button>
         </div>
       </div>
-
-      <!-- Multi-Model Debate -->
-      <div class="cl-item right animate-on-scroll">
-        <div class="cl-dot"></div>
-        <div class="cl-card">
-          <div class="cl-badge">Özellik</div>
-          <div class="cl-icon">🤖</div>
-          <h3>Multi-Model Debate</h3>
-          <p style="color:var(--text2);font-size:14px">2-3 model aynı sorunu tartışır.</p>
-          <div class="cl-terminal">
-            <code>$ glitch fix --debate https://github.com/user/repo/issues/42</code>
-            <span class="cl-cursor">|</span>
-          </div>
-          <div class="cl-details">
-            <div class="cl-detail"><b>→</b><span>Cross-critique: Her model diğerinin çözümünü eleştirir</span></div>
-            <div class="cl-detail"><b>→</b><span>LLM-based scoring ile skorlama</span></div>
-            <div class="cl-detail"><b>→</b><span>Consensus: Moderatör nihai kararı verir</span></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 7 Fazlı Pipeline -->
-      <div class="cl-item animate-on-scroll">
-        <div class="cl-dot"></div>
-        <div class="cl-card">
-          <div class="cl-badge">Pipeline</div>
-          <div class="cl-icon">🔧</div>
-          <h3>7 Fazlı Fix Pipeline</h3>
-          <p style="color:var(--text2);font-size:14px">GitHub issue'sunu otomatik çözer.</p>
-          <div class="cl-steps">
-            <div class="cl-step">1. Triage</div>
-            <div class="cl-step">2. Plan</div>
-            <div class="cl-step">3. Discover</div>
-            <div class="cl-step">4. Propose</div>
-            <div class="cl-step">5. Review</div>
-            <div class="cl-step">6. Apply</div>
-            <div class="cl-step">7. PR</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 40+ Provider -->
-      <div class="cl-item right animate-on-scroll">
-        <div class="cl-dot"></div>
-        <div class="cl-card">
-          <div class="cl-badge">Ekosistem</div>
-          <div class="cl-icon">🌐</div>
-          <h3>40+ AI Provider</h3>
-          <p style="color:var(--text2);font-size:14px">Tek arayüzde tüm modeller.</p>
-          <div class="cl-providers">
-            <span class="cl-tag">OpenAI</span>
-            <span class="cl-tag">Anthropic</span>
-            <span class="cl-tag">Google</span>
-            <span class="cl-tag">Mistral</span>
-            <span class="cl-tag">Cohere</span>
-            <span class="cl-tag">Ollama</span>
-            <span class="cl-tag">+34 daha</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Yol Haritası Başlığı -->
-      <div class="cl-roadmap-header animate-on-scroll">
-        <h3>Yol Haritası</h3>
-        <p>Gelecek özellikler ve geliştirmeler.</p>
-      </div>
-
-      <!-- Repo Map -->
-      <div class="cl-item animate-on-scroll">
-        <div class="cl-dot upcoming"></div>
-        <div class="cl-card glass">
-          <div class="cl-badge upcoming">Yakında</div>
-          <div class="cl-icon float">🗺️</div>
-          <h3>Repo Map</h3>
-          <p style="color:var(--text2);font-size:14px">Büyük projelerde akıllı bağlam yönetimi.</p>
-          <div class="cl-details">
-            <div class="cl-detail"><b>→</b><span>1000+ dosyalık projelerde LLM'e sadece ilgili dosyalar gönderilir</span></div>
-            <div class="cl-detail"><b>→</b><span>TypeScript AST parser ile export/import haritası</span></div>
-            <div class="cl-detail"><b>→</b><span>Fonksiyon/sınıf bağımlılık graph'ı</span></div>
-          </div>
-          <div class="cl-status"><span class="cl-status-dot planning"></span>Planlama aşamasında</div>
-        </div>
-      </div>
-
-      <!-- VS Code Extension -->
-      <div class="cl-item right animate-on-scroll">
-        <div class="cl-dot upcoming"></div>
-        <div class="cl-card glass">
-          <div class="cl-badge upcoming">Yakında</div>
-          <div class="cl-icon float">🔌</div>
-          <h3>VS Code Extension</h3>
-          <p style="color:var(--text2);font-size:14px">IDE içinde Glitch Code deneyimi.</p>
-          <div class="cl-details">
-            <div class="cl-detail"><b>→</b><span>WebSocket ile Glitch Code server'a bağlanır</span></div>
-            <div class="cl-detail"><b>→</b><span>Webview panel ile chat arayüzü</span></div>
-            <div class="cl-detail"><b>→</b><span>Diff view ile dosya değişiklikleri</span></div>
-          </div>
-          <div class="cl-status"><span class="cl-status-dot planned"></span>Planlandı</div>
-        </div>
-      </div>
-
-      <!-- Plugin Ekosistemi -->
-      <div class="cl-item animate-on-scroll">
-        <div class="cl-dot upcoming"></div>
-        <div class="cl-card glass">
-          <div class="cl-badge upcoming">Yakında</div>
-          <div class="cl-icon float">🧩</div>
-          <h3>Plugin Ekosistemi</h3>
-          <p style="color:var(--text2);font-size:14px">Topluluğun kendi araçlarını yazması.</p>
-          <div class="cl-details">
-            <div class="cl-detail"><b>→</b><span>Plugin API: Tool, Provider, Command tanımları</span></div>
-            <div class="cl-detail"><b>→</b><span>Plugin market: GitHub'dan keşif ve kurulum</span></div>
-            <div class="cl-detail"><b>→</b><span>Hot reload: Restart olmadan yükleme</span></div>
-          </div>
-          <div class="cl-status"><span class="cl-status-dot planned"></span>Planlandı</div>
-        </div>
-      </div>
-
-      <!-- GitHub Entegrasyonu -->
-      <div class="cl-item right animate-on-scroll">
-        <div class="cl-dot upcoming"></div>
-        <div class="cl-card glass">
-          <div class="cl-badge upcoming">Yakında</div>
-          <div class="cl-icon float">🐙</div>
-          <h3>GitHub Entegrasyonu</h3>
-          <p style="color:var(--text2);font-size:14px">Tek komutla GitHub işleri.</p>
-          <div class="cl-details">
-            <div class="cl-detail"><b>→</b><span><code>glitch pr create</code> — PR oluşturma</span></div>
-            <div class="cl-detail"><b>→</b><span><code>glitch pr review</code> — Otomatik inceleme</span></div>
-            <div class="cl-detail"><b>→</b><span><code>glitch issue list</code> — Issue yönetimi</span></div>
-          </div>
-          <div class="cl-status"><span class="cl-status-dot development"></span>Geliştirme aşamasında</div>
-        </div>
-      </div>
-
     </div>
-  </div>
-</section>
+  </header>
 
-<script>
-// Particle Effects
-(function(){
-  var c=document.getElementById('cl-particles');
-  if(!c)return;
-  var ctx=c.getContext('2d'),ps=[],N=25;
-  function resize(){c.width=c.offsetWidth;c.height=c.offsetHeight;}
-  resize();window.addEventListener('resize',resize);
-  function mk(){return{x:Math.random()*c.width,y:c.height+10,s:Math.random()*3+1,vy:Math.random()*0.8+0.3,vx:(Math.random()-0.5)*0.4,o:Math.random()*0.5+0.1,cl:Math.random()>0.5?'139,92,246':'255,107,0'};}
-  for(var i=0;i<N;i++){var p=mk();p.y=Math.random()*c.height;ps.push(p);}
-  function anim(){ctx.clearRect(0,0,c.width,c.height);ps.forEach(function(p,i){p.y-=p.vy;p.x+=p.vx;p.o-=0.0005;if(p.y<-10||p.o<=0){ps[i]=mk();}ctx.beginPath();ctx.arc(p.x,p.y,p.s,0,Math.PI*2);ctx.fillStyle='rgba('+p.cl+','+p.o+')';ctx.fill();});requestAnimationFrame(anim);}
-  anim();
-})();
-</script>
+  <section class="demo-section"><div class="container">
+    <div class="terminal-frame">
+      <div class="terminal-bar"><span class="terminal-dot red"></span><span class="terminal-dot yellow"></span><span class="terminal-dot green"></span><span class="terminal-title">glitch</span></div>
+      <div class="terminal-body">
+        <div class="terminal-line"><span class="t-prompt">$</span> <span class="t-cmd">glitch fix https://github.com/user/repo/issues/42</span></div>
+        <div class="terminal-line t-dim">Glitch Fix başlatılıyor...</div>
+        <div class="terminal-line"><span class="t-info">→</span> Model: anthropic/claude-sonnet-4-20250514</div>
+        <div class="terminal-line"><span class="t-info">→</span> Issue: user/repo#42</div>
+        <div class="terminal-line t-dim">Faz 1: Issue triage ediliyor...</div>
+        <div class="terminal-line"><span class="t-ok">✓</span> Triage: bug / high</div>
+        <div class="terminal-line t-dim">Faz 2: Çözüm planı oluşturuluyor...</div>
+        <div class="terminal-line"><span class="t-ok">✓</span> Plan oluşturuldu.</div>
+        <div class="terminal-line t-dim">Faz 3: Dosyalar keşfediliyor...</div>
+        <div class="terminal-line"><span class="t-ok">✓</span> 3 dosya keşfedildi.</div>
+        <div class="terminal-line t-dim">Faz 4: Kod önerisi üretiliyor...</div>
+        <div class="terminal-line"><span class="t-ok">✓</span> 2 dosya işlemi önerildi.</div>
+        <div class="terminal-line t-dim">Faz 5: Kod inceleniyor...</div>
+        <div class="terminal-line"><span class="t-ok">✓</span> Teknik: OK | Stil: OK | Güvenlik: OK</div>
+        <div class="terminal-line t-dim">Faz 6: Değişiklikler uygulanıyor...</div>
+        <div class="terminal-line t-dim">Faz 7: Git işlemleri...</div>
+        <div class="terminal-line"><span class="t-ok">✓</span> Branch: fix/issue-42</div>
+        <div class="terminal-line"><span class="t-ok">✓</span> Commit: a1b2c3d</div>
+        <div class="terminal-line"><span class="t-ok">✓</span> PR: https://github.com/user/repo/pull/43</div>
+        <div class="terminal-line"><span class="t-success">▸</span> <span class="t-bold">Glitch Fix tamamlandı!</span></div>
+      </div>
+    </div>
+  </div></section>
 
-<!-- PLATFORMS -->
-<section class="sec sec-alt" id="install"><div class="container">
-  <div class="sec-header animate-on-scroll">
-    <span class="sec-badge">Kurulum</span>
-    <h2 class="sec-title">Her Platformda Çalışır</h2>
-    <p class="sec-desc">10 platform, her yerde çalışır. Seçtiğin yerden indir.</p>
-  </div>
-  <div class="plat-grid">
-    <div class="plat-card animate-on-scroll"><span class="plat-icon">🐧</span><span>Linux x64</span></div>
-    <div class="plat-card animate-on-scroll"><span class="plat-icon">🐧</span><span>Linux ARM64</span></div>
-    <div class="plat-card animate-on-scroll"><span class="plat-icon">🍎</span><span>macOS Intel</span></div>
-    <div class="plat-card animate-on-scroll"><span class="plat-icon">🍎</span><span>macOS ARM</span></div>
-    <div class="plat-card animate-on-scroll"><span class="plat-icon">🪟</span><span>Windows x64</span></div>
-    <div class="plat-card animate-on-scroll"><span class="plat-icon">🪟</span><span>Windows ARM</span></div>
-  </div>
-  <div class="alt-install">
-    <a href="https://github.com/glassesglitchstudio-lab/Gltich_code/releases" target="_blank" class="link-btn">GitHub Releases</a>
-    <a href="https://www.npmjs.com/package/glitchcode-cli" target="_blank" class="link-btn">npmjs.com</a>
-  </div>
-</div></section>
+  <section class="section" id="features"><div class="container">
+    <h2 class="section-title">Neden Glitch Code?</h2>
+    <p class="section-desc">Diğer agent'lardan farkı ne? Her şeyi kendin şekillendirirsin.</p>
+    <div class="feature-grid">
+      <div class="feature-card"><div class="feature-icon">⚔️</div><h3>PlusTwoCoder Debate</h3><p>2-3 model aynı kodu tartışır. Cross-critique ile her turda güçlenir.</p></div>
+      <div class="feature-card"><div class="feature-icon">🔧</div><h3>7 Fazlı Otomatik Düzeltme</h3><p><code>glitch fix</code> ile GitHub issue'larını otomatik çöz. Triage → Plan → PR.</p></div>
+      <div class="feature-card"><div class="feature-icon">🧠</div><h3>Obsidian Hafıza</h3><p>.md dosyalarıyla sınırsız hafıza. Geçmiş oturumları hatırla.</p></div>
+      <div class="feature-card"><div class="feature-icon">🌐</div><h3>40+ Provider</h3><p>OpenAI, Anthropic, Google, Ollama, Copilot ve daha fazlası.</p></div>
+      <div class="feature-card"><div class="feature-icon">📊</div><h3>Görev Yönetimi</h3><p><code>glitch solve</code> ile karmaşık görevleri parçalara böl.</p></div>
+      <div class="feature-card"><div class="feature-icon">🔒</div><h3>Güvenlik Denetimi</h3><p>OWASP kontrollü security review. Otomatik tarama.</p></div>
+    </div>
+  </div></section>
 
-<!-- FOOTER -->
-<footer class="footer"><div class="container"><div class="footer-in">
-  <div class="footer-brand">
-    <span class="footer-logo">GLITCH CODE</span>
-    <span class="footer-copy">GlassesCat AI tarafından geliştirildi.</span>
-  </div>
-  <div class="footer-links">
-    <a href="https://github.com/glassesglitchstudio-lab/Gltich_code" target="_blank">GitHub</a>
-    <a href="https://www.npmjs.com/package/glitchcode-cli" target="_blank">npm</a>
-    <a href="#features">Özellikler</a>
-    <a href="#commands">Komutlar</a>
-    <a href="#examples">Örnekler</a>
-    <a href="#install">Kurulum</a>
-  </div>
-</div></div></footer>
+  <section class="section section--alt" id="how"><div class="container">
+    <h2 class="section-title">Nasıl Çalışır?</h2>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><h3>Kur</h3><p>Tek komutla global kurulum. İlk çalıştırmada <code>.glitchcode/</code> dizini otomatik oluşur.</p></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><h3>Yapılandır</h3><p><code>glitch onboard</code> ile provider seçimi, API key, tema tercihi.</p></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><h3>Geliştir</h3><p>AI ile kod üret, düzelt, incele. Terminalinden çıkma.</p></div></div>
+    </div>
+  </div></section>
 
-<script>
-// Particles
-(function(){
-  const c=document.getElementById('particles');
-  const colors=['#8b5cf6','#ff6b00','#a78bfa','#7c3aed'];
-  for(let i=0;i<40;i++){
-    const p=document.createElement('div');
-    p.className='particle';
-    const size=1+Math.random()*4;
-    p.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;width:${size}px;height:${size}px;background:${colors[i%colors.length]};animation-duration:${4+Math.random()*8}s;animation-delay:${Math.random()*5}s;`;
-    c.appendChild(p);
-  }
-})();
+  <section class="section"><div class="container">
+    <h2 class="section-title">Neler var?</h2>
+    <p class="section-desc">Diğerlerinin aksine, her şeyi önceden inşa ettik.</p>
+    <div class="built-grid">
+      <div class="built-card"><span class="built-check">✓</span><div><h3>MCP Desteği</h3><p>Model Context Protocol ile dış araçları bağla.</p></div></div>
+      <div class="built-card"><span class="built-check">✓</span><div><h3>Sub-agent Sistemi</h3><p>Alt ajanları paralel çalıştır, görevleri delege et.</p></div></div>
+      <div class="built-card"><span class="built-check">✓</span><div><h3>Plan Mode</h3><p>Çok adımlı görevleri planla ve sırayla uygula.</p></div></div>
+      <div class="built-card"><span class="built-check">✓</span><div><h3>Permission Gates</h3><p>Dosya erişimi, komut çalıştırma izinleri.</p></div></div>
+      <div class="built-card"><span class="built-check">✓</span><div><h3>Theme Sistemi</h3><p>7 hazır tema, neon-turuncu Glassmorphism.</p></div></div>
+      <div class="built-card"><span class="built-check">✓</span><div><h3>Offline Çalışma</h3><p>Ollama/LMStudio ile internet olmadan.</p></div></div>
+    </div>
+  </div></section>
 
-// Nav scroll
-window.addEventListener('scroll',()=>{
-  document.getElementById('nav').classList.toggle('scrolled',window.scrollY>50);
-});
+  <section class="section section--alt" id="install"><div class="container">
+    <h2 class="section-title">Kurulum</h2>
+    <p class="section-desc">13 platform, her yerde çalışır.</p>
+    <div class="platform-grid">
+      <div class="platform-card"><span class="platform-icon">🐧</span><span>Linux x64</span></div>
+      <div class="platform-card"><span class="platform-icon">🐧</span><span>Linux ARM64</span></div>
+      <div class="platform-card"><span class="platform-icon">🍎</span><span>macOS Intel</span></div>
+      <div class="platform-card"><span class="platform-icon">🍎</span><span>macOS Apple Silicon</span></div>
+      <div class="platform-card"><span class="platform-icon">🪟</span><span>Windows x64</span></div>
+      <div class="platform-card"><span class="platform-icon">🪟</span><span>Windows ARM64</span></div>
+    </div>
+    <div class="alt-install">
+      <a href="https://github.com/glassesglitchstudio-lab/Gltich_code/releases" target="_blank" class="link-btn">GitHub Releases</a>
+      <a href="https://www.npmjs.com/package/glitchcode-cli" target="_blank" class="link-btn">npmjs.com</a>
+    </div>
+  </div></section>
 
-// Tab switch
-document.querySelectorAll('.install-tab').forEach(t=>{
-  t.addEventListener('click',()=>{
-    document.querySelectorAll('.install-tab').forEach(x=>x.classList.remove('active'));
-    t.classList.add('active');
-    const p=t.dataset.tab;
-    document.querySelectorAll('.install-cmd').forEach(c=>{c.hidden=c.dataset.panel!==p});
-  });
-});
+  <section class="section" id="vscode"><div class="container">
+    <h2 class="section-title">VS Code Extension</h2>
+    <p class="section-desc">Glitch Code'u doğrudan VS Code içinde kullanın.</p>
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="display:inline-block;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px 48px;">
+        <div style="font-size:48px;margin-bottom:16px;">🔌</div>
+        <h3 style="font-size:24px;margin-bottom:12px;">Sidebar Chat</h3>
+        <p style="color:var(--text2);margin-bottom:24px;">Activity bar'dan AI ile sohbet edin</p>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+          <code style="background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:8px;padding:12px 20px;font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--violet-light);">Ctrl+Shift+G</code>
+          <span style="color:var(--text3);display:flex;align-items:center;">ile chat panelini açın</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;max-width:800px;margin:0 auto;">
+      <div style="text-align:center;padding:20px;background:var(--surface);border:1px solid var(--border);border-radius:12px;">
+        <div style="font-size:24px;margin-bottom:8px;">🔧</div>
+        <h4 style="font-size:14px;margin-bottom:4px;">Fix Selection</h4>
+        <p style="color:var(--text3);font-size:12px;">Seçili kodu düzelt</p>
+      </div>
+      <div style="text-align:center;padding:20px;background:var(--surface);border:1px solid var(--border);border-radius:12px;">
+        <div style="font-size:24px;margin-bottom:8px;">💡</div>
+        <h4 style="font-size:14px;margin-bottom:4px;">Solve Task</h4>
+        <p style="color:var(--text3);font-size:12px;">Görev planla ve çöz</p>
+      </div>
+      <div style="text-align:center;padding:20px;background:var(--surface);border:1px solid var(--border);border-radius:12px;">
+        <div style="font-size:24px;margin-bottom:8px;">⚡</div>
+        <h4 style="font-size:14px;margin-bottom:4px;">Model Select</h4>
+        <p style="color:var(--text3);font-size:12px;">40+ model arasından seçim</p>
+      </div>
+      <div style="text-align:center;padding:20px;background:var(--surface);border:1px solid var(--border);border-radius:12px;">
+        <div style="font-size:24px;margin-bottom:8px;">📊</div>
+        <h4 style="font-size:14px;margin-bottom:4px;">Diff View</h4>
+        <p style="color:var(--text3);font-size:12px;">Kod değişikliklerini karşılaştır</p>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:32px;">
+      <p style="color:var(--text3);font-size:13px;margin-bottom:12px;">Kurulum:</p>
+      <code style="background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:8px;padding:12px 20px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--violet-light);display:inline-block;">code --install-extension glitch-code.vsix</code>
+    </div>
+  </div></section>
 
-// Copy
-document.querySelectorAll('.copy-btn').forEach(b=>{
-  b.addEventListener('click',async()=>{
-    const c=document.querySelector('.install-cmd:not([hidden])');
-    if(c){
-      await navigator.clipboard.writeText(c.textContent.replace(/^\$\s*/,''));
-      b.textContent='Kopyalandı!';b.classList.add('copied');
-      setTimeout(()=>{b.textContent='Kopyala';b.classList.remove('copied')},2000);
-    }
-  });
-});
+  <footer class="site-footer"><div class="container"><div class="footer-inner">
+    <div class="footer-brand"><span class="footer-logo">GLITCH CODE</span><span class="footer-copy">GlassesCat AI tarafından geliştirildi.</span></div>
+    <div class="footer-links"><a href="https://github.com/glassesglitchstudio-lab/Gltich_code" target="_blank">GitHub</a><a href="https://www.npmjs.com/package/glitchcode-cli" target="_blank">npm</a><a href="#features">Özellikler</a><a href="#install">Kurulum</a></div>
+  </div></div></footer>
 
-// Scroll animations
-const obs=new IntersectionObserver((entries)=>{
-  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')});
-},{threshold:0.1,rootMargin:'0px 0px -50px 0px'});
-document.querySelectorAll('.animate-on-scroll').forEach(el=>obs.observe(el));
-
-// Terminal typing
-(function(){
-  const lines=[
-    {type:'cmd',text:'glitch fix https://github.com/user/repo/issues/42'},
-    {type:'info',text:'Glitch Fix başlatılıyor...'},
-    {type:'arrow',text:'Model: anthropic/claude-sonnet-4-20250514'},
-    {type:'arrow',text:'Issue: user/repo#42'},
-    {type:'ok',text:'Faz 1: Triage — bug / high priority'},
-    {type:'ok',text:'Faz 2: Plan — 3 adımlık çözüm'},
-    {type:'ok',text:'Faz 3: 3 dosya keşfedildi'},
-    {type:'ok',text:'Faz 4: 2 dosya değiştirildi'},
-    {type:'ok',text:'Faz 5: Teknik: OK | Stil: OK | Güvenlik: OK'},
-    {type:'ok',text:'Faz 6-7: Branch + PR oluşturuldu'},
-    {type:'final',text:'▸ Glitch Fix tamamlandı!'}
-  ];
-  const tb=document.getElementById('term-body');
-  let i=0;
-  function addLine(){
-    if(i>=lines.length)return;
-    const l=lines[i];
-    const d=document.createElement('div');
-    d.className='tl term-line';
-    let html='';
-    if(l.type==='cmd') html='<span class="tp">❯</span> <span class="mono">'+l.text+'</span>';
-    else if(l.type==='info') html='<span class="td">'+l.text+'</span>';
-    else if(l.type==='arrow') html='<span class="ti">→</span> '+l.text;
-    else if(l.type==='ok') html='<span class="tok">✓</span> '+l.text;
-    else if(l.type==='final') html='<span class="ts">▸</span> <span class="tb">'+l.text+'</span>';
-    d.innerHTML=html;
-    d.style.cssText='opacity:0;transform:translateX(-10px);';
-    tb.appendChild(d);
-    requestAnimationFrame(()=>{
-      d.style.transition='all .4s cubic-bezier(.16,1,.3,1)';
-      d.style.opacity='1';d.style.transform='translateX(0)';
-    });
-    i++;
-    setTimeout(addLine,120+Math.random()*80);
-  }
-  const termObs=new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{if(e.isIntersecting){setTimeout(addLine,500);termObs.disconnect()}});
-  },{threshold:0.3});
-  termObs.observe(document.getElementById('terminal'));
-})();
-
-// Smooth scroll
-document.querySelectorAll('a[href^="#"]').forEach(a=>{
-  a.addEventListener('click',e=>{
-    e.preventDefault();
-    const t=document.querySelector(a.getAttribute('href'));
-    if(t)t.scrollIntoView({behavior:'smooth',block:'start'});
-  });
-});
-
-// Tilt effect on cards
-document.querySelectorAll('.feat-card,.cmd-card,.code-block').forEach(card=>{
-  card.addEventListener('mousemove',e=>{
-    const rect=card.getBoundingClientRect();
-    const x=(e.clientX-rect.left)/rect.width-0.5;
-    const y=(e.clientY-rect.top)/rect.height-0.5;
-    card.style.transform=`translateY(-8px) perspective(600px) rotateX(${-y*5}deg) rotateY(${x*5}deg)`;
-  });
-  card.addEventListener('mouseleave',()=>{
-    card.style.transform='';
-  });
-});
-
-// Sparkle effect on hero
-(function(){
-  const hero=document.querySelector('.hero-content');
-  setInterval(()=>{
-    const s=document.createElement('div');
-    s.style.cssText=`position:absolute;width:4px;height:4px;background:var(--violet);border-radius:50%;pointer-events:none;animation:sparkle 1s ease forwards;left:${Math.random()*100}%;top:${Math.random()*100}%;z-index:1;`;
-    hero.appendChild(s);
-    setTimeout(()=>s.remove(),1000);
-  },300);
-})();
-</script>
+  <script>
+    document.querySelectorAll('.install-tab').forEach(t=>t.addEventListener('click',()=>{document.querySelectorAll('.install-tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');const p=t.dataset.tab;document.querySelectorAll('.install-cmd').forEach(c=>{c.hidden=c.dataset.panel!==p})}));
+    document.querySelectorAll('.copy-btn').forEach(b=>b.addEventListener('click',async()=>{const c=document.querySelector('.install-cmd:not([hidden])');if(c){await navigator.clipboard.writeText(c.textContent||'');b.textContent='Kopyalandı!';setTimeout(()=>{b.textContent='Kopyala'},2000)}}));
+  </script>
 </body>
 </html>
