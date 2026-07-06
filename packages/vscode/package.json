@@ -9,6 +9,11 @@
     "email": "dev@glassescat.ai"
   },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/glassesglitchstudio-lab/Gltich_code",
+    "directory": "packages/vscode"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
