@@ -192,10 +192,31 @@ export function formatPromptTooLargeError(files: { filename: string; content: st
   return `PROMPT_TOO_LARGE: The prompt exceeds the model's context limit.${fileDetails}`
 }
 
+import { IssueListCommand } from "./github/issue/list"
+import { IssueViewCommand } from "./github/issue/view"
+import { IssueSearchCommand } from "./github/issue/search"
+import { IssueCreateCommand } from "./github/issue/create"
+
 export const GithubCommand = cmd({
   command: "github",
   describe: "manage GitHub agent",
-  builder: (yargs) => yargs.command(GithubInstallCommand).command(GithubRunCommand).demandCommand(),
+  builder: (yargs) =>
+    yargs
+      .command(GithubInstallCommand)
+      .command(GithubRunCommand)
+      .command(
+        "issue",
+        "Issue management",
+        (yargs) =>
+          yargs
+            .command(IssueListCommand)
+            .command(IssueViewCommand)
+            .command(IssueSearchCommand)
+            .command(IssueCreateCommand)
+            .demandCommand(1, "Specify a subcommand: list, view, search, create"),
+        () => {},
+      )
+      .demandCommand(),
   async handler() {},
 })
 

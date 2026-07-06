@@ -35,4 +35,7 @@ export interface SolveOptions {
   maxParallel: number
   maxSteps: number
   verbose: boolean
+  github?: string
+  autoPr: boolean
+  base: string
 }

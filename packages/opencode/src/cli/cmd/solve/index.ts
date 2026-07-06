@@ -11,6 +11,8 @@ import type { LanguageModel } from "ai"
 import { extractJsonFromMarkdown } from "../fix/parser"
 import { loadPrompt, fillTemplate } from "../fix/prompts-loader"
 import type { SolveOptions, SolveContext, TaskPlan, SubTask } from "./types"
+import { getGitHubClient, resolveRepo, withRetry } from "../github/client"
+import { parseIssueUrl } from "../fix/github"
 import fs from "fs"
 import path from "path"
 
@@ -60,6 +62,20 @@ export const SolveCommand = cmd({
         type: "boolean",
         default: false,
       })
+      .option("github", {
+        describe: "GitHub issue URL (ornek: https://github.com/owner/repo/issues/123)",
+        type: "string",
+      })
+      .option("auto-pr", {
+        describe: "Cozumu GitHub'a PR olarak gonder",
+        type: "boolean",
+        default: false,
+      })
+      .option("base", {
+        describe: "PR icin base branch",
+        type: "string",
+        default: "main",
+      })
   },
   handler: async (args) => {
     const options: SolveOptions = {
@@ -69,6 +85,50 @@ export const SolveCommand = cmd({
       maxParallel: (args["max-parallel"] as number) || 1,
       maxSteps: (args["max-steps"] as number) || 8,
       verbose: (args["verbose"] as boolean) || false,
+      github: args.github as string | undefined,
+      autoPr: (args["auto-pr"] as boolean) || false,
+      base: (args.base as string) || "main",
+    }
+
+    // GitHub issue URL varsa task'i guncelle
+    if (options.github) {
+      const parsed = parseIssueUrl(options.github)
+      if (!parsed) {
+        console.error("Gecersiz GitHub issue URL. Ornek: https://github.com/owner/repo/issues/123")
+        process.exit(1)
+      }
+
+      const { octoGraph } = getGitHubClient()
+      const ISSUE_QUERY = `
+        query($owner: String!, $repo: String!, $number: Int!) {
+          repository(owner: $owner, name: $repo) {
+            issue(number: $number) {
+              title
+              body
+              state
+              labels(first: 10) { nodes { name } }
+              assignees(first: 5) { nodes { login } }
+            }
+          }
+        }
+      `
+      const response = await withRetry(() =>
+        octoGraph(ISSUE_QUERY, {
+          owner: parsed.owner,
+          repo: parsed.repo,
+          number: parsed.number,
+        }) as Promise<any>,
+      )
+
+      const issue = response.repository.issue
+      if (!issue) {
+        console.error(`Issue #${parsed.number} bulunamadi: ${parsed.owner}/${parsed.repo}`)
+        process.exit(1)
+      }
+
+      const labels = issue.labels?.nodes?.map((l: any) => l.name).join(", ") || "yok"
+      options.task = `[${parsed.owner}/${parsed.repo}#${parsed.number}] ${issue.title}\n\n${issue.body || "Aciklama yok"}\n\nLabels: ${labels}`
+      console.log(`GitHub Issue: #${parsed.number} ${issue.title}`)
     }
 
     await bootstrap(process.cwd(), async () => {
@@ -283,6 +343,78 @@ export const SolveCommand = cmd({
 
               // ─── SONUC ───
               printSummary(ctx)
+
+              // ─── FAZ 6: GitHub PR Olustur (opsiyonel) ───
+              if (options.autoPr && options.github) {
+                s.message("\nFaz 6: GitHub PR olusturuluyor...")
+                const createPr = async () => {
+                  const parsed = parseIssueUrl(options.github!)
+                  if (parsed) {
+                    const { octoRest } = getGitHubClient()
+                    const branchName = `solve/issue-${parsed.number}-${Date.now()}`
+
+                    const { data: mainBranch } = await withRetry(() =>
+                      octoRest.rest.repos.getBranch({
+                        owner: parsed.owner,
+                        repo: parsed.repo,
+                        branch: options.base,
+                      }),
+                    )
+
+                    await withRetry(() =>
+                      octoRest.rest.git.createRef({
+                        owner: parsed.owner,
+                        repo: parsed.repo,
+                        ref: `refs/heads/${branchName}`,
+                        sha: mainBranch.commit.sha,
+                      }),
+                    )
+
+                    s.message(`  Branch olusturuldu: ${branchName}`)
+
+                    const prBody = [
+                      `## Cozum Ozeti`,
+                      ``,
+                      `Issue: #${parsed.number}`,
+                      ``,
+                      ctx.summary,
+                      ``,
+                      `---`,
+                      `*Glitch Solve tarafindan otomatik olusturuldu.*`,
+                    ].join("\n")
+
+                    const { data: pr } = await withRetry(() =>
+                      octoRest.rest.pulls.create({
+                        owner: parsed.owner,
+                        repo: parsed.repo,
+                        title: `fix: #${parsed.number} - ${ctx.plan.goal}`,
+                        body: prBody,
+                        head: branchName,
+                        base: options.base,
+                      }),
+                    )
+
+                    s.message(`  PR olusturuldu: ${pr.html_url}`)
+
+                    await withRetry(() =>
+                      octoRest.rest.issues.createComment({
+                        owner: parsed.owner,
+                        repo: parsed.repo,
+                        issue_number: parsed.number,
+                        body: `Glitch Solve bu issue'yu cozmek icin bir PR olusturdu: #${pr.number}\n\nOzet: ${ctx.summary.substring(0, 200)}...`,
+                      }),
+                    )
+
+                    s.message(`  Issue'ya yorum eklendi`)
+                  }
+                }
+                try {
+                  yield* Effect.tryPromise({ try: createPr, catch: (e) => e as Error })
+                } catch {
+                  s.message(`  Uyari: PR olusturulamadi`)
+                }
+              }
+
               s.stop("Glitch Solve tamamlandi!")
             }),
           )
