@@ -32,7 +32,7 @@ jobs:
         run: bun run build
 
       - name: Package VSIX
-        run: bunx @vscode/vsce package --allow-missing-repository
+        run: bunx @vscode/vsce package --ignoreFile .vscodeignore
 
       - name: Upload VSIX artifact
         uses: actions/upload-artifact@v4
