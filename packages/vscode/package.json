@@ -1,0 +1,133 @@
+{
+  "name": "glitch-code",
+  "displayName": "Glitch Code",
+  "description": "AI-powered coding assistant with 40+ providers",
+  "version": "0.3.0",
+  "publisher": "glassesglitchstudio",
+  "author": {
+    "name": "GlassesCat AI",
+    "email": "dev@glassescat.ai"
+  },
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "ai",
+    "code",
+    "assistant",
+    "copilot",
+    "chat",
+    "gpt",
+    "claude",
+    "gemini"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "glitch",
+          "title": "Glitch Code",
+          "icon": "$(comment-discussion)"
+        }
+      ]
+    },
+    "views": {
+      "glitch": [
+        {
+          "id": "glitch.chat",
+          "name": "Chat",
+          "type": "webview"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "glitch.chat",
+        "title": "Glitch: Open Chat",
+        "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "glitch.fix",
+        "title": "Glitch: Fix Selection",
+        "icon": "$(tools)"
+      },
+      {
+        "command": "glitch.solve",
+        "title": "Glitch: Solve Task",
+        "icon": "$(lightbulb)"
+      },
+      {
+        "command": "glitch.session.new",
+        "title": "Glitch: New Session",
+        "icon": "$(add)"
+      },
+      {
+        "command": "glitch.session.list",
+        "title": "Glitch: List Sessions",
+        "icon": "$(list-flat)"
+      },
+      {
+        "command": "glitch.model.select",
+        "title": "Glitch: Select Model",
+        "icon": "$(zap)"
+      },
+      {
+        "command": "glitch.status",
+        "title": "Glitch: Check Status",
+        "icon": "$(pulse)"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "glitch.chat",
+        "key": "ctrl+shift+g",
+        "mac": "cmd+shift+g"
+      }
+    ],
+    "configuration": {
+      "title": "Glitch Code",
+      "properties": {
+        "glitch.server.port": {
+          "type": "number",
+          "default": 4096,
+          "description": "Glitch server port"
+        },
+        "glitch.server.autoStart": {
+          "type": "boolean",
+          "default": true,
+          "description": "Auto-start server on extension activate"
+        },
+        "glitch.server.hostname": {
+          "type": "string",
+          "default": "127.0.0.1",
+          "description": "Glitch server hostname"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "node esbuild.config.mjs",
+    "watch": "node esbuild.config.mjs --watch",
+    "lint": "eslint src --ext ts",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.20.0",
+    "@vscode/vsce": "^2.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@glitchcode/sdk": "latest"
+  }
+}
