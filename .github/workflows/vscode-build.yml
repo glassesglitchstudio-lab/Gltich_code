@@ -20,19 +20,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: '20'
+          bun-version: latest
 
       - name: Install dependencies
-        run: npm install --ignore-workspaces
+        run: bun install --ignore-workspace
 
       - name: Build extension
-        run: npm run build
+        run: bun run build
 
       - name: Package VSIX
-        run: npx vsce package
+        run: bunx @vscode/vsce package
 
       - name: Upload VSIX artifact
         uses: actions/upload-artifact@v4
