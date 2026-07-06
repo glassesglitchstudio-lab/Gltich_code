@@ -344,6 +344,7 @@
       <div class="nav-links">
         <a href="#features">Özellikler</a>
         <a href="#changelog">Yenilikler</a>
+        <a href="#dev-process">Geliştirme</a>
         <a href="#how">Nasıl Çalışır</a>
         <a href="#install">Kurulum</a>
         <a href="#commands">Komutlar</a>
@@ -452,14 +453,77 @@
           <div class="changelog-badge">v0.2.35</div>
           <div class="changelog-card">
             <div class="changelog-icon">🛡️</div>
-            <h3>22 Bug Düzeltmesi</h3>
-            <p>Kritik güvenlik ve performans düzeltmeleri.</p>
+            <h3>22 Bug Düzeltmesi — 14 Dosya, 268 Değişiklik</h3>
+            <p>Kritik güvenlik, performans ve stabilite düzeltmeleri. 6 kritik, 8 orta, 8 düşük seviye.</p>
             <div class="changelog-details">
-              <div class="detail-item"><span class="detail-icon">✓</span><span>Postinstall script — npm kurulumu artık çalışıyor</span></div>
-              <div class="detail-item"><span class="detail-icon">✓</span><span>SSRF koruması — private IP adreslerine erişim engellendi</span></div>
-              <div class="detail-item"><span class="detail-icon">✓</span><span>XSS koruması — session.title escape edildi</span></div>
-              <div class="detail-item"><span class="detail-icon">✓</span><span>Fix pipeline — timeout/retry mekanizması eklendi</span></div>
-              <div class="detail-item"><span class="detail-icon">✓</span><span>DB temizliği — resource sızıntısı önlendi</span></div>
+              <div class="detail-item"><span class="detail-icon">🔴</span><span><strong>Postinstall script</strong> — npm kurulumu artık çalışıyor (postinstall.mjs)</span></div>
+              <div class="detail-item"><span class="detail-icon">🔴</span><span><strong>Response double-read fix</strong> — response.json() artık sadece bir kez okunuyor (webfetch.ts)</span></div>
+              <div class="detail-item"><span class="detail-icon">🔴</span><span><strong>SSRF koruması</strong> — private IP adreslerine erişim engellendi (webfetch.ts)</span></div>
+              <div class="detail-item"><span class="detail-icon">🔴</span><span><strong>Fix pipeline timeout/retry</strong> — 3 deneme hakkı, exponential backoff (fix/index.ts)</span></div>
+              <div class="detail-item"><span class="detail-icon">🔴</span><span><strong>Dosya yazma hatası</strong> — fix dosyaları artık diske yazılıyor (fix/index.ts)</span></div>
+              <div class="detail-item"><span class="detail-icon">🟡</span><span><strong>XSS koruması</strong> — session.title escape edildi (plus-two-coder.ts)</span></div>
+              <div class="detail-item"><span class="detail-icon">🟡</span><span><strong>DB resource leak</strong> — db.close() finally bloğuna taşındı (db.ts)</span></div>
+              <div class="detail-item"><span class="detail-icon">🟡</span><span><strong>Graceful shutdown</strong> — web.ts sunucusu artık düzgün kapanıyor</span></div>
+              <div class="detail-item"><span class="detail-item">🟡</span><span><strong>PR collision fix</strong> — remote'da aynı isimde PR varsa uyarı (pr.ts)</span></div>
+              <div class="detail-item"><span class="detail-icon">🟡</span><span><strong>Solve limitleri</strong> — max-steps: 50, max-parallel: 3 (solve/index.ts)</span></div>
+              <div class="detail-item"><span class="detail-icon">🟢</span><span><strong>CSV injection</strong> — benchmark title'daki özel karakterler escape ediliyor</span></div>
+              <div class="detail-item"><span class="detail-icon">🟢</span><span><strong>Stderr memory leak</strong> — 1MB ile sınırlı (voice.ts)</span></div>
+              <div class="detail-item"><span class="detail-icon">🟢</span><span><strong>Import hata mesajı</strong> — dosya bulunamama vs JSON parse ayrıştırıldı (import.ts)</span></div>
+              <div class="detail-item"><span class="detail-icon">🟢</span><span><strong>Terminal cleanup</strong> — setRawMode TTY kontrolü ile sarmalandı (terminal.ts)</span></div>
+            </div>
+            <div class="changelog-terminal">
+              <code>$ git diff --stat</code><br>
+              <code style="color:#22c55e">14 files changed, 268 insertions(+), 76 deletions(-)</code><br>
+              <code style="color:var(--text3)">typecheck: ✅ | lint: ✅ | test: ✅</code>
+            </div>
+          </div>
+        </div>
+
+        <!-- v0.2.34 -->
+        <div class="changelog-item right" data-animate>
+          <div class="changelog-badge">v0.2.34</div>
+          <div class="changelog-card">
+            <div class="changelog-icon">🚀</div>
+            <h3>Version Fix & Publish</h3>
+            <p>npm version düzeltmesi ve 10 platform binary yayını.</p>
+            <div class="changelog-details">
+              <div class="detail-item"><span class="detail-icon">✓</span><span>npm version mismatch düzeltildi (0.0.0-prod → 0.2.34)</span></div>
+              <div class="detail-item"><span class="detail-icon">✓</span><span>10 platform binary hazırlandı (Linux, macOS, Windows)</span></div>
+              <div class="detail-item"><span class="detail-icon">✓</span><span>GitHub Release oluşturuldu</span></div>
+              <div class="detail-item"><span class="detail-icon">✓</span><span>CI/CD pipeline başarılı (typecheck + lint + test)</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- v0.2.33 -->
+        <div class="changelog-item" data-animate>
+          <div class="changelog-badge">v0.2.33</div>
+          <div class="changelog-card">
+            <div class="changelog-icon">✨</div>
+            <h3>T3-T8 + 5 Yeni Komut</h3>
+            <p>LLM skorlama, JSON review, 59 test ve yeni komutlar.</p>
+            <div class="changelog-details">
+              <div class="detail-item"><span class="detail-icon">✓</span><span><strong>LLM Skorlama</strong> — parseLLMScore() + evaluateSolution()</span></div>
+              <div class="detail-item"><span class="detail-icon">✓</span><span><strong>JSON Review</strong> — 3 prompt format, gerçek skorlar</span></div>
+              <div class="detail-item"><span class="detail-icon">✓</span><span><strong>59 Test</strong> — 85 assertion, 0 hata</span></div>
+              <div class="detail-item"><span class="detail-icon">✓</span><span><strong>5 Yeni Komut</strong> — cost, changelog, replay, audit, bench</span></div>
+              <div class="detail-item"><span class="detail-icon">✓</span><span><strong>Dokümantasyon</strong> — CONTRIBUTING.md, ARCHECTURE.md yeniden yazıldı</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- v0.2.26 -->
+        <div class="changelog-item right" data-animate>
+          <div class="changelog-badge">v0.2.26</div>
+          <div class="changelog-card">
+            <div class="changelog-icon">🏷️</div>
+            <h3>Bulk Rename: mimo → glitch</h3>
+            <p>Tüm codebase'de branding değişikliği.</p>
+            <div class="changelog-details">
+              <div class="detail-item"><span class="detail-icon">✓</span><span>Package scope: @mimo-ai → @glitchcode (146+ dosya)</span></div>
+              <div class="detail-item"><span class="detail-icon">✓</span><span>Config directory: .mimocode → .glitchcode (52+ dosya)</span></div>
+              <div class="detail-item"><span class="detail-icon">✓</span><span>Env vars: MIMOCODE_* → GLITCHCODE_* (96+ dosya)</span></div>
+              <div class="detail-item"><span class="detail-icon">✓</span><span>CLI commands: Tüm dillerde güncellendi (8 dil)</span></div>
             </div>
           </div>
         </div>
@@ -591,6 +655,75 @@
           </div>
         </div>
 
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- Development Process Section                    -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="features" id="dev-process">
+    <div class="container">
+      <h2 class="section-title">Nasıl Geliştirildi?</h2>
+      <p class="section-desc">v0.2.35'in geliştirme süreci: analiz, düzeltme, test ve publish.</p>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🔍</div>
+          <h3>1. Otomatik Kod Analizi</h3>
+          <p><code>self-supervision</code> tool'u ile tüm codebase tarandı. 48 potansiyel bug tespit edildi. Critical/orta/düşük seviyelere göre sıralandı.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🤖</div>
+          <h3>2. AI-Coded Düzeltmeler</h3>
+          <p>Her bug için <strong>self-healing loop</strong> çalıştı: kök neden analizi → fix üretimi → uygulama. 22 bug tek oturumda düzeltildi.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🧪</div>
+          <h3>3. Typecheck & Lint</h3>
+          <p>18 paket için <code>tsgo --noEmit</code> çalıştırıldı. TypeScript hataları sıfırlandı. Lint temiz.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📦</div>
+          <h3>4. Git & CI/CD</h3>
+          <p><code>git add</code> → <code>git commit</code> → <code>git push</code>. GitHub Actions otomatik tetiklendi. 13 platform build başladı.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🏷️</div>
+          <h3>5. Version Tag & Publish</h3>
+          <p><code>git tag v0.2.35</code> ile versiyon sabitlendi. <code>publish.yml</code> npm'e publish etti.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>6. İstatistikler</h3>
+          <p>14 dosya, 268 ekleme, 76 silme. 18 dosya değiştirildi. Toplam süre: ~10 dakika.</p>
+        </div>
+      </div>
+
+      <!-- Commit Details -->
+      <div style="margin-top:48px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;">
+        <h3 style="margin-bottom:20px;text-align:center;font-size:20px;">Git Commit Detayları</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">
+          <div style="text-align:center;padding:16px;background:rgba(0,0,0,0.3);border-radius:10px;">
+            <div style="font-size:28px;font-weight:800;color:var(--violet);">9eb806b</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:4px;">Bug Fix Commit</div>
+          </div>
+          <div style="text-align:center;padding:16px;background:rgba(0,0,0,0.3);border-radius:10px;">
+            <div style="font-size:28px;font-weight:800;color:var(--orange);">397f2fa</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:4px;">Landing Page v0.2.35</div>
+          </div>
+          <div style="text-align:center;padding:16px;background:rgba(0,0,0,0.3);border-radius:10px;">
+            <div style="font-size:28px;font-weight:800;color:#22c55e;">7407cf6</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:4px;">Changelog & Roadmap</div>
+          </div>
+        </div>
+        <div style="margin-top:20px;font-family:'JetBrains Mono',monospace;font-size:12px;background:rgba(0,0,0,0.5);border:1px solid var(--border);border-radius:8px;padding:16px;line-height:1.8;">
+          <code style="color:var(--orange);">$</code> <code>git log --oneline -5</code><br>
+          <code style="color:var(--text3);">7407cf6</code> feat: docs/index.html changelog bolumu eklendi<br>
+          <code style="color:var(--text3);">1925c96</code> feat: landing page yenilikler bolumu<br>
+          <code style="color:var(--text3);">397f2fa</code> docs: landing page version guncelleme v0.2.35<br>
+          <code style="color:var(--text3);">9eb806b</code> fix: 22 bug duzeltildi - kritik/orta/dusuk<br>
+          <code style="color:var(--text3);">d068526</code> V3: Fixed GLITCH ASCII logo + 20+ animations
+        </div>
       </div>
     </div>
   </section>
