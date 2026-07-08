@@ -26,6 +26,9 @@ export interface SolveContext {
   dryRun: boolean
   model?: string
   maxParallel: number
+  github?: string
+  autoPr?: boolean
+  base?: string
 }
 
 export interface SolveOptions {
