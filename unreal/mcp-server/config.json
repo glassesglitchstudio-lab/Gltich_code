@@ -1,0 +1,6 @@
+{
+  "ue5_host": "localhost",
+  "ue5_port": 9877,
+  "glitch_code_path": "glitch",
+  "auto_reconnect": true
+}
