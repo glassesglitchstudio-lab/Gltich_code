@@ -68,7 +68,7 @@ function walk(ast: SchemaAST.AST): z.ZodTypeAny {
 }
 
 function walkUncached(ast: SchemaAST.AST): z.ZodTypeAny {
-  const override = (ast.annotations as any)?.[ZodOverride] as z.ZodTypeAny | undefined
+  const override = (ast.annotations as Record<symbol, unknown>)?.[ZodOverride] as z.ZodTypeAny | undefined
   if (override) return override
 
   // Schema.Class wraps its fields in a Declaration AST plus an encoding that
@@ -147,7 +147,7 @@ function applyChecks(out: z.ZodTypeAny, checks: SchemaAST.Checks, ast: SchemaAST
     for (const filter of unhandled) {
       const issue = filter.run(value, ast, EMPTY_PARSE_OPTIONS)
       if (!issue) continue
-      const message = issueMessage(issue) ?? (filter.annotations as any)?.message ?? "Validation failed"
+      const message = issueMessage(issue) ?? (filter.annotations as { message?: string })?.message ?? "Validation failed"
       ctx.addIssue({ code: "custom", message })
     }
   })

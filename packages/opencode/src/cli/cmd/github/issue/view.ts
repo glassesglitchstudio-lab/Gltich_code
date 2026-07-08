@@ -3,6 +3,27 @@ import { cmd } from "../../cmd"
 import { UI } from "../../../ui"
 import type { IssueSummary } from "../types"
 
+interface GitHubIssue {
+  number: number
+  title: string
+  body: string | null
+  state: string
+  createdAt: string
+  url: string
+  author?: { login: string; name?: string }
+  labels?: { nodes: Array<{ name: string; color: string }> }
+  assignees?: { nodes: Array<{ login: string }> }
+  milestone?: { title: string }
+  comments?: {
+    totalCount: number
+    nodes: Array<{
+      author?: { login: string }
+      body: string
+      createdAt: string
+    }>
+  }
+}
+
 const ISSUE_VIEW_QUERY = `
   query($owner: String!, $repo: String!, $number: Int!) {
     repository(owner: $owner, name: $repo) {
@@ -50,10 +71,10 @@ export const IssueViewCommand = cmd({
     const { octoGraph } = getGitHubClient()
 
     const response = await withRetry(() =>
-      octoGraph(ISSUE_VIEW_QUERY, { owner, repo, number: args.number }) as Promise<any>,
+      octoGraph(ISSUE_VIEW_QUERY, { owner, repo, number: args.number }) as Promise<{ repository: { issue: GitHubIssue | null } }>,
     )
 
-    const issue = response.repository.issue as any
+    const issue = response.repository.issue
     if (!issue) {
       UI.error(`Issue #${args.number} not found in ${owner}/${repo}`)
       process.exit(1)
@@ -74,12 +95,12 @@ export const IssueViewCommand = cmd({
     UI.println(`  Created:   ${new Date(issue.createdAt).toLocaleString()}`)
 
     if (issue.labels?.nodes?.length) {
-      const labels = issue.labels.nodes.map((l: any) => `\x1b[36m${l.name}\x1b[0m`).join(", ")
+      const labels = (issue.labels.nodes as Array<{ name: string }>).map((l) => `\x1b[36m${l.name}\x1b[0m`).join(", ")
       UI.println(`  Labels:    ${labels}`)
     }
 
     if (issue.assignees?.nodes?.length) {
-      const assignees = issue.assignees.nodes.map((a: any) => a.login).join(", ")
+      const assignees = (issue.assignees.nodes as Array<{ login: string }>).map((a) => a.login).join(", ")
       UI.println(`  Assignees: ${assignees}`)
     }
 

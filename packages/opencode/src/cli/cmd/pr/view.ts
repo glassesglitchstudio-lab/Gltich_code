@@ -3,6 +3,47 @@ import { cmd } from "../cmd"
 import { UI } from "../../ui"
 import type { PRSummary } from "../github/types"
 
+interface GitHubPR {
+  title: string
+  body: string
+  author: { login: string; name?: string }
+  baseRefName: string
+  headRefName: string
+  headRefOid: string
+  createdAt: string
+  additions: number
+  deletions: number
+  state: string
+  reviewDecision?: string
+  mergeable: string
+  mergeStateStatus: string
+  url: string
+  labels?: { nodes: Array<{ name: string; color: string }> }
+  reviews?: {
+    nodes: Array<{
+      author: { login: string }
+      state: string
+      body: string
+      submittedAt: string
+    }>
+  }
+  commits?: {
+    nodes: Array<{
+      oid: string
+      message: string
+      author: { name: string; email: string }
+    }>
+  }
+  files?: {
+    nodes: Array<{
+      path: string
+      additions: number
+      deletions: number
+      changeType: string
+    }>
+  }
+}
+
 const PR_QUERY = `
   query($owner: String!, $repo: String!, $number: Int!) {
     repository(owner: $owner, name: $repo) {
@@ -70,10 +111,10 @@ export const PrViewCommand = cmd({
     const { octoGraph } = getGitHubClient()
 
     const response = await withRetry(() =>
-      octoGraph(PR_QUERY, { owner, repo, number: args.number }) as Promise<any>,
+      octoGraph(PR_QUERY, { owner, repo, number: args.number }) as Promise<{ repository: { pullRequest: GitHubPR | null } }>,
     )
 
-    const pr = response.repository.pullRequest as any
+    const pr = response.repository.pullRequest
     if (!pr) {
       UI.error(`PR #${args.number} not found in ${owner}/${repo}`)
       process.exit(1)
@@ -101,7 +142,7 @@ export const PrViewCommand = cmd({
     UI.println(`  Review:      ${pr.reviewDecision || "None"}`)
 
     if (pr.labels?.nodes?.length) {
-      const labels = pr.labels.nodes.map((l: any) => `\x1b[36m${l.name}\x1b[0m`).join(", ")
+      const labels = (pr.labels.nodes as Array<{ name: string }>).map((l) => `\x1b[36m${l.name}\x1b[0m`).join(", ")
       UI.println(`  Labels:      ${labels}`)
     }
 
