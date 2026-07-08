@@ -122,7 +122,7 @@ export const ApiDocGenTool = Tool.define(
           if (code !== 0 || !stdout) {
             return {
               title: "API Doc Generator",
-              metadata: { error: true } as any,
+              metadata: { error: true } as Tool.Metadata,
               output: `No source files found at: ${params.path}`,
             }
           }

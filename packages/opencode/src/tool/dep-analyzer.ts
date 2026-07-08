@@ -69,7 +69,7 @@ export const DepAnalyzerTool = Tool.define(
           if (!pkgContent) {
             return {
               title: "Dep Analyzer",
-              metadata: { error: true } as any,
+              metadata: { error: true } as Tool.Metadata,
               output: "No package.json found in current directory.",
             }
           }
@@ -78,7 +78,7 @@ export const DepAnalyzerTool = Tool.define(
           if (!pkg) {
             return {
               title: "Dep Analyzer",
-              metadata: { error: true } as any,
+              metadata: { error: true } as Tool.Metadata,
               output: "Invalid package.json format.",
             }
           }
@@ -121,7 +121,7 @@ export const DepAnalyzerTool = Tool.define(
             } catch {
               return {
                 title: "Dep Outdated",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: "Could not parse npm outdated output.",
               }
             }
@@ -161,7 +161,7 @@ export const DepAnalyzerTool = Tool.define(
             } catch {
               return {
                 title: "Dep Audit",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: "Could not parse npm audit output.",
               }
             }
@@ -230,7 +230,7 @@ export const DepAnalyzerTool = Tool.define(
 
           return {
             title: "Dep Analyzer",
-            metadata: { error: true } as any,
+            metadata: { error: true } as Tool.Metadata,
             output: `Unknown operation: ${params.operation}`,
           }
         }).pipe(Effect.orDie),

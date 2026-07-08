@@ -45,7 +45,7 @@ export const GitTool = Tool.define(
             if (code !== 0) {
               return {
                 title: "Git Status",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: `Error: ${stderr || "Not a git repository"}`,
               }
             }
@@ -92,7 +92,7 @@ export const GitTool = Tool.define(
             if (code !== 0) {
               return {
                 title: "Git Diff",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: `Error: ${stderr}`,
               }
             }
@@ -119,7 +119,7 @@ export const GitTool = Tool.define(
             if (code !== 0) {
               return {
                 title: "Git Log",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: `Error: ${stderr}`,
               }
             }
@@ -145,7 +145,7 @@ export const GitTool = Tool.define(
             if (!params.files?.length) {
               return {
                 title: "Git Blame",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: "Error: 'files' parameter is required for blame operation.",
               }
             }
@@ -154,7 +154,7 @@ export const GitTool = Tool.define(
             if (code !== 0) {
               return {
                 title: "Git Blame",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: `Error: ${stderr}`,
               }
             }
@@ -195,7 +195,7 @@ export const GitTool = Tool.define(
             if (!params.message) {
               return {
                 title: "Git Commit",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: "Error: 'message' parameter is required for commit operation.",
               }
             }
@@ -213,7 +213,7 @@ export const GitTool = Tool.define(
             if (stageResult.code !== 0) {
               return {
                 title: "Git Commit",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: `Stage error: ${stageResult.stderr}`,
               }
             }
@@ -225,7 +225,7 @@ export const GitTool = Tool.define(
             if (code !== 0) {
               return {
                 title: "Git Commit",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: `Commit error: ${stderr}`,
               }
             }
@@ -242,7 +242,7 @@ export const GitTool = Tool.define(
               if (code !== 0) {
                 return {
                   title: "Git Branch",
-                  metadata: { error: true } as any,
+                  metadata: { error: true } as Tool.Metadata,
                   output: `Error: ${stderr}`,
                 }
               }
@@ -268,7 +268,7 @@ export const GitTool = Tool.define(
               if (code !== 0) {
                 return {
                   title: "Git Branch",
-                  metadata: { error: true } as any,
+                  metadata: { error: true } as Tool.Metadata,
                   output: `Error switching branch: ${stderr}`,
                 }
               }
@@ -282,7 +282,7 @@ export const GitTool = Tool.define(
               if (code !== 0) {
                 return {
                   title: "Git Branch",
-                  metadata: { error: true } as any,
+                  metadata: { error: true } as Tool.Metadata,
                   output: `Error creating branch: ${stderr}`,
                 }
               }
@@ -296,7 +296,7 @@ export const GitTool = Tool.define(
 
           return {
             title: "Git",
-            metadata: { error: true } as any,
+            metadata: { error: true } as Tool.Metadata,
             output: `Unknown operation: ${params.operation}`,
           }
         }).pipe(Effect.orDie),

@@ -102,7 +102,7 @@ export const ApiTesterTool = Tool.define(
             ]
             return {
               title: `API Error: ${method} ${new URL(params.url).hostname}`,
-              metadata: { error: true } as any,
+              metadata: { error: true } as Tool.Metadata,
               output: output.join("\n"),
             }
           }

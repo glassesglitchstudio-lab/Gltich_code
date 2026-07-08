@@ -47,7 +47,7 @@ export const DbQueryTool = Tool.define(
           if (exists !== 0) {
             return {
               title: "DB Query",
-              metadata: { error: true } as any,
+              metadata: { error: true } as Tool.Metadata,
               output: `Database not found: ${dbPath}`,
             }
           }
@@ -57,7 +57,7 @@ export const DbQueryTool = Tool.define(
             if (code !== 0) {
               return {
                 title: "DB Tables",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: `Error: ${stderr}`,
               }
             }
@@ -78,7 +78,7 @@ export const DbQueryTool = Tool.define(
             if (code !== 0) {
               return {
                 title: "DB Schema",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: `Error: ${stderr}`,
               }
             }
@@ -119,7 +119,7 @@ export const DbQueryTool = Tool.define(
             if (!params.sql) {
               return {
                 title: "DB Query",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: "Error: 'sql' parameter is required for query operation.",
               }
             }
@@ -141,7 +141,7 @@ export const DbQueryTool = Tool.define(
             if (code !== 0) {
               return {
                 title: "DB Query",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: `Query error: ${stderr}`,
               }
             }
@@ -170,7 +170,7 @@ export const DbQueryTool = Tool.define(
 
           return {
             title: "DB Query",
-            metadata: { error: true } as any,
+            metadata: { error: true } as Tool.Metadata,
             output: `Unknown operation: ${params.operation}`,
           }
         }).pipe(Effect.orDie),

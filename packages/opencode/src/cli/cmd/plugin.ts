@@ -10,6 +10,7 @@ interface Plugin {
   description: string
   version: string
   author: string
+  tags?: string[]
   mcpServer?: {
     command: string
     args?: string[]
@@ -18,77 +19,37 @@ interface Plugin {
   enabled: boolean
 }
 
+interface RegistryPlugin {
+  name: string
+  description: string
+  version: string
+  author: string
+  tags?: string[]
+  mcpServer?: {
+    command: string
+    args?: string[]
+    env?: Record<string, string>
+  }
+}
+
+interface Registry {
+  version: number
+  plugins: RegistryPlugin[]
+}
+
 const PLUGINS_DIR = ".glitchcode/plugins"
 const CONFIG_FILE = ".glitchcode/plugins.json"
+const REGISTRY_FILE = path.join(__dirname, "plugin-registry.json")
 
-const AVAILABLE_PLUGINS: Plugin[] = [
-  {
-    name: "github",
-    description: "GitHub API entegrasyonu - PR, Issue, Review yonetimi",
-    version: "1.0.0",
-    author: "GlitchCode",
-    mcpServer: {
-      command: "npx",
-      args: ["-y", "@modelcontextprotocol/server-github"],
-    },
-    enabled: false,
-  },
-  {
-    name: "filesystem",
-    description: "Gelismis dosya sistemi erisimi",
-    version: "1.0.0",
-    author: "GlitchCode",
-    mcpServer: {
-      command: "npx",
-      args: ["-y", "@modelcontextprotocol/server-filesystem"],
-    },
-    enabled: false,
-  },
-  {
-    name: "postgres",
-    description: "PostgreSQL veritabani sorgulama",
-    version: "1.0.0",
-    author: "GlitchCode",
-    mcpServer: {
-      command: "npx",
-      args: ["-y", "@modelcontextprotocol/server-postgres"],
-    },
-    enabled: false,
-  },
-  {
-    name: "sqlite",
-    description: "SQLite veritabani yonetimi",
-    version: "1.0.0",
-    author: "GlitchCode",
-    mcpServer: {
-      command: "npx",
-      args: ["-y", "@modelcontextprotocol/server-sqlite"],
-    },
-    enabled: false,
-  },
-  {
-    name: "brave-search",
-    description: "Brave Search API ile web arama",
-    version: "1.0.0",
-    author: "GlitchCode",
-    mcpServer: {
-      command: "npx",
-      args: ["-y", "@modelcontextprotocol/server-brave-search"],
-    },
-    enabled: false,
-  },
-  {
-    name: "puppeteer",
-    description: "Puppeteer ile web scraping ve tarayici otomasyonu",
-    version: "1.0.0",
-    author: "GlitchCode",
-    mcpServer: {
-      command: "npx",
-      args: ["-y", "@modelcontextprotocol/server-puppeteer"],
-    },
-    enabled: false,
-  },
-]
+function loadRegistry(): RegistryPlugin[] {
+  try {
+    const content = fs.readFileSync(REGISTRY_FILE, "utf-8")
+    const registry: Registry = JSON.parse(content)
+    return registry.plugins
+  } catch {
+    return []
+  }
+}
 
 export const PluginMarketCommand = cmd({
   command: "plugins",
@@ -96,6 +57,7 @@ export const PluginMarketCommand = cmd({
   builder: (yargs: Argv) => {
     return yargs
       .command(PluginListCommand)
+      .command(PluginSearchCommand)
       .command(PluginAddCommand)
       .command(PluginRemoveCommand)
       .command(PluginEnableCommand)
@@ -115,7 +77,7 @@ export const PluginListCommand = cmd({
     console.log("\n📦 Mevcut Pluginler\n")
 
     if (installed.length === 0) {
-      console.log("  Henuz plugin yok. 'glitch plugin add' ile ekle.\n")
+      console.log("  Henuz plugin yok. 'glitch plugins add' ile ekle.\n")
       return
     }
 
@@ -123,6 +85,46 @@ export const PluginListCommand = cmd({
       const status = plugin.enabled ? "✅" : "❌"
       console.log(`  ${status} ${plugin.name} v${plugin.version}`)
       console.log(`     ${plugin.description}\n`)
+    }
+  },
+})
+
+export const PluginSearchCommand = cmd({
+  command: "search <query>",
+  describe: "Registry'de plugin ara",
+  builder: (yargs: Argv) => {
+    return yargs.positional("query", {
+      describe: "Arama sorgusu (ad, aciklama veya tag)",
+      type: "string",
+      demandOption: true,
+    })
+  },
+  handler: async (args) => {
+    const registry = loadRegistry()
+    const query = args.query.toLowerCase()
+
+    const results = registry.filter((p) => {
+      const nameMatch = p.name.toLowerCase().includes(query)
+      const descMatch = p.description.toLowerCase().includes(query)
+      const tagMatch = p.tags?.some((t) => t.toLowerCase().includes(query))
+      return nameMatch || descMatch || tagMatch
+    })
+
+    if (results.length === 0) {
+      console.log(`\n🔍 "${args.query}" icin sonuc bulunamadi.\n`)
+      console.log("Mevcut pluginler:")
+      for (const p of registry) {
+        console.log(`  - ${p.name}: ${p.description}`)
+      }
+      return
+    }
+
+    console.log(`\n🔍 "${args.query}" icin ${results.length} sonuc:\n`)
+    for (const plugin of results) {
+      const tags = plugin.tags?.length ? ` [${plugin.tags.join(", ")}]` : ""
+      console.log(`  ${plugin.name} v${plugin.version}${tags}`)
+      console.log(`    ${plugin.description}`)
+      console.log(`    Yazar: ${plugin.author}\n`)
     }
   },
 })
@@ -138,12 +140,13 @@ export const PluginAddCommand = cmd({
     })
   },
   handler: async (args) => {
-    const plugin = AVAILABLE_PLUGINS.find((p) => p.name === args.name)
+    const registry = loadRegistry()
+    const plugin = registry.find((p) => p.name === args.name)
 
     if (!plugin) {
       UI.error(`Plugin bulunamadi: ${args.name}`)
       UI.println("\nMevcut pluginler:")
-      for (const p of AVAILABLE_PLUGINS) {
+      for (const p of registry) {
         UI.println(`  - ${p.name}: ${p.description}`)
       }
       process.exit(1)

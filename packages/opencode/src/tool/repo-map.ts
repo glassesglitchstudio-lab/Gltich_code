@@ -59,47 +59,47 @@ export const RepoMapTool = Tool.define(
             case "build":
               return {
                 title: "Repo Map Build",
-                metadata: { success: true } as any,
+                metadata: { success: true } as Tool.Metadata,
                 output: `Index oluşturuldu: ${index.files.size} dosya, ${index.stats.totalExports} export`,
               }
 
             case "query": {
-              if (!params.target) return { title: "Error", metadata: { error: true } as any, output: "target gerekli" }
+              if (!params.target) return { title: "Error", metadata: { error: true } as Tool.Metadata, output: "target gerekli" }
               const file = index.files.get(params.target)
-              if (!file) return { title: "Error", metadata: { error: true } as any, output: `Bulunamadı: ${params.target}` }
+              if (!file) return { title: "Error", metadata: { error: true } as Tool.Metadata, output: `Bulunamadı: ${params.target}` }
               return {
                 title: file.path,
-                metadata: { success: true } as any,
+                metadata: { success: true } as Tool.Metadata,
                 output: `Dil: ${file.language}\nExport: ${file.exports.map(e => e.name).join(", ")}\nImport: ${file.imports.map(i => i.source).join(", ")}`,
               }
             }
 
             case "dependents": {
-              if (!params.target) return { title: "Error", metadata: { error: true } as any, output: "target gerekli" }
+              if (!params.target) return { title: "Error", metadata: { error: true } as Tool.Metadata, output: "target gerekli" }
               const deps = graph.getDependents(params.target, params.depth)
               return {
                 title: "Dependents",
-                metadata: { success: true } as any,
+                metadata: { success: true } as Tool.Metadata,
                 output: `${deps.length} dosya: ${deps.map(f => f.path).join("\n")}`,
               }
             }
 
             case "dependencies": {
-              if (!params.target) return { title: "Error", metadata: { error: true } as any, output: "target gerekli" }
+              if (!params.target) return { title: "Error", metadata: { error: true } as Tool.Metadata, output: "target gerekli" }
               const deps = graph.getDependencies(params.target, params.depth)
               return {
                 title: "Dependencies",
-                metadata: { success: true } as any,
+                metadata: { success: true } as Tool.Metadata,
                 output: `${deps.length} dosya: ${deps.map(f => f.path).join("\n")}`,
               }
             }
 
             case "impact": {
-              if (!params.target) return { title: "Error", metadata: { error: true } as any, output: "target gerekli" }
+              if (!params.target) return { title: "Error", metadata: { error: true } as Tool.Metadata, output: "target gerekli" }
               const impact = graph.getImpact(params.target, params.depth)
               return {
                 title: "Impact",
-                metadata: { success: true } as any,
+                metadata: { success: true } as Tool.Metadata,
                 output: `${impact.length} dosya etkilenir: ${impact.map(f => f.path).join("\n")}`,
               }
             }
@@ -108,17 +108,17 @@ export const RepoMapTool = Tool.define(
               const routes = graph.findRoutes()
               return {
                 title: "Routes",
-                metadata: { success: true } as any,
+                metadata: { success: true } as Tool.Metadata,
                 output: `${routes.length} route: ${routes.map(f => f.path).join("\n")}`,
               }
             }
 
             case "search": {
-              if (!params.target) return { title: "Error", metadata: { error: true } as any, output: "target gerekli" }
+              if (!params.target) return { title: "Error", metadata: { error: true } as Tool.Metadata, output: "target gerekli" }
               const result = graph.execute({ type: "search", target: params.target })
               return {
                 title: "Search",
-                metadata: { success: true } as any,
+                metadata: { success: true } as Tool.Metadata,
                 output: `${result.totalMatches} sonuç:\n${result.results.map(f => f.path).join("\n")}`,
               }
             }
@@ -127,15 +127,15 @@ export const RepoMapTool = Tool.define(
               const summary = graph.getSummary()
               return {
                 title: "Summary",
-                metadata: { success: true } as any,
+                metadata: { success: true } as Tool.Metadata,
                 output: JSON.stringify(summary, null, 2),
               }
             }
 
             default:
-              return { title: "Error", metadata: { error: true } as any, output: "Bilinmeyen operasyon" }
+              return { title: "Error", metadata: { error: true } as Tool.Metadata, output: "Bilinmeyen operasyon" }
           }
-        }) as any,
+        }).pipe(Effect.orDie)
     }
-  }) as any,
+  }),
 )

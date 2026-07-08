@@ -117,7 +117,7 @@ export const CodeMigrationTool = Tool.define(
           if (!content) {
             return {
               title: "Code Migration",
-              metadata: { error: true } as any,
+              metadata: { error: true } as Tool.Metadata,
               output: `Could not read file: ${params.path}`,
             }
           }

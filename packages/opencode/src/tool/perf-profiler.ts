@@ -176,7 +176,7 @@ export const PerfProfilerTool = Tool.define(
           if (files.length === 0) {
             return {
               title: "Perf Profiler",
-              metadata: { error: true } as any,
+              metadata: { error: true } as Tool.Metadata,
               output: `No source files found at: ${params.path}`,
             }
           }

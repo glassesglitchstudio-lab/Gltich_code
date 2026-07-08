@@ -47,7 +47,7 @@ export const DockerTool = Tool.define(
             if (code !== 0) {
               return {
                 title: "Docker PS",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: `Docker not available: ${stderr}`,
               }
             }
@@ -63,7 +63,7 @@ export const DockerTool = Tool.define(
             if (code !== 0) {
               return {
                 title: "Docker Images",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: `Docker not available: ${stderr}`,
               }
             }
@@ -78,7 +78,7 @@ export const DockerTool = Tool.define(
             if (!target) {
               return {
                 title: "Docker Logs",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: "Error: 'target' (container name/ID) is required for logs.",
               }
             }
@@ -87,7 +87,7 @@ export const DockerTool = Tool.define(
             if (code !== 0) {
               return {
                 title: "Docker Logs",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: `Error: ${stderr}`,
               }
             }
@@ -102,7 +102,7 @@ export const DockerTool = Tool.define(
             if (!target) {
               return {
                 title: "Docker Stop",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: "Error: 'target' (container name/ID) is required.",
               }
             }
@@ -116,7 +116,7 @@ export const DockerTool = Tool.define(
             if (code !== 0) {
               return {
                 title: "Docker Stop",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: `Error: ${stderr}`,
               }
             }
@@ -131,7 +131,7 @@ export const DockerTool = Tool.define(
             if (!target) {
               return {
                 title: "Docker Start",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: "Error: 'target' (container name/ID) is required.",
               }
             }
@@ -145,7 +145,7 @@ export const DockerTool = Tool.define(
             if (code !== 0) {
               return {
                 title: "Docker Start",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: `Error: ${stderr}`,
               }
             }
@@ -160,7 +160,7 @@ export const DockerTool = Tool.define(
             if (!target) {
               return {
                 title: "Docker Build",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: "Error: 'target' (Dockerfile path) is required.",
               }
             }
@@ -175,7 +175,7 @@ export const DockerTool = Tool.define(
             if (code !== 0) {
               return {
                 title: "Docker Build",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: `Build failed:\n${stderr}\n${stdout}`,
               }
             }
@@ -190,7 +190,7 @@ export const DockerTool = Tool.define(
             if (!target) {
               return {
                 title: "Docker Run",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: "Error: 'target' (image name) is required.",
               }
             }
@@ -205,7 +205,7 @@ export const DockerTool = Tool.define(
             if (code !== 0) {
               return {
                 title: "Docker Run",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: `Error: ${stderr}`,
               }
             }
@@ -220,7 +220,7 @@ export const DockerTool = Tool.define(
             if (!target || !command) {
               return {
                 title: "Docker Exec",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: "Error: 'target' and 'command' are required for exec.",
               }
             }
@@ -234,7 +234,7 @@ export const DockerTool = Tool.define(
             if (code !== 0) {
               return {
                 title: "Docker Exec",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: `Error: ${stderr}`,
               }
             }
@@ -249,7 +249,7 @@ export const DockerTool = Tool.define(
             if (!target) {
               return {
                 title: "Docker Inspect",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: "Error: 'target' (container/image) is required.",
               }
             }
@@ -257,7 +257,7 @@ export const DockerTool = Tool.define(
             if (code !== 0) {
               return {
                 title: "Docker Inspect",
-                metadata: { error: true } as any,
+                metadata: { error: true } as Tool.Metadata,
                 output: `Error: ${stderr}`,
               }
             }
@@ -273,7 +273,7 @@ export const DockerTool = Tool.define(
 
           return {
             title: "Docker",
-            metadata: { error: true } as any,
+            metadata: { error: true } as Tool.Metadata,
             output: `Unknown operation: ${operation}`,
           }
         }).pipe(Effect.orDie),

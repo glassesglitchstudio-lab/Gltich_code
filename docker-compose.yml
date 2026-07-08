@@ -1,0 +1,36 @@
+services:
+  glitchcode:
+    build:
+      context: .
+      dockerfile: packages/opencode/Dockerfile
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    depends_on:
+      - ollama
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: glitchcode
+      POSTGRES_PASSWORD: glitchcode
+      POSTGRES_DB: glitchcode
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  ollama_data:
+  postgres_data:

@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "plugins": [
+    {
+      "name": "github",
+      "description": "GitHub API entegrasyonu - PR, Issue, Review yonetimi",
+      "version": "1.0.0",
+      "author": "GlitchCode",
+      "tags": ["github", "api", "pr", "issue"],
+      "mcpServer": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-github"]
+      }
+    },
+    {
+      "name": "filesystem",
+      "description": "Gelismis dosya sistemi erisimi",
+      "version": "1.0.0",
+      "author": "GlitchCode",
+      "tags": ["filesystem", "io"],
+      "mcpServer": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-filesystem"]
+      }
+    },
+    {
+      "name": "postgres",
+      "description": "PostgreSQL veritabani sorgulama",
+      "version": "1.0.0",
+      "author": "GlitchCode",
+      "tags": ["database", "postgres", "sql"],
+      "mcpServer": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-postgres"]
+      }
+    },
+    {
+      "name": "sqlite",
+      "description": "SQLite veritabani yonetimi",
+      "version": "1.0.0",
+      "author": "GlitchCode",
+      "tags": ["database", "sqlite", "sql"],
+      "mcpServer": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-sqlite"]
+      }
+    },
+    {
+      "name": "brave-search",
+      "description": "Brave Search API ile web arama",
+      "version": "1.0.0",
+      "author": "GlitchCode",
+      "tags": ["search", "web", "brave"],
+      "mcpServer": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-brave-search"]
+      }
+    },
+    {
+      "name": "puppeteer",
+      "description": "Puppeteer ile web scraping ve tarayici otomasyonu",
+      "version": "1.0.0",
+      "author": "GlitchCode",
+      "tags": ["browser", "scraping", "automation"],
+      "mcpServer": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
+      }
+    },
+    {
+      "name": "memory",
+      "description": "Kalici hafiza sistemi - bilgi depolama ve hatirlama",
+      "version": "1.0.0",
+      "author": "GlitchCode",
+      "tags": ["memory", "storage", "knowledge"],
+      "mcpServer": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-memory"]
+      }
+    },
+    {
+      "name": "brave-local-search",
+      "description": "Brave Search - yerel isletme arama",
+      "version": "1.0.0",
+      "author": "GlitchCode",
+      "tags": ["search", "local", "brave"],
+      "mcpServer": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-brave-local-search"]
+      }
+    }
+  ]
+}

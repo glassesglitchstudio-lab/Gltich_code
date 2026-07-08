@@ -524,7 +524,7 @@ export const DeepFileAnalysisTool = Tool.define(
           if (!stat || stat.type !== "File") {
             return {
               title: path.basename(filePath),
-              metadata: { error: true } as any,
+              metadata: { error: true } as Tool.Metadata,
               output: `File not found or is not a regular file: ${filePath}`,
             }
           }
@@ -534,7 +534,7 @@ export const DeepFileAnalysisTool = Tool.define(
           if (stat.size > MAX_FILE_SIZE) {
             return {
               title: path.basename(filePath),
-              metadata: { error: true } as any,
+              metadata: { error: true } as Tool.Metadata,
               output: `File too large (${(Number(stat.size) / 1024 / 1024).toFixed(1)} MB). Maximum: 1 MB`,
             }
           }
@@ -543,7 +543,7 @@ export const DeepFileAnalysisTool = Tool.define(
           if (!content) {
             return {
               title: path.basename(filePath),
-              metadata: { error: true } as any,
+              metadata: { error: true } as Tool.Metadata,
               output: `Could not read file: ${filePath}`,
             }
           }

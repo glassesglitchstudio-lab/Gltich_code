@@ -136,7 +136,7 @@ export const TestGeneratorTool = Tool.define(
           if (!content) {
             return {
               title: "Test Generator",
-              metadata: { error: true } as any,
+              metadata: { error: true } as Tool.Metadata,
               output: `Could not read file: ${params.path}`,
             }
           }

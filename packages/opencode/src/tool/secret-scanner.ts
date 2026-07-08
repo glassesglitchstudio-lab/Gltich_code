@@ -99,7 +99,7 @@ export const SecretScannerTool = Tool.define(
           if (code !== 0 || !stdout) {
             return {
               title: "Secret Scanner",
-              metadata: { error: true } as any,
+              metadata: { error: true } as Tool.Metadata,
               output: `No files found at: ${scanPath}`,
             }
           }
