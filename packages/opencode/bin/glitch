@@ -33,7 +33,15 @@ const LOGO = [
 ]
 
 const TAGLINE = `${C.gray}  AI-Powered Coding Assistant${C.reset}`
-const VERSION_LINE = `${C.darkGray}  v0.2.34${C.reset}`
+const VERSION_LINE = (() => {
+  try {
+    const pkgPath = join(dirname(realpathSync(fileURLToPath(import.meta.url))), "..", "package.json")
+    const pkg = JSON.parse(readFileSync(pkgPath, "utf8"))
+    return `${C.darkGray}  v${pkg.version}${C.reset}`
+  } catch {
+    return `${C.darkGray}  v0.0.0${C.reset}`
+  }
+})()
 
 // ─── Setup Screen ───────────────────────────────────────────────────────────
 const isInteractive = process.stdout.isTTY && !process.env.CI
@@ -598,6 +606,18 @@ function findBinary(startDir) {
 }
 
 // ─── Main ───────────────────────────────────────────────────────────────────
+// Intercept --version to report correct version from package.json
+if (process.argv.includes("--version") || process.argv.includes("-v")) {
+  try {
+    const pkgPath = join(dirname(realpathSync(fileURLToPath(import.meta.url))), "..", "package.json")
+    const pkg = JSON.parse(readFileSync(pkgPath, "utf8"))
+    console.log(pkg.version)
+  } catch {
+    console.log("0.0.0")
+  }
+  process.exit(0)
+}
+
 const envPath = process.env.GLITCHCODE_BIN_PATH
 if (envPath) {
   run(envPath)
