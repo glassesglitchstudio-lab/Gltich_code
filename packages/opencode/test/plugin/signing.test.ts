@@ -18,7 +18,7 @@ const writeJsonSpy = spyOn(Filesystem, "writeJson").mockImplementation(async (p:
   mkdirSync(join(p, ".."), { recursive: true })
   writeFileSync(p, JSON.stringify(data))
 })
-const existsSpy = spyOn(Filesystem, "exists").mockImplementation((p: string) => {
+const existsSpy = spyOn(Filesystem, "exists").mockImplementation(async (p: string) => {
   try { require("fs").accessSync(p); return true } catch { return false }
 })
 // readJson MUST return synchronously — verifyPlugin calls it without await
@@ -94,7 +94,7 @@ describe("plugin.signing", () => {
       const keys = generateKeyPair()
       signPlugin(keys.privateKey, pkgDir)
       await Bun.sleep(50)
-      expect(existsSpy(join(pkgDir, "plugin-signature.json"))).toBe(true)
+      expect(await existsSpy(join(pkgDir, "plugin-signature.json"))).toBe(true)
     })
 
     test("same content produces same hash", async () => {
