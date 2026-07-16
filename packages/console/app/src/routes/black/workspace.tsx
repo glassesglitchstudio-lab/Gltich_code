@@ -1,19 +1,48 @@
-import { A, createAsync, useNavigate } from "@solidjs/router"
+import { A, createAsync, query, useNavigate } from "@solidjs/router"
 import "./workspace.css"
 import { Title } from "@solidjs/meta"
 import { github } from "~/lib/github"
-import { createEffect, createMemo, For, onMount } from "solid-js"
+import { createEffect, createMemo, For, Match, onMount, Switch } from "solid-js"
 import { config } from "~/config"
 import { createList } from "solid-list"
 import { useLanguage } from "~/context/language"
 import { LanguagePicker } from "~/component/language-picker"
 import { useI18n } from "~/context/i18n"
+import { withActor } from "~/context/auth.withActor"
+import { Actor } from "@glitchcode/console-core/actor.js"
+import { and, Database, eq, isNull } from "@glitchcode/console-core/drizzle/index.js"
+import { WorkspaceTable } from "@glitchcode/console-core/schema/workspace.sql.js"
+import { UserTable } from "@glitchcode/console-core/schema/user.sql.js"
+
+const getWorkspaces = query(async () => {
+  "use server"
+  return withActor(async () => {
+    const actor = Actor.assert("account")
+    return Database.use((tx) =>
+      tx
+        .select({
+          id: WorkspaceTable.id,
+          name: WorkspaceTable.name,
+        })
+        .from(UserTable)
+        .innerJoin(WorkspaceTable, eq(UserTable.workspaceID, WorkspaceTable.id))
+        .where(
+          and(
+            eq(UserTable.accountID, actor.properties.accountID),
+            isNull(WorkspaceTable.timeDeleted),
+            isNull(UserTable.timeDeleted),
+          ),
+        ),
+    )
+  })
+}, "black.workspaces")
 
 export default function BlackWorkspace() {
   const navigate = useNavigate()
   const language = useLanguage()
   const i18n = useI18n()
   const githubData = createAsync(() => github())
+  const workspaces = createAsync(() => getWorkspaces())
   const starCount = createMemo(() =>
     githubData()?.stars
       ? new Intl.NumberFormat(language.tag(language.locale()), {
@@ -23,26 +52,11 @@ export default function BlackWorkspace() {
       : config.github.starsFormatted.compact,
   )
 
-  // TODO: Frank, replace with real workspaces
-  const workspaces = [
-    { id: "wrk_123", n: 1 },
-    { id: "wrk_456", n: 2 },
-    { id: "wrk_789", n: 3 },
-    { id: "wrk_111", n: 4 },
-    { id: "wrk_222", n: 5 },
-    { id: "wrk_333", n: 6 },
-    { id: "wrk_444", n: 7 },
-    { id: "wrk_555", n: 8 },
-  ].map((workspace) => ({
-    ...workspace,
-    name: i18n.t("black.workspace.name", { n: workspace.n }),
-  }))
-
   let listRef: HTMLUListElement | undefined
 
   const { active, setActive, onKeyDown } = createList({
-    items: () => workspaces.map((w) => w.id),
-    initialActive: workspaces[0]?.id ?? null,
+    items: () => workspaces()?.map((w) => w.id) ?? [],
+    initialActive: workspaces()?.[0]?.id ?? null,
     handleTab: true,
   })
 
@@ -180,36 +194,46 @@ export default function BlackWorkspace() {
         </div>
         <section data-slot="select-workspace">
           <p data-slot="select-workspace-title">{i18n.t("black.workspace.selectPlan")}</p>
-          <ul
-            ref={listRef}
-            data-slot="workspaces"
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && active()) {
-                navigate(`/black/workspace/${active()}`)
-              } else if (e.key === "Tab") {
-                e.preventDefault()
-                onKeyDown(e)
-              } else {
-                onKeyDown(e)
-              }
-            }}
-          >
-            <For each={workspaces}>
-              {(workspace) => (
-                <li
-                  data-slot="workspace"
-                  data-id={workspace.id}
-                  data-active={active() === workspace.id}
-                  onMouseEnter={() => setActive(workspace.id)}
-                  onClick={() => navigate(`/black/workspace/${workspace.id}`)}
-                >
-                  <span data-slot="selected-icon">[*]</span>
-                  <a href={`/black/workspace/${workspace.id}`}>{workspace.name}</a>
-                </li>
-              )}
-            </For>
-          </ul>
+          <Switch>
+            <Match when={workspaces.loading}>
+              <p data-slot="loading">{i18n.t("black.workspace.loading")}</p>
+            </Match>
+            <Match when={workspaces()?.length === 0}>
+              <p data-slot="empty">{i18n.t("black.workspace.noWorkspaces")}</p>
+            </Match>
+            <Match when={workspaces()}>
+              <ul
+                ref={listRef}
+                data-slot="workspaces"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && active()) {
+                    navigate(`/black/workspace/${active()}`)
+                  } else if (e.key === "Tab") {
+                    e.preventDefault()
+                    onKeyDown(e)
+                  } else {
+                    onKeyDown(e)
+                  }
+                }}
+              >
+                <For each={workspaces()}>
+                  {(workspace) => (
+                    <li
+                      data-slot="workspace"
+                      data-id={workspace.id}
+                      data-active={active() === workspace.id}
+                      onMouseEnter={() => setActive(workspace.id)}
+                      onClick={() => navigate(`/black/workspace/${workspace.id}`)}
+                    >
+                      <span data-slot="selected-icon">[*]</span>
+                      <a href={`/black/workspace/${workspace.id}`}>{workspace.name}</a>
+                    </li>
+                  )}
+                </For>
+              </ul>
+            </Match>
+          </Switch>
         </section>
       </main>
       <footer data-component="footer">

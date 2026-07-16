@@ -622,6 +622,15 @@ export const ProvidersLoginCommand = cmd({
           key,
         })
 
+        // Persist last connected provider for auto-reconnect on next startup
+        try {
+          const lastProviderFile = path.join(Global.Path.state, "last-provider.json")
+          const lastState = { providerID: provider, modelID: "", timestamp: Date.now() }
+          fs.mkdirSync(path.dirname(lastProviderFile), { recursive: true })
+          fs.writeFileSync(lastProviderFile, JSON.stringify(lastState), "utf-8")
+        } catch {}
+
+        prompts.log.success("Credential saved. Provider will auto-connect on next launch.")
         prompts.outro("Done")
       },
     })

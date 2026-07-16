@@ -11,13 +11,25 @@ public class GlitchCodeAI : ModuleRules
 			"Core",
 			"CoreUObject",
 			"Engine",
+			"InputCore",
 			"HTTP",
 			"Json",
-			"JsonUtilities"
+			"JsonUtilities",
+			"Niagara",
+			"NiagaraCore",
+			"OnlineSubsystem",
+			"OnlineSubsystemUtils",
+			"UMG",
+			"SlateCore",
+			"Slate",
+			"AudioMixer",
+			"GameplayTags"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
+			"NavigationSystem",
+			"AIModule"
 		});
 
 		if (Target.bBuildEditor)

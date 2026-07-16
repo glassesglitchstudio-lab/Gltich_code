@@ -1,11 +1,440 @@
 #!/usr/bin/env node
 
-import { spawnSync } from "child_process"
+import { spawnSync, execSync } from "child_process"
 import { existsSync, mkdirSync, chmodSync, realpathSync, readFileSync, writeFileSync, unlinkSync } from "fs"
 import { dirname, join } from "path"
 import { homedir, platform as osPlatform, arch as osArch } from "os"
 import { fileURLToPath } from "url"
 
+// ─── ANSI Colors (neon-orange theme #FF6B00) ────────────────────────────────
+const C = {
+  reset: "\x1b[0m",
+  bold: "\x1b[1m",
+  dim: "\x1b[2m",
+  orange: "\x1b[38;2;255;107;0m",
+  orangeBright: "\x1b[38;2;255;140;50m",
+  white: "\x1b[38;2;255;255;255m",
+  gray: "\x1b[38;2;140;140;140m",
+  darkGray: "\x1b[38;2;80;80;80m",
+  green: "\x1b[38;2;80;255;120m",
+  red: "\x1b[38;2;255;80;80m",
+  cyan: "\x1b[38;2;100;200;255m",
+  bg: "\x1b[48;2;18;18;24m",
+}
+
+// ─── GLITCH ASCII Logo ──────────────────────────────────────────────────────
+const LOGO = [
+  `${C.orange}${C.bold}   ██████╗  ██████╗  ██████╗  ███████╗${C.reset}`,
+  `${C.orange}${C.bold}  ██╔════╝ ██╔═══██╗ ██╔══██╗ ██╔════╝${C.reset}`,
+  `${C.orange}${C.bold}  ██║      ██║   ██║ ██║  ██║ █████╗  ${C.reset}`,
+  `${C.orange}${C.bold}  ██║      ██║   ██║ ██║  ██║ ██╔══╝  ${C.reset}`,
+  `${C.orange}${C.bold}  ╚██████╗ ╚██████╔╝ ██████╔╝ ███████╗${C.reset}`,
+  `${C.orange}${C.bold}   ╚═════╝  ╚═════╝  ╚═════╝  ╚══════╝${C.reset}`,
+]
+
+const TAGLINE = `${C.gray}  AI-Powered Coding Assistant${C.reset}`
+const VERSION_LINE = `${C.darkGray}  v0.2.34${C.reset}`
+
+// ─── Setup Screen ───────────────────────────────────────────────────────────
+const isInteractive = process.stdout.isTTY && !process.env.CI
+
+function clearScreen() {
+  if (!isInteractive) return
+  process.stdout.write("\x1b[2J\x1b[H")
+}
+
+function hideCursor() {
+  if (!isInteractive) return
+  process.stdout.write("\x1b[?25l")
+}
+
+function showCursor() {
+  if (!isInteractive) return
+  process.stdout.write("\x1b[?25h")
+}
+
+function printLogo() {
+  const pad = "  "
+  console.log("")
+  for (const line of LOGO) {
+    console.log(`${pad}${line}`)
+  }
+  console.log(`${pad}${TAGLINE}`)
+  console.log(`${pad}${VERSION_LINE}`)
+  console.log("")
+}
+
+function printSeparator() {
+  console.log(`${C.darkGray}${"─".repeat(56)}${C.reset}`)
+}
+
+// Animated spinner frames
+const SPIN_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+const DOT_FRAMES = ["   ", ".  ", ".. ", "..."]
+const PULSE_FRAMES = ["◯", "◎", "●", "◎"]
+
+// Progress bar renderer
+function renderBar(pct, width = 30) {
+  const filled = Math.round((pct / 100) * width)
+  const empty = width - filled
+  const bar = `${C.orange}${"█".repeat(filled)}${C.darkGray}${"░".repeat(empty)}${C.reset}`
+  const pctStr = pct >= 100 ? "100%" : `${Math.floor(pct)}%`
+  return `${bar} ${C.white}${pctStr}${C.reset}`
+}
+
+// Step status indicators
+const STEP_DONE = `${C.green}  ✓  ${C.reset}`
+const STEP_ACTIVE = `${C.orange}  ▶  ${C.reset}`
+const STEP_PENDING = `${C.darkGray}  ○  ${C.reset}`
+const STEP_FAIL = `${C.red}  ✗  ${C.reset}`
+
+function printStep(status, label, detail) {
+  const icon = status === "done" ? STEP_DONE : status === "active" ? STEP_ACTIVE : status === "fail" ? STEP_FAIL : STEP_PENDING
+  const color = status === "done" ? C.green : status === "active" ? C.white : status === "fail" ? C.red : C.gray
+  const detailStr = detail ? ` ${C.darkGray}${detail}${C.reset}` : ""
+  console.log(`${icon}${color}${label}${C.reset}${detailStr}`)
+}
+
+// Animated typing effect for a line
+async function typeLine(text, delay = 12) {
+  if (!isInteractive) {
+    console.log(text)
+    return
+  }
+  process.stdout.write("     ")
+  for (const char of text) {
+    process.stdout.write(char)
+    await sleep(delay)
+  }
+  process.stdout.write("\n")
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+// Animated spinner that runs while a promise executes
+async function withSpinner(text, fn) {
+  if (!isInteractive) {
+    return fn()
+  }
+
+  let frame = 0
+  let running = true
+  const spinnerLine = `\r     ${C.orange}${SPIN_FRAMES[0]}${C.reset} ${C.white}${text}${C.reset}`
+
+  process.stdout.write(spinnerLine)
+
+  const timer = setInterval(() => {
+    frame = (frame + 1) % SPIN_FRAMES.length
+    process.stdout.write(`\r     ${C.orange}${SPIN_FRAMES[frame]}${C.reset} ${C.white}${text}${C.reset}`)
+  }, 80)
+
+  try {
+    const result = await fn()
+    running = false
+    clearInterval(timer)
+    process.stdout.write("\r" + " ".repeat(spinnerLine.length - 20) + "\r")
+    return result
+  } catch (err) {
+    running = false
+    clearInterval(timer)
+    process.stdout.write("\r" + " ".repeat(spinnerLine.length - 20) + "\r")
+    throw err
+  }
+}
+
+// Download with animated progress (uses curl --progress-bar or manual tracking)
+function downloadWithProgress(url, dest, platform) {
+  return new Promise((resolve, reject) => {
+    const curlExe = platform === "windows" ? "curl.exe" : "curl"
+
+    if (isInteractive) {
+      // Show animated progress bar while curl runs
+      let pct = 0
+      let frame = 0
+
+      const timer = setInterval(() => {
+        // Simulate progress animation (curl outputs its own progress)
+        // We just show the bar pulsing
+        const pulse = PULSE_FRAMES[frame % PULSE_FRAMES.length]
+        process.stdout.write(
+          `\r     ${C.orange}${pulse}${C.reset} ${renderBar(Math.min(pct, 95))}  ${C.gray}indiriliyor...${C.reset}`
+        )
+        frame++
+        if (pct < 90) pct += Math.random() * 3
+      }, 150)
+
+      const result = spawnSync(curlExe, ["-L", "-s", "-o", dest, url], {
+        stdio: "pipe",
+        timeout: 300000,
+      })
+
+      clearInterval(timer)
+
+      if (result.status === 0) {
+        process.stdout.write(
+          `\r     ${C.green}  ✓  ${C.reset} ${renderBar(100)}  ${C.green}tamamlandı${C.reset}` + " ".repeat(20) + "\n"
+        )
+        resolve(result)
+      } else {
+        process.stdout.write(
+          `\r     ${C.red}  ✗  ${C.reset} ${renderBar(0)}  ${C.red}başarısız${C.reset}` + " ".repeat(20) + "\n"
+        )
+        reject(new Error("Download failed"))
+      }
+    } else {
+      const result = spawnSync(curlExe, ["-L", "-o", dest, url], { stdio: "inherit", timeout: 300000 })
+      if (result.status !== 0) {
+        reject(new Error("Download failed"))
+      } else {
+        resolve(result)
+      }
+    }
+  })
+}
+
+// ─── Prerequisite Checks ────────────────────────────────────────────────────
+function checkCommand(cmd, args = ["--version"]) {
+  try {
+    const result = spawnSync(cmd, args, { encoding: "utf8", timeout: 5000, windowsHide: true })
+    return result.status === 0
+  } catch {
+    return false
+  }
+}
+
+function getNodeVersion() {
+  try {
+    const result = spawnSync("node", ["--version"], { encoding: "utf8", timeout: 5000, windowsHide: true })
+    if (result.status !== 0) return null
+    const match = (result.stdout || "").trim().match(/^v(\d+)/)
+    return match ? parseInt(match[1], 10) : null
+  } catch {
+    return null
+  }
+}
+
+function checkPrerequisites() {
+  const results = { node: false, nodeVersion: null, npm: false, curl: false, issues: [] }
+
+  // Node.js
+  const nodeVersion = getNodeVersion()
+  results.nodeVersion = nodeVersion
+  if (nodeVersion === null) {
+    results.issues.push({
+      name: "Node.js",
+      fix: "https://nodejs.org/ adresinden Node.js >= 18 kurun",
+    })
+  } else if (nodeVersion < 18) {
+    results.issues.push({
+      name: `Node.js v${nodeVersion}`,
+      fix: `Node.js >= 18 gerekli (şu an v${nodeVersion}). https://nodejs.org/ adresinden güncelleyin`,
+    })
+  } else {
+    results.node = true
+  }
+
+  // npm
+  results.npm = checkCommand("npm", ["--version"])
+  if (!results.npm) {
+    results.issues.push({
+      name: "npm",
+      fix: "npm Node.js ile birlikte gelir. https://nodejs.org/ adresinden Node.js kurun",
+    })
+  }
+
+  // curl (Windows'da curl.exe zaten var)
+  results.curl = checkCommand(platform === "windows" ? "curl.exe" : "curl", ["--version"])
+  if (!results.curl) {
+    results.issues.push({
+      name: "curl",
+      fix: platform === "windows"
+        ? "curl.exe Windows 10+ ile birlikte gelir. Sistem güncellemesi gerekebilir"
+        : "curl kurulmamış: sudo apt install curl / brew install curl",
+    })
+  }
+
+  return results
+}
+
+// ─── Full First-Run Setup Screen ────────────────────────────────────────────
+async function showFirstRunSetup(archiveName, releaseUrl, glitchDir, cachedBinary, tmpFile, platform) {
+  clearScreen()
+  hideCursor()
+
+  printLogo()
+  printSeparator()
+  console.log(`${C.cyan}  İlk kurulum algılandı — bağımlılıklar kontrol ediliyor${C.reset}`)
+  printSeparator()
+  console.log("")
+
+  // Step 1: Platform detection
+  printStep("active", "Platform algılanıyor", `${osPlatform()}/${osArch()}`)
+  await sleep(300)
+  if (isInteractive) {
+    process.stdout.write("\x1b[1A")
+    process.stdout.write("\x1b[2K")
+  }
+  printStep("done", "Platform algılandı", `${platform}/${arch}`)
+  await sleep(100)
+
+  // Step 2: Check prerequisites
+  const prereqs = checkPrerequisites()
+
+  // Node.js check
+  printStep("active", "Node.js kontrol ediliyor", "")
+  await sleep(250)
+  if (isInteractive) {
+    process.stdout.write("\x1b[1A")
+    process.stdout.write("\x1b[2K")
+  }
+  if (prereqs.node) {
+    printStep("done", "Node.js", `v${prereqs.nodeVersion} ✓`)
+  } else {
+    printStep("fail", "Node.js", "bulunamadı")
+  }
+  await sleep(100)
+
+  // npm check
+  printStep("active", "npm kontrol ediliyor", "")
+  await sleep(200)
+  if (isInteractive) {
+    process.stdout.write("\x1b[1A")
+    process.stdout.write("\x1b[2K")
+  }
+  if (prereqs.npm) {
+    printStep("done", "npm", "yüklü ✓")
+  } else {
+    printStep("fail", "npm", "bulunamadı")
+  }
+  await sleep(100)
+
+  // curl check
+  printStep("active", "curl kontrol ediliyor", "")
+  await sleep(200)
+  if (isInteractive) {
+    process.stdout.write("\x1b[1A")
+    process.stdout.write("\x1b[2K")
+  }
+  if (prereqs.curl) {
+    printStep("done", "curl", "yüklü ✓")
+  } else {
+    printStep("fail", "curl", "bulunamadı")
+  }
+  await sleep(100)
+
+  // If any prerequisite failed, show errors and exit
+  if (prereqs.issues.length > 0) {
+    printSeparator()
+    console.log("")
+    console.log(`${C.red}${C.bold}  Eksik bağımlılıklar bulundu:${C.reset}`)
+    console.log("")
+    for (const issue of prereqs.issues) {
+      console.log(`${C.red}  ✗ ${C.white}${issue.name}${C.reset}`)
+      console.log(`${C.gray}    → ${issue.fix}${C.reset}`)
+      console.log("")
+    }
+    printSeparator()
+    console.log("")
+    console.log(`${C.gray}  Eksikleri kurduktan sonra tekrar çalıştırın: ${C.white}glitch${C.reset}`)
+    console.log("")
+    showCursor()
+    process.exit(1)
+  }
+
+  // Step 3: Create directories
+  printStep("active", "Dizinler oluşturuluyor", glitchDir)
+  mkdirSync(join(glitchDir, "bin"), { recursive: true })
+  await sleep(300)
+  if (isInteractive) {
+    process.stdout.write("\x1b[1A")
+    process.stdout.write("\x1b[2K")
+  }
+  printStep("done", "Dizinler oluşturuluyor", glitchDir)
+  await sleep(100)
+
+  // Step 4: Download
+  printSeparator()
+  console.log(`${C.cyan}  Binary indiriliyor...${C.reset}`)
+  printSeparator()
+  console.log("")
+  printStep("active", "Binary indiriliyor", archiveName)
+  try {
+    await downloadWithProgress(releaseUrl, tmpFile, platform)
+  } catch {
+    if (isInteractive) {
+      process.stdout.write("\x1b[1A")
+      process.stdout.write("\x1b[2K")
+    }
+    printStep("fail", "Binary indirilemedi", "")
+    showCursor()
+    console.log(`\n${C.red}  Hata: ${releaseUrl} adresinden indirme başarısız${C.reset}\n`)
+    console.log(`${C.gray}  Manuel kurulum: https://github.com/glassesglitchstudio-lab/Gltich_code/releases${C.reset}\n`)
+    process.exit(1)
+  }
+
+  // Step 4: Extract
+  printStep("active", "Arşiv çıkarılıyor", "")
+  try {
+    if (platform === "windows") {
+      execSync(`powershell -Command "Expand-Archive -Path '${tmpFile}' -DestinationPath '${join(glitchDir, "bin")}' -Force"`)
+    } else {
+      spawnSync("tar", ["-xzf", tmpFile, "-C", join(glitchDir, "bin")], { stdio: "pipe" })
+    }
+  } catch (e) {
+    if (isInteractive) {
+      process.stdout.write("\x1b[1A")
+      process.stdout.write("\x1b[2K")
+    }
+    printStep("fail", "Arşiv çıkarılamadı", e.message)
+    showCursor()
+    process.exit(1)
+  }
+
+  if (isInteractive) {
+    process.stdout.write("\x1b[1A")
+    process.stdout.write("\x1b[2K")
+  }
+  printStep("done", "Arşiv çıkarıldı", "")
+  await sleep(150)
+
+  // Step 5: Cleanup
+  printStep("active", "Temizlik yapılıyor", "")
+  try { unlinkSync(tmpFile) } catch {}
+  try { chmodSync(cachedBinary, 0o755) } catch {}
+  await sleep(200)
+  if (isInteractive) {
+    process.stdout.write("\x1b[1A")
+    process.stdout.write("\x1b[2K")
+  }
+  printStep("done", "Temizlik tamamlandı", "")
+  await sleep(100)
+
+  // Step 6: Project config
+  printStep("active", "Proje yapılandırması kontrol ediliyor", "")
+  ensureProjectConfig()
+  await sleep(200)
+  if (isInteractive) {
+    process.stdout.write("\x1b[1A")
+    process.stdout.write("\x1b[2K")
+  }
+  printStep("done", "Proje yapılandırması hazır", "")
+  await sleep(100)
+
+  printSeparator()
+  console.log("")
+  console.log(`${C.green}${C.bold}  Kurulum tamamlandı!${C.reset} ${C.gray}Glitch Code başlatılıyor...${C.reset}`)
+  console.log("")
+  printSeparator()
+  console.log("")
+
+  showCursor()
+
+  return cachedBinary
+}
+
+// ─── Project Config ─────────────────────────────────────────────────────────
 function ensureProjectConfig() {
   const cwd = process.cwd()
   const glitchDir = join(cwd, ".glitchcode")
@@ -18,8 +447,7 @@ function ensureProjectConfig() {
   }
 }
 
-ensureProjectConfig()
-
+// ─── Run Binary ─────────────────────────────────────────────────────────────
 function run(target) {
   const result = spawnSync(target, process.argv.slice(2), {
     stdio: "inherit",
@@ -32,20 +460,7 @@ function run(target) {
   process.exit(code)
 }
 
-const envPath = process.env.GLITCHCODE_BIN_PATH
-if (envPath) {
-  run(envPath)
-}
-
-const scriptPath = realpathSync(fileURLToPath(import.meta.url))
-const scriptDir = dirname(scriptPath)
-
-//
-const cached = join(scriptDir, ".glitchcode")
-if (existsSync(cached)) {
-  run(cached)
-}
-
+// ─── Platform Detection ─────────────────────────────────────────────────────
 const platformMap = {
   darwin: "darwin",
   linux: "linux",
@@ -65,10 +480,12 @@ let arch = archMap[osArch()]
 if (!arch) {
   arch = osArch()
 }
+
 const scope = "@glitchcode/"
 const base = scope + "glitchcode-" + platform + "-" + arch
 const binary = platform === "windows" ? "glitch.exe" : "glitch"
 
+// ─── AVX2 Detection ────────────────────────────────────────────────────────
 function supportsAvx2() {
   if (arch !== "x64") return false
 
@@ -119,6 +536,7 @@ function supportsAvx2() {
   return false
 }
 
+// ─── Binary Names (fallback order) ──────────────────────────────────────────
 const names = (() => {
   const avx2 = supportsAvx2()
   const baseline = arch === "x64" && !avx2
@@ -127,17 +545,13 @@ const names = (() => {
     const musl = (() => {
       try {
         if (existsSync("/etc/alpine-release")) return true
-      } catch {
-        // ignore
-      }
+      } catch {}
 
       try {
         const result = spawnSync("ldd", ["--version"], { encoding: "utf8" })
         const text = ((result.stdout || "") + (result.stderr || "")).toLowerCase()
         if (text.includes("musl")) return true
-      } catch {
-        // ignore
-      }
+      } catch {}
 
       return false
     })()
@@ -164,6 +578,7 @@ const names = (() => {
   return [base]
 })()
 
+// ─── Find Binary ────────────────────────────────────────────────────────────
 function findBinary(startDir) {
   let current = startDir
   for (;;) {
@@ -182,48 +597,46 @@ function findBinary(startDir) {
   }
 }
 
-// try cached binary in user-global dir
+// ─── Main ───────────────────────────────────────────────────────────────────
+const envPath = process.env.GLITCHCODE_BIN_PATH
+if (envPath) {
+  run(envPath)
+}
+
+const scriptPath = realpathSync(fileURLToPath(import.meta.url))
+const scriptDir = dirname(scriptPath)
+
+// Check cached binary next to script
+const cached = join(scriptDir, ".glitchcode")
+if (existsSync(cached)) {
+  run(cached)
+}
+
+// Try to find binary in node_modules or user-global cache
 const glitchDir = join(homedir(), ".glitchcode")
 const cachedBinary = join(glitchDir, "bin", binary)
 let resolved = findBinary(scriptDir) || (existsSync(cachedBinary) ? cachedBinary : null)
 
 if (!resolved) {
+  // First run — show animated setup screen
   const ext = platform === "windows" ? "zip" : "tar.gz"
   const archiveName = `glitchcode-${platform}-${arch}${arch === "x64" && !supportsAvx2() ? "-baseline" : ""}.${ext}`
   const releaseUrl =
     "https://github.com/glassesglitchstudio-lab/Gltich_code/releases/latest/download/" + archiveName
-
-  console.log("Downloading " + archiveName + "...")
-
-  mkdirSync(join(glitchDir, "bin"), { recursive: true })
-
   const tmpFile = join(glitchDir, "bin", archiveName)
-  const curlExe = platform === "windows" ? "curl.exe" : "curl"
-  let dl = spawnSync(curlExe, ["-L", "-o", tmpFile, releaseUrl], { stdio: "inherit", timeout: 300000 })
-  if (dl.status !== 0 && platform !== "windows") {
-    dl = spawnSync("wget", ["-O", tmpFile, releaseUrl], { stdio: "inherit", timeout: 300000 })
-  }
-  if (dl.status !== 0) {
-    console.error("Failed to download " + releaseUrl)
-    process.exit(1)
-  }
 
-  try {
-    if (platform === "windows") {
-      const { execSync } = await import("node:child_process")
-      execSync(`powershell -Command "Expand-Archive -Path '${tmpFile}' -DestinationPath '${join(glitchDir, "bin")}' -Force"`)
-    } else {
-      spawnSync("tar", ["-xzf", tmpFile, "-C", join(glitchDir, "bin")], { stdio: "inherit" })
+  ;(async () => {
+    try {
+      const result = await showFirstRunSetup(archiveName, releaseUrl, glitchDir, cachedBinary, tmpFile, platform)
+      run(result)
+    } catch (err) {
+      showCursor()
+      console.error(`\n${C.red}Kurulum hatası:${C.reset} ${err.message}\n`)
+      console.log(`${C.gray}Manuel kurulum: https://github.com/glassesglitchstudio-lab/Gltich_code/releases${C.reset}\n`)
+      process.exit(1)
     }
-  } catch (e) {
-    console.error("Failed to extract archive:", e.message)
-    process.exit(1)
-  }
-
-  try { unlinkSync(tmpFile) } catch {}
-  try { chmodSync(cachedBinary, 0o755) } catch {}
-  resolved = cachedBinary
-  console.log("Downloaded to " + cachedBinary)
+  })()
+} else {
+  ensureProjectConfig()
+  run(resolved)
 }
-
-run(resolved)

@@ -104,7 +104,7 @@ describe("CheckpointContext", () => {
     // then fails. The ensuring callback must still run.
     await Effect.runPromise(
       Effect.gen(function* () {
-        yield* Effect.fail(new Error("simulated settle failure"))
+        return yield* Effect.fail(new Error("simulated settle failure"))
       }).pipe(
         Effect.ensuring(
           Effect.sync(() => CheckpointContext.remove(sid, aid)),
@@ -126,7 +126,7 @@ describe("CheckpointContext", () => {
 
     await Effect.runPromise(
       Effect.gen(function* () {
-        yield* Effect.interrupt
+        return yield* Effect.interrupt
       }).pipe(
         Effect.ensuring(
           Effect.sync(() => CheckpointContext.remove(sid, aid)),

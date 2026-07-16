@@ -35,11 +35,34 @@ private:
 	void OnTextCommitted(const FText& Text, ETextCommit::Type CommitType);
 	void OnResponseReceived(const FString& Response);
 	void OnErrorReceived(const FString& ErrorMessage);
+	void OnConnectionStateChanged(bool bConnected);
 	void AddMessage(const FString& Sender, const FString& Content, bool bIsUser);
 	void ScrollToBottom();
+	void RefreshConnectionIndicator();
 
+	// Settings
+	FReply OnToggleSettings();
+	void OnAutoStartChanged(ECheckBoxState NewState);
+	void OnBinaryPathChanged(const FText& NewText, ETextCommit::Type CommitType);
+	FReply OnRestartClicked();
+
+	// Widgets
 	TSharedPtr<SScrollBox> ChatScrollBox;
 	TSharedPtr<SEditableTextBox> InputTextBox;
 	TSharedPtr<SListView<TSharedPtr<FChatMessage>>> MessageListView;
 	TArray<TSharedPtr<FChatMessage>> Messages;
+
+	// Connection indicator
+	TSharedPtr<STextBlock> ConnectionIndicatorText;
+	TSharedPtr<STextBlock> ConnectionIndicatorDot;
+	bool bIsConnected = false;
+
+	// Settings panel
+	TSharedPtr<SVerticalBox> SettingsContainer;
+	TSharedPtr<SCheckBox> AutoStartCheckBox;
+	TSharedPtr<SEditableTextBox> BinaryPathTextBox;
+	bool bSettingsVisible = false;
+
+	// Cached subsystem pointer
+	TObjectPtr<class UGlitchCodeAISubsystem> CachedSubsystem;
 };

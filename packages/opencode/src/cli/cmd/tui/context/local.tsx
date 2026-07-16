@@ -13,6 +13,9 @@ import { useSDK } from "./sdk"
 import { RGBA } from "@opentui/core"
 import { Filesystem } from "@/util"
 
+// Provider persistence: saves last connected provider/model to disk
+import { getLastProvider, saveLastProvider, type ProviderState } from "@/auth/provider-persistence"
+
 export function parseModel(model: string) {
   const [providerID, ...rest] = model.split("/")
   return {
@@ -151,13 +154,14 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
           if (Array.isArray(x.favorite)) setModelStore("favorite", x.favorite)
           if (typeof x.variant === "object" && x.variant !== null) setModelStore("variant", x.variant)
         })
-        .catch(() => {})
+        .catch((err) => { console.warn('[tui.local] model state read error:', err) })
         .finally(() => {
           setModelStore("ready", true)
           if (state.pending) save()
         })
 
       const args = useArgs()
+
       const fallbackModel = createMemo(() => {
         if (args.model) {
           const { providerID, modelID } = parseModel(args.model)
@@ -176,6 +180,15 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
               providerID,
               modelID,
             }
+          }
+        }
+
+        // Check last persisted provider (from previous session)
+        const last = getLastProvider()
+        if (last && isModelValid({ providerID: last.providerID, modelID: last.modelID })) {
+          return {
+            providerID: last.providerID,
+            modelID: last.modelID,
           }
         }
 
@@ -307,6 +320,8 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
                 uniq.map((x) => ({ providerID: x.providerID, modelID: x.modelID })),
               )
               save()
+              // Persist last connected provider for auto-reconnect on next startup
+              saveLastProvider(model.providerID, model.modelID)
             }
           })
         },

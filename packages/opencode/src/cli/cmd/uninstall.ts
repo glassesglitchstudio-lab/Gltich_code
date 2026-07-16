@@ -133,10 +133,9 @@ async function showRemovalSummary(targets: RemovalTargets, method: Installation.
       npm: "npm uninstall -g @glitchcode/cli",
       pnpm: "pnpm uninstall -g @glitchcode/cli",
       bun: "bun remove -g @glitchcode/cli",
-      // TODO(glitchcode): uncomment when published to these channels
-      // brew: "brew uninstall glitchcode",
-      // choco: "choco uninstall glitchcode",
-      // scoop: "scoop uninstall glitchcode",
+      brew: "brew uninstall glitchcode",
+      choco: "choco uninstall glitchcode",
+      scoop: "scoop uninstall glitchcode",
     }
     prompts.log.info(`  ✓ Package: ${cmds[method] || method}`)
   }
@@ -184,10 +183,9 @@ async function executeUninstall(method: Installation.Method, targets: RemovalTar
       npm: ["npm", "uninstall", "-g", "@glitchcode/cli"],
       pnpm: ["pnpm", "uninstall", "-g", "@glitchcode/cli"],
       bun: ["bun", "remove", "-g", "@glitchcode/cli"],
-      // TODO(glitchcode): uncomment when published to these channels
-      // brew: ["brew", "uninstall", "glitchcode"],
-      // choco: ["choco", "uninstall", "glitchcode"],
-      // scoop: ["scoop", "uninstall", "glitchcode"],
+      brew: ["brew", "uninstall", "glitchcode"],
+      choco: ["choco", "uninstall", "glitchcode"],
+      scoop: ["scoop", "uninstall", "glitchcode"],
     }
 
     const cmd = cmds[method]

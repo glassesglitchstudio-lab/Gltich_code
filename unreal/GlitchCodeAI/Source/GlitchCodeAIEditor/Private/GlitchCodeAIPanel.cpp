@@ -3,22 +3,19 @@
 #include "UGlitchCodeAISubsystem.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Input/SEditableTextBox.h"
+#include "Widgets/Input/SCheckBox.h"
 #include "Widgets/Layout/SScrollBox.h"
-#include "Widgets/Layout/SScrollBar.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/Layout/SBorder.h"
-#include "Widgets/Layout/SSpacer.h"
 #include "Widgets/SBoxPanel.h"
-#include "GameFramework/PlayerController.h"
 #include "Engine/GameInstance.h"
 #include "Editor.h"
-#include "EditorStyleSet.h"
 
 #define LOCTEXT_NAMESPACE "GlitchCodeAIPanel"
 
 void SGlitchCodeAIPanel::Construct(const FArguments& InArgs)
 {
-	// Get the subsystem
+	// Get subsystem
 	UGameInstance* GameInstance = nullptr;
 	if (GEditor)
 	{
@@ -29,33 +26,178 @@ void SGlitchCodeAIPanel::Construct(const FArguments& InArgs)
 		}
 	}
 
-	if (UGlitchCodeAISubsystem* Subsystem = GameInstance->GetSubsystem<UGlitchCodeAISubsystem>())
+	if (GameInstance)
 	{
-		Subsystem->OnResponseReceived.AddDynamic(this, &SGlitchCodeAIPanel::OnResponseReceived);
-		Subsystem->OnErrorReceived.AddDynamic(this, &SGlitchCodeAIPanel::OnErrorReceived);
+		CachedSubsystem = GameInstance->GetSubsystem<UGlitchCodeAISubsystem>();
+	}
+
+	if (CachedSubsystem)
+	{
+		CachedSubsystem->OnResponseReceived.AddDynamic(this, &SGlitchCodeAIPanel::OnResponseReceived);
+		CachedSubsystem->OnErrorReceived.AddDynamic(this, &SGlitchCodeAIPanel::OnErrorReceived);
+		CachedSubsystem->OnConnectionStateChanged.AddDynamic(this, &SGlitchCodeAIPanel::OnConnectionStateChanged);
+		bIsConnected = CachedSubsystem->IsRunning();
 	}
 
 	ChildSlot
 	[
 		SNew(SVerticalBox)
 
-		// Header
+		// Header with connection indicator and settings button
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		.Padding(8.0f)
 		[
 			SNew(SBorder)
 			.BorderImage(FAppStyle::GetBrush("ToolPanel.GroupBorder"))
-			.Padding(8.0f)
+			.Padding(FMargin(8.0f, 6.0f))
 			[
-				SNew(STextBlock)
-				.Text(LOCTEXT("HeaderTitle", "GlitchCode AI"))
-				.Font(FCoreStyle::GetDefaultFontStyle("Bold", 14))
-				.ColorAndOpacity(FLinearColor(1.0f, 0.5f, 0.0f))  // Neon orange
+				SNew(SHorizontalBox)
+
+				// Title
+				+ SHorizontalBox::Slot()
+				.FillWidth(1.0f)
+				.VAlign(VAlign_Center)
+				[
+					SNew(STextBlock)
+					.Text(LOCTEXT("HeaderTitle", "GlitchCode AI"))
+					.Font(FCoreStyle::GetDefaultFontStyle("Bold", 14))
+					.ColorAndOpacity(FLinearColor(1.0f, 0.5f, 0.0f))
+				]
+
+				// Connection status
+				+ SHorizontalBox::Slot()
+				.AutoWidth()
+				.VAlign(VAlign_Center)
+				.Padding(0, 0, 8, 0)
+				[
+					SNew(SHorizontalBox)
+
+					+ SHorizontalBox::Slot()
+					.AutoWidth()
+					.VAlign(VAlign_Center)
+					.Padding(0, 0, 4, 0)
+					[
+						SAssignNew(ConnectionIndicatorDot, STextBlock)
+						.Text(FText::FromString(TEXT("\u25CF")))  // Filled circle
+						.Font(FCoreStyle::GetDefaultFontStyle("Regular", 12))
+						.ColorAndOpacity(bIsConnected
+							? FLinearColor(0.0f, 0.9f, 0.0f)
+							: FLinearColor(0.9f, 0.1f, 0.1f))
+					]
+
+					+ SHorizontalBox::Slot()
+					.AutoWidth()
+					.VAlign(VAlign_Center)
+					[
+						SAssignNew(ConnectionIndicatorText, STextBlock)
+						.Text(bIsConnected
+							? LOCTEXT("Connected", "Connected")
+							: LOCTEXT("Disconnected", "Disconnected"))
+						.Font(FCoreStyle::GetDefaultFontStyle("Regular", 9))
+						.ColorAndOpacity(bIsConnected
+							? FLinearColor(0.0f, 0.8f, 0.0f)
+							: FLinearColor(0.8f, 0.2f, 0.2f))
+					]
+				]
+
+				// Settings toggle button
+				+ SHorizontalBox::Slot()
+				.AutoWidth()
+				.VAlign(VAlign_Center)
+				[
+					SNew(SButton)
+					.Text(LOCTEXT("SettingsBtn", "Settings"))
+					.OnClicked(this, &SGlitchCodeAIPanel::OnToggleSettings)
+					.ButtonStyle(FAppStyle::Get(), "FlatButton")
+				]
 			]
 		]
 
-		// Chat history area
+		// Settings panel (collapsed by default)
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.Padding(4.0f, 0.0f)
+		[
+			SAssignNew(SettingsContainer, SVerticalBox)
+			.Visibility(EVisibility::Collapsed)
+			[
+				SNew(SBorder)
+				.BorderImage(FAppStyle::GetBrush("ToolPanel.GroupBorder"))
+				.Padding(8.0f)
+				[
+					SNew(SVerticalBox)
+
+					+ SVerticalBox::Slot()
+					.AutoHeight()
+					.Padding(0, 0, 0, 8)
+					[
+						SNew(STextBlock)
+						.Text(LOCTEXT("SettingsTitle", "Settings"))
+						.Font(FCoreStyle::GetDefaultFontStyle("Bold", 11))
+						.ColorAndOpacity(FLinearColor(1.0f, 0.5f, 0.0f))
+					]
+
+					// Auto-start
+					+ SVerticalBox::Slot()
+					.AutoHeight()
+					.Padding(0, 0, 0, 6)
+					[
+						SNew(SHorizontalBox)
+
+						+ SHorizontalBox::Slot()
+						.FillWidth(1.0f)
+						.VAlign(VAlign_Center)
+						[
+							SNew(STextBlock)
+							.Text(LOCTEXT("AutoStartLabel", "Auto-start CLI on editor launch"))
+						]
+
+						+ SHorizontalBox::Slot()
+						.AutoWidth()
+						[
+							SAssignNew(AutoStartCheckBox, SCheckBox)
+							.IsChecked(CachedSubsystem && CachedSubsystem->GetAutoStart()
+								? ECheckBoxState::Checked
+								: ECheckBoxState::Unchecked)
+							.OnCheckStateChanged(this, &SGlitchCodeAIPanel::OnAutoStartChanged)
+						]
+					]
+
+					// Binary path
+					+ SVerticalBox::Slot()
+					.AutoHeight()
+					.Padding(0, 0, 0, 4)
+					[
+						SNew(STextBlock)
+						.Text(LOCTEXT("BinaryPathLabel", "Custom binary path (leave empty for auto-detect)"))
+					]
+
+					+ SVerticalBox::Slot()
+					.AutoHeight()
+					.Padding(0, 0, 0, 8)
+					[
+						SAssignNew(BinaryPathTextBox, SEditableTextBox)
+						.HintText(LOCTEXT("BinaryPathHint", "e.g. C:/Program Files/GlitchCode/glitch-cli.exe"))
+						.Text(FText::FromString(
+							CachedSubsystem ? CachedSubsystem->GetBinaryPath() : FString()))
+						.OnTextCommitted(this, &SGlitchCodeAIPanel::OnBinaryPathChanged)
+					]
+
+					// Restart button
+					+ SVerticalBox::Slot()
+					.AutoHeight()
+					[
+						SNew(SButton)
+						.Text(LOCTEXT("RestartBtn", "Restart CLI"))
+						.OnClicked(this, &SGlitchCodeAIPanel::OnRestartClicked)
+						.ButtonStyle(FAppStyle::Get(), "FlatButton.Warning")
+					]
+				]
+			]
+		]
+
+		// Chat messages
 		+ SVerticalBox::Slot()
 		.FillHeight(1.0f)
 		.Padding(4.0f)
@@ -80,12 +222,11 @@ void SGlitchCodeAIPanel::Construct(const FArguments& InArgs)
 							SNew(STextBlock)
 							.Text(FText::FromString(FString::Printf(TEXT("%s - %s"),
 								*Item->Sender,
-								*Item->Timestamp.ToString(TEXT("%H:%M:%S"))))
-							)
+								*Item->Timestamp.ToString(TEXT("%H:%M:%S")))))
 							.Font(FCoreStyle::GetDefaultFontStyle("Bold", 9))
 							.ColorAndOpacity(Item->bIsUser
-								? FLinearColor(0.4f, 0.8f, 1.0f)   // Blue for user
-								: FLinearColor(1.0f, 0.5f, 0.0f))  // Orange for AI
+								? FLinearColor(0.4f, 0.8f, 1.0f)
+								: FLinearColor(1.0f, 0.5f, 0.0f))
 						]
 
 						+ SVerticalBox::Slot()
@@ -137,9 +278,82 @@ void SGlitchCodeAIPanel::Construct(const FArguments& InArgs)
 		]
 	];
 
-	// Add welcome message
-	AddMessage(TEXT("System"), TEXT("GlitchCode AI initialized. Type a message to start."), false);
+	AddMessage(TEXT("System"), TEXT("GlitchCode AI ready."), false);
 }
+
+// --- Connection indicator ---
+
+void SGlitchCodeAIPanel::OnConnectionStateChanged(bool bConnected)
+{
+	bIsConnected = bConnected;
+	RefreshConnectionIndicator();
+}
+
+void SGlitchCodeAIPanel::RefreshConnectionIndicator()
+{
+	if (ConnectionIndicatorDot.IsValid())
+	{
+		ConnectionIndicatorDot->SetColorAndOpacity(
+			bIsConnected
+				? FLinearColor(0.0f, 0.9f, 0.0f)
+				: FLinearColor(0.9f, 0.1f, 0.1f));
+	}
+
+	if (ConnectionIndicatorText.IsValid())
+	{
+		ConnectionIndicatorText->SetText(
+			bIsConnected
+				? LOCTEXT("Connected", "Connected")
+				: LOCTEXT("Disconnected", "Disconnected"));
+		ConnectionIndicatorText->SetColorAndOpacity(
+			bIsConnected
+				? FLinearColor(0.0f, 0.8f, 0.0f)
+				: FLinearColor(0.8f, 0.2f, 0.2f));
+	}
+}
+
+// --- Settings ---
+
+FReply SGlitchCodeAIPanel::OnToggleSettings()
+{
+	bSettingsVisible = !bSettingsVisible;
+
+	if (SettingsContainer.IsValid())
+	{
+		SettingsContainer->SetVisibility(
+			bSettingsVisible ? EVisibility::Visible : EVisibility::Collapsed);
+	}
+
+	return FReply::Handled();
+}
+
+void SGlitchCodeAIPanel::OnAutoStartChanged(ECheckBoxState NewState)
+{
+	if (CachedSubsystem)
+	{
+		CachedSubsystem->SetAutoStart(NewState == ECheckBoxState::Checked);
+	}
+}
+
+void SGlitchCodeAIPanel::OnBinaryPathChanged(const FText& NewText, ETextCommit::Type CommitType)
+{
+	if (CachedSubsystem)
+	{
+		CachedSubsystem->SetBinaryPath(NewText.ToString());
+	}
+}
+
+FReply SGlitchCodeAIPanel::OnRestartClicked()
+{
+	if (CachedSubsystem)
+	{
+		AddMessage(TEXT("System"), TEXT("Restarting CLI..."), false);
+		CachedSubsystem->RestartCLI();
+	}
+	return FReply::Handled();
+}
+
+// --- Chat ---
 
 void SGlitchCodeAIPanel::OnSendClicked()
 {
@@ -170,30 +384,16 @@ void SGlitchCodeAIPanel::OnTextCommitted(const FText& Text, ETextCommit::Type Co
 		return;
 	}
 
-	// Display user message
 	AddMessage(TEXT("You"), Message, true);
 	InputTextBox->SetText(FText::GetEmpty());
 
-	// Send to CLI
-	if (UGameInstance* GameInstance = nullptr)
+	if (CachedSubsystem)
 	{
-		if (GEditor)
+		if (!CachedSubsystem->IsRunning())
 		{
-			UWorld* EditorWorld = GEditor->GetEditorWorldContext().World();
-			if (EditorWorld)
-			{
-				GameInstance = EditorWorld->GetGameInstance();
-			}
+			CachedSubsystem->StartCLI();
 		}
-
-		if (UGlitchCodeAISubsystem* Subsystem = GameInstance->GetSubsystem<UGlitchCodeAISubsystem>())
-		{
-			if (!Subsystem->IsRunning())
-			{
-				Subsystem->StartCLI();
-			}
-			Subsystem->SendMessage(Message);
-		}
+		CachedSubsystem->SendMessage(Message);
 	}
 }
 

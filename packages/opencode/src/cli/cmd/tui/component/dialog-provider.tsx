@@ -1,4 +1,4 @@
-﻿import { createMemo, createSignal, onMount, Show } from "solid-js"
+import { createMemo, createSignal, onMount, Show } from "solid-js"
 import { useSync } from "@tui/context/sync"
 import { map, pipe, sortBy } from "remeda"
 import { DialogSelect } from "@tui/ui/dialog-select"
@@ -364,22 +364,22 @@ function ApiMethod(props: ApiMethodProps) {
           opencode: (
             <box gap={1}>
               <text fg={theme.textMuted}>
-                OpenCode Zen gives you access to all the best coding models at the cheapest prices with a single API
+                Glitch Code Zen gives you access to all the best coding models at the cheapest prices with a single API
                 key.
               </text>
               <text fg={theme.text}>
-                Go to <span style={{ fg: theme.primary }}>https://opencode.ai/zen</span> to get a key
+                Go to <span style={{ fg: theme.primary }}>https://glitchcode.dev/zen</span> to get a key
               </text>
             </box>
           ),
           "opencode-go": (
             <box gap={1}>
               <text fg={theme.textMuted}>
-                OpenCode Go is a $10 per month subscription that provides reliable access to popular open coding models
+                Glitch Code Go is a $10 per month subscription that provides reliable access to popular open coding models
                 with generous usage limits.
               </text>
               <text fg={theme.text}>
-                Go to <span style={{ fg: theme.primary }}>https://opencode.ai/zen</span> and enable OpenCode Go
+                Go to <span style={{ fg: theme.primary }}>https://glitchcode.dev/zen</span> and enable Glitch Code Go
               </text>
             </box>
           ),

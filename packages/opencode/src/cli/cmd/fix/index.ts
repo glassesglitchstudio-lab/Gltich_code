@@ -194,9 +194,9 @@ export const FixCommand = cmd({
                 owner,
                 repo,
                 issueNumber: number,
-                issue: null as any,
-                triage: null as any,
-                plan: null as any,
+                issue: null as unknown as FixContext["issue"],
+                triage: null as unknown as FixContext["triage"],
+                plan: null as unknown as FixContext["plan"],
                 discoveredFiles: [],
                 originalContents: [],
                 proposals: [],
@@ -324,10 +324,10 @@ export const FixCommand = cmd({
                     }),
                   )
                   if (treeRes.ok) {
-                    const treeData = (yield* Effect.promise(() => treeRes.json())) as any
+                    const treeData = (yield* Effect.promise(() => treeRes.json())) as { tree?: Array<{ type: string; path: string }> }
                     const allFiles = (treeData.tree || [])
-                      .filter((f: any) => f.type === "blob")
-                      .map((f: any) => f.path as string)
+                      .filter((f) => f.type === "blob")
+                      .map((f) => f.path as string)
 
                     const discoveryPrompt = fillTemplate(loadPrompt("file-discovery"), {
                       title: ctx.issue.title,
@@ -572,7 +572,7 @@ export const FixCommand = cmd({
   },
 })
 
-function resolveModel(modelStr: string, providers: Record<string, any>): ModelRef | null {
+function resolveModel(modelStr: string, providers: Record<string, { models?: Record<string, unknown> }>): ModelRef | null {
   const [provider, model] = modelStr.includes("/") ? modelStr.split("/", 2) : ["auto", modelStr]
   const pid = ProviderID.make(provider)
   const providerData = providers[pid]
@@ -582,11 +582,11 @@ function resolveModel(modelStr: string, providers: Record<string, any>): ModelRe
   return { providerID: pid, modelID: model, model: modelData as LanguageModel }
 }
 
-function selectBestModel(providers: Record<string, any>): ModelRef | null {
+function selectBestModel(providers: Record<string, { models?: Record<string, unknown> }>): ModelRef | null {
   const allModels: ModelRef[] = []
   for (const [pid, provider] of Object.entries(providers)) {
     const providerID = ProviderID.make(pid)
-    for (const [modelID, model] of Object.entries((provider as any).models ?? {})) {
+    for (const [modelID, model] of Object.entries(provider.models ?? {})) {
       allModels.push({ providerID, modelID, model: model as LanguageModel })
     }
   }
@@ -602,13 +602,13 @@ function selectBestModel(providers: Record<string, any>): ModelRef | null {
 
 async function runDebate(
   primaryModel: ModelRef,
-  providers: Record<string, any>,
+  providers: Record<string, { models?: Record<string, unknown> }>,
   context: { title: string; body: string; plan: string; fileContents: string },
 ): Promise<string> {
   const allModels: ModelRef[] = []
   for (const [pid, provider] of Object.entries(providers)) {
     const providerID = ProviderID.make(pid)
-    for (const [modelID, model] of Object.entries((provider as any).models ?? {})) {
+    for (const [modelID, model] of Object.entries(provider.models ?? {})) {
       if (pid !== primaryModel.providerID.toString() || modelID !== primaryModel.modelID) {
         allModels.push({ providerID, modelID, model: model as LanguageModel })
       }

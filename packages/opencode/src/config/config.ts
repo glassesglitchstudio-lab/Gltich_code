@@ -101,7 +101,7 @@ const InfoSchema = Schema.Struct({
     description: "Server configuration for glitch serve and web commands",
   }),
   command: Schema.optional(Schema.Record(Schema.String, ConfigCommand.Info)).annotate({
-    description: "Command configuration, see https://opencode.ai/docs/commands",
+    description: "Command configuration, see https://github.com/glassesglitchstudio-lab/Gltich_code",
   }),
   skills: Schema.optional(ConfigSkills.Info).annotate({ description: "Additional skill folder paths" }),
   watcher: Schema.optional(
@@ -186,7 +186,7 @@ const InfoSchema = Schema.Struct({
       }),
       [Schema.Record(Schema.String, AgentRef)],
     ),
-  ).annotate({ description: "Agent configuration, see https://opencode.ai/docs/agents" }),
+  ).annotate({ description: "Agent configuration, see https://github.com/glassesglitchstudio-lab/Gltich_code" }),
   provider: Schema.optional(Schema.Record(Schema.String, ConfigProvider.Info)).annotate({
     description: "Custom provider configurations and model overrides",
   }),

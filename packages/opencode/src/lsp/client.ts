@@ -43,8 +43,8 @@ export async function create(input: { serverID: string; server: LSPServer.Handle
   l.info("starting client")
 
   const connection = createMessageConnection(
-    new StreamMessageReader(input.server.process.stdout as any),
-    new StreamMessageWriter(input.server.process.stdin as any),
+    new StreamMessageReader(input.server.process.stdout as import("stream").Readable),
+    new StreamMessageWriter(input.server.process.stdin as import("stream").Writable),
   )
 
   const diagnostics = new Map<string, Diagnostic[]>()
@@ -228,7 +228,7 @@ export async function create(input: { serverID: string; server: LSPServer.Handle
         }),
         3000,
       )
-        .catch(() => {})
+        .catch((err) => { console.warn('[lsp.client] waitForDiagnostics error:', err) })
         .finally(() => {
           if (debounceTimer) clearTimeout(debounceTimer)
           unsub?.()

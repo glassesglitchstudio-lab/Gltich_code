@@ -62,15 +62,15 @@ export const CostCommand = cmd({
           const messages = await AppRuntime.runPromise(
             Session.Service.use((svc: any) => svc.messages({ sessionID: session.id, agentID: "*" })),
           )
-          for (const msg of messages as any[]) {
-            const info = msg.info as any
+          for (const msg of messages as Array<{ info?: { tokens?: { input?: number; output?: number; reasoning?: number }; cost?: number; model?: string } }>) {
+            const info = msg.info
             if (info?.tokens) {
               totalTokens += (info.tokens.input ?? 0) + (info.tokens.output ?? 0) + (info.tokens.reasoning ?? 0)
             }
             totalCost += info?.cost ?? 0
             if (info?.model) model = info.model
           }
-        } catch {}
+        } catch (err) { console.warn('[cli.cost] session message fetch error:', err) }
 
         entries.push({
           sessionID: session.id,

@@ -680,7 +680,13 @@ export const layer: Layer.Layer<
         ctx.shouldBreak = (yield* config.get()).experimental?.continue_loop_on_deny !== true
 
         const attemptFallback = Effect.fn("SessionProcessor.attemptFallback")(function* (error: unknown) {
-          if (!SessionRetry.isQuotaError(error)) return yield* Effect.fail(error)
+          // Fallback triggers for:
+          // 1. Quota/billing errors (402, 403 with quota keywords, insufficient_quota)
+          // 2. Rate-limit errors (429) after all retries are exhausted
+          // Auth errors (401/403 invalid key) do NOT trigger fallback — the key is invalid.
+          if (!SessionRetry.isQuotaError(error) && !SessionRetry.isRateLimitError(error)) {
+            return yield* Effect.fail(error)
+          }
 
           const currentModel = streamInput.model
           const fallbacks = yield* provider.getFallbackProviders(currentModel.providerID, currentModel.id)
@@ -699,10 +705,11 @@ export const layer: Layer.Layer<
               continue
             }
 
-            slog.info("quota fallback", {
+            slog.info("provider fallback", {
               from: `${currentModel.providerID}/${currentModel.id}`,
               to: `${fallback.providerID}/${fallback.modelID}`,
               source: fallback.source,
+              reason: SessionRetry.isQuotaError(error) ? "quota_exceeded" : "rate_limit",
             })
 
             const fallbackModel = yield* provider.getModel(fallback.providerID, fallback.modelID).pipe(Effect.exit)

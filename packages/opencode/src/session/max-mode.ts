@@ -78,7 +78,7 @@ export type MaxStepInput = {
 export function toSchemaOnlyTools(tools: Record<string, AITool>): Record<string, AITool> {
   const out: Record<string, AITool> = {}
   for (const [key, t] of Object.entries(tools)) {
-    const { execute: _execute, ...rest } = t as any
+    const { execute: _execute, ...rest } = t as Omit<AITool, "execute"> & { execute?: unknown }
     out[key] = rest as AITool
   }
   return out
@@ -386,7 +386,7 @@ export const runMaxStep = (input: MaxStepInput): Effect.Effect<SessionProcessor.
       finishReason: winner.finishReason,
       usage: winner.usage,
       providerMetadata: winner.providerMetadata,
-      tools: input.tools as any,
+      tools: input.tools as Record<string, AITool>,
       messages: input.messages,
       selection: { winner: pick, total: survivors.length },
       thinkingMs: Date.now() - ensembleStartedAt,

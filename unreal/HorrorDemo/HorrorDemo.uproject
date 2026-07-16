@@ -1,0 +1,27 @@
+{
+    "FileVersion": 3,
+    "EngineAssociation": "5.4",
+    "Category": "Game",
+    "Description": "GlitchCode AI Horror Demo - Testbed for all 120 tools and 29 C++ components",
+    "Modules": [
+        {
+            "Name": "HorrorDemo",
+            "Type": "Runtime",
+            "LoadingPhase": "Default"
+        }
+    ],
+    "Plugins": [
+        {
+            "Name": "GlitchCodeAI",
+            "Enabled": true
+        },
+        {
+            "Name": "Niagara",
+            "Enabled": true
+        },
+        {
+            "Name": "OnlineSubsystem",
+            "Enabled": true
+        }
+    ]
+}

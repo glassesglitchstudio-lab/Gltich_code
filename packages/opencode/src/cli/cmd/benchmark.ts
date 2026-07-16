@@ -92,7 +92,7 @@ async function runBenchmark(days?: number): Promise<BenchmarkResult[]> {
     let lastTime = 0
 
     for (const msg of messages) {
-      const info = msg.info as any
+      const info = msg.info as { tokens?: { input: number; output: number; reasoning?: number }; cost?: number }
       if (info.tokens) {
         totalTokens += info.tokens.input + info.tokens.output + (info.tokens.reasoning || 0)
       }
@@ -102,7 +102,7 @@ async function runBenchmark(days?: number): Promise<BenchmarkResult[]> {
         if (part.type === "tool") toolCalls++
       }
 
-      const msgTime = (msg as any).time?.created || Date.now()
+      const msgTime = (msg as { time?: { created?: number } }).time?.created || Date.now()
       firstTime = Math.min(firstTime, msgTime)
       lastTime = Math.max(lastTime, msgTime)
     }

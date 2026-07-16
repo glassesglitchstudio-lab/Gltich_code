@@ -124,6 +124,98 @@ packages/opencode/
 - `--no-verify` ile push ediliyor (husky hook typecheck hatası yüzünden)
 - `zht.ts` = Geleneksel Çince (Traditional Chinese) dil dosyası — Taiwan/Hong Kong
 
+## Session Notları (2026-07-14)
+
+### ShadowCat-R1 Pulse 14B Eğitimi — Colab Sorunları
+Pulse 14B modeli PC'ye indirildi, Colab'da eğitilmeye çalışıldı ama mirror env var sorunu ile karşılaşıldı.
+
+**Pulse 14B İndirme:**
+- `C:/Users/ErCuM/models/pulse/` konumuna indirildi (~29.5GB)
+- hf-mirror.com ile PC'den hızlı indirme (28.7MB/s)
+- PC disk: 366GB → 349GB (Ollama temizliği + model indirme)
+
+**Colab Eğitim Sorunları:**
+1. hf-mirror.com Colab'dan erişilemez (Google Cloud ağı farklı region)
+2. `HF_ENDPOINT` env var tüm hücrelere yayılıyor, temizlenmiyor
+3. Model indirme %1'de 21 dakika takıldı
+4. Kullanıcı küçük model reddetti ("o kadar uğraştım olmaz")
+
+**Çözüm:** Runtime → Disconnect and delete runtime, sonra mirror'sız kod yapıştır.
+
+**Kullanıcı Tepkisi:** Çok sinirli — "hiç bişeyi değiştirmeden bir çözümü yokmu?"
+
+**Mirror Durumu:**
+- PC: hf-mirror.com çalışıyor ✅
+- Colab: hf-mirror.com çalışmıyor ❌ (sadece doğrudan huggingface.co)
+
+## Session Notları (2026-07-12)
+
+### UE5 Plugin — 88 Özellik TAMAMLANDI ✅
+110 feature roadmap'inin kalan 88 özelliği tek oturumda tamamlandı.
+
+**Toplam Yeni Dosya:** 88 TypeScript tool + 29 C++ component (58 dosya) = **146 yeni dosya**
+**Toplam Tool Sayısı:** 120 TS + 110 MCP + 58 C++ = **288 dosya**
+
+**14 Kategori (88 tool):**
+1. **Procedural Generation (6)** — room, corridor, door, lighting, props, spawn
+2. **Oyun Mekaniği (13)** — health, stamina, combat, interact, crafting, inventory-upgrade, damage, healing, puzzle, trap, key-item, tutorial, difficulty
+3. **Animasyon (7)** — state, blend, ragdoll, IK, montage, notify, locomotion
+4. **Kamera (5)** — first-person, third-person, cinematic, shake, follow
+5. **Görsel/VFX (9)** — particle, postprocess, lighting, fog, weather, decal, niagara, lumen, nanite
+6. **UI/UX (7)** — menu, hud-custom, tooltip, notification, loading, inventory-screen, dialogue-box
+7. **Çapraz Platform (4)** — input, perf, resolve, quality
+8. **Build (5)** — cook, package, shader, cooktime, asset
+9. **Test/QA (6)** — unit, functional, perf, coverage, automation, report
+10. **Kayıt (4)** — auto, slot, cloud, version
+11. **Sosyal (6)** — replicate, session, chat, lobby, match, leaderboard
+12. **Temel Plugin (8)** — settings, logs, analytics, telemetry, error, recovery, update, config
+13. **Özgün Horror (7)** — ai-spawn, horror-event, fear-aura, sanity, jumpscare-zone, darkness, sound-trigger
+14. **Texture-Scout (1)** — search, download, apply, preview, import
+
+**110 feature roadmap TAMAMLANDI ✅**
+
+### C++ Component'ler Gerçek UE5 API'lerine Bağlandı ✅ (Aynı oturum)
+29 component tamamen yeniden yazıldı — UE_LOG stub'ları gerçek API çağrılarıyla değiştirildi.
+
+**Kullanılan Gerçek UE5 API'leri:**
+- `UWorld::SpawnActor<>()` — Procedural room/corridor/door/trap spawn
+- `UGameplayStatics::ApplyDamage/ApplyRadialDamage` — Combat, damage, traps
+- `UCameraComponent` + `USpringArmComponent` — Camera systems
+- `UAnimInstance::Montage_Play/SetFloatParameter` — Animation control
+- `UNiagaraFunctionLibrary::SpawnSystemAtLocation` — VFX particles
+- `SetAllBodiesSimulatePhysics` — Ragdoll death
+- `IOnlineSubsystem::Get()` — Multiplayer sessions
+- `UGameplayStatics::SaveGameToSlot` — Save system
+- `FPlatformMemory::GetStats()` — Telemetry
+- `GConfig->SetString/GetString` — Config management
+- `OnComponentBeginOverlap` — Trap/interaction triggers
+- `FMath::VInterpTo/RInterpTo` — Cinematic camera interpolation
+- `FTimerManager::SetTimer` — DoT, flicker, cooldowns
+
+**Değişen dosya:** 58 C++ dosya (29 header + 29 implementation)
+**Toplam satır:** ~5000+ satır gerçek UE5 kodu (UE_LOG stub'ları silindi)
+
+### UE5 Editor Panel Luna AI Gibi Yenilendi ✅ (Aynı oturum)
+Plugin artık UE5 içinde doğrudan çalışıyor — terminal/MCP server gerekmez.
+
+**Değişen dosyalar:**
+- `UGlitchCodeAISubsystem.h` — Auto-start, FindGlitchBinary, SendToStdin, LoadSettings/SaveSettings
+- `UGlitchCodeAISubsystem.cpp` — Initialize'da otomatik CLI başlatma, pipe-based stdin/stdout
+- `GlitchCodeAIPanel.h` — FQuickTool struct, bShowSettings, ConnectionStatusText, 18 quick tool
+- `GlitchCodeAIPanel.cpp` — Header (connection indicator + settings toggle), settings panel, 18 quick tool butonu, renk kodlu chat
+- `GlitchCodeAIEditorModule.cpp` — UToolMenus toolbar butonu, SDockTab registration
+- `GlitchCodeAIEditorModule.h` — OpenTab, OnSpawnTab
+
+**Panel Özellikleri:**
+- Auto-start: Subsystem Initialize'da otomatik başlar
+- Connection indicator: Yeşil/kırmızı nokta (2sn kontrol)
+- Quick tools: room, corridor, door, light, props, spawn, weather, fog, health, combat, darkness, horror, sanity, trap, puzzle, save, play, stop
+- Settings: API key, max tokens, auto-start toggle
+- Toolbar: Tools menüsünde GlitchCode AI Panel
+- Chat: Kullanıcı=mavi, AI=turuncu, Tool=yeşil
+
+**Kullanıcı deneyimi:** UE5'i aç → Panel otomatik gelir → Yazarsın → Çalışır.
+
 ## Session Notları (2026-06-30)
 
 ### T3-T8 Kalan İşler Tamamlandı ✅

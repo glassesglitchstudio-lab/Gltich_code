@@ -19,6 +19,8 @@ import { SessionCwd } from "./session-cwd"
 import { Snapshot } from "@/snapshot"
 import { assertWriteAllowed, askEditUnlessMemory } from "./external-directory"
 import { AppFileSystem } from "@glitchcode/shared/filesystem"
+import { GlitchError } from "../util/glitch-error"
+import { createError } from "../util/error-handler"
 
 function normalizeLineEndings(text: string): string {
   return text.replaceAll("\r\n", "\n")
@@ -66,11 +68,11 @@ export const EditTool = Tool.define(
       execute: (params: z.infer<typeof Parameters>, ctx: Tool.Context) =>
         Effect.gen(function* () {
           if (!params.filePath) {
-            throw new Error("filePath is required")
+            throw createError("INVALID_PARAMETERS", { details: "filePath is required" })
           }
 
           if (params.oldString === params.newString) {
-            throw new Error("No changes to apply: oldString and newString are identical.")
+            throw createError("INVALID_PARAMETERS", { details: "No changes to apply: oldString and newString are identical." })
           }
 
           const filePath = path.isAbsolute(params.filePath)
@@ -102,8 +104,8 @@ export const EditTool = Tool.define(
               }
 
               const info = yield* afs.stat(filePath).pipe(Effect.catch(() => Effect.succeed(undefined)))
-              if (!info) throw new Error(`File ${filePath} not found`)
-              if (info.type === "Directory") throw new Error(`Path is a directory, not a file: ${filePath}`)
+              if (!info) throw createError("FILE_NOT_FOUND", { path: filePath })
+              if (info.type === "Directory") throw createError("INVALID_PARAMETERS", { details: `Path is a directory, not a file: ${filePath}` })
               contentOld = yield* afs.readFileString(filePath)
 
               const ending = detectLineEnding(contentOld)
@@ -647,7 +649,7 @@ export function trimDiff(diff: string): string {
 
 export function replace(content: string, oldString: string, newString: string, replaceAll = false): string {
   if (oldString === newString) {
-    throw new Error("No changes to apply: oldString and newString are identical.")
+    throw createError("INVALID_PARAMETERS", { details: "No changes to apply: oldString and newString are identical." })
   }
 
   let notFound = true
@@ -677,9 +679,7 @@ export function replace(content: string, oldString: string, newString: string, r
   }
 
   if (notFound) {
-    throw new Error(
-      "Could not find oldString in the file. It must match exactly, including whitespace, indentation, and line endings.",
-    )
+    throw createError("EDIT_NO_MATCH", { path: "file" })
   }
-  throw new Error("Found multiple matches for oldString. Provide more surrounding context to make the match unique.")
+  throw createError("EDIT_MULTIPLE_MATCHES", { path: "file" })
 }

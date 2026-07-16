@@ -1015,7 +1015,7 @@ describe("tool.bash abort", () => {
         const result = await Effect.runPromise(
           bash.execute(
             {
-              command: `echo started && sleep 60`,
+              command: process.platform === "win32" ? `echo started; sleep 60` : `echo started && sleep 60`,
               description: "Timeout test",
               timeout: 500,
             },

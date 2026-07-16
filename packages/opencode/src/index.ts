@@ -26,8 +26,7 @@ import { AttachCommand } from "./cli/cmd/tui/attach"
 import { TuiThreadCommand } from "./cli/cmd/tui/thread"
 import { AcpCommand } from "./cli/cmd/acp"
 import { EOL } from "os"
-// Web command temporarily disabled
-// import { WebCommand } from "./cli/cmd/web"
+import { WebCommand } from "./cli/cmd/web"
 import { PrCommand } from "./cli/cmd/pr"
 import { SessionCommand } from "./cli/cmd/session"
 import { DbCommand } from "./cli/cmd/db"
@@ -43,6 +42,7 @@ import { OnboardCommand } from "./cli/cmd/onboard"
 import { ShareCommand } from "./cli/cmd/share"
 import { BenchmarkCommand } from "./cli/cmd/benchmark"
 import { PluginMarketCommand } from "./cli/cmd/plugin"
+import { RegistryCommand } from "./cli/cmd/registry"
 import { TeamCommand } from "./cli/cmd/team"
 import { ReviewCommand } from "./cli/cmd/review"
 import { SuggestCommand } from "./cli/cmd/suggest"
@@ -201,8 +201,7 @@ const cli = yargs(args)
   .command(UpgradeCommand)
   .command(UninstallCommand)
   .command(ServeCommand)
-  // Web command temporarily disabled
-  // .command(WebCommand)
+  .command(WebCommand)
   .command(ModelsCommand)
   .command(StatsCommand)
   .command(ExportCommand)
@@ -217,6 +216,7 @@ const cli = yargs(args)
   .command(ShareCommand)
   .command(BenchmarkCommand)
   .command(PluginMarketCommand)
+  .command(RegistryCommand)
   .command(TeamCommand)
   .command(ReviewCommand)
   .command(SuggestCommand)

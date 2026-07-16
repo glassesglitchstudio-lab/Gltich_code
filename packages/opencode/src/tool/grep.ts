@@ -7,6 +7,8 @@ import { assertExternalDirectoryEffect } from "./external-directory"
 import { SessionCwd } from "./session-cwd"
 import DESCRIPTION from "./grep.txt"
 import * as Tool from "./tool"
+import { GlitchError } from "../util/glitch-error"
+import { createError } from "../util/error-handler"
 
 const MAX_LINE_LENGTH = 2000
 
@@ -31,7 +33,7 @@ export const GrepTool = Tool.define(
             output: "No files found",
           }
           if (!params.pattern) {
-            throw new Error("pattern is required")
+            throw createError("INVALID_PARAMETERS", { details: "pattern is required" })
           }
 
           yield* ctx.ask({

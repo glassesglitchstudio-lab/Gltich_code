@@ -11,7 +11,8 @@ import { Git } from "../../src/git"
 import { Instance } from "../../src/project/instance"
 
 // chokidar is pure JS — always available, but skip in CI to avoid flaky filesystem timing
-const describeWatcher = !process.env.CI ? describe : describe.skip
+// Also skip on Windows where ReadDirectoryChangesW has higher latency
+const describeWatcher = !process.env.CI && process.platform !== "win32" ? describe : describe.skip
 
 // ---------------------------------------------------------------------------
 // Helpers

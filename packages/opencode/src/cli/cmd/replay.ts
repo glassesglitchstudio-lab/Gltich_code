@@ -81,25 +81,25 @@ export const ReplayCommand = cmd({
         Session.Service.use((svc: any) => svc.messages({ sessionID: session.id, agentID: "*" })),
       )
 
-      const replayMessages: ReplayMessage[] = (messages as any[])
-        .filter((m: any) => {
+      const replayMessages: ReplayMessage[] = (messages as Array<{ info?: { role?: string }; parts?: Array<{ type: string; text?: string; tool?: string }>; time?: { created?: number } }>)
+        .filter((m) => {
           if (args["skip-tools"]) {
             const role = m.info?.role as string
             if (role === "tool") return false
           }
           return true
         })
-        .map((m: any) => {
-          const info = m.info as any
+        .map((m) => {
+          const info = m.info
           const content = m.parts
-            ?.filter((p: any) => p.type === "text")
-            .map((p: any) => p.text ?? "")
+            ?.filter((p) => p.type === "text")
+            .map((p) => p.text ?? "")
             .join("") ?? ""
           return {
             role: (info?.role ?? "system") as ReplayMessage["role"],
             content,
             timestamp: m.time?.created ?? Date.now(),
-            toolName: m.parts?.find((p: any) => p.type === "tool")?.tool,
+            toolName: m.parts?.find((p) => p.type === "tool")?.tool,
           }
         })
 

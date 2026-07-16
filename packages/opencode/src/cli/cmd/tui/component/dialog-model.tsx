@@ -16,9 +16,17 @@ const ADD_MODEL_SENTINEL = "__add_model__"
 
 export function useConnected() {
   const sync = useSync()
-  return createMemo(() =>
-    sync.data.provider.some((x) => x.id !== "opencode" || Object.values(x.models).some((y) => y.cost?.input !== 0)),
-  )
+  return createMemo(() => {
+    // Check 1: provider_next.connected list (from server-side auth.json check)
+    const connectedIds = sync.data.provider_next.connected
+    if (Array.isArray(connectedIds) && connectedIds.length > 0) {
+      return true
+    }
+    // Check 2: any provider has loaded models (excluding free opencode)
+    return sync.data.provider.some(
+      (x) => x.id !== "opencode" || Object.values(x.models).some((y) => y.cost?.input !== 0),
+    )
+  })
 }
 
 export function DialogModel(props: { providerID?: string }) {

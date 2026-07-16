@@ -771,7 +771,8 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
         if (input.options?.metadata) return input.options.metadata
         try {
           return JSON.parse(input.options?.headers?.["cf-aig-metadata"])
-        } catch {
+        } catch (err) {
+          console.warn('[provider] cf-aig-metadata JSON parse error:', err)
           return undefined
         }
       })

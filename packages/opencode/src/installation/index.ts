@@ -69,17 +69,16 @@ export class UpgradeFailedError extends Schema.TaggedErrorClass<UpgradeFailedErr
   stderr: Schema.String,
 }) {}
 
-// TODO(glitchcode): uncomment when corresponding channels are supported
-// const GitHubRelease = Schema.Struct({ tag_name: Schema.String })
+const GitHubRelease = Schema.Struct({ tag_name: Schema.String })
 const NpmPackage = Schema.Struct({ version: Schema.String })
-// const BrewFormula = Schema.Struct({ versions: Schema.Struct({ stable: Schema.String }) })
-// const BrewInfoV2 = Schema.Struct({
-//   formulae: Schema.Array(Schema.Struct({ versions: Schema.Struct({ stable: Schema.String }) })),
-// })
-// const ChocoPackage = Schema.Struct({
-//   d: Schema.Struct({ results: Schema.Array(Schema.Struct({ Version: Schema.String })) }),
-// })
-// const ScoopManifest = NpmPackage
+const BrewFormula = Schema.Struct({ versions: Schema.Struct({ stable: Schema.String }) })
+const BrewInfoV2 = Schema.Struct({
+  formulae: Schema.Array(Schema.Struct({ versions: Schema.Struct({ stable: Schema.String }) })),
+})
+const ChocoPackage = Schema.Struct({
+  d: Schema.Struct({ results: Schema.Array(Schema.Struct({ Version: Schema.String })) }),
+})
+const ScoopManifest = NpmPackage
 
 export interface Interface {
   readonly info: () => Effect.Effect<Info>
@@ -133,14 +132,13 @@ export const layer: Layer.Layer<Service, never, HttpClient.HttpClient | ChildPro
         Effect.catch(() => Effect.succeed({ code: ChildProcessSpawner.ExitCode(1), stdout: "", stderr: "" })),
       )
 
-          // TODO(glitchcode): uncomment when glitchcode is published to homebrew
-      // const getBrewFormula = Effect.fnUntraced(function* () {
-      //   const tapFormula = yield* text(["brew", "list", "--formula", "anomalyco/tap/opencode"])
-      //   if (tapFormula.includes("opencode")) return "anomalyco/tap/opencode"
-      //   const coreFormula = yield* text(["brew", "list", "--formula", "opencode"])
-      //   if (coreFormula.includes("opencode")) return "opencode"
-      //   return "opencode"
-      // })
+      const getBrewFormula = Effect.fnUntraced(function* () {
+        const tapFormula = yield* text(["brew", "list", "--formula", "glassesglitchstudio-lab/tap/glitchcode"])
+        if (tapFormula.includes("glitchcode")) return "glassesglitchstudio-lab/tap/glitchcode"
+        const coreFormula = yield* text(["brew", "list", "--formula", "glitchcode"])
+        if (coreFormula.includes("glitchcode")) return "glitchcode"
+        return "glitchcode"
+      })
 
       const upgradeCurl = Effect.fnUntraced(
         function* (target: string) {
@@ -173,10 +171,9 @@ export const layer: Layer.Layer<Service, never, HttpClient.HttpClient | ChildPro
           { name: "npm", command: () => text(["npm", "list", "-g", "--depth=0"]) },
           { name: "pnpm", command: () => text(["pnpm", "list", "-g", "--depth=0"]) },
           { name: "bun", command: () => text(["bun", "pm", "ls", "-g"]) },
-          // TODO(glitchcode): uncomment when glitchcode is published to these channels
-          // { name: "brew", command: () => text(["brew", "list", "--formula", "opencode"]) },
-          // { name: "scoop", command: () => text(["scoop", "list", "opencode"]) },
-          // { name: "choco", command: () => text(["choco", "list", "--limit-output", "opencode"]) },
+          { name: "brew", command: () => text(["brew", "list", "--formula", "glitchcode"]) },
+          { name: "scoop", command: () => text(["scoop", "list", "glitchcode"]) },
+          { name: "choco", command: () => text(["choco", "list", "--limit-output", "glitchcode"]) },
         ]
 
         checks.sort((a, b) => {
@@ -200,22 +197,21 @@ export const layer: Layer.Layer<Service, never, HttpClient.HttpClient | ChildPro
       const latestImpl = Effect.fn("Installation.latest")(function* (installMethod?: Method) {
         const detectedMethod = installMethod || (yield* methodImpl())
 
-        // TODO(glitchcode): uncomment when glitchcode is published to homebrew
-        // if (detectedMethod === "brew") {
-        //   const formula = yield* getBrewFormula()
-        //   if (formula.includes("/")) {
-        //     const infoJson = yield* text(["brew", "info", "--json=v2", formula])
-        //     const info = yield* Schema.decodeUnknownEffect(Schema.fromJsonString(BrewInfoV2))(infoJson)
-        //     return info.formulae[0].versions.stable
-        //   }
-        //   const response = yield* httpOk.execute(
-        //     HttpClientRequest.get("https://formulae.brew.sh/api/formula/opencode.json").pipe(
-        //       HttpClientRequest.acceptJson,
-        //     ),
-        //   )
-        //   const data = yield* HttpClientResponse.schemaBodyJson(BrewFormula)(response)
-        //   return data.versions.stable
-        // }
+        if (detectedMethod === "brew") {
+          const formula = yield* getBrewFormula()
+          if (formula.includes("/")) {
+            const infoJson = yield* text(["brew", "info", "--json=v2", formula])
+            const info = yield* Schema.decodeUnknownEffect(Schema.fromJsonString(BrewInfoV2))(infoJson)
+            return info.formulae[0].versions.stable
+          }
+          const response = yield* httpOk.execute(
+            HttpClientRequest.get("https://formulae.brew.sh/api/formula/glitchcode.json").pipe(
+              HttpClientRequest.acceptJson,
+            ),
+          )
+          const data = yield* HttpClientResponse.schemaBodyJson(BrewFormula)(response)
+          return data.versions.stable
+        }
 
         if (detectedMethod === "curl") {
           const headers = yield* text([
@@ -241,36 +237,33 @@ export const layer: Layer.Layer<Service, never, HttpClient.HttpClient | ChildPro
           return data.version
         }
 
-          // TODO(glitchcode): uncomment when glitchcode is published to chocolatey
-        // if (detectedMethod === "choco") {
-        //   const response = yield* httpOk.execute(
-        //     HttpClientRequest.get(
-        //       "https://community.chocolatey.org/api/v2/Packages?$filter=Id%20eq%20%27opencode%27%20and%20IsLatestVersion&$select=Version",
-        //     ).pipe(HttpClientRequest.setHeaders({ Accept: "application/json;odata=verbose" })),
-        //   )
-        //   const data = yield* HttpClientResponse.schemaBodyJson(ChocoPackage)(response)
-        //   return data.d.results[0].Version
-        // }
+        if (detectedMethod === "choco") {
+          const response = yield* httpOk.execute(
+            HttpClientRequest.get(
+              "https://community.chocolatey.org/api/v2/Packages?$filter=Id%20eq%20%27glitchcode%27%20and%20IsLatestVersion&$select=Version",
+            ).pipe(HttpClientRequest.setHeaders({ Accept: "application/json;odata=verbose" })),
+          )
+          const data = yield* HttpClientResponse.schemaBodyJson(ChocoPackage)(response)
+          return data.d.results[0].Version
+        }
 
-          // TODO(glitchcode): uncomment when glitchcode is published to scoop
-        // if (detectedMethod === "scoop") {
-        //   const response = yield* httpOk.execute(
-        //     HttpClientRequest.get(
-        //       "https://raw.githubusercontent.com/ScoopInstaller/Main/master/bucket/opencode.json",
-        //     ).pipe(HttpClientRequest.setHeaders({ Accept: "application/json" })),
-        //   )
-        //   const data = yield* HttpClientResponse.schemaBodyJson(ScoopManifest)(response)
-        //   return data.version
-        // }
+        if (detectedMethod === "scoop") {
+          const response = yield* httpOk.execute(
+            HttpClientRequest.get(
+              "https://raw.githubusercontent.com/ScoopInstaller/Main/master/bucket/glitchcode.json",
+            ).pipe(HttpClientRequest.setHeaders({ Accept: "application/json" })),
+          )
+          const data = yield* HttpClientResponse.schemaBodyJson(ScoopManifest)(response)
+          return data.version
+        }
 
-        // TODO(glitchcode): uncomment when glitchcode has github releases
-        // const response = yield* httpOk.execute(
-        //   HttpClientRequest.get("https://api.github.com/repos/anomalyco/opencode/releases/latest").pipe(
-        //     HttpClientRequest.acceptJson,
-        //   ),
-        // )
-        // const data = yield* HttpClientResponse.schemaBodyJson(GitHubRelease)(response)
-        // return data.tag_name.replace(/^v/, "")
+        const ghResponse = yield* httpOk.execute(
+          HttpClientRequest.get("https://api.github.com/repos/glassesglitchstudio-lab/Gltich_code/releases/latest").pipe(
+            HttpClientRequest.acceptJson,
+          ),
+        )
+        const ghData = yield* HttpClientResponse.schemaBodyJson(GitHubRelease)(ghResponse)
+        return ghData.tag_name.replace(/^v/, "")
 
         log.warn("unsupported update channel, skipping", { method: detectedMethod })
         return yield* Effect.die(new Error(`unsupported update channel: ${detectedMethod}`))
@@ -291,44 +284,39 @@ export const layer: Layer.Layer<Service, never, HttpClient.HttpClient | ChildPro
           case "bun":
             result = yield* run(["bun", "install", "-g", `${PACKAGE_NAME}@${target}`])
             break
-      // TODO(glitchcode): uncomment when glitchcode is published to homebrew
-          // case "brew": {
-          //   const formula = yield* getBrewFormula()
-          //   const env = { HOMEBREW_NO_AUTO_UPDATE: "1" }
-          //   if (formula.includes("/")) {
-          //     const tap = yield* run(["brew", "tap", "anomalyco/tap"], { env })
-          //     if (tap.code !== 0) {
-          //       result = tap
-          //       break
-          //     }
-          //     const repo = yield* text(["brew", "--repo", "anomalyco/tap"])
-          //     const dir = repo.trim()
-          //     if (dir) {
-          //       const pull = yield* run(["git", "pull", "--ff-only"], { cwd: dir, env })
-          //       if (pull.code !== 0) {
-          //         result = pull
-          //         break
-          //       }
-          //     }
-          //   }
-          //   result = yield* run(["brew", "upgrade", formula], { env })
-          //   break
-          // }
-        // TODO(glitchcode): uncomment when glitchcode is published to chocolatey
-          // case "choco":
-          //   result = yield* run(["choco", "upgrade", "opencode", `--version=${target}`, "-y"])
-          //   break
-        // TODO(glitchcode): uncomment when glitchcode is published to scoop
-          // case "scoop":
-          //   result = yield* run(["scoop", "install", `opencode@${target}`])
-          //   break
+          case "brew": {
+            const formula = yield* getBrewFormula()
+            const env = { HOMEBREW_NO_AUTO_UPDATE: "1" }
+            if (formula.includes("/")) {
+              const tap = yield* run(["brew", "tap", "glassesglitchstudio-lab/tap"], { env })
+              if (tap.code !== 0) {
+                result = tap
+                break
+              }
+              const repo = yield* text(["brew", "--repo", "glassesglitchstudio-lab/tap"])
+              const dir = repo.trim()
+              if (dir) {
+                const pull = yield* run(["git", "pull", "--ff-only"], { cwd: dir, env })
+                if (pull.code !== 0) {
+                  result = pull
+                  break
+                }
+              }
+            }
+            result = yield* run(["brew", "upgrade", formula], { env })
+            break
+          }
+          case "choco":
+            result = yield* run(["choco", "upgrade", "glitchcode", `--version=${target}`, "-y"])
+            break
+          case "scoop":
+            result = yield* run(["scoop", "install", `glitchcode@${target}`])
+            break
           default:
             return yield* new UpgradeFailedError({ stderr: `Unknown method: ${m}` })
         }
         if (!result || result.code !== 0) {
-          // TODO(glitchcode): restore choco-specific error when choco channel is supported
-          // const stderr = m === "choco" ? "not running from an elevated command shell" : result?.stderr || ""
-          const stderr = result?.stderr || ""
+          const stderr = m === "choco" ? "not running from an elevated command shell" : result?.stderr || ""
           return yield* new UpgradeFailedError({ stderr })
         }
         log.info("upgraded", {

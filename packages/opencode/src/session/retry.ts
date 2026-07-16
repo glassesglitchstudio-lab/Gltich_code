@@ -65,6 +65,26 @@ export function isAuthError(error: unknown): boolean {
 }
 
 /**
+ * Check if an error is a rate-limit (429) error that should trigger provider fallback
+ * after retries are exhausted. Rate-limit errors on the same provider are
+ * retryable, but after all retries fail, switching providers is the right move.
+ */
+export function isRateLimitError(error: unknown): boolean {
+  if (MessageV2.APIError.isInstance(error)) {
+    const status = error.data.statusCode
+    if (status === 429) return true
+  }
+  if (typeof error === "object" && error !== null && "data" in error) {
+    const data = (error as { data?: { message?: string } }).data
+    if (data?.message) {
+      const lower = data.message.toLowerCase()
+      if (lower.includes("rate limit") || lower.includes("too many requests")) return true
+    }
+  }
+  return false
+}
+
+/**
  * Check if an error is a quota/billing error that should trigger provider fallback.
  * Quota errors are NOT retryable on the same provider — they require switching.
  * Auth errors are excluded — they won't be fixed by switching providers.

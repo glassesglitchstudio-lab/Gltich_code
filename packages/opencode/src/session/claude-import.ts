@@ -43,7 +43,7 @@ function stringifyToolContent(content: unknown): string {
   if (typeof content === "string") return content
   if (Array.isArray(content))
     return content
-      .map((b) => (b && typeof b === "object" && "type" in b && b.type === "text" ? (b as any).text : JSON.stringify(b)))
+      .map((b) => (b && typeof b === "object" && "type" in b && b.type === "text" ? (b as { text?: string }).text ?? "" : JSON.stringify(b)))
       .join("\n")
   return content == null ? "" : JSON.stringify(content)
 }

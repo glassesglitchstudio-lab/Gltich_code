@@ -1,46 +1,65 @@
 #include "GlitchCodeAIEditorModule.h"
 #include "GlitchCodeAIPanel.h"
-#include "Framework/Docking/TabManager.h"
 #include "Widgets/Docking/SDockTab.h"
+#include "Framework/Docking/TabManager.h"
+#include "ToolMenus.h"
+#include "Editor.h"
 
-#define LOCTEXT_NAMESPACE "FGlitchCodeAIEditorModule"
+#define LOCTEXT_NAMESPACE "GlitchCodeAIEditorModule"
 
-const FName FGlitchCodeAIEditorModule::GlitchCodeAITabId("GlitchCodeAITab");
+static const FName GlitchCodeAITabName("GlitchCodeAITab");
 
 void FGlitchCodeAIEditorModule::StartupModule()
 {
-	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(
-		GlitchCodeAITabId,
-		FOnSpawnTab::CreateRaw(this, &FGlitchCodeAIEditorModule::SpawnGlitchCodeAITab)
-	)
-	.SetDisplayName(LOCTEXT("TabTitle", "GlitchCode AI"))
-	.SetTooltipText(LOCTEXT("TabTooltip", "Open the GlitchCode AI chat panel"))
-	.SetIcon(FSlateIcon(
-		FAppStyle::GetAppStyleSetName(),
-		"ClassIcon.Actor"
-	));
-
-	UE_LOG(LogTemp, Log, TEXT("GlitchCodeAIEditor module registered"));
+    // Register tab spawner
+    FGlobalTabmanager::Get()->RegisterNomadTabSpawner(GlitchCodeAITabName,
+        FOnSpawnTab::CreateRaw(this, &FGlitchCodeAIEditorModule::OnSpawnTab))
+        .SetDisplayName(LOCTEXT("TabTitle", "GlitchCode AI"))
+        .SetMenuType(ETabSpawnerMenuType::Hidden)
+        .SetIcon(FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Bot"));
+    
+    // Add toolbar button
+    if (UToolMenus::IsToolMenuUIEnabled())
+    {
+        UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Tools");
+        FToolMenuSection& Section = Menu->AddSection("GlitchCodeAI", LOCTEXT("MenuSection", "GlitchCode AI"));
+        
+        Section.AddMenuEntry(
+            "OpenGlitchCodeAIPanel",
+            LOCTEXT("MenuEntry", "GlitchCode AI Panel"),
+            LOCTEXT("MenuEntryTip", "Open the GlitchCode AI assistant panel"),
+            FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Bot"),
+            FUIAction(FExecuteAction::CreateRaw(this, &FGlitchCodeAIEditorModule::OpenTab))
+        );
+    }
+    
+    UE_LOG(LogTemp, Log, TEXT("GlitchCodeAI Editor Module: Registered"));
 }
 
 void FGlitchCodeAIEditorModule::ShutdownModule()
 {
-	FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(GlitchCodeAITabId);
-	UE_LOG(LogTemp, Log, TEXT("GlitchCodeAIEditor module shut down"));
+    FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(GlitchCodeAITabName);
+    
+    if (UToolMenus::IsToolMenuUIEnabled())
+    {
+        UToolMenus::UnRegisterStartupCallback(this);
+    }
+    
+    UE_LOG(LogTemp, Log, TEXT("GlitchCodeAI Editor Module: Unregistered"));
 }
 
-void FGlitchCodeAIEditorModule::OpenGlitchCodeAIPanel()
+TSharedRef<SDockTab> FGlitchCodeAIEditorModule::OnSpawnTab(const FSpawnTabArgs& SpawnTabArgs)
 {
-	FGlobalTabmanager::Get()->TryInvokeTab(GlitchCodeAITabId);
+    return SNew(SDockTab)
+        .TabRole(ETabRole::NomadTab)
+        [
+            SNew(SGlitchCodeAIPanel)
+        ];
 }
 
-TSharedRef<SDockTab> FGlitchCodeAIEditorModule::SpawnGlitchCodeAITab(const FSpawnTabArgs& Args)
+void FGlitchCodeAIEditorModule::OpenTab()
 {
-	return SNew(SDockTab)
-		.TabRole(ETabRole::NomadTab)
-		[
-			SNew(SGlitchCodeAIPanel)
-		];
+    FGlobalTabmanager::Get()->TryInvokeTab(GlitchCodeAITabName);
 }
 
 #undef LOCTEXT_NAMESPACE

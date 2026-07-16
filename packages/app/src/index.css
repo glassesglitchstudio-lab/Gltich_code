@@ -82,4 +82,194 @@
       opacity: 1;
     }
   }
+
+  @keyframes glow-pulse {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(255, 107, 0, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 40px rgba(255, 107, 0, 0.6);
+    }
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
+  }
+
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes neon-text {
+    0%, 100% {
+      text-shadow: 0 0 10px rgba(255, 107, 0, 0.5), 0 0 20px rgba(255, 107, 0, 0.3);
+    }
+    50% {
+      text-shadow: 0 0 20px rgba(255, 107, 0, 0.8), 0 0 40px rgba(255, 107, 0, 0.5);
+    }
+  }
+
+  @keyframes particle-float {
+    0% {
+      transform: translateY(100vh) rotate(0deg);
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-100vh) rotate(720deg);
+      opacity: 0;
+    }
+  }
+
+  /* Glitch Code Web Theme */
+  :root {
+    --gc-primary: #FF6B00;
+    --gc-primary-light: #FF8C33;
+    --gc-primary-dark: #CC5500;
+    --gc-bg-dark: #09090f;
+    --gc-bg-card: rgba(255, 255, 255, 0.05);
+    --gc-border: rgba(255, 107, 0, 0.2);
+    --gc-text: #ffffff;
+    --gc-text-muted: #a0a0a0;
+  }
+
+  /* Glassmorphism Base */
+  .gc-glass {
+    background: var(--gc-bg-card);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--gc-border);
+    border-radius: 16px;
+  }
+
+  /* Glow Effects */
+  .gc-glow {
+    animation: glow-pulse 2s ease-in-out infinite;
+  }
+
+  .gc-glow-hover:hover {
+    box-shadow: 0 0 30px rgba(255, 107, 0, 0.4);
+    transition: box-shadow 0.3s ease;
+  }
+
+  /* Float Animation */
+  .gc-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* Slide Up Animation */
+  .gc-slide-up {
+    animation: slide-up 0.6s ease-out forwards;
+  }
+
+  /* Neon Text */
+  .gc-neon {
+    animation: neon-text 2s ease-in-out infinite;
+    color: var(--gc-primary);
+  }
+
+  /* Particle Background */
+  .gc-particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: -1;
+  }
+
+  .gc-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: var(--gc-primary);
+    border-radius: 50%;
+    animation: particle-float linear infinite;
+    opacity: 0.6;
+  }
+
+  /* Chat Input Enhancement */
+  .gc-chat-input {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--gc-border);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+  }
+
+  .gc-chat-input:focus {
+    border-color: var(--gc-primary);
+    box-shadow: 0 0 20px rgba(255, 107, 0, 0.2);
+    outline: none;
+  }
+
+  /* Message Bubble */
+  .gc-message {
+    background: var(--gc-bg-card);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin: 8px 0;
+    transition: transform 0.2s ease;
+  }
+
+  .gc-message:hover {
+    transform: translateX(4px);
+  }
+
+  /* Sidebar Enhancement */
+  .gc-sidebar {
+    background: rgba(9, 9, 15, 0.95);
+    border-right: 1px solid var(--gc-border);
+    backdrop-filter: blur(10px);
+  }
+
+  /* Button Styles */
+  .gc-btn-primary {
+    background: linear-gradient(135deg, var(--gc-primary), var(--gc-primary-dark));
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .gc-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(255, 107, 0, 0.4);
+  }
+
+  /* Scrollbar */
+  .gc-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .gc-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .gc-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--gc-border);
+    border-radius: 3px;
+  }
+
+  .gc-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--gc-primary);
+  }
 }

@@ -475,11 +475,11 @@ function resolveModel(modelStr: string, providers: Record<string, any>): ModelRe
   return { providerID: pid, modelID: model, model: modelData as LanguageModel }
 }
 
-function selectBestModel(providers: Record<string, any>): ModelRef | null {
+function selectBestModel(providers: Record<string, { models?: Record<string, unknown> }>): ModelRef | null {
   const allModels: ModelRef[] = []
   for (const [pid, provider] of Object.entries(providers)) {
     const providerID = ProviderID.make(pid)
-    for (const [modelID, model] of Object.entries((provider as any).models ?? {})) {
+    for (const [modelID, model] of Object.entries(provider.models ?? {})) {
       allModels.push({ providerID, modelID, model: model as LanguageModel })
     }
   }

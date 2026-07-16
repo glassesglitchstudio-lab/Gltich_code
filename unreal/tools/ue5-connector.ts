@@ -70,7 +70,8 @@ export class UE5Connector {
         projectName: data.projectName,
         playInEditor: data.playInEditor,
       }
-    } catch {
+    } catch (err) {
+      console.warn('[ue5-connector] getStatus error:', err)
       return { connected: false }
     }
   }

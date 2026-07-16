@@ -81,7 +81,8 @@ function createFsWatcher(
       onEvent(eventType === "rename" ? "unlink" : "change", fullPath)
     })
     return watcher as unknown as FSWatcher
-  } catch {
+  } catch (err) {
+    console.warn('[file.watcher] createFsWatcher error:', err)
     return null
   }
 }
@@ -89,8 +90,8 @@ function createFsWatcher(
 function createNoopWatcher(): FSWatcher {
   return {
     close: () => Promise.resolve(),
-    on: () => ({}) as any,
-    unwatch: () => ({}) as any,
+    on: () => ({ on: () => ({}) }) as unknown as FSWatcher,
+    unwatch: () => ({}) as unknown as FSWatcher,
   } as unknown as FSWatcher
 }
 
@@ -186,7 +187,7 @@ export const layer = Layer.effect(
 
               try {
                 const gitWatcher = chokidar.watch(vcsDir, {
-                  ignored: gitIgnore as any,
+                  ignored: gitIgnore as (string | RegExp)[],
                   persistent: true,
                   ignoreInitial: true,
                 })

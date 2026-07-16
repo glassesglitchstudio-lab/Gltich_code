@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glitch Code Marketplace — Plugin Dükkanı</title>
+  <meta name="description" content="Glitch Code plugin marketplace. Keşfet ve kur.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#09090f;--surface:rgba(139,92,246,.05);--surface2:rgba(139,92,246,.08);--border:rgba(139,92,246,.12);--violet:#8b5cf6;--violet-dim:#7c3aed;--violet-light:#a78bfa;--orange:#ff6b00;--text:#eeeef0;--text2:#8b8a9e;--text3:#5c5b6e;--radius:12px}
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+    code,.cmd,.mono{font-family:'JetBrains Mono','Fira Code',monospace}
+    .container{max-width:1100px;margin:0 auto;padding:0 24px}
+
+    /* NAV */
+    .topnav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(9,9,15,.8);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+    .nav-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .nav-logo{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:16px;color:var(--violet);text-decoration:none;letter-spacing:2px}
+    .nav-links{display:flex;gap:28px;align-items:center}
+    .nav-links a{color:var(--text2);text-decoration:none;font-size:14px;transition:color .2s}
+    .nav-links a:hover,.nav-links a.active{color:var(--text)}
+    .nav-links a.active{color:var(--violet)}
+
+    /* HERO */
+    .hero{position:relative;padding:140px 0 80px;text-align:center;overflow:hidden}
+    .hero-glow{position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:800px;height:600px;background:radial-gradient(ellipse,rgba(139,92,246,.12) 0%,transparent 70%);pointer-events:none}
+    .hero h1{font-size:48px;font-weight:800;line-height:1.1;margin-bottom:16px}
+    .hero-accent{background:linear-gradient(135deg,var(--violet),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hero-sub{font-size:18px;color:var(--text2);max-width:520px;margin:0 auto 40px}
+
+    /* SEARCH */
+    .search-bar{max-width:560px;margin:0 auto;position:relative}
+    .search-input{width:100%;padding:14px 20px 14px 48px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:15px;font-family:inherit;outline:none;transition:border-color .2s}
+    .search-input::placeholder{color:var(--text3)}
+    .search-input:focus{border-color:var(--violet)}
+    .search-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--text3);pointer-events:none}
+    .search-stats{margin-top:12px;font-size:13px;color:var(--text3)}
+
+    /* SECTIONS */
+    .section{padding:80px 0}
+    .section--alt{background:var(--surface)}
+    .section-title{font-size:32px;font-weight:800;text-align:center;margin-bottom:12px}
+    .section-desc{font-size:16px;color:var(--text2);text-align:center;max-width:480px;margin:0 auto 48px}
+
+    /* CATEGORIES GRID */
+    .cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .cat-card{display:flex;flex-direction:column;align-items:center;gap:8px;padding:28px 16px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .3s;text-decoration:none;color:inherit}
+    .cat-card:hover{border-color:var(--violet);transform:translateY(-3px);box-shadow:0 8px 32px rgba(139,92,246,.12)}
+    .cat-card.active{border-color:var(--violet);background:rgba(139,92,246,.08)}
+    .cat-emoji{font-size:32px}
+    .cat-name{font-size:14px;font-weight:600}
+    .cat-count{font-size:12px;color:var(--text3)}
+
+    /* FEATURED SCROLL */
+    .featured-scroll{display:flex;gap:16px;overflow-x:auto;padding-bottom:16px;scroll-snap-type:x mandatory;-ms-overflow-style:none;scrollbar-width:none}
+    .featured-scroll::-webkit-scrollbar{display:none}
+    .featured-card{flex:0 0 320px;scroll-snap-align:start;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:24px;cursor:pointer;transition:all .3s}
+    .featured-card:hover{border-color:var(--violet);transform:translateY(-2px);box-shadow:0 8px 32px rgba(139,92,246,.1)}
+    .featured-top{display:flex;align-items:flex-start;gap:14px;margin-bottom:14px}
+    .featured-icon{font-size:36px;flex-shrink:0}
+    .featured-info{flex:1;min-width:0}
+    .featured-name{font-size:16px;font-weight:700;display:flex;align-items:center;gap:6px}
+    .verified-badge{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;background:var(--violet);border-radius:50%;font-size:9px;color:#fff}
+    .featured-author{font-size:12px;color:var(--text3);margin-top:2px}
+    .featured-desc{font-size:13px;color:var(--text2);margin-bottom:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .featured-meta{display:flex;align-items:center;justify-content:space-between}
+    .featured-stats{display:flex;align-items:center;gap:12px;font-size:12px;color:var(--text3)}
+    .featured-dl{display:flex;align-items:center;gap:4px}
+    .featured-stars{color:#f59e0b}
+    .featured-rating{display:flex;align-items:center;gap:4px}
+
+    /* INSTALL BTN */
+    .install-btn{padding:8px 16px;background:var(--violet);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s;white-space:nowrap}
+    .install-btn:hover{background:var(--violet-dim);transform:scale(1.04)}
+    .install-btn.installed{background:rgba(34,197,94,.15);color:#22c55e}
+
+    /* FILTER BAR */
+    .filter-bar{display:flex;gap:12px;margin-bottom:32px;flex-wrap:wrap;align-items:center}
+    .filter-select{padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;cursor:pointer;outline:none;transition:border-color .2s}
+    .filter-select:focus{border-color:var(--violet)}
+    .filter-count{margin-left:auto;font-size:13px;color:var(--text3)}
+
+    /* PLUGIN GRID */
+    .plugin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .plugin-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:24px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
+    .plugin-card:hover{border-color:var(--violet);transform:translateY(-2px);box-shadow:0 12px 40px rgba(139,92,246,.1)}
+    .plugin-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--violet),transparent);opacity:0;transition:opacity .3s}
+    .plugin-card:hover::before{opacity:1}
+    .plugin-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+    .plugin-icon{font-size:32px;flex-shrink:0}
+    .plugin-title-group{flex:1;min-width:0}
+    .plugin-name{font-size:15px;font-weight:700;display:flex;align-items:center;gap:6px}
+    .plugin-author{font-size:12px;color:var(--text3)}
+    .plugin-desc{font-size:13px;color:var(--text2);margin-bottom:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .plugin-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+    .plugin-tag{padding:3px 8px;background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.1);border-radius:6px;font-size:11px;color:var(--violet-light)}
+    .plugin-bottom{display:flex;align-items:center;justify-content:space-between}
+    .plugin-stats{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text3)}
+    .plugin-dl{display:flex;align-items:center;gap:4px}
+
+    /* MODAL */
+    .modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+    .modal-overlay.open{opacity:1;pointer-events:auto}
+    .modal{background:var(--bg);border:1px solid var(--border);border-radius:16px;max-width:560px;width:90%;max-height:85vh;overflow-y:auto;padding:32px;position:relative;transform:translateY(20px) scale(.97);transition:transform .25s}
+    .modal-overlay.open .modal{transform:translateY(0) scale(1)}
+    .modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+    .modal-close:hover{background:var(--violet);color:#fff;border-color:var(--violet)}
+    .modal-header{display:flex;gap:16px;align-items:flex-start;margin-bottom:20px}
+    .modal-icon{font-size:48px}
+    .modal-title-group{flex:1}
+    .modal-name{font-size:22px;font-weight:800;display:flex;align-items:center;gap:8px}
+    .modal-author{font-size:14px;color:var(--text3);margin-top:4px}
+    .modal-desc{font-size:15px;color:var(--text2);margin-bottom:24px;line-height:1.7}
+    .modal-meta{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+    .modal-meta-item{padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px}
+    .modal-meta-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+    .modal-meta-value{font-size:14px;font-weight:600}
+    .modal-install{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:12px;margin-bottom:20px}
+    .modal-cmd{flex:1;font-size:13px;color:var(--violet-light);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .modal-copy{padding:8px 14px;background:var(--violet);border:none;border-radius:6px;color:#fff;font-size:12px;font-family:inherit;cursor:pointer;transition:background .2s;white-space:nowrap}
+    .modal-copy:hover{background:var(--violet-dim)}
+    .modal-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+    .modal-section-title{font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+    .modal-perms{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+    .perm-badge{padding:4px 10px;background:rgba(255,107,0,.08);border:1px solid rgba(255,107,0,.15);border-radius:6px;font-size:12px;color:var(--orange)}
+    .modal-install-row{display:flex;gap:10px}
+    .modal-install-btn{flex:1;padding:12px;background:var(--violet);border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s}
+    .modal-install-btn:hover{background:var(--violet-dim)}
+
+    /* ANIMATIONS */
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .animate-in{animation:fadeUp .4s ease both}
+    .delay-1{animation-delay:.05s}.delay-2{animation-delay:.1s}.delay-3{animation-delay:.15s}.delay-4{animation-delay:.2s}
+
+    /* FOOTER */
+    .site-footer{padding:48px 0 32px;border-top:1px solid var(--border)}
+    .footer-inner{display:flex;justify-content:space-between;align-items:center}
+    .footer-brand{display:flex;flex-direction:column;gap:4px}
+    .footer-logo{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:800;color:var(--violet);letter-spacing:1px}
+    .footer-copy{font-size:13px;color:var(--text3)}
+    .footer-links{display:flex;gap:24px}
+    .footer-links a{color:var(--text2);text-decoration:none;font-size:13px;transition:color .2s}
+    .footer-links a:hover{color:var(--violet)}
+
+    /* EMPTY STATE */
+    .empty-state{text-align:center;padding:60px 20px;color:var(--text3)}
+    .empty-state .empty-icon{font-size:48px;margin-bottom:16px;opacity:.5}
+    .empty-state p{font-size:15px}
+
+    /* LOADING */
+    .loading{text-align:center;padding:60px 20px}
+    .loading-spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--violet);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 16px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loading p{font-size:14px;color:var(--text3)}
+
+    @media(max-width:768px){
+      .hero h1{font-size:32px}
+      .cat-grid{grid-template-columns:repeat(2,1fr)}
+      .plugin-grid{grid-template-columns:1fr}
+      .featured-card{flex:0 0 280px}
+      .modal{padding:24px}
+      .modal-meta{grid-template-columns:1fr}
+      .nav-links{display:none}
+      .footer-inner{flex-direction:column;gap:20px;text-align:center}
+    }
+  </style>
+</head>
+<body>
+  <nav class="topnav"><div class="nav-inner"><a href="/" class="nav-logo">GLITCH</a><div class="nav-links"><a href="/">Home</a><a href="/marketplace.html" class="active">Plugins</a><a href="#">Docs</a><a href="https://github.com/glassesglitchstudio-lab/Gltich_code" target="_blank">GitHub</a></div></div></nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-glow"></div>
+    <div class="container">
+      <h1><span class="hero-accent">Glitch Code Marketplace</span></h1>
+      <p class="hero-sub">Discover and install plugins to extend Glitch Code</p>
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" placeholder="Search plugins..." id="searchInput">
+      </div>
+      <div class="search-stats" id="searchStats"></div>
+    </div>
+  </header>
+
+  <!-- CATEGORIES -->
+  <section class="section" id="categories">
+    <div class="container">
+      <h2 class="section-title">Categories</h2>
+      <p class="section-desc">Browse by category</p>
+      <div class="cat-grid" id="catGrid"></div>
+    </div>
+  </section>
+
+  <!-- FEATURED -->
+  <section class="section section--alt" id="featured">
+    <div class="container">
+      <h2 class="section-title">Featured Plugins</h2>
+      <p class="section-desc">Hand-picked by the Glitch Code team</p>
+      <div class="featured-scroll" id="featuredScroll"></div>
+    </div>
+  </section>
+
+  <!-- ALL PLUGINS -->
+  <section class="section" id="plugins">
+    <div class="container">
+      <h2 class="section-title">All Plugins</h2>
+      <p class="section-desc">Browse the full collection</p>
+      <div class="filter-bar">
+        <select class="filter-select" id="filterCategory">
+          <option value="all">All Categories</option>
+        </select>
+        <select class="filter-select" id="filterSort">
+          <option value="downloads">Most Downloads</option>
+          <option value="rating">Highest Rated</option>
+          <option value="name">Name A–Z</option>
+        </select>
+        <span class="filter-count" id="filterCount"></span>
+      </div>
+      <div class="plugin-grid" id="pluginGrid"></div>
+    </div>
+  </section>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modal">
+      <button class="modal-close" id="modalClose">&times;</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="site-footer"><div class="container"><div class="footer-inner">
+    <div class="footer-brand"><span class="footer-logo">GLITCH CODE</span><span class="footer-copy">GlassesCat AI tarafından geliştirildi.</span></div>
+    <div class="footer-links"><a href="https://github.com/glassesglitchstudio-lab/Gltich_code" target="_blank">GitHub</a><a href="https://www.npmjs.com/package/glitchcode-cli" target="_blank">npm</a><a href="/">Home</a><a href="#">Docs</a></div>
+  </div></div></footer>
+
+  <script>
+    const CATEGORY_META = {
+      ai:          { emoji: '🤖', label: 'AI' },
+      devtools:    { emoji: '🔧', label: 'DevTools' },
+      ui:          { emoji: '🎨', label: 'UI' },
+      auth:        { emoji: '🔐', label: 'Auth' },
+      database:    { emoji: '🗄️', label: 'Database' },
+      search:      { emoji: '🔍', label: 'Search' },
+      automation:  { emoji: '⚙️', label: 'Automation' },
+      productivity:{ emoji: '📋', label: 'Productivity' }
+    };
+
+    const PLUGIN_ICONS = {
+      github:'🐙', filesystem:'📁', postgres:'🐘', sqlite:'💾',
+      'brave-search':'🦁', puppeteer:'🎭', memory:'🧠',
+      'brave-local-search':'📍', ollama:'🦙', slack:'💬',
+      linear:'📐', notion:'📝'
+    };
+
+    let allPlugins = [];
+    let currentCategory = 'all';
+
+    function formatDownloads(n) {
+      if (n >= 1000) return (n / 1000).toFixed(n >= 10000 ? 0 : 1) + 'k';
+      return n;
+    }
+
+    function renderStars(rating) {
+      const full = Math.floor(rating);
+      const half = rating % 1 >= 0.5 ? 1 : 0;
+      let s = '';
+      for (let i = 0; i < full; i++) s += '★';
+      if (half) s += '½';
+      return s;
+    }
+
+    function getPluginsByCategory() {
+      const counts = {};
+      allPlugins.forEach(p => { counts[p.category] = (counts[p.category] || 0) + 1; });
+      return counts;
+    }
+
+    function renderCategories() {
+      const counts = getPluginsByCategory();
+      const grid = document.getElementById('catGrid');
+      grid.innerHTML = '';
+      Object.entries(CATEGORY_META).forEach(([key, meta]) => {
+        const count = counts[key] || 0;
+        if (count === 0) return;
+        const card = document.createElement('div');
+        card.className = 'cat-card' + (currentCategory === key ? ' active' : '');
+        card.innerHTML = `<span class="cat-emoji">${meta.emoji}</span><span class="cat-name">${meta.label}</span><span class="cat-count">${count} plugin${count !== 1 ? 's' : ''}</span>`;
+        card.onclick = () => {
+          currentCategory = currentCategory === key ? 'all' : key;
+          document.getElementById('filterCategory').value = currentCategory;
+          renderAll();
+        };
+        grid.appendChild(card);
+      });
+    }
+
+    function renderFeatured() {
+      const scroll = document.getElementById('featuredScroll');
+      const featured = allPlugins.filter(p => p.featured);
+      scroll.innerHTML = '';
+      if (featured.length === 0) {
+        scroll.innerHTML = '<p style="color:var(--text3);font-size:14px;padding:20px;">No featured plugins yet.</p>';
+        return;
+      }
+      featured.forEach(p => {
+        const icon = PLUGIN_ICONS[p.name] || '📦';
+        const card = document.createElement('div');
+        card.className = 'featured-card';
+        card.innerHTML = `
+          <div class="featured-top">
+            <span class="featured-icon">${icon}</span>
+            <div class="featured-info">
+              <div class="featured-name">${p.name}${p.verified ? '<span class="verified-badge">✓</span>' : ''}</div>
+              <div class="featured-author">by ${p.author}</div>
+            </div>
+          </div>
+          <div class="featured-desc">${p.description}</div>
+          <div class="featured-meta">
+            <div class="featured-stats">
+              <span class="featured-dl">⬇ ${formatDownloads(p.downloads)}</span>
+              <span class="featured-rating"><span class="featured-stars">${renderStars(p.rating)}</span> ${p.rating}</span>
+            </div>
+            <button class="install-btn" onclick="event.stopPropagation();openModal(${JSON.stringify(p).replace(/"/g, '&quot;')})">Install</button>
+          </div>`;
+        card.onclick = () => openModal(p);
+        scroll.appendChild(card);
+      });
+    }
+
+    function getFilteredPlugins() {
+      const q = document.getElementById('searchInput').value.toLowerCase().trim();
+      const sort = document.getElementById('filterSort').value;
+      let list = [...allPlugins];
+
+      if (currentCategory !== 'all') {
+        list = list.filter(p => p.category === currentCategory);
+      }
+      if (q) {
+        list = list.filter(p =>
+          p.name.toLowerCase().includes(q) ||
+          p.description.toLowerCase().includes(q) ||
+          p.tags.some(t => t.toLowerCase().includes(q)) ||
+          p.author.toLowerCase().includes(q)
+        );
+      }
+
+      if (sort === 'downloads') list.sort((a, b) => b.downloads - a.downloads);
+      else if (sort === 'rating') list.sort((a, b) => b.rating - a.rating);
+      else if (sort === 'name') list.sort((a, b) => a.name.localeCompare(b.name));
+
+      return list;
+    }
+
+    function renderPlugins() {
+      const grid = document.getElementById('pluginGrid');
+      const list = getFilteredPlugins();
+      document.getElementById('filterCount').textContent = `${list.length} plugin${list.length !== 1 ? 's' : ''}`;
+
+      if (list.length === 0) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🔍</div><p>No plugins found matching your criteria.</p></div>`;
+        return;
+      }
+
+      grid.innerHTML = '';
+      list.forEach((p, i) => {
+        const icon = PLUGIN_ICONS[p.name] || '📦';
+        const card = document.createElement('div');
+        card.className = 'plugin-card animate-in';
+        card.style.animationDelay = `${Math.min(i * 30, 300)}ms`;
+        card.innerHTML = `
+          <div class="plugin-header">
+            <span class="plugin-icon">${icon}</span>
+            <div class="plugin-title-group">
+              <div class="plugin-name">${p.name}${p.verified ? '<span class="verified-badge">✓</span>' : ''}</div>
+              <div class="plugin-author">by ${p.author}</div>
+            </div>
+          </div>
+          <div class="plugin-desc">${p.description}</div>
+          <div class="plugin-tags">${p.tags.map(t => `<span class="plugin-tag">${t}</span>`).join('')}</div>
+          <div class="plugin-bottom">
+            <div class="plugin-stats">
+              <span class="plugin-dl">⬇ ${formatDownloads(p.downloads)}</span>
+              <span style="color:#f59e0b">★ ${p.rating}</span>
+            </div>
+            <button class="install-btn" onclick="event.stopPropagation();openModal(${JSON.stringify(p).replace(/"/g, '&quot;')})">Install</button>
+          </div>`;
+        card.onclick = () => openModal(p);
+        grid.appendChild(card);
+      });
+    }
+
+    function renderAll() {
+      renderCategories();
+      renderFeatured();
+      renderPlugins();
+      updateStats();
+    }
+
+    function updateStats() {
+      const filtered = getFilteredPlugins();
+      const q = document.getElementById('searchInput').value.trim();
+      const el = document.getElementById('searchStats');
+      if (q) {
+        el.textContent = `${filtered.length} result${filtered.length !== 1 ? 's' : ''} for "${q}"`;
+      } else {
+        el.textContent = `${allPlugins.length} plugins available`;
+      }
+    }
+
+    // MODAL
+    function openModal(p) {
+      const icon = PLUGIN_ICONS[p.name] || '📦';
+      const perms = ['file:read', 'file:write', 'network:outbound', 'exec:subprocess'].slice(0, 2 + Math.floor(Math.random() * 2));
+      document.getElementById('modalContent').innerHTML = `
+        <div class="modal-header">
+          <span class="modal-icon">${icon}</span>
+          <div class="modal-title-group">
+            <div class="modal-name">${p.name}${p.verified ? '<span class="verified-badge" style="width:20px;height:20px;font-size:11px">✓</span>' : ''}</div>
+            <div class="modal-author">by ${p.author}</div>
+          </div>
+        </div>
+        <div class="modal-desc">${p.description}</div>
+        <div class="modal-meta">
+          <div class="modal-meta-item"><div class="modal-meta-label">Version</div><div class="modal-meta-value">${p.version}</div></div>
+          <div class="modal-meta-item"><div class="modal-meta-label">License</div><div class="modal-meta-value">${p.license}</div></div>
+          <div class="modal-meta-item"><div class="modal-meta-label">Downloads</div><div class="modal-meta-value">${formatDownloads(p.downloads)}</div></div>
+          <div class="modal-meta-item"><div class="modal-meta-label">Rating</div><div class="modal-meta-value" style="color:#f59e0b">★ ${p.rating}</div></div>
+        </div>
+        <div class="modal-section-title">Install Command</div>
+        <div class="modal-install">
+          <code class="modal-cmd">glitch registry install ${p.name}</code>
+          <button class="modal-copy" onclick="copyCmd(this)">Copy</button>
+        </div>
+        <div class="modal-section-title">Tags</div>
+        <div class="modal-tags">${p.tags.map(t => `<span class="plugin-tag">${t}</span>`).join('')}</div>
+        <div class="modal-section-title">Required Permissions</div>
+        <div class="modal-perms">${perms.map(pr => `<span class="perm-badge">${pr}</span>`).join('')}</div>
+        <div class="modal-section-title">Compatibility</div>
+        <div class="modal-meta-item" style="margin-bottom:20px"><div class="modal-meta-label">Min Version</div><div class="modal-meta-value mono" style="font-size:13px">glitchcode-cli ≥ 1.0.0</div></div>
+        <div class="modal-install-row">
+          <button class="modal-install-btn" onclick="copyCmd(this)">📋 Copy Install Command</button>
+        </div>`;
+      document.getElementById('modalOverlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function copyCmd(btn) {
+      const cmd = 'glitch registry install ' + (document.querySelector('.modal-name')?.textContent?.replace('✓', '').trim() || '');
+      navigator.clipboard.writeText(cmd).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = orig; }, 1500);
+      });
+    }
+
+    document.getElementById('modalClose').onclick = closeModal;
+    document.getElementById('modalOverlay').onclick = e => { if (e.target === e.currentTarget) closeModal(); };
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    // FILTERS
+    document.getElementById('searchInput').addEventListener('input', () => { renderPlugins(); updateStats(); });
+    document.getElementById('filterCategory').addEventListener('change', e => {
+      currentCategory = e.target.value;
+      renderAll();
+    });
+    document.getElementById('filterSort').addEventListener('change', () => renderPlugins());
+
+    // INIT
+    fetch('../plugins-registry.json')
+      .then(r => { if (!r.ok) throw new Error('Not found'); return r.json(); })
+      .then(data => {
+        allPlugins = data.plugins || [];
+        // populate filter dropdown
+        const counts = getPluginsByCategory();
+        const sel = document.getElementById('filterCategory');
+        Object.entries(CATEGORY_META).forEach(([key, meta]) => {
+          if (!counts[key]) return;
+          const opt = document.createElement('option');
+          opt.value = key;
+          opt.textContent = meta.emoji + ' ' + meta.label;
+          sel.appendChild(opt);
+        });
+        renderAll();
+      })
+      .catch(() => {
+        // fallback: load from inline if fetch fails (file:// protocol)
+        document.getElementById('catGrid').innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">⚠️</div><p>Could not load plugins-registry.json.<br>Try serving via a local server instead of file://.</p></div>';
+        document.getElementById('featuredScroll').innerHTML = '';
+        document.getElementById('pluginGrid').innerHTML = '';
+      });
+  </script>
+</body>
+</html>

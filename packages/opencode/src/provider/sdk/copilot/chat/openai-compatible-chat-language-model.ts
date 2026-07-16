@@ -323,7 +323,7 @@ export class OpenAICompatibleChatLanguageModel implements LanguageModelV3 {
       headers: combineHeaders(this.config.headers(), options.headers),
       body,
       failedResponseHandler: this.failedResponseHandler,
-      successfulResponseHandler: createEventSourceResponseHandler(this.chunkSchema),
+      successfulResponseHandler: createEventSourceResponseHandler(openAICompatibleChatChunkSuccessSchema),
       abortSignal: options.abortSignal,
       fetch: this.config.fetch,
     })
@@ -378,12 +378,11 @@ export class OpenAICompatibleChatLanguageModel implements LanguageModelV3 {
 
     return {
       stream: response.pipeThrough(
-        new TransformStream<ParseResult<z.infer<typeof this.chunkSchema>>, LanguageModelV3StreamPart>({
+        new TransformStream<ParseResult<ChatChunkSuccessValue>, LanguageModelV3StreamPart>({
           start(controller) {
             controller.enqueue({ type: "stream-start", warnings })
           },
 
-          // TODO we lost type safety on Chunk, most likely due to the error schema. MUST FIX
           transform(chunk, controller) {
             // Emit raw chunk if requested (before anything else)
             if (options.includeRawChunks) {
@@ -777,44 +776,43 @@ const OpenAICompatibleChatResponseSchema = z.object({
 
 // limited version of the schema, focussed on what is needed for the implementation
 // this approach limits breakages when the API changes and increases efficiency
-const createOpenAICompatibleChatChunkSchema = <ERROR_SCHEMA extends z.core.$ZodType>(errorSchema: ERROR_SCHEMA) =>
-  z.union([
+const openAICompatibleChatChunkSuccessSchema = z.object({
+  id: z.string().nullish(),
+  created: z.number().nullish(),
+  model: z.string().nullish(),
+  choices: z.array(
     z.object({
-      id: z.string().nullish(),
-      created: z.number().nullish(),
-      model: z.string().nullish(),
-      choices: z.array(
-        z.object({
-          delta: z
-            .object({
-              role: z.enum(["assistant"]).nullish(),
-              content: z.string().nullish(),
-              // Copilot-specific reasoning fields
-              reasoning_text: z.string().nullish(),
-              reasoning_opaque: z.string().nullish(),
-              tool_calls: z
-                .array(
-                  z.object({
-                    index: z.number(),
-                    id: z.string().nullish(),
-                    function: z.object({
-                      name: z.string().nullish(),
-                      arguments: z.string().nullish(),
-                    }),
-                  }),
-                )
-                .nullish(),
-            })
+      delta: z
+        .object({
+          role: z.enum(["assistant"]).nullish(),
+          content: z.string().nullish(),
+          // Copilot-specific reasoning fields
+          reasoning_text: z.string().nullish(),
+          reasoning_opaque: z.string().nullish(),
+          tool_calls: z
+            .array(
+              z.object({
+                index: z.number(),
+                id: z.string().nullish(),
+                function: z.object({
+                  name: z.string().nullish(),
+                  arguments: z.string().nullish(),
+                }),
+              }),
+            )
             .nullish(),
-          finish_reason: z.string().nullish(),
-        }),
-      ),
-      usage: openaiCompatibleTokenUsageSchema,
+        })
+        .nullish(),
+      finish_reason: z.string().nullish(),
     }),
-    errorSchema,
-  ])
+  ),
+  usage: openaiCompatibleTokenUsageSchema,
+})
 
-type ChatChunkValue = z.infer<ReturnType<typeof createOpenAICompatibleChatChunkSchema>>
+type ChatChunkSuccessValue = z.infer<typeof openAICompatibleChatChunkSuccessSchema>
+
+const createOpenAICompatibleChatChunkSchema = <ERROR_SCHEMA extends z.core.$ZodType>(errorSchema: ERROR_SCHEMA) =>
+  z.union([openAICompatibleChatChunkSuccessSchema, errorSchema])
 
 function isErrorResponse(value: unknown): value is { error: { message: string } } {
   return typeof value === "object" && value !== null && "error" in value

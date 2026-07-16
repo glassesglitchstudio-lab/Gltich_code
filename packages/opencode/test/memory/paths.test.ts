@@ -152,15 +152,14 @@ describe("parsePath", () => {
 
 describe("buildPath", () => {
   test("session checkpoint", () => {
-    expect(
-      buildPath({ root: "/data/memory", scope: "sessions", scope_id: "ses_abc", key: "checkpoint" }),
-    ).toBe("/data/memory/sessions/ses_abc/checkpoint.md")
+    const result = buildPath({ root: "/data/memory", scope: "sessions", scope_id: "ses_abc", key: "checkpoint" })
+    // Normalize for cross-platform comparison (path.join uses \ on Windows)
+    expect(result.replace(/\\/g, "/")).toBe("/data/memory/sessions/ses_abc/checkpoint.md")
   })
 
   test("global free", () => {
-    expect(buildPath({ root: "/data/memory", scope: "global", key: "tooling" })).toBe(
-      "/data/memory/global/tooling.md",
-    )
+    const result = buildPath({ root: "/data/memory", scope: "global", key: "tooling" })
+    expect(result.replace(/\\/g, "/")).toBe("/data/memory/global/tooling.md")
   })
 
   test("rejects key with .. segment", () => {

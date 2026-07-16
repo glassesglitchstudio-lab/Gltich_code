@@ -5,6 +5,8 @@ import * as Tool from "./tool"
 import TurndownService from "turndown"
 import DESCRIPTION from "./webfetch.txt"
 import { isImageAttachment } from "@/util/media"
+import { GlitchError } from "../util/glitch-error"
+import { createError } from "../util/error-handler"
 
 const MAX_RESPONSE_SIZE = 5 * 1024 * 1024 // 5MB
 const DEFAULT_TIMEOUT = 30 * 1000 // 30 seconds
@@ -54,11 +56,11 @@ export const WebFetchTool = Tool.define(
       execute: (params: z.infer<typeof parameters>, ctx: Tool.Context) =>
         Effect.gen(function* () {
           if (!params.url.startsWith("http://") && !params.url.startsWith("https://")) {
-            throw new Error("URL must start with http:// or https://")
+            throw createError("INVALID_URL", { url: params.url })
           }
 
           if (isBlockedURL(params.url)) {
-            throw new Error("Access to private/internal network addresses is blocked for security reasons")
+            throw createError("URL_BLOCKED", { url: params.url })
           }
 
           yield* ctx.ask({
@@ -120,12 +122,12 @@ export const WebFetchTool = Tool.define(
           // Check content length
           const contentLength = response.headers["content-length"]
           if (contentLength && parseInt(contentLength) > MAX_RESPONSE_SIZE) {
-            throw new Error("Response too large (exceeds 5MB limit)")
+            throw createError("RESPONSE_TOO_LARGE", { limit: "5MB" })
           }
 
           const arrayBuffer = yield* response.arrayBuffer
           if (arrayBuffer.byteLength > MAX_RESPONSE_SIZE) {
-            throw new Error("Response too large (exceeds 5MB limit)")
+            throw createError("RESPONSE_TOO_LARGE", { limit: "5MB" })
           }
 
           const contentType = response.headers["content-type"] || ""

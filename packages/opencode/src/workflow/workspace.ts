@@ -61,7 +61,7 @@ export function makeFileHooks(root: string) {
       // drop those. Empty-string (the root itself) is also dropped. Then sort for
       // deterministic fan-out order.
       return abs
-        .map((p) => path.relative(root, p))
+        .map((p) => path.relative(root, p).replace(/\\/g, "/"))
         .filter((rel) => rel !== "" && !rel.startsWith("..") && !path.isAbsolute(rel))
         .sort()
     },

@@ -118,7 +118,7 @@ async function searchHistory(args: any): Promise<HistoryEntry[]> {
       entries.push({
         sessionID: session.id,
         title: session.title,
-        timestamp: (msg as any).time?.created || Date.now(),
+        timestamp: (msg as { time?: { created?: number } }).time?.created || Date.now(),
         role: msg.info.role as "user" | "assistant",
         content,
         preview,

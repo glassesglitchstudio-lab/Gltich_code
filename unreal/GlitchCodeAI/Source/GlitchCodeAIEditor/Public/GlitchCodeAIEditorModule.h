@@ -6,13 +6,10 @@
 class FGlitchCodeAIEditorModule : public IModuleInterface
 {
 public:
-	virtual void StartupModule() override;
-	virtual void ShutdownModule() override;
-
-	static void OpenGlitchCodeAIPanel();
-
+    virtual void StartupModule() override;
+    virtual void ShutdownModule() override;
+    
 private:
-	TSharedRef<SDockTab> SpawnGlitchCodeAITab(const FSpawnTabArgs& Args);
-
-	static const FName GlitchCodeAITabId;
+    TSharedRef<SDockTab> OnSpawnTab(const FSpawnTabArgs& SpawnTabArgs);
+    void OpenTab();
 };

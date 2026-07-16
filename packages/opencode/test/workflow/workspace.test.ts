@@ -2,23 +2,28 @@ import { describe, expect, test } from "bun:test"
 import { resolveInWorkspace, makeFileHooks } from "../../src/workflow/workspace"
 import { tmpdir } from "os"
 import { mkdtempSync } from "fs"
+import path from "path"
 
 describe("resolveInWorkspace", () => {
   test("resolves a relative path inside the root", () => {
-    expect(resolveInWorkspace("/ws", "a/b.txt")).toBe("/ws/a/b.txt")
+    const root = process.platform === "win32" ? "C:\\ws" : "/ws"
+    expect(resolveInWorkspace(root, "a/b.txt")).toBe(path.join(root, "a/b.txt"))
   })
 
   test("rejects a parent-traversal escape", () => {
-    expect(() => resolveInWorkspace("/ws", "../escape")).toThrow(/workspace/)
+    const root = process.platform === "win32" ? "C:\\ws" : "/ws"
+    expect(() => resolveInWorkspace(root, "../escape")).toThrow(/workspace/)
   })
 
   test("rejects an absolute path that escapes the root", () => {
-    expect(() => resolveInWorkspace("/ws", "/etc/passwd")).toThrow(/workspace/)
+    const root = process.platform === "win32" ? "C:\\ws" : "/ws"
+    expect(() => resolveInWorkspace(root, "/etc/passwd")).toThrow(/workspace/)
   })
 
   test("allows the root itself and nested dirs", () => {
-    expect(resolveInWorkspace("/ws", ".")).toBe("/ws")
-    expect(resolveInWorkspace("/ws", "deep/nested/x")).toBe("/ws/deep/nested/x")
+    const root = process.platform === "win32" ? "C:\\ws" : "/ws"
+    expect(resolveInWorkspace(root, ".")).toBe(path.normalize(root))
+    expect(resolveInWorkspace(root, "deep/nested/x")).toBe(path.join(root, "deep/nested/x"))
   })
 })
 
@@ -59,7 +64,9 @@ describe("makeFileHooks glob", () => {
     await hooks.writeFile("src/a.zig", "")
     await hooks.writeFile("src/b.zig", "")
     const r = await hooks.glob("src/*.zig")
-    expect(r).toEqual(["src/a.zig", "src/b.zig", "src/c.zig"]) // sorted, relative
+    // Normalize to forward slashes for cross-platform comparison
+    const normalized = r.map((p) => p.replace(/\\/g, "/"))
+    expect(normalized).toEqual(["src/a.zig", "src/b.zig", "src/c.zig"]) // sorted, relative
   })
 
   test("empty match set returns []", async () => {

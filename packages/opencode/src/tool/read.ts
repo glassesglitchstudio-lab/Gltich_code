@@ -12,6 +12,8 @@ import { assertExternalDirectoryEffect } from "./external-directory"
 import { SessionCwd } from "./session-cwd"
 import { Instruction } from "../session/instruction"
 import { isImageAttachment, isPdfAttachment, sniffAttachmentMime } from "@/util/media"
+import { GlitchError } from "../util/glitch-error"
+import { createError } from "../util/error-handler"
 
 const DEFAULT_READ_LIMIT = 2000
 const MAX_LINE_LENGTH = 2000
@@ -52,11 +54,11 @@ export const ReadTool = Tool.define(
 
       if (items.length > 0) {
         return yield* Effect.fail(
-          new Error(`File not found: ${filepath}\n\nDid you mean one of these?\n${items.join("\n")}`),
+          createError("FILE_NOT_FOUND", { path: `${filepath}\n\nDid you mean one of these?\n${items.join("\n")}` }),
         )
       }
 
-      return yield* Effect.fail(new Error(`File not found: ${filepath}`))
+      return yield* Effect.fail(createError("FILE_NOT_FOUND", { path: filepath }))
     })
 
     const list = Effect.fn("ReadTool.list")(function* (filepath: string) {
@@ -143,7 +145,7 @@ export const ReadTool = Tool.define(
 
     const run = Effect.fn("ReadTool.execute")(function* (params: z.infer<typeof parameters>, ctx: Tool.Context) {
       if (params.offset !== undefined && params.offset < 1) {
-        return yield* Effect.fail(new Error("offset must be greater than or equal to 1"))
+        return yield* Effect.fail(createError("INVALID_PARAMETERS", { details: "offset must be greater than or equal to 1" }))
       }
 
       let filepath = params.filePath
@@ -230,7 +232,7 @@ export const ReadTool = Tool.define(
       }
 
       if (isBinaryFile(filepath, sample)) {
-        return yield* Effect.fail(new Error(`Cannot read binary file: ${filepath}`))
+        return yield* Effect.fail(createError("CANNOT_READ_BINARY", { path: filepath }))
       }
 
       const file = yield* Effect.promise(() =>
@@ -238,7 +240,7 @@ export const ReadTool = Tool.define(
       )
       if (file.count < file.offset && !(file.count === 0 && file.offset === 1)) {
         return yield* Effect.fail(
-          new Error(`Offset ${file.offset} is out of range for this file (${file.count} lines)`),
+          createError("INVALID_PARAMETERS", { details: `Offset ${file.offset} is out of range for this file (${file.count} lines)` }),
         )
       }
 

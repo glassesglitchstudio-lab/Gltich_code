@@ -89,7 +89,7 @@ export const BenchCommand = cmd({
                 const allModels: ModelRef[] = []
                 for (const [pid, provider] of Object.entries(providers)) {
                   const providerID = ProviderID.make(pid)
-                  for (const [modelID, model] of Object.entries((provider as any).models ?? {})) {
+                  for (const [modelID, model] of Object.entries((provider as { models?: Record<string, unknown> }).models ?? {})) {
                     allModels.push({ providerID, modelID, model: model as unknown as LanguageModel })
                   }
                 }
@@ -136,7 +136,7 @@ export const BenchCommand = cmd({
                       }),
                     )
                     const duration = Date.now() - startTime
-                    const tokens = (result.usage as any)?.totalTokens ?? result.text.split(/\s+/).length
+                    const tokens = (result.usage as { totalTokens?: number })?.totalTokens ?? result.text.split(/\s+/).length
                     const tokensPerSecond = duration > 0 ? Math.round((tokens / duration) * 1000) : 0
 
                     results.push({

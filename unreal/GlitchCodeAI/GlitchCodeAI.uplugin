@@ -3,15 +3,16 @@
 	"Version": 1,
 	"VersionName": "1.0",
 	"FriendlyName": "GlitchCode AI",
-	"Description": "AI-powered coding assistant integration for Unreal Engine. Connects to the Glitch Code CLI for intelligent code generation, refactoring, and debugging.",
+	"Description": "Comprehensive game development toolkit for Unreal Engine 5.4. Includes procedural generation, AI-driven combat, animation systems, VFX/Niagara, camera control, UI/UX, multiplayer networking, save/load, QA testing, horror mechanics, and AI coding assistant integration via Glitch Code CLI.",
 	"Category": "Development",
 	"CreatedBy": "GlitchStudio",
 	"CreatedByURL": "",
 	"DocsURL": "",
 	"MarketplaceURL": "",
-	"CanContainContent": false,
+	"CanContainContent": true,
 	"IsBetaVersion": false,
 	"IsExperimentalVersion": false,
+	"EngineVersion": "5.4",
 	"Installed": false,
 	"Modules": [
 		{

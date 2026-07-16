@@ -8,6 +8,8 @@ import { Log } from "../util"
 import { Instance } from "../project/instance"
 import { lazy } from "@/util/lazy"
 import { Language, type Node } from "web-tree-sitter"
+import { GlitchError } from "../util/glitch-error"
+import { createError } from "../util/error-handler"
 
 import { AppFileSystem } from "@glitchcode/shared/filesystem"
 import { fileURLToPath } from "url"
@@ -279,7 +281,7 @@ function tail(text: string, maxLines: number, maxBytes: number) {
 
 const parse = Effect.fn("BashTool.parse")(function* (command: string, ps: boolean) {
   const tree = yield* Effect.promise(() => parser().then((p) => (ps ? p.ps : p.bash).parse(command)))
-  if (!tree) throw new Error("Failed to parse command")
+  if (!tree) throw createError("PARSE_ERROR", { details: "Failed to parse command" })
   return tree.rootNode
 })
 
@@ -636,7 +638,7 @@ export const BashTool = Tool.define(
                 ? yield* resolvePath(params.workdir, effectiveCwd, shell)
                 : effectiveCwd
               if (params.timeout !== undefined && params.timeout < 0) {
-                throw new Error(`Invalid timeout value: ${params.timeout}. Timeout must be a positive number.`)
+                throw createError("INVALID_PARAMETERS", { details: `Invalid timeout value: ${params.timeout}. Timeout must be a positive number.` })
               }
               const timeout = params.timeout ?? DEFAULT_TIMEOUT
               const ps = PS.has(name)

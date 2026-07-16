@@ -51,7 +51,8 @@ const resolveEntryPoint = (name: string, dir: string): EntryPoint => {
   try {
     const resolved = typeof Bun !== "undefined" ? import.meta.resolve(name, dir) : import.meta.resolve(dir)
     entrypoint = Option.some(resolved)
-  } catch {
+  } catch (err) {
+    console.warn('[npm] resolveEntryPoint error:', err)
     entrypoint = Option.none()
   }
   return {
@@ -139,7 +140,8 @@ export const layer = Layer.effect(
       const name = (() => {
         try {
           return npa(pkg).name ?? pkg
-        } catch {
+        } catch (err) {
+          console.warn('[npm] npa parse error:', err)
           return pkg
         }
       })()
@@ -178,17 +180,17 @@ export const layer = Layer.effect(
         const pkg = yield* afs.readJson(path.join(dir, "package.json")).pipe(Effect.orElseSucceed(() => ({})))
         const lock = yield* afs.readJson(path.join(dir, "package-lock.json")).pipe(Effect.orElseSucceed(() => ({})))
 
-        const pkgAny = pkg as any
-        const lockAny = lock as any
+        const pkgTyped = pkg as { dependencies?: Record<string, unknown>; devDependencies?: Record<string, unknown>; peerDependencies?: Record<string, unknown>; optionalDependencies?: Record<string, unknown> }
+        const lockTyped = lock as { packages?: Record<string, { dependencies?: Record<string, unknown>; devDependencies?: Record<string, unknown>; peerDependencies?: Record<string, unknown>; optionalDependencies?: Record<string, unknown> }> }
         const declared = new Set([
-          ...Object.keys(pkgAny?.dependencies || {}),
-          ...Object.keys(pkgAny?.devDependencies || {}),
-          ...Object.keys(pkgAny?.peerDependencies || {}),
-          ...Object.keys(pkgAny?.optionalDependencies || {}),
+          ...Object.keys(pkgTyped?.dependencies || {}),
+          ...Object.keys(pkgTyped?.devDependencies || {}),
+          ...Object.keys(pkgTyped?.peerDependencies || {}),
+          ...Object.keys(pkgTyped?.optionalDependencies || {}),
           ...(input?.add || []).map((pkg) => pkg.name),
         ])
 
-        const root = lockAny?.packages?.[""] || {}
+        const root = lockTyped?.packages?.[""] || {}
         const locked = new Set([
           ...Object.keys(root?.dependencies || {}),
           ...Object.keys(root?.devDependencies || {}),

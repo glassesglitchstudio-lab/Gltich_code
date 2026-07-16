@@ -416,14 +416,21 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
 
   const connected = useConnected()
 
-  // Auto-open login dialog on first run when no provider is configured
-  let authCheckDone = false
+  // Auto-open login dialog when no provider is configured.
+  // Waits for sync to complete before checking — avoids false negatives
+  // during provider initialization.
+  let authDialogShown = false
   createEffect(() => {
-    if (authCheckDone) return
-    if (sync.status !== "partial" && sync.status !== "complete") return
-    authCheckDone = true
+    if (authDialogShown) return
+    // Only check after sync is fully complete (not partial) to ensure
+    // all providers and auth data are loaded
+    if (sync.status !== "complete") return
     if (!connected()) {
+      authDialogShown = true
       setTimeout(() => dialog.replace(() => <DialogMimoLogin />), 500)
+    } else {
+      // Mark as done — we're connected, no need to check again
+      authDialogShown = true
     }
   })
 

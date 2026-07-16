@@ -9,6 +9,8 @@ import { assertExternalDirectoryEffect } from "./external-directory"
 import { SessionCwd } from "./session-cwd"
 import DESCRIPTION from "./glob.txt"
 import * as Tool from "./tool"
+import { GlitchError } from "../util/glitch-error"
+import { createError } from "../util/error-handler"
 
 export const GlobTool = Tool.define(
   "glob",
@@ -44,7 +46,7 @@ export const GlobTool = Tool.define(
           search = path.isAbsolute(search) ? search : path.resolve(SessionCwd.get(ctx.sessionID), search)
           const info = yield* fs.stat(search).pipe(Effect.catch(() => Effect.succeed(undefined)))
           if (info?.type === "File") {
-            throw new Error(`glob path must be a directory: ${search}`)
+            throw createError("INVALID_PARAMETERS", { details: `glob path must be a directory: ${search}` })
           }
           yield* assertExternalDirectoryEffect(ctx, search, { kind: "directory" })
 

@@ -142,7 +142,7 @@ export const layer = Layer.effect(
               uv: ["ruff", "uv"],
             }
             const aliases = sharedBackends[name] ?? [name]
-            if (cfg.formatter && aliases.some((alias) => (cfg.formatter as any)?.[alias]?.disabled)) {
+            if (cfg.formatter && aliases.some((alias) => (cfg.formatter as Record<string, { disabled?: boolean }>)?.[alias]?.disabled)) {
               for (const alias of aliases) delete formatters[alias]
               continue
             }

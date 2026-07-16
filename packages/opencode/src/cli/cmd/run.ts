@@ -160,7 +160,7 @@ function websearch(info: ToolProps<typeof WebSearchTool>) {
 }
 
 function task(info: ToolProps<typeof ActorTool>) {
-  const op = (info.part.state.input as any)?.operation ?? info.part.state.input
+  const op = (info.part.state.input as { operation?: Record<string, unknown> })?.operation ?? info.part.state.input
   const status = info.part.state.status
   const subagent =
     typeof op?.subagent_type === "string" && op.subagent_type.trim().length > 0 ? op.subagent_type : "unknown"
@@ -300,7 +300,8 @@ export const RunCommand = cmd({
       try {
         process.chdir(args.dir)
         return process.cwd()
-      } catch {
+      } catch (err) {
+        console.warn('[cli.run] process.chdir error:', err)
         UI.error("Failed to change directory to " + args.dir)
         process.exit(1)
       }
@@ -409,7 +410,8 @@ export const RunCommand = cmd({
           if (part.tool === "actor") return task(props<typeof ActorTool>(part))
           if (part.tool === "skill") return skill(props<typeof SkillTool>(part))
           return fallback(part)
-        } catch {
+        } catch (err) {
+          console.warn('[cli.run] tool render error:', err)
           return fallback(part)
         }
       }

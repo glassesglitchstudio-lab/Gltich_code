@@ -10,3 +10,8 @@ export * as Process from "./process"
 export * as Rpc from "./rpc"
 export * as Token from "./token"
 export * as Wildcard from "./wildcard"
+
+// Error handling
+export { GlitchError } from "./glitch-error"
+export * as ErrorHandler from "./error-handler"
+export * as ErrorCodes from "./error-codes"

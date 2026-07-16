@@ -1,5 +1,5 @@
 {
-  "$schema": "https://opencode.ai/theme.json",
+  "$schema": "https://glitchcode.dev/theme.json",
   "defs": {
     "purple":     "#a855f7",
     "purpleLight":"#c084fc",

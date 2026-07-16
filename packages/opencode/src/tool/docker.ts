@@ -262,7 +262,7 @@ export const DockerTool = Tool.define(
               }
             }
             let pretty = stdout
-            try { pretty = JSON.stringify(JSON.parse(stdout), null, 2) } catch {}
+            try { pretty = JSON.stringify(JSON.parse(stdout), null, 2) } catch (err) { console.warn('[docker] inspect JSON parse error:', err) }
             const truncated = pretty.length > 3000 ? pretty.slice(0, 3000) + "\n..." : pretty
             return {
               title: `Inspect: ${target}`,
