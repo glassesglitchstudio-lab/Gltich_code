@@ -160,14 +160,6 @@ jobs:
             fi
           done
 
-      - name: Build VSIX
-        run: |
-          cd packages/vscode
-          npm install
-          npm run build
-          vsce package
-          cp *.vsix "$GITHUB_WORKSPACE/release/"
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -180,6 +172,7 @@ jobs:
     needs: build
     if: ${{ always() && !cancelled() && startsWith(github.ref, 'refs/tags/v') }}
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
