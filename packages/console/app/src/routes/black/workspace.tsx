@@ -195,11 +195,11 @@ export default function BlackWorkspace() {
         <section data-slot="select-workspace">
           <p data-slot="select-workspace-title">{i18n.t("black.workspace.selectPlan")}</p>
           <Switch>
-            <Match when={workspaces.loading}>
-              <p data-slot="loading">{i18n.t("black.workspace.loading")}</p>
+            <Match when={!workspaces()}>
+              <p data-slot="loading">{i18n.t("black.workspace.selectPlan")}</p>
             </Match>
             <Match when={workspaces()?.length === 0}>
-              <p data-slot="empty">{i18n.t("black.workspace.noWorkspaces")}</p>
+              <p data-slot="empty">No workspaces found</p>
             </Match>
             <Match when={workspaces()}>
               <ul
