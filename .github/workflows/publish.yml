@@ -48,10 +48,6 @@ jobs:
             target: windows-x64
           - os: windows-latest
             target: windows-x64-baseline
-          - os: windows-latest
-            target: windows-arm64
-          - os: windows-latest
-            target: windows-arm64-baseline
 
     steps:
       - name: Checkout repository
@@ -97,6 +93,7 @@ jobs:
 
   publish-npm:
     needs: build
+    if: ${{ always() && !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -125,8 +122,8 @@ jobs:
 
   release:
     needs: build
+    if: ${{ always() && !cancelled() && startsWith(github.ref, 'refs/tags/v') }}
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -181,8 +178,8 @@ jobs:
 
   publish-vscode:
     needs: build
+    if: ${{ always() && !cancelled() && startsWith(github.ref, 'refs/tags/v') }}
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
