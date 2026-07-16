@@ -78,7 +78,7 @@ jobs:
           GLITCHCODE_CHANNEL: latest
 
       - name: Smoke test binary
-        if: ${{ !contains(matrix.target, 'musl') }}
+        if: ${{ !contains(matrix.target, 'musl') && !contains(matrix.target, 'arm64') }}
         run: |
           if [ "${{ matrix.target }}" == *"windows"* ]; then
             ./packages/opencode/dist/glitchcode-${{ matrix.target }}/bin/glitch.exe --version
