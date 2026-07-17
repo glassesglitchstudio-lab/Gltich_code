@@ -39,6 +39,8 @@ export function Sidebar(props: { sessionID: string; overlay?: boolean }) {
         paddingLeft={2}
         paddingRight={2}
         position={props.overlay ? "absolute" : "relative"}
+        border={["left"]}
+        borderColor={theme.borderSubtle}
       >
         <scrollbox
           flexGrow={1}
@@ -51,6 +53,7 @@ export function Sidebar(props: { sessionID: string; overlay?: boolean }) {
           }}
         >
           <box flexShrink={0} gap={1} paddingRight={1}>
+            {/* Session Title */}
             <TuiPluginRuntime.Slot
               name="sidebar_title"
               mode="single_winner"
@@ -59,7 +62,7 @@ export function Sidebar(props: { sessionID: string; overlay?: boolean }) {
               share_url={session()!.share?.url}
             >
               <box paddingRight={1}>
-                <text fg={theme.text}>
+                <text fg={theme.primary} selectable={false}>
                   <b>{session()!.title}</b>
                 </text>
                 <Show when={InstallationChannel !== "latest"}>
@@ -76,14 +79,22 @@ export function Sidebar(props: { sessionID: string; overlay?: boolean }) {
                 </Show>
               </box>
             </TuiPluginRuntime.Slot>
+
+            {/* Divider */}
+            <text fg={theme.borderSubtle} selectable={false}>
+              ────────────────────────────────
+            </text>
+
+            {/* Plugin Content */}
             <TuiPluginRuntime.Slot name="sidebar_content" session_id={props.sessionID} />
           </box>
         </scrollbox>
 
+        {/* Footer */}
         <box flexShrink={0} gap={1} paddingTop={1}>
           <TuiPluginRuntime.Slot name="sidebar_footer" mode="single_winner" session_id={props.sessionID}>
             <text fg={theme.textMuted}>
-              <span style={{ fg: theme.success }}>•</span> <b>Open</b>
+              <span style={{ fg: theme.primary }}>●</span> <b>Glitch</b>
               <span style={{ fg: theme.text }}>
                 <b>Code</b>
               </span>{" "}

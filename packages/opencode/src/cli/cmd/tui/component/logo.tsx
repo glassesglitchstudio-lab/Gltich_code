@@ -904,8 +904,8 @@ export function Logo(props: { shape?: LogoShape; ink?: RGBA; idle?: boolean; swe
     }
   }
 
-  const GLITCH_PURPLE = RGBA.fromInts(168, 85, 247)
-  const GLITCH_GRAY = RGBA.fromInts(160, 160, 160)
+  const GLITCH_PRIMARY = theme.primary
+  const GLITCH_SECONDARY = theme.secondary
 
   return (
     <box ref={(item: BoxRenderable) => (box = item)}>
@@ -924,21 +924,21 @@ export function Logo(props: { shape?: LogoShape; ink?: RGBA; idle?: boolean; swe
           if (labelRow) {
             return (
               <box flexDirection="row" gap={1}>
-                <text fg={GLITCH_GRAY} selectable={false}>{line}</text>
-                <text fg={GLITCH_GRAY} selectable={false}>{ctx.shape.right[index()]}</text>
+                <text fg={GLITCH_SECONDARY} selectable={false}>{line}</text>
+                <text fg={GLITCH_SECONDARY} selectable={false}>{ctx.shape.right[index()]}</text>
               </box>
             )
           }
           return (
             <box flexDirection="row" gap={1}>
               <box flexDirection="row">
-                {renderLine(line, index(), props.ink ?? GLITCH_PURPLE, true, 0, frame(), dusk(), idleState())}
+                {renderLine(line, index(), props.ink ?? GLITCH_PRIMARY, true, 0, frame(), dusk(), idleState())}
               </box>
               <box flexDirection="row">
                 {renderLine(
                   ctx.shape.right[index()],
                   index(),
-                  props.ink ?? GLITCH_GRAY,
+                  props.ink ?? GLITCH_SECONDARY,
                   true,
                   ctx.LEFT + GAP,
                   frame(),

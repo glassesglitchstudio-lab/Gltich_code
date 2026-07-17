@@ -1,4 +1,4 @@
-﻿import { CliRenderEvents, SyntaxStyle, RGBA, type TerminalColors } from "@opentui/core"
+import { CliRenderEvents, SyntaxStyle, RGBA, type TerminalColors } from "@opentui/core"
 import path from "path"
 import { createEffect, createMemo, onCleanup, onMount } from "solid-js"
 import { createSimpleContext } from "./helper"
@@ -192,7 +192,7 @@ const [store, setStore] = createStore<State>({
   themes: listThemes(),
   mode: "dark",
   lock: undefined,
-  active: "glitch",
+  active: "glitchcode",
   ready: false,
 })
 

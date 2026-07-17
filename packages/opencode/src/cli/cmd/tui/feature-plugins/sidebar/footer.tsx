@@ -1,4 +1,4 @@
-﻿import type { TuiPlugin, TuiPluginApi, TuiPluginModule } from "@glitchcode/plugin/tui"
+import type { TuiPlugin, TuiPluginApi, TuiPluginModule } from "@glitchcode/plugin/tui"
 import { createMemo, Show } from "solid-js"
 import { Global } from "@/global"
 
@@ -36,7 +36,7 @@ function View(props: { api: TuiPluginApi }) {
           flexDirection="row"
           gap={1}
         >
-          <text flexShrink={0} fg={theme().text}>
+          <text flexShrink={0} fg={theme().primary}>
             ⬖
           </text>
           <box flexGrow={1} gap={1}>
@@ -64,10 +64,10 @@ function View(props: { api: TuiPluginApi }) {
         <span style={{ fg: theme().text }}>{path().name}</span>
       </text>
       <text fg={theme().textMuted}>
-                <span style={{ fg: theme().success }}>•</span> <b>Glitch</b>
+        <span style={{ fg: theme().primary }}>●</span> <b>Glitch</b>
         <span style={{ fg: theme().text }}>
           <b>Code</b>
-        </span> {" "}
+        </span>{" "}
         <span>{props.api.app.version}</span>
       </text>
     </box>

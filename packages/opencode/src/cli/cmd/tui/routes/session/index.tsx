@@ -88,6 +88,7 @@ import { useTuiConfig } from "../../context/tui-config"
 import { getScrollAcceleration } from "../../util/scroll"
 import { nextThinkingMode, reasoningSummary, useThinkingMode, type ThinkingMode } from "../../context/thinking"
 import { TuiPluginRuntime } from "../../plugin"
+import { TopBar } from "../../component/top-bar"
 import { DialogGoUpsell } from "../../component/dialog-go-upsell"
 import { SessionRetry } from "@/session/retry"
 import { getRevertDiffFiles } from "../../util/revert-diff"
@@ -1075,8 +1076,10 @@ export function Session() {
         tui: tuiConfig,
       }}
     >
-      <box flexDirection="row">
-        <box flexGrow={1} paddingBottom={1} paddingLeft={2} paddingRight={2} gap={1} onMouse={onWheel}>
+      <box flexDirection="column">
+        <TopBar sessionID={route.sessionID} />
+        <box flexDirection="row">
+          <box flexGrow={1} paddingBottom={1} paddingLeft={2} paddingRight={2} gap={1} onMouse={onWheel}>
           <Show when={session()}>
             <scrollbox
               ref={(r) => (scroll = r)}
@@ -1249,6 +1252,7 @@ export function Session() {
             </Match>
           </Switch>
         </Show>
+        </box>
       </box>
     </context.Provider>
   )
