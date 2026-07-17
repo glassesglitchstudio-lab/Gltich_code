@@ -1,6 +1,6 @@
 import { useProject } from "@tui/context/project"
 import { useSync } from "@tui/context/sync"
-import { createMemo, Show } from "solid-js"
+import { createMemo, createSignal, Show } from "solid-js"
 import { useTheme } from "../../context/theme"
 import { useTuiConfig } from "../../context/tui-config"
 import { InstallationChannel, InstallationVersion } from "@/installation/version"
@@ -14,6 +14,8 @@ export function Sidebar(props: { sessionID: string; overlay?: boolean }) {
   const { theme } = useTheme()
   const tuiConfig = useTuiConfig()
   const session = createMemo(() => sync.session.get(props.sessionID))
+  const [hovered, setHovered] = createSignal(false)
+
   const workspaceStatus = () => {
     const workspaceID = session()?.workspaceID
     if (!workspaceID) return "error"
@@ -40,7 +42,9 @@ export function Sidebar(props: { sessionID: string; overlay?: boolean }) {
         paddingRight={2}
         position={props.overlay ? "absolute" : "relative"}
         border={["left"]}
-        borderColor={theme.borderSubtle}
+        borderColor={hovered() ? theme.primary : theme.borderSubtle}
+        onMouseOver={() => setHovered(true)}
+        onMouseOut={() => setHovered(false)}
       >
         <scrollbox
           flexGrow={1}
@@ -80,10 +84,14 @@ export function Sidebar(props: { sessionID: string; overlay?: boolean }) {
               </box>
             </TuiPluginRuntime.Slot>
 
-            {/* Divider */}
-            <text fg={theme.borderSubtle} selectable={false}>
-              ────────────────────────────────
-            </text>
+            {/* Divider with glow */}
+            <box flexDirection="row" gap={0}>
+              {Array.from({ length: 36 }).map((_, i) => (
+                <text fg={i === 18 ? theme.primary : theme.borderSubtle} selectable={false}>
+                  {i === 18 ? "◆" : "─"}
+                </text>
+              ))}
+            </box>
 
             {/* Plugin Content */}
             <TuiPluginRuntime.Slot name="sidebar_content" session_id={props.sessionID} />

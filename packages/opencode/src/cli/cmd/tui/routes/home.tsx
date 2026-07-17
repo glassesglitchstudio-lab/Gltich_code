@@ -14,9 +14,21 @@ import { usePromptRef } from "../context/prompt"
 import { useLocal } from "../context/local"
 import { useKV } from "../context/kv"
 import { useLanguage } from "@tui/context/language"
+import { useTheme } from "../context/theme"
 import { TuiPluginRuntime } from "../plugin"
 import { Global } from "@/global"
 import { isPlainTerminal } from "../util/terminal"
+
+const GLITCH_BANNER = [
+  "  ██████╗ ██╗  ██╗ ██████╗ ███████╗",
+  " ██╔════╝ ██║  ██║ ██╔══██╗ ██╔════╝",
+  " ██║      ███████║ ██║  ██║ █████╗  ",
+  " ██║      ██╔══██║ ██║  ██║ ██╔══╝  ",
+  " ╚██████╗ ██║  ██║ ██████╔╝ ███████╗",
+  "  ╚═════╝ ╚═╝  ╚═╝ ╚═════╝  ╚══════╝",
+]
+
+const GLITCH_TAGLINE = "  AI-Powered CLI for Software Engineering"
 
 let once = false
 
@@ -30,6 +42,7 @@ export function Home() {
   const local = useLocal()
   const kv = useKV()
   const t = useLanguage().t
+  const { theme } = useTheme()
   const plainTerminal = isPlainTerminal()
   const bgImagePath = createMemo(() => {
     const filename = kv.get("background_image")
@@ -40,7 +53,6 @@ export function Home() {
     const key = kv.get("logo_design")
     return typeof key === "string" && key in logos ? (key as LogoKey) : "thin"
   })
-  // 所有 logo 变体(含默认的 thin 纤细半块)都显示流星特效。
   const showMeteor = () => true
   const placeholder = {
     get normal() {
@@ -68,7 +80,6 @@ export function Home() {
     once = true
   }
 
-  // Wait for sync and model store to be ready before auto-submitting --prompt
   createEffect(() => {
     const r = ref()
     if (sent) return
@@ -95,9 +106,17 @@ export function Home() {
             when={plainTerminal}
             fallback={
               <TuiPluginRuntime.Slot name="home_logo" mode="replace">
-                <Show when={logoKey()} keyed>
-                  {(k) => <Logo shape={logos[k]} sweep />}
-                </Show>
+                {/* Glitch Code ASCII Banner */}
+                <box flexDirection="column" alignItems="center" gap={0}>
+                  {GLITCH_BANNER.map((line) => (
+                    <text fg={theme.primary} selectable={false}>
+                      {line}
+                    </text>
+                  ))}
+                  <text fg={theme.textMuted} selectable={false}>
+                    {GLITCH_TAGLINE}
+                  </text>
+                </box>
               </TuiPluginRuntime.Slot>
             }
           >

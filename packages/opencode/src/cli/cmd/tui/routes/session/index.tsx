@@ -1314,6 +1314,15 @@ function UserMessage(props: {
             backgroundColor={hover() ? theme.backgroundElement : theme.backgroundPanel}
             flexShrink={0}
           >
+            {/* Role indicator */}
+            <box flexDirection="row" gap={1} marginBottom={0}>
+              <text fg={color()} selectable={false}>
+                ▸
+              </text>
+              <text fg={color()} selectable={false}>
+                <b>You</b>
+              </text>
+            </box>
             <text fg={theme.text}>{text()?.text}</text>
             <Show when={files().length}>
               <box flexDirection="row" paddingBottom={metadataVisible() ? 1 : 0} paddingTop={1} gap={1} flexWrap="wrap">
@@ -1450,9 +1459,11 @@ function AssistantMessage(props: { message: AssistantMessage; parts: Part[]; las
                       : local.agent.color(props.message.agent),
                 }}
               >
-                ▣{" "}
+                ◆
               </span>{" "}
-              <span style={{ fg: theme.text }}>{Locale.titlecase(props.message.mode)}</span>
+              <span style={{ fg: local.agent.color(props.message.agent) }}>
+                <b>Glitch</b>
+              </span>
               <span style={{ fg: theme.textMuted }}> · {model()}</span>
               <Show when={duration()}>
                 <span style={{ fg: theme.textMuted }}> · {Locale.duration(duration())}</span>
@@ -1999,6 +2010,11 @@ function BlockTool(props: {
   const renderer = useRenderer()
   const [hover, setHover] = createSignal(false)
   const error = createMemo(() => (props.part?.state.status === "error" ? props.part.state.error : undefined))
+  const statusColor = createMemo(() => {
+    if (props.part?.state.status === "error") return theme.error
+    if (props.spinner) return theme.primary
+    return theme.success
+  })
   return (
     <box
       border={["left"]}
@@ -2009,7 +2025,7 @@ function BlockTool(props: {
       gap={1}
       backgroundColor={hover() ? theme.backgroundMenu : theme.backgroundPanel}
       customBorderChars={SplitBorder.customBorderChars}
-      borderColor={theme.background}
+      borderColor={statusColor()}
       onMouseOver={() => props.onClick && setHover(true)}
       onMouseOut={() => setHover(false)}
       onMouseUp={() => {
@@ -2020,12 +2036,20 @@ function BlockTool(props: {
       <Show
         when={props.spinner}
         fallback={
-          <text paddingLeft={3} fg={theme.textMuted}>
-            {props.title}
-          </text>
+          <box flexDirection="row" gap={1} paddingLeft={3}>
+            <text fg={statusColor()} selectable={false}>
+              ◆
+            </text>
+            <text fg={theme.textMuted}>
+              {props.title}
+            </text>
+            <text fg={statusColor()} selectable={false}>
+              ✓
+            </text>
+          </box>
         }
       >
-        <Spinner color={theme.textMuted}>{props.title.replace(/^# /, "")}</Spinner>
+        <Spinner color={theme.primary}>{props.title.replace(/^# /, "")}</Spinner>
       </Show>
       {props.children}
       <Show when={error()}>

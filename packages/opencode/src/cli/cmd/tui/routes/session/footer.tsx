@@ -5,11 +5,13 @@ import { useDirectory } from "../../context/directory"
 import { useConnected } from "../../component/dialog-model"
 import { createStore } from "solid-js/store"
 import { useRoute } from "../../context/route"
+import { useLocal } from "../../context/local"
 
 export function Footer() {
   const { theme } = useTheme()
   const sync = useSync()
   const route = useRoute()
+  const local = useLocal()
   const mcp = createMemo(() => Object.values(sync.data.mcp).filter((x) => x.status === "connected").length)
   const mcpError = createMemo(() => Object.values(sync.data.mcp).some((x) => x.status === "failed"))
   const lsp = createMemo(() => Object.keys(sync.data.lsp))
@@ -24,8 +26,12 @@ export function Footer() {
     welcome: false,
   })
 
+  const modelName = createMemo(() => {
+    const parsed = local.model.parsed()
+    return parsed.model
+  })
+
   onMount(() => {
-    // Track all timeouts to ensure proper cleanup
     const timeouts: ReturnType<typeof setTimeout>[] = []
 
     function tick() {
@@ -51,7 +57,10 @@ export function Footer() {
 
   return (
     <box flexDirection="row" justifyContent="space-between" gap={1} flexShrink={0}>
+      {/* Left: Directory */}
       <text fg={theme.textMuted}>{directory()}</text>
+
+      {/* Center: Status */}
       <box gap={2} flexDirection="row" flexShrink={0}>
         <Switch>
           <Match when={store.welcome}>
@@ -82,9 +91,16 @@ export function Footer() {
                 {mcp()} MCP
               </text>
             </Show>
-            <text fg={theme.textMuted}>/status</text>
           </Match>
         </Switch>
+      </box>
+
+      {/* Right: Model + Version */}
+      <box flexDirection="row" gap={2} flexShrink={0}>
+        <text fg={theme.textMuted}>
+          <span style={{ fg: theme.primary }}>●</span> {modelName()}
+        </text>
+        <text fg={theme.textMuted}>/status</text>
       </box>
     </box>
   )
