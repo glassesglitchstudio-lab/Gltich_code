@@ -89,6 +89,9 @@ import { getScrollAcceleration } from "../../util/scroll"
 import { nextThinkingMode, reasoningSummary, useThinkingMode, type ThinkingMode } from "../../context/thinking"
 import { TuiPluginRuntime } from "../../plugin"
 import { TopBar } from "../../component/top-bar"
+import { GlitchEffect } from "../../component/glitch-effect"
+import { NeonPulse, NeonDots } from "../../component/neon-pulse"
+import { OfflineBanner } from "../../component/offline-banner"
 import { DialogGoUpsell } from "../../component/dialog-go-upsell"
 import { SessionRetry } from "@/session/retry"
 import { getRevertDiffFiles } from "../../util/revert-diff"
@@ -1078,6 +1081,7 @@ export function Session() {
     >
       <box flexDirection="column">
         <TopBar sessionID={route.sessionID} />
+        <OfflineBanner />
         <box flexDirection="row">
           <box flexGrow={1} paddingBottom={1} paddingLeft={2} paddingRight={2} gap={1} onMouse={onWheel}>
           <Show when={session()}>
@@ -1967,11 +1971,14 @@ function InlineTool(props: {
           <Spinner color={fg()} children={props.children} />
         </Match>
         <Match when={true}>
-          <text paddingLeft={3} fg={fg()} attributes={denied() || recoverable() || props.dismissed ? TextAttributes.STRIKETHROUGH : undefined}>
-            <Show fallback={<>~ {props.pending}</>} when={props.complete}>
-              <span style={{ fg: props.iconColor }}>{props.icon}</span> {props.children}
-            </Show>
-          </text>
+          <box flexDirection="row" gap={1} paddingLeft={3}>
+            <NeonPulse active={!props.complete} color={theme.primary} />
+            <text fg={fg()} attributes={denied() || recoverable() || props.dismissed ? TextAttributes.STRIKETHROUGH : undefined}>
+              <Show fallback={<>{props.pending}</>} when={props.complete}>
+                <span style={{ fg: props.iconColor }}>{props.icon}</span> {props.children}
+              </Show>
+            </text>
+          </box>
         </Match>
       </Switch>
       <Show when={error() && !denied() && !recoverable()}>

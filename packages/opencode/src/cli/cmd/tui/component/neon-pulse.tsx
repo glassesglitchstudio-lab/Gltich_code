@@ -1,10 +1,11 @@
 import { createEffect, createSignal, onCleanup, onMount, Show } from "solid-js"
 import { useTheme } from "../context/theme"
+import type { RGBA } from "@opentui/core"
 
 const PULSE_CHARS = ["◐", "◑", "◒", "◓", "◔", "◕", "●"]
 const PULSE_INTERVAL = 100
 
-export function NeonPulse(props: { active: boolean; color?: string }) {
+export function NeonPulse(props: { active: boolean; color?: RGBA }) {
   const { theme } = useTheme()
   const [frame, setFrame] = createSignal(0)
   let interval: ReturnType<typeof setInterval> | undefined
