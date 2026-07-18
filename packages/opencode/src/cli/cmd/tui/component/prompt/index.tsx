@@ -1400,9 +1400,51 @@ export function Prompt(props: PromptProps) {
       if (!shell().length) return undefined
       return t("tui.prompt.placeholder.shell", { example: shell()[store.placeholder % shell().length] })
     }
-    if (!list().length) return undefined
-    return t("tui.prompt.placeholder.normal", { example: list()[store.placeholder % list().length] })
+    // Branded placeholder for Glitch Code
+    const brandPlaceholders = [
+      "Glitch'e sor...",
+      "Ne yapmak istersin?",
+      "Kodunu yaz, ben hallederim...",
+      "Bir görev tanımla...",
+      "Başla, Glitch hazır!",
+    ]
+    return brandPlaceholders[store.placeholder % brandPlaceholders.length]
   })
+
+  // Character counter for prompt input
+  const charCount = createMemo(() => store.prompt.input.length)
+  const maxChars = 128000
+  const charCountColor = createMemo(() => {
+    const pct = charCount() / maxChars
+    if (pct > 0.9) return theme.error
+    if (pct > 0.7) return theme.warning
+    return theme.textMuted
+  })
+
+  // Glow animation: border pulses between dim and bright
+  const [glowPhase, setGlowPhase] = createSignal(0)
+  let glowTimer: ReturnType<typeof setInterval> | undefined
+  onMount(() => {
+    if (animationsEnabled()) {
+      glowTimer = setInterval(() => {
+        setGlowPhase((p) => (p + 1) % 4)
+      }, 800)
+    }
+  })
+  onCleanup(() => {
+    if (glowTimer) clearInterval(glowTimer)
+  })
+  const glowAlpha = createMemo(() => {
+    const phase = glowPhase()
+    const focused = input?.focused
+    if (!focused) return 0.6
+    // Pulse: 0.5 → 0.8 → 1.0 → 0.8 → ...
+    const values = [0.5, 0.7, 1.0, 0.7]
+    return values[phase]
+  })
+  const glowColor = createMemo(() =>
+    RGBA.fromValues(theme.primary.r, theme.primary.g, theme.primary.b, glowAlpha()),
+  )
 
   const spinnerDef = createMemo(() => {
     const agent = local.agent.current()
@@ -1458,7 +1500,7 @@ export function Prompt(props: PromptProps) {
       <box ref={(r) => (anchor = r)} visible={props.visible !== false}>
         <box
           border={["left", "top", "bottom", "right"]}
-          borderColor={theme.primary}
+          borderColor={glowColor()}
           customBorderChars={{
             ...SplitBorder.customBorderChars,
             bottomLeft: "╹",
@@ -1637,6 +1679,9 @@ export function Prompt(props: PromptProps) {
                 <Show when={local.agent.current()} fallback={<box height={1} />}>
                   {(agent) => (
                     <>
+                      <text fg={fadeColor(theme.primary, agentMetaAlpha())}>
+                        ◆
+                      </text>
                       <text fg={fadeColor(highlight(), agentMetaAlpha())}>
                         {store.mode === "shell" ? "Shell" : Locale.titlecase(agent().name)}
                       </text>
@@ -1669,6 +1714,12 @@ export function Prompt(props: PromptProps) {
                 </Show>
               </box>
               <box flexDirection="row" gap={1} alignItems="center">
+                {/* Character counter */}
+                <Show when={charCount() > 0}>
+                  <text fg={charCountColor()} selectable={false}>
+                    {charCount().toLocaleString()}/{(maxChars / 1000).toFixed(0)}K
+                  </text>
+                </Show>
                 <Show when={hasRightContent()}>
                   {props.right}
                 </Show>
@@ -1706,7 +1757,7 @@ export function Prompt(props: PromptProps) {
         <box
           height={1}
           border={["left", "right"]}
-          borderColor={theme.primary}
+          borderColor={glowColor()}
           customBorderChars={{
             ...EmptyBorder,
             vertical: theme.backgroundElement.a !== 0 ? "╹" : " ",
