@@ -1457,11 +1457,12 @@ export function Prompt(props: PromptProps) {
       />
       <box ref={(r) => (anchor = r)} visible={props.visible !== false}>
         <box
-          border={["left", "top", "bottom"]}
-          borderColor={borderHighlight()}
+          border={["left", "top", "bottom", "right"]}
+          borderColor={theme.primary}
           customBorderChars={{
             ...SplitBorder.customBorderChars,
             bottomLeft: "╹",
+            bottomRight: "╹",
           }}
         >
           <box
@@ -1704,8 +1705,8 @@ export function Prompt(props: PromptProps) {
         </box>
         <box
           height={1}
-          border={["left"]}
-          borderColor={borderHighlight()}
+          border={["left", "right"]}
+          borderColor={theme.primary}
           customBorderChars={{
             ...EmptyBorder,
             vertical: theme.backgroundElement.a !== 0 ? "╹" : " ",

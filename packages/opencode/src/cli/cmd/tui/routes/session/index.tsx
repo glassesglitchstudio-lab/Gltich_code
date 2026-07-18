@@ -92,6 +92,7 @@ import { TopBar } from "../../component/top-bar"
 import { GlitchEffect } from "../../component/glitch-effect"
 import { NeonPulse, NeonDots } from "../../component/neon-pulse"
 import { OfflineBanner } from "../../component/offline-banner"
+import { SessionFooter } from "../../component/session-footer"
 import { DialogGoUpsell } from "../../component/dialog-go-upsell"
 import { SessionRetry } from "@/session/retry"
 import { getRevertDiffFiles } from "../../util/revert-diff"
@@ -160,6 +161,7 @@ export function Session() {
   const dimensions = useTerminalDimensions()
   const [sidebar, setSidebar] = kv.signal<"auto" | "hide">("sidebar", "auto")
   const [sidebarOpen, setSidebarOpen] = createSignal(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = kv.signal<"expanded" | "collapsed">("sidebar_collapsed", "expanded")
   const [conceal, setConceal] = createSignal(true)
   const thinking = useThinkingMode()
   const thinkingMode = thinking.mode
@@ -193,7 +195,7 @@ export function Session() {
     return false
   })
   const showTimestamps = createMemo(() => timestamps() === "show")
-  const contentWidth = createMemo(() => dimensions().width - (sidebarVisible() ? 42 : 0) - 4)
+  const contentWidth = createMemo(() => dimensions().width - (sidebarVisible() ? (sidebarCollapsed() === "collapsed" ? 6 : 42) : 0) - 4)
   const providers = createMemo(() => Model.index(sync.data.provider))
 
   const scrollAcceleration = createMemo(() => getScrollAcceleration(tuiConfig))
@@ -1239,7 +1241,11 @@ export function Session() {
         <Show when={sidebarVisible()}>
           <Switch>
             <Match when={wide()}>
-              <Sidebar sessionID={route.sessionID} />
+              <Sidebar
+                sessionID={route.sessionID}
+                collapsed={sidebarCollapsed() === "collapsed"}
+                onToggleCollapse={() => setSidebarCollapsed((prev) => (prev === "collapsed" ? "expanded" : "collapsed"))}
+              />
             </Match>
             <Match when={!wide()}>
               <box
@@ -1251,12 +1257,19 @@ export function Session() {
                 alignItems="flex-end"
                 backgroundColor={RGBA.fromInts(0, 0, 0, 70)}
               >
-                <Sidebar sessionID={route.sessionID} />
+                <Sidebar
+                  sessionID={route.sessionID}
+                  collapsed={sidebarCollapsed() === "collapsed"}
+                  onToggleCollapse={() => setSidebarCollapsed((prev) => (prev === "collapsed" ? "expanded" : "collapsed"))}
+                />
               </box>
             </Match>
           </Switch>
         </Show>
         </box>
+        <Show when={visible()}>
+          <SessionFooter sessionID={route.sessionID} />
+        </Show>
       </box>
     </context.Provider>
   )
