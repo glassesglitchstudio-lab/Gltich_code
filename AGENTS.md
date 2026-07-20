@@ -272,6 +272,54 @@ Plugin artık UE5 içinde doğrudan çalışıyor — terminal/MCP server gerekm
 
 ---
 
+## Session Notları (2026-07-17)
+
+### ShadowCat-R1 Dataset Dönüştürme TAMAMLANDI ✅
+8 external dataset OpenAI messages formatına dönüştürüldü — RAM şişirmeden (satır satır streaming).
+
+**Dönüştürülen Datasetler:**
+- pulse_magicoder.jsonl → 111,183 entries (243MB → 277MB)
+- pulse_codealpaca.jsonl → 20,016 entries (7MB → 13MB)
+- pulse_python18k.jsonl → 18,612 entries (26MB → 18MB)
+- pulse_selfoss.jsonl → 50,661 entries (260MB → 111MB)
+- matrix_toolcalling.jsonl → 276,601 entries (1.2GB → 752MB)
+- matrix_reasoning.jsonl → 231,144 entries (484MB → 546MB)
+- matrix_openhermes_mig.jsonl → 50,000 entries (171MB → 159MB)
+- matrix_bfcl.jsonl → 400 entries (0.3MB → 0.5MB)
+
+**Toplam:** 758,617 entries (ham: 2.36GB → dönüştürülmüş: 1.87GB)
+
+### Singularity Dataset Tamamlandı ✅
+430 → 500 entries. 70 yeni entry eklendi (wake word, intent, routing, status, terminal, monitoring).
+
+### Final Dataset Durumu (Merge Colab Pro+ Bekleniyor)
+- **Pulse 14B:** 1,000 (mevcut) + 200,472 (external) = 201,472 entries
+- **Matrix 7B:** 1,000 (mevcut) + 558,145 (external) = 559,145 entries
+- **Singularity 1.5B:** 500 entries
+- **GRAND TOTAL:** 761,117 training example
+- **Durum:** Hazır, merge Colab Pro+ bekleniyor
+
+### Dataset Download (RAM-safe)
+- `huggingface_hub.hf_hub_download()` ile disk'e indirildi (RAM'a dokunmadan)
+- BFCL_v3_simple.json indirildi (0.3MB)
+- PyReason-7k ve orijinal BFCL repo'su 404 (silinmiş/taşınmış)
+- Cache temizlendi (1.8GB yer açıldı)
+
+### Gelecek Planları
+- **QLoRA training scriptleri** — Colab Pro+ için hazır edilecek
+- **Glasses-API** — ShadowCat-R1 modellerini API olarak sunma
+- **Home server:** RTX 4060 Ti 16GB + 32GB RAM (masaüstü, ~30K TL)
+- **Şirket:** 18'e kadar aile şirketi, sonra Limited
+
+### Gelecek Proje Fikirleri (Sektörde Olmayan)
+1. **Self-Evolving AI** — AI kendi kendini geliştirir (patentlenebilir)
+2. **Game Master AI** — Real-time oyun yönetmeni (UE5 entegrasyonu)
+3. **Dataset Factory** — Synthetic data generation tool
+4. **Code Archaeology AI** — Eski codebase'leri reverse-engineer
+5. **Swarm Intelligence** — 10 küçük model > 1 büyük model
+
+---
+
 ## Session Notları (2026-06-29)
 
 ### Glitch Fix — Enhanced OctoAgent Entegrasyonu ✅
@@ -439,3 +487,63 @@ glitch solve "Test coverage'ı %80'e çıkar" -m anthropic/claude-sonnet-4-20250
 - T4: Review prompt JSON format
 - T5-T7: Test coverage (fix/solve/scoring)
 - T8: Cross-compilation advisory
+
+## Session Notları (2026-07-17 — TUI Visual Overhaul)
+
+### Büyük Görsel Yenileme TAMAMLANDI ✅
+
+**6 Faz + 7 Büyük Görsel Değişiklik tek oturumda tamamlandı.**
+
+#### FAZ 1: Tema & Branding ✅
+- Varsayılan tema `glitch` (mor) → `glitchcode` (neon turuncu #FF6A00)
+- Logo renkleri hardcoded mor/gri → tema primary/secondary
+- Startup loading: Glitch Code ASCII logo + branded loading
+
+#### FAZ 2: Layout Yeniden Yapılanma ✅
+- **TopBar (yeni):** Logo + Model + Agent + LSP/MCP + Version
+- **Sidebar:** Border + divider + Glitch Code branding
+- **Session Layout:** Column wrapper (TopBar → Row(Sidebar + Content))
+
+#### FAZ 3: Özel Bileşenler ✅
+- GlitchEffect (animasyonlu glitch efekti)
+- NeonPulse/NeonDots (düşünme animasyonu)
+- ToolCard (tool output kartları)
+- MessageCard (mesaj kartları)
+- GlassmorphismDialog (border glow dialog)
+
+#### FAZ 4-6: Offline Mode & Animasyonlar ✅
+- OfflineBanner (çevrimdışı durum banner'ı)
+- OllamaStatus (sidebar plugin)
+- StartupAnimation (animasyonlu logo reveal + progress bar)
+
+#### Entegrasyon ✅
+- NeonPulse → InlineTool (tool çalışırken)
+- OfflineBanner → Session layout
+- OllamaStatus → Sidebar plugin
+- GlitchEffect → Thinking indicator (hazır)
+
+#### 7 Büyük Görsel Değişiklik ✅
+1. **Home Sayfası:** Glitch Code ASCII banner + tagline
+2. **Dialog Glassmorphism:** Tüm dialog'lara turuncu border glow
+3. **Sidebar:** Hover glow + diamond divider (◆) + Glitch Code branding
+4. **Footer:** 3 bölümlü status bar (directory + status + model)
+5. **Prompt Area:** Full border glassmorphism
+6. **Mesaj Balonları:** Rol göstergeleri (▸ You / ◆ Glitch)
+7. **Tool Output Kartları:** Status-aware border (error/running/complete)
+
+#### Publish
+- **v0.3.2** push edildi (tag: v0.3.2)
+- GitHub Actions build + publish tetiklendi
+- Typecheck: 12/12 paket temiz ✅
+
+#### Dosya İstatistikleri
+- **Yeni dosya:** 10 (TUI component + plugin)
+- **Değişen dosya:** 11 (theme, logo, layout, dialog, prompt, sidebar, footer)
+- **Toplam:** 21 dosya, 1000+ satır kod
+
+#### Kullanılmayan Ama Hazır Bileşenler
+- `GlitchEffect` → Thinking indicator'da kullanılabilir
+- `ToolCard` → Tool output'ları kart göstermek için
+- `MessageCard` → Mesajları kart göstermek için
+- `GlassmorphismDialog` → Özel dialog sistemi
+- `StartupAnimation` → Mevcut startup loading yerine kullanılabilir

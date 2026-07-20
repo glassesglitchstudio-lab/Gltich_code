@@ -19,7 +19,7 @@ async function publish(dir: string, name: string, version: string) {
   }
   await $`rm -f *.tgz`.cwd(dir).nothrow()
   await $`bun pm pack`.cwd(dir)
-  await $`npm publish *.tgz --access public --tag ${Script.channel}`.cwd(dir)
+  await $`npm publish *.tgz --access public --tag ${Script.channel} --workspaces false`.cwd(dir)
 }
 
 const binaries: { dir: string; name: string; version: string }[] = []
@@ -28,12 +28,17 @@ for (const filepath of new Bun.Glob("*/package.json").scanSync({ cwd: "./dist" }
   binaries.push({ dir: `./dist/${filepath.replace("/package.json", "")}`, name: p.name, version: p.version })
 }
 console.log("binaries", Object.fromEntries(binaries.map((b) => [b.name, b.version])))
-const version = binaries[0].version
+const version = pkg.version
 
-await $`rm -rf ./dist/${pkg.name}`
+await $`rm -rf ./dist/${pkg.name}`.nothrow()
 await $`mkdir -p ./dist/${pkg.name}`
-await $`cp -r ./bin ./dist/${pkg.name}/bin`
-await $`cp ./script/postinstall.mjs ./dist/${pkg.name}/postinstall.mjs`
+if (process.platform === "win32") {
+  await $`powershell -Command "Copy-Item -Path .\\bin -Destination .\\dist\\${pkg.name}\\bin -Recurse -Force"`
+  await $`powershell -Command "Copy-Item -Path .\\script\\postinstall.mjs -Destination .\\dist\\${pkg.name}\\postinstall.mjs -Force"`
+} else {
+  await $`cp -r ./bin ./dist/${pkg.name}/bin`
+  await $`cp ./script/postinstall.mjs ./dist/${pkg.name}/postinstall.mjs`
+}
 await Bun.file(`./dist/${pkg.name}/LICENSE`).write(await Bun.file("../../LICENSE").text())
 await Bun.file(`./dist/${pkg.name}/README.md`).write(await Bun.file("../../README_npm.md").text())
 
