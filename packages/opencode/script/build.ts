@@ -286,7 +286,7 @@ for (const item of targets) {
     plugins: [plugin],
     external: ["node-gyp"],
     format: "esm",
-    minify: true,
+    minify: false,
     splitting: true,
     compile: {
       autoloadBunfig: false,
