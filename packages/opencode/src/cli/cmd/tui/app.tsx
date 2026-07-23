@@ -24,7 +24,7 @@ import { PluginRouteMissing } from "@tui/component/plugin-route-missing"
 import { ProjectProvider } from "@tui/context/project"
 import { useEvent } from "@tui/context/event"
 import { SDKProvider, useSDK } from "@tui/context/sdk"
-import { StartupLoading } from "@tui/component/startup-loading"
+import { StartupAnimation } from "@tui/component/startup-animation"
 import { SyncProvider, useSync } from "@tui/context/sync"
 import { LocalProvider, useLocal } from "@tui/context/local"
 import { DialogModel, useConnected } from "@tui/component/dialog-model"
@@ -1152,7 +1152,7 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       </Show>
       {plugin()}
       <TuiPluginRuntime.Slot name="app" />
-      <StartupLoading ready={ready} />
+      <StartupAnimation ready={ready} />
     </box>
   )
 }
