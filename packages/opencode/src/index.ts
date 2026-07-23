@@ -58,6 +58,7 @@ import { ReplayCommand } from "./cli/cmd/replay"
 import { AuditCommand } from "./cli/cmd/audit"
 import { BenchCommand } from "./cli/cmd/bench"
 import { DoctorCommand } from "./cli/cmd/doctor"
+import { AuthCommand } from "./cli/cmd/auth"
 import { Heap } from "./cli/heap"
 import { drizzle } from "drizzle-orm/bun-sqlite"
 import { ensureProcessMetadata } from "./util/glitch-process"
@@ -232,6 +233,7 @@ const cli = yargs(args)
   .command(AuditCommand)
   .command(BenchCommand)
   .command(DoctorCommand)
+  .command(AuthCommand)
   .fail((msg, err) => {
     if (
       msg?.startsWith("Unknown argument") ||
