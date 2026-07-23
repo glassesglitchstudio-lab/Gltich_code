@@ -363,6 +363,16 @@ export function Autocomplete(props: {
   const commands = createMemo((): AutocompleteOption[] => {
     const results: AutocompleteOption[] = [...command.slashes()]
 
+    // Hardcoded PTC komutu - her zaman gorunur
+    results.push({
+      display: "/ptc",
+      description: "PlusTwoCoder - Model tartisma",
+      aliases: ["debate"],
+      onSelect: () => {
+        command.trigger("session.plus-two-coder")
+      },
+    })
+
     for (const serverCommand of sync.data.command) {
       if (serverCommand.source === "skill") continue
       const label = serverCommand.source === "mcp" ? ":mcp" : ""
