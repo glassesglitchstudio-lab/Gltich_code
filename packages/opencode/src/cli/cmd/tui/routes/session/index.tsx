@@ -1021,19 +1021,6 @@ export function Session() {
         dialog.clear()
       },
     },
-    {
-      title: "Plus Two Coder",
-      value: "session.plus-two-coder",
-      category: "session",
-      suggested: true,
-      slash: {
-        name: "ptc",
-        aliases: ["debate"],
-      },
-      onSelect: (dialog) => {
-        dialog.replace(() => <DialogPTC />)
-      },
-    },
   ])
 
   const revertInfo = createMemo(() => session()?.revert)

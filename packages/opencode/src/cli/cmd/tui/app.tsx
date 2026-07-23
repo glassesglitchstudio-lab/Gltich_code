@@ -71,6 +71,7 @@ import { isPlainTerminal } from "./util/terminal"
 
 import type { EventSource } from "./context/sdk"
 import { DialogVariant } from "./component/dialog-variant"
+import { DialogPTC } from "./component/dialog-ptc"
 
 function rendererConfig(_config: TuiConfig.Info, plainTerminal: boolean): CliRendererConfig {
   const mouseEnabled = !plainTerminal && !Flag.GLITCHCODE_DISABLE_MOUSE && (_config.mouse ?? true)
@@ -922,6 +923,19 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
             }))}
           />
         ))
+      },
+    },
+    {
+      title: "Plus Two Coder",
+      value: "session.plus-two-coder",
+      category: "session",
+      suggested: true,
+      slash: {
+        name: "ptc",
+        aliases: ["debate"],
+      },
+      onSelect: (dialog) => {
+        dialog.replace(() => <DialogPTC />)
       },
     },
   ])
