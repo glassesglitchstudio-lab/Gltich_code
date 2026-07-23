@@ -980,11 +980,18 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
   event.on("session.error", (evt) => {
     const error = evt.properties.error
     if (error && typeof error === "object" && error.name === "MessageAbortedError") return
-    const message = errorMessage(error)
+
+    // Auth ve quota hatalarini sadece konsola yazdir, toast gosterme
+    // Bu hatalar genellikle kullanilmayan provider'lardan gelir
+    const errorMsg = errorMessage(error)
+    if (errorMsg.includes("API key is invalid") || errorMsg.includes("quota") || errorMsg.includes("billing")) {
+      console.warn(`[Provider] ${errorMsg}`)
+      return
+    }
 
     toast.show({
       variant: "error",
-      message,
+      message: errorMsg,
       duration: 5000,
     })
   })

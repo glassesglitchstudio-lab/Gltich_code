@@ -160,6 +160,7 @@ export function retryable(error: Err) {
   if (MessageV2.ContextOverflowError.isInstance(error)) return undefined
 
   // auth errors should not be retried — the API key itself is invalid
+  // Sadece secilen provider'da hata goster, fallback provider'lar icin sessiz kal
   if (isAuthError(error)) {
     return "API key is invalid or expired. Check your provider configuration."
   }
