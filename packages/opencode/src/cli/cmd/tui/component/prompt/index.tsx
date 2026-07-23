@@ -19,6 +19,7 @@ import { usePromptHistory, type PromptInfo } from "./history"
 import { assign } from "./part"
 import { usePromptStash } from "./stash"
 import { DialogStash } from "../dialog-stash"
+import { DialogPTC } from "../dialog-ptc"
 import { type AutocompleteRef, Autocomplete } from "./autocomplete"
 import { useCommandDialog } from "../dialog-command"
 import { useLanguage } from "@tui/context/language"
@@ -1114,6 +1115,13 @@ export function Prompt(props: PromptProps) {
     // Capture mode before it gets reset
     const currentMode = store.mode
     const variant = local.model.variant.current()
+
+    // /ptc komutu icin ozel kontrol - DialogPTC ac
+    if (inputText.trim() === "/ptc" || inputText.trim() === "/debate") {
+      dialog.replace(() => <DialogPTC />)
+      setStore("prompt", { input: "", parts: [] })
+      return
+    }
 
     const clientSlash = inputText.startsWith("/")
       ? command.slashes().find((s) => s.display === inputText.trim())
