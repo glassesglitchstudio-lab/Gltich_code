@@ -247,6 +247,14 @@ export function Session() {
     }
   })
 
+  // PTC modu secildiginde DialogPTC'yi ac
+  createEffect(() => {
+    const agent = local.agent.current()
+    if (agent?.name === "ptc") {
+      dialog.replace(() => <DialogPTC />)
+    }
+  })
+
   let seeded = false
   let scroll: ScrollBoxRenderable
   let prompt: PromptRef | undefined

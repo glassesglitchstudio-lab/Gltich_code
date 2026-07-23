@@ -190,6 +190,21 @@ export const layer = Layer.effect(
             mode: "primary",
             native: true,
           },
+          ptc: {
+            name: "ptc",
+            color: "#ff6b6b",
+            description: "PlusTwoCoder mode. Multi-model debate for code solutions.",
+            options: {},
+            permission: Permission.merge(
+              defaults,
+              Permission.fromConfig({
+                question: "allow",
+              }),
+              user,
+            ),
+            mode: "primary",
+            native: true,
+          },
           general: {
             name: "general",
             color: "#aac4e1",
