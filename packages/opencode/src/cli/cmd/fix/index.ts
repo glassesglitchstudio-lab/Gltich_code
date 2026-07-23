@@ -23,7 +23,7 @@ import {
 import { parseFileOperations, extractJsonFromMarkdown, extractFileList } from "./parser"
 import { loadPrompt, fillTemplate } from "./prompts-loader"
 import type { FixOptions, FixContext } from "./types"
-import { scoreWithLLM, buildCritiquePrompt, parseLLMScore } from "../plus-two-coder"
+import { scoreWithLLM, buildCritiquePrompt, parseLLMScore, buildInitialPrompt, buildConsensusContext } from "../plus-two-coder"
 
 interface ModelRef {
   providerID: ProviderID
@@ -618,23 +618,11 @@ async function runDebate(
   const debaters = [primaryModel, allModels[0], allModels[1]].filter(Boolean).slice(0, 3)
   const opinions: Array<{ model: string; solution: string; critique: string; score: number }> = []
 
-  // Round 1: Her model bağımsız çözüm üretir + cross-critique
+  // Round 1: Her model bağımsız çözüm üretir + cross-critique + cross-scoring
   for (let i = 0; i < debaters.length; i++) {
     const m = debaters[i]
-    const prompt = `Sen bir uzman yazilimciisin. Asagidaki issue icin en iyi kod cozumunu uret.
-
-ISSUE: ${context.title}
-ACIKLAMA: ${context.body}
-PLAN: ${context.plan}
-DOSYALAR: ${context.fileContents}
-
-Cevabi su formatta ver (Her dosya icin Changes for \`dosya\`: ile basla):
-### Changes for \`dosya/yolu\`:
-\`\`\`[dil]
-[kod]
-\`\`\`
-
-Neden bu cozumu sectigini kisa kisa acikla.`
+    const task = `${context.title}\n${context.body}`
+    const prompt = buildInitialPrompt(task)
 
     const result = await generateText({ model: m.model, messages: [{ role: "user", content: prompt }] })
 
@@ -642,14 +630,17 @@ Neden bu cozumu sectigini kisa kisa acikla.`
     const nextModel = debaters[(i + 1) % debaters.length]
     const critiqueResult = await generateText({
       model: nextModel.model,
-      messages: [{ role: "user", content: buildCritiquePrompt(context.title + "\n" + context.body, result.text) }],
+      messages: [{ role: "user", content: buildCritiquePrompt(task, result.text) }],
     })
 
+    // Cross-scoring: 3. model puanlasın
+    const scorerModel = debaters[(i + 2) % debaters.length]
     const score = await scoreWithLLM({
       solution: result.text,
       critique: critiqueResult.text,
-      task: context.title + "\n" + context.body,
+      task,
       model: m.model,
+      scorer: scorerModel.model,
     })
     opinions.push({
       model: `${m.providerID}/${m.modelID}`,

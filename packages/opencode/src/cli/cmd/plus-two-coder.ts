@@ -84,13 +84,15 @@ export const PlusTwoCoderCommand = cmd({
 
               const rounds: DebateRound[] = []
               let currentContext = args.task as string
+              let previousScores: number[] = []
 
               for (let round = 0; round < (args.rounds as number); round++) {
                 s.message(`\n--- TUR ${round + 1} ---`)
 
                 const opinions: CoderOpinion[] = []
 
-                for (const m of selectedModels) {
+                for (let i = 0; i < selectedModels.length; i++) {
+                  const m = selectedModels[i]
                   s.message(`${m.providerID}/${m.modelID} dusuncesini paylasiyor...`)
 
                   const prompt = round === 0
@@ -104,7 +106,8 @@ export const PlusTwoCoderCommand = cmd({
                     }),
                   )
 
-                  const nextModel = selectedModels[(selectedModels.indexOf(m) + 1) % selectedModels.length]
+                  // Cross-critique: bir sonraki model eleştirsin
+                  const nextModel = selectedModels[(i + 1) % selectedModels.length]
                   const critiqueResult = yield* Effect.promise(() =>
                     generateText({
                       model: nextModel.model,
@@ -112,12 +115,15 @@ export const PlusTwoCoderCommand = cmd({
                     }),
                   )
 
+                  // Cross-scoring: 3. model puanlasın (self-scoring yerine)
+                  const scorerModel = selectedModels[(i + 2) % selectedModels.length]
                   const score = yield* Effect.promise(() =>
                     scoreWithLLM({
                       solution: solution.text,
                       critique: critiqueResult.text,
                       task: args.task as string,
                       model: m.model,
+                      scorer: scorerModel.model,
                     }),
                   )
 
@@ -134,6 +140,19 @@ export const PlusTwoCoderCommand = cmd({
 
                 opinions.sort((a, b) => b.score - a.score)
                 rounds.push({ round: round + 1, opinions })
+
+                // Convergence check: skorlar yakin ise erken dur
+                const currentScores = opinions.map((o) => o.score)
+                if (round > 0 && previousScores.length > 0) {
+                  const avgPrev = previousScores.reduce((a, b) => a + b, 0) / previousScores.length
+                  const avgCurr = currentScores.reduce((a, b) => a + b, 0) / currentScores.length
+                  const diff = Math.abs(avgPrev - avgCurr)
+                  if (diff < 5) {
+                    s.message(`\nSkorlar yaklasti (fark: ${diff.toFixed(1)}), tartisma erken sonlandirildi.`)
+                    break
+                  }
+                }
+                previousScores = currentScores
 
                 currentContext = buildConsensusContext(opinions)
               }
@@ -390,7 +409,10 @@ export async function scoreWithLLM(params: {
   critique: string
   task: string
   model: LanguageModel
+  scorer?: LanguageModel
 }): Promise<number> {
+  const scorerModel = params.scorer ?? params.model
+
   const prompt = `Sen bir kod kalitesi degerlendiricisin. Asagidaki cozumu ve elestiriyi incele.
 
 GOREV: ${params.task}
@@ -402,20 +424,25 @@ ELESTIRI:
 ${params.critique.substring(0, 1000)}
 
 Bu cozumu degerlendir. Su kriterlere gore 0-100 arasi skor ver:
-- Kod dogrulugu ve calisirligi (30 puan)
-- Performans ve verimlilik (20 puan)
-- Guvenlik ve dayaniklilik (20 puan)
-- Kod kalitesi ve okunabilirlik (15 puan)
-- Tamlik ve kapsam (15 puan)
+- Kod dogrulugu ve calisirligi (30 puan) — kod calisir mi? Mantiksal hata var mi?
+- Performans ve verimlilik (20 puan) — gereksiz dongu, bellek sizi var mi?
+- Guvenlik ve dayaniklilik (20 puan) — SQL injection, XSS, hata yonetimi var mi?
+- Kod kalitesi ve okunabilirlik (15 puan) — isimlendirme, yapi, yorumlar
+- Tamlik ve kapsam (15 puan) — gorevin tum gereksinimlerini karsiliyor mu?
 
-SADECE su JSON formatinda cevap ver, baska bir sey yazma:
+Dikkat:
+- Sadece JSON formatinda cevap ver
+- Extra metin yazma
+- Skoru adil ve katı degerlendir
+
+SADECE su JSON formatinda cevap ver:
 {"score": N}
 
 N = 0-100 arasi tam sayi`
 
   try {
     const result = await generateText({
-      model: params.model,
+      model: scorerModel,
       messages: [{ role: "user", content: prompt }],
     })
     const parsed = parseLLMScore(result.text)
