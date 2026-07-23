@@ -94,6 +94,7 @@ import { NeonPulse, NeonDots } from "../../component/neon-pulse"
 import { OfflineBanner } from "../../component/offline-banner"
 import { SessionFooter } from "../../component/session-footer"
 import { DialogGoUpsell } from "../../component/dialog-go-upsell"
+import { DialogPTC } from "../../component/dialog-ptc"
 import { SessionRetry } from "@/session/retry"
 import { getRevertDiffFiles } from "../../util/revert-diff"
 
@@ -1030,8 +1031,7 @@ export function Session() {
         aliases: ["debate"],
       },
       onSelect: (dialog) => {
-        toast.show({ message: "PlusTwoCoder: Use 'glitch plus-two-coder --task <description>' in terminal", variant: "info" })
-        dialog.clear()
+        dialog.replace(() => <DialogPTC />)
       },
     },
   ])
