@@ -83,6 +83,13 @@ export function DialogModel(props: { providerID?: string }) {
 
     const providerOptions = pipe(
       sync.data.provider,
+      // Sadece key'i olan provider'lari goster
+      filter((provider) => {
+        // opencode provider her zaman gorunur (ucretsiz modeller icin)
+        if (provider.id === "opencode") return true
+        // Diger provider'lar sadece key varsa gorunur
+        return provider.source === "env" || provider.source === "api" || provider.source === "custom"
+      }),
       sortBy(
         (provider) => provider.id !== "opencode",
         (provider) => provider.name,

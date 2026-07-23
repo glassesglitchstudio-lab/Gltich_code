@@ -1741,8 +1741,10 @@ const layer: Layer.Layer<
       const hasValidKey = (providerID: ProviderID): boolean => {
         const p = s.providers[providerID]
         if (!p) return false
-        if (p.key) return true
-        if (p.options?.apiKey) return true
+        // opencode provider her zaman kullanilabilir (ucretsiz)
+        if (providerID === "opencode") return true
+        if (p.key && p.key.length > 10) return true
+        if (p.options?.apiKey && p.options.apiKey.length > 10) return true
         // Env-based provider'lar key olmadan kullanılamaz
         if (p.source === "env") return false
         return false
