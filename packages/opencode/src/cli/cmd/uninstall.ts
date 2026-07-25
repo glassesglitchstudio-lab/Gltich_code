@@ -130,9 +130,9 @@ async function showRemovalSummary(targets: RemovalTargets, method: Installation.
 
   if (method !== "curl" && method !== "unknown") {
     const cmds: Record<string, string> = {
-      npm: "npm uninstall -g @glitchcode/cli",
-      pnpm: "pnpm uninstall -g @glitchcode/cli",
-      bun: "bun remove -g @glitchcode/cli",
+      npm: "npm uninstall -g glitchcode-cli",
+      pnpm: "pnpm uninstall -g glitchcode-cli",
+      bun: "bun remove -g glitchcode-cli",
       brew: "brew uninstall glitchcode",
       choco: "choco uninstall glitchcode",
       scoop: "scoop uninstall glitchcode",
@@ -180,9 +180,9 @@ async function executeUninstall(method: Installation.Method, targets: RemovalTar
 
   if (method !== "curl" && method !== "unknown") {
     const cmds: Record<string, string[]> = {
-      npm: ["npm", "uninstall", "-g", "@glitchcode/cli"],
-      pnpm: ["pnpm", "uninstall", "-g", "@glitchcode/cli"],
-      bun: ["bun", "remove", "-g", "@glitchcode/cli"],
+      npm: ["npm", "uninstall", "-g", "glitchcode-cli"],
+      pnpm: ["pnpm", "uninstall", "-g", "glitchcode-cli"],
+      bun: ["bun", "remove", "-g", "glitchcode-cli"],
       brew: ["brew", "uninstall", "glitchcode"],
       choco: ["choco", "uninstall", "glitchcode"],
       scoop: ["scoop", "uninstall", "glitchcode"],
