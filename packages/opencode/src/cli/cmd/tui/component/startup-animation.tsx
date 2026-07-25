@@ -1,5 +1,6 @@
 import { createEffect, createMemo, createSignal, onCleanup, onMount, Show } from "solid-js"
 import { useTheme } from "../context/theme"
+import { InstallationVersion } from "@/installation/version"
 
 const GLITCH_LOGO = [
   "  ██████╗ ██╗  ██╗ ██████╗ ███████╗",
@@ -157,7 +158,7 @@ export function StartupAnimation(props: { ready: () => boolean }) {
 
           {/* Version */}
           <text fg={theme.textMuted} selectable={false}>
-            v0.3.5
+            v{InstallationVersion}
           </text>
         </box>
       </box>
