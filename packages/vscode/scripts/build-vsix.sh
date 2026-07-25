@@ -9,11 +9,11 @@ echo "🔨 VSIX Build başlıyor..."
 
 # Build
 echo "📦 Extension build ediliyor..."
-npm run build
+bun run build
 
 # Package
 echo "📋 VSIX paketleniyor..."
-npx vsce package
+bunx vsce package
 
 # Find VSIX file
 VSIX_FILE=$(ls -t *.vsix 2>/dev/null | head -1)

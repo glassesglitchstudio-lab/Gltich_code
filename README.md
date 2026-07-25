@@ -100,6 +100,23 @@ glitch ptc --task "Auth sistemi kur" --models "anthropic/claude-sonnet-4-2025051
 glitch debate --task "Cache sistemi tasarla" --rounds 3
 ```
 
+### Derin Düşünce Analizi (PlusThinking)
+
+2-3 modelin düşünce süreçlerini karşılaştırarak derin analiz üretir:
+
+```bash
+# Tek analiz
+glitch plus-thinking --task "Bu mimariye ne dersin?"
+
+# Özel modeller ile
+glitch think --task "Bu algoritmanın zayıf yönleri neler?" --models "anthropic/claude-sonnet-4-20250514,openai/gpt-4o"
+
+# 3 tur analiz
+glitch plusthinking --task "Race condition sorunu var mı?" --rounds 3
+
+# TUI'da: /thinking veya /think
+```
+
 ### GitHub Issue Otomatik Çözümleme (Fix)
 
 7 aşamalı pipeline ile GitHub issue'larını otomatik çözer:
@@ -202,6 +219,7 @@ glitch changelog --output CHANGELOG.md # Dosyaya yaz
 | `glitch stats` | Token istatistikleri |
 | `glitch debug` | Hata ayıklama araçları |
 | `glitch plus-two-coder` | Multi-model debate |
+| `glitch plus-thinking` | Derin düşünce analizi |
 | `glitch fix` | GitHub issue çöz |
 | `glitch solve` | Görev parçalama |
 | `glitch cost` | Maliyet takibi |
@@ -273,7 +291,21 @@ TUI içinde `/` yazarak erişilebilir:
 | `/redo` | Mesajı tekrarla |
 | `/export` | Oturumu dışa aktar |
 | `/ptc` | Plus Two Coder |
+| `/thinking` | PlusThinking - Derin analiz |
 | `/help` | Yardım |
+
+---
+
+## Docker ile Çalıştırma
+
+```bash
+# docker-compose ile (Ollama + Postgres dahil)
+docker-compose up -d
+
+# Tek container
+docker build -f packages/opencode/Dockerfile -t glitchcode .
+docker run -it -v .:/workspace glitchcode
+```
 
 ---
 

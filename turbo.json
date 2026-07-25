@@ -8,6 +8,11 @@
       "dependsOn": [],
       "outputs": ["dist/**"]
     },
+    "watch": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
     "@glitchcode/cli#test": {
       "dependsOn": ["^build"],
       "outputs": [],

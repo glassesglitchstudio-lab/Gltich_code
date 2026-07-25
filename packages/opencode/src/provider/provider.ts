@@ -823,6 +823,46 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
           },
         },
       }),
+    "novita-ai": () =>
+      Effect.succeed({
+        autoload: false,
+        options: {
+          headers: {
+            "HTTP-Referer": "https://mimo.xiaomi.com/coder/",
+            "X-Title": "mimocode",
+          },
+        },
+      }),
+    "chutes-ai": () =>
+      Effect.succeed({
+        autoload: false,
+        options: {
+          headers: {
+            "HTTP-Referer": "https://mimo.xiaomi.com/coder/",
+            "X-Title": "mimocode",
+          },
+        },
+      }),
+    sambanova: () =>
+      Effect.succeed({
+        autoload: false,
+        options: {
+          headers: {
+            "HTTP-Referer": "https://mimo.xiaomi.com/coder/",
+            "X-Title": "mimocode",
+          },
+        },
+      }),
+    zhipuai: () =>
+      Effect.succeed({
+        autoload: false,
+        options: {},
+      }),
+    moonshot: () =>
+      Effect.succeed({
+        autoload: false,
+        options: {},
+      }),
   }
 }
 

@@ -72,6 +72,7 @@ import { isPlainTerminal } from "./util/terminal"
 import type { EventSource } from "./context/sdk"
 import { DialogVariant } from "./component/dialog-variant"
 import { DialogPTC } from "./component/dialog-ptc"
+import { DialogPlusThinking } from "./component/dialog-thinking"
 
 function rendererConfig(_config: TuiConfig.Info, plainTerminal: boolean): CliRendererConfig {
   const mouseEnabled = !plainTerminal && !Flag.GLITCHCODE_DISABLE_MOUSE && (_config.mouse ?? true)
@@ -936,6 +937,19 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       },
       onSelect: (dialog) => {
         dialog.replace(() => <DialogPTC />)
+      },
+    },
+    {
+      title: "Plus Thinking",
+      value: "session.plus-thinking",
+      category: "session",
+      suggested: false,
+      slash: {
+        name: "thinking",
+        aliases: ["think", "plusthinking"],
+      },
+      onSelect: (dialog) => {
+        dialog.replace(() => <DialogPlusThinking />)
       },
     },
   ])

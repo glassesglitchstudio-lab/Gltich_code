@@ -4,11 +4,11 @@ Write-Host "🔨 VSIX Build basliyor..." -ForegroundColor Cyan
 
 # Build
 Write-Host "📦 Extension build ediliyor..." -ForegroundColor Yellow
-npm run build
+bun run build
 
 # Package
 Write-Host "📋 VSIX paketleniyor..." -ForegroundColor Yellow
-npx vsce package
+bunx vsce package
 
 # Find VSIX file
 $VSIX_FILE = Get-ChildItem -Filter "*.vsix" | Sort-Object LastWriteTime -Descending | Select-Object -First 1

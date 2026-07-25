@@ -205,6 +205,22 @@ export const layer = Layer.effect(
             mode: "primary",
             native: true,
           },
+          plusthinking: {
+            name: "plusthinking",
+            color: "#9b59b6",
+            description: "PlusThinking mode. Chain-of-thought reasoning with structured thinking traces.",
+            options: {},
+            permission: Permission.merge(
+              defaults,
+              Permission.fromConfig({
+                question: "allow",
+                plan_enter: "allow",
+              }),
+              user,
+            ),
+            mode: "primary",
+            native: true,
+          },
           general: {
             name: "general",
             color: "#aac4e1",
@@ -447,6 +463,7 @@ export const layer = Layer.effect(
               [(x) => x.name === "plan", "desc"],
               [(x) => x.name === "compose", "desc"],
               [(x) => x.name === "max", "desc"],
+              [(x) => x.name === "plusthinking", "desc"],
               [(x) => x.name, "asc"],
             ),
           )

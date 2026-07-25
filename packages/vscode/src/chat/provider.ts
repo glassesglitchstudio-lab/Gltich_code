@@ -94,10 +94,6 @@ export class ChatProvider implements vscode.WebviewViewProvider {
   }
 
   private getHtmlForWebview(webview: vscode.Webview): string {
-    const scriptUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this.extensionUri, "src", "chat", "template.html"),
-    )
-
     return `<!DOCTYPE html>
 <html lang="tr">
 <head>

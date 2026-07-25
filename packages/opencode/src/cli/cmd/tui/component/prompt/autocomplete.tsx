@@ -373,6 +373,16 @@ export function Autocomplete(props: {
       },
     })
 
+    // Hardcoded PlusThinking komutu
+    results.push({
+      display: "/thinking",
+      description: "PlusThinking - Derin analiz",
+      aliases: ["think", "plusthinking"],
+      onSelect: () => {
+        command.trigger("session.plus-thinking")
+      },
+    })
+
     for (const serverCommand of sync.data.command) {
       if (serverCommand.source === "skill") continue
       const label = serverCommand.source === "mcp" ? ":mcp" : ""

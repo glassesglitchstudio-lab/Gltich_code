@@ -50,6 +50,7 @@ import { ThemeCommand } from "./cli/cmd/theme"
 import { OfflineCommand } from "./cli/cmd/offline"
 import { HistoryCommand } from "./cli/cmd/history"
 import { PlusTwoCoderCommand } from "./cli/cmd/plus-two-coder"
+import { PlusThinkingCommand } from "./cli/cmd/plus-thinking"
 import { FixCommand } from "./cli/cmd/fix"
 import { SolveCommand } from "./cli/cmd/solve"
 import { CostCommand } from "./cli/cmd/cost"
@@ -57,6 +58,7 @@ import { ChangelogCommand } from "./cli/cmd/changelog"
 import { ReplayCommand } from "./cli/cmd/replay"
 import { AuditCommand } from "./cli/cmd/audit"
 import { BenchCommand } from "./cli/cmd/bench"
+import { ProviderTestCommand } from "./cli/cmd/provider-test"
 import { DoctorCommand } from "./cli/cmd/doctor"
 import { AuthCommand } from "./cli/cmd/auth"
 import { Heap } from "./cli/heap"
@@ -225,6 +227,7 @@ const cli = yargs(args)
   .command(OfflineCommand)
   .command(HistoryCommand)
   .command(PlusTwoCoderCommand)
+  .command(PlusThinkingCommand)
   .command(FixCommand)
   .command(SolveCommand)
   .command(CostCommand)
@@ -232,6 +235,7 @@ const cli = yargs(args)
   .command(ReplayCommand)
   .command(AuditCommand)
   .command(BenchCommand)
+  .command(ProviderTestCommand)
   .command(DoctorCommand)
   .command(AuthCommand)
   .fail((msg, err) => {

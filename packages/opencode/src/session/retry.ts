@@ -15,6 +15,32 @@ export const RETRY_BACKOFF_FACTOR = 2
 export const RETRY_MAX_DELAY_NO_HEADERS = 30_000 // 30 seconds
 export const RETRY_MAX_DELAY = 2_147_483_647 // max 32-bit signed integer for setTimeout
 
+// Rate limit tracking per provider
+const rateLimitTracker = new Map<string, { count: number; resetAt: number }>()
+const RATE_LIMIT_WINDOW = 60_000 // 1 minute window
+const RATE_LIMIT_THRESHOLD = 5 // max retries per window before giving up
+
+function trackRateLimit(providerID: string): boolean {
+  const now = Date.now()
+  const entry = rateLimitTracker.get(providerID)
+  if (!entry || now > entry.resetAt) {
+    rateLimitTracker.set(providerID, { count: 1, resetAt: now + RATE_LIMIT_WINDOW })
+    return true
+  }
+  entry.count++
+  return entry.count <= RATE_LIMIT_THRESHOLD
+}
+
+function isRateLimited(providerID: string): boolean {
+  const entry = rateLimitTracker.get(providerID)
+  if (!entry) return false
+  return Date.now() <= entry.resetAt && entry.count > RATE_LIMIT_THRESHOLD
+}
+
+function clearRateLimit(providerID: string) {
+  rateLimitTracker.delete(providerID)
+}
+
 const NETWORK_ERROR_CODES = new Set(["ECONNRESET", "EPIPE", "ETIMEDOUT"])
 const SSE_TIMEOUT_MESSAGE = "SSE read timed out"
 const RETRYABLE_HTTP_STATUS = new Set([429, 500, 502, 503, 504, 529])
@@ -177,7 +203,8 @@ export function retryable(error: Err) {
   // branch closes that gap. See Spec ③ P2.
   if (isRetryableTransientError(error as unknown)) {
     const msg = (error as unknown as Error).message
-    return msg || "Transient network error"
+    if (msg === SSE_TIMEOUT_MESSAGE) return "Connection timed out waiting for response. The provider may be overloaded."
+    return msg || "Transient network error — will retry"
   }
 
   if (MessageV2.APIError.isInstance(error)) {
@@ -186,7 +213,14 @@ export function retryable(error: Err) {
     // even when the provider SDK doesn't explicitly mark them as retryable.
     if (!error.data.isRetryable && !(status !== undefined && status >= 500)) return undefined
     if (error.data.responseBody?.includes("FreeUsageLimitError")) return GO_UPSELL_MESSAGE
-    return error.data.message.includes("Overloaded") ? "Provider is overloaded" : error.data.message
+    if (error.data.message.includes("Overloaded")) return "Provider is overloaded — will retry shortly"
+    // Enhanced rate limit message with wait time hint
+    if (status === 429) {
+      const retryAfter = error.data.responseHeaders?.["retry-after"]
+      const waitHint = retryAfter ? ` (retry after ${retryAfter}s)` : ""
+      return `Rate limited${waitHint} — switching provider or waiting`
+    }
+    return error.data.message
   }
 
   // Check for rate limit patterns in plain text error messages
@@ -198,7 +232,7 @@ export function retryable(error: Err) {
       lower.includes("rate limit") ||
       lower.includes("too many requests")
     ) {
-      return msg
+      return `Rate limited — ${msg}`
     }
     // Quota patterns in plain text
     if (lower.includes("quota exceeded") || lower.includes("billing error") || lower.includes("insufficient quota")) {

@@ -18,6 +18,7 @@ import { SessionRetry } from "./retry"
 import { SessionStatus } from "./status"
 import { SessionSummary } from "./summary"
 import { Provider } from "@/provider"
+import { recordLatency } from "@/provider/health"
 import { Question } from "@/question"
 import { errorMessage } from "@/util/error"
 import { isRecoverableError } from "@/tool/recoverable"
@@ -749,6 +750,7 @@ export const layer: Layer.Layer<
         })
 
         return yield* Effect.gen(function* () {
+          const streamStartTime = Date.now()
           yield* Effect.gen(function* () {
             ctx.currentText = undefined
             ctx.reasoningMap = {}
@@ -802,7 +804,23 @@ export const layer: Layer.Layer<
             ),
             Effect.catch(attemptFallback),
             Effect.catch(halt),
-            Effect.ensuring(cleanup()),
+            Effect.ensuring(
+              Effect.sync(() => {
+                try {
+                  // Record latency for health tracking
+                  const latencyMs = Date.now() - streamStartTime
+                  recordLatency({
+                    providerID: streamInput.model.providerID,
+                    modelID: streamInput.model.id,
+                    latencyMs,
+                    timestamp: Date.now(),
+                    success: !ctx.assistantMessage.error,
+                  })
+                } catch {
+                  // Ignore errors in latency tracking
+                }
+              }),
+            ),
           )
 
           if (ctx.needsOverflowHandling) return "overflow"
