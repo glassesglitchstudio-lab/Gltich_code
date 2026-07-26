@@ -1429,14 +1429,14 @@ export function Prompt(props: PromptProps) {
     return theme.textMuted
   })
 
-  // Glow animation: border pulses between dim and bright
+  // Glow animation: border pulses between dim and bright (hizli nabiz)
   const [glowPhase, setGlowPhase] = createSignal(0)
   let glowTimer: ReturnType<typeof setInterval> | undefined
   onMount(() => {
     if (animationsEnabled()) {
       glowTimer = setInterval(() => {
-        setGlowPhase((p) => (p + 1) % 4)
-      }, 800)
+        setGlowPhase((p) => (p + 1) % 8)
+      }, 400)
     }
   })
   onCleanup(() => {
@@ -1446,8 +1446,8 @@ export function Prompt(props: PromptProps) {
     const phase = glowPhase()
     const focused = input?.focused
     if (!focused) return 0.6
-    // Pulse: 0.5 → 0.8 → 1.0 → 0.8 → ...
-    const values = [0.5, 0.7, 1.0, 0.7]
+    // Pulse: 0.4 → 0.6 → 0.85 → 1.0 → 0.85 → 0.6 → 0.4 → 0.6 (daha akici)
+    const values = [0.4, 0.6, 0.85, 1.0, 0.85, 0.6, 0.4, 0.6]
     return values[phase]
   })
   const glowColor = createMemo(() =>

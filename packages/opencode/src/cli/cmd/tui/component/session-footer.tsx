@@ -2,6 +2,7 @@ import { createMemo, Show } from "solid-js"
 import { useTheme } from "../context/theme"
 import { useSync } from "@tui/context/sync"
 import { useLocal } from "@tui/context/local"
+import { NeonPulse } from "./neon-pulse"
 import * as Model from "../util/model"
 import { Global } from "@/global"
 
@@ -49,7 +50,7 @@ export function SessionFooter(props: SessionFooterProps) {
   const statusLabel = createMemo(() => {
     switch (status()) {
       case "running":
-        return "thinking..."
+        return "thinking"
       default:
         return "ready"
     }
@@ -81,7 +82,8 @@ export function SessionFooter(props: SessionFooterProps) {
 
       {/* Status */}
       <text fg={statusColor()} selectable={false}>
-        <span style={{ fg: statusColor() }}>●</span> {statusLabel()}
+        <NeonPulse active={status() === "running"} color={theme.primary} />{" "}
+        <span style={{ fg: statusColor() }}>{statusLabel()}</span>
       </text>
 
       {/* Model */}
