@@ -757,10 +757,15 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
       })
 
       if (!apiToken) {
-        throw new Error(
-          "CLOUDFLARE_API_TOKEN (or CF_AIG_TOKEN) is required for Cloudflare AI Gateway. " +
-            "Set it via environment variable or run `glitchcode auth cloudflare-ai-gateway`.",
-        )
+        return {
+          autoload: false,
+          async getModel() {
+            throw new Error(
+              "CLOUDFLARE_API_TOKEN (or CF_AIG_TOKEN) is required for Cloudflare AI Gateway. " +
+                "Set it via environment variable or run `glitchcode auth cloudflare-ai-gateway`.",
+            )
+          },
+        }
       }
 
       // Use official ai-gateway-provider package (v2.x for AI SDK v5 compatibility)
@@ -1345,6 +1350,7 @@ const layer: Layer.Layer<
             log.error("Provider does not exist in model list " + providerID)
             continue
           }
+          if (!providers[providerID] && !cfg.provider?.[providerID]) continue
           const result = yield* fn(data)
           if (result && (result.autoload || providers[providerID])) {
             if (result.getModel) modelLoaders[providerID] = result.getModel
