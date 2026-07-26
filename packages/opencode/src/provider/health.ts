@@ -28,6 +28,7 @@ export interface LatencyRecord {
 
 const latencyHistory = new Map<string, LatencyRecord[]>()
 const MAX_HISTORY_PER_KEY = 50
+const MAX_HISTORY_KEYS = 200 // toplam entry limiti, memory leak önlemi
 
 function latencyKey(providerID: string, modelID: string) {
   return `${providerID}/${modelID}`
@@ -39,6 +40,12 @@ export function recordLatency(record: LatencyRecord) {
   history.push(record)
   if (history.length > MAX_HISTORY_PER_KEY) history.shift()
   latencyHistory.set(key, history)
+  // Toplam key sayısını sınırla, eski provider'ları temizle
+  if (latencyHistory.size > MAX_HISTORY_KEYS) {
+    const keys = [...latencyHistory.keys()]
+    const toDelete = keys.slice(0, keys.length - MAX_HISTORY_KEYS)
+    for (const k of toDelete) latencyHistory.delete(k)
+  }
 }
 
 export function getAverageLatency(providerID: string, modelID: string): number | undefined {

@@ -273,14 +273,9 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
 
       const awsAccessKeyId = env["AWS_ACCESS_KEY_ID"]
 
-      // Bearer token: auth storage'dan al, env'e yaz
+      // Bearer token: options'da sakla, resolveSDK SDK init'te process.env'a yazar
       const awsBearerToken = iife(() => {
-        const envToken = process.env.AWS_BEARER_TOKEN_BEDROCK
-        if (envToken) return envToken
-        if (auth?.type === "api") {
-          process.env.AWS_BEARER_TOKEN_BEDROCK = auth.key
-          return auth.key
-        }
+        if (auth?.type === "api") return auth.key
         return undefined
       })
 
@@ -313,6 +308,8 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
       if (endpoint) {
         providerOptions.baseURL = endpoint
       }
+
+      if (awsBearerToken) providerOptions["awsBearerToken"] = awsBearerToken
 
       return {
         autoload: true,
@@ -513,15 +510,13 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
     "sap-ai-core": Effect.fnUntraced(function* () {
       const auth = yield* dep.auth("sap-ai-core")
       const envServiceKey = process.env.AICORE_SERVICE_KEY ?? (auth?.type === "api" ? auth.key : undefined)
-      if (auth?.type === "api" && !process.env.AICORE_SERVICE_KEY) {
-        yield* dep.set("AICORE_SERVICE_KEY", auth.key)
-      }
+      // process.env mutasyonu yapma, resolveSDK'de SDK init'te set edilir
       const deploymentId = process.env.AICORE_DEPLOYMENT_ID
       const resourceGroup = process.env.AICORE_RESOURCE_GROUP
 
       return {
         autoload: !!envServiceKey,
-        options: envServiceKey ? { deploymentId, resourceGroup } : {},
+        options: envServiceKey ? { deploymentId, resourceGroup, aicoreServiceKey: auth?.type === "api" ? auth.key : undefined } : {},
         async getModel(sdk: any, modelID: string) {
           return sdk(modelID)
         },
@@ -1380,18 +1375,16 @@ const layer: Layer.Layer<
 
         const gitlab = ProviderID.make("gitlab")
         if (discoveryLoaders[gitlab] && providers[gitlab] && isProviderAllowed(gitlab)) {
-          yield* Effect.promise(async () => {
-            try {
-              const discovered = await discoveryLoaders[gitlab]()
-              for (const [modelID, model] of Object.entries(discovered)) {
-                if (!providers[gitlab].models[modelID]) {
-                  providers[gitlab].models[modelID] = model
-                }
+          try {
+            const discovered = yield* Effect.promise(() => discoveryLoaders[gitlab]())
+            for (const [modelID, model] of Object.entries(discovered)) {
+              if (!providers[gitlab].models[modelID]) {
+                providers[gitlab].models[modelID] = model
               }
-            } catch (e) {
-              log.warn("state discovery error", { id: "gitlab", error: e })
             }
-          })
+          } catch (e) {
+            log.warn("state discovery error", { id: "gitlab", error: e })
+          }
         }
 
         for (const hook of plugins) {
@@ -1582,19 +1575,39 @@ const layer: Layer.Layer<
           return wrapSSE(res, chunkTimeout, chunkAbortCtl)
         }
 
+        // Amazon Bedrock: bearer token process.env'a gerekli, SDK init'te okur
+        const prevBedrockToken = model.providerID === "amazon-bedrock" ? process.env.AWS_BEARER_TOKEN_BEDROCK : undefined
+        if (prevBedrockToken === undefined && options["awsBearerToken"]) {
+          process.env.AWS_BEARER_TOKEN_BEDROCK = options["awsBearerToken"]
+        }
+        delete options["awsBearerToken"]
+
+        const prevAicoreKey = model.providerID === "sap-ai-core" ? process.env.AICORE_SERVICE_KEY : undefined
+        if (prevAicoreKey === undefined && options["aicoreServiceKey"]) {
+          process.env.AICORE_SERVICE_KEY = options["aicoreServiceKey"]
+        }
+        delete options["aicoreServiceKey"]
+
         const bundledLoader = BUNDLED_PROVIDERS[model.api.npm]
         if (bundledLoader) {
           log.info("using bundled provider", {
             providerID: model.providerID,
             pkg: model.api.npm,
           })
-          const factory = await bundledLoader()
-          const loaded = factory({
-            name: model.providerID,
-            ...options,
-          })
-          s.sdk.set(key, loaded)
-          return loaded as SDK
+          try {
+            const factory = await bundledLoader()
+            const loaded = factory({
+              name: model.providerID,
+              ...options,
+            })
+            s.sdk.set(key, loaded)
+            return loaded as SDK
+          } finally {
+            if (prevBedrockToken === undefined) delete process.env.AWS_BEARER_TOKEN_BEDROCK
+            else process.env.AWS_BEARER_TOKEN_BEDROCK = prevBedrockToken
+            if (prevAicoreKey === undefined) delete process.env.AICORE_SERVICE_KEY
+            else process.env.AICORE_SERVICE_KEY = prevAicoreKey
+          }
         }
 
         let installedPath: string
@@ -1612,7 +1625,11 @@ const layer: Layer.Layer<
         const importSpec = installedPath.startsWith("file://") ? installedPath : pathToFileURL(installedPath).href
         const mod = await import(importSpec)
 
-        const fn = mod[Object.keys(mod).find((key) => key.startsWith("create"))!]
+        const createKey = Object.keys(mod).find((key) => key.startsWith("create"))
+        if (!createKey) {
+          throw new Error(`No "create*" export found in package ${model.api.npm} for provider ${model.providerID}`)
+        }
+        const fn = mod[createKey]
         const loaded = fn({
           name: model.providerID,
           ...options,

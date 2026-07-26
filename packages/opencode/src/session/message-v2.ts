@@ -1158,7 +1158,9 @@ export function fromError(
             },
           ).toObject()
         }
-      } catch {}
+      } catch (inner) {
+        console.warn("[parseAPIError] unexpected error:", inner)
+      }
       return new NamedError.Unknown({ message: JSON.stringify(e) }, { cause: e }).toObject()
   }
 }
