@@ -3,7 +3,7 @@
 	"Version": 1,
 	"VersionName": "1.0",
 	"FriendlyName": "GlitchCode AI",
-	"Description": "Comprehensive game development toolkit for Unreal Engine 5.4. Includes procedural generation, AI-driven combat, animation systems, VFX/Niagara, camera control, UI/UX, multiplayer networking, save/load, QA testing, horror mechanics, and AI coding assistant integration via Glitch Code CLI.",
+	"Description": "Comprehensive game development toolkit for Unreal Engine 5.8. Includes procedural generation, AI-driven combat, animation systems, VFX/Niagara, camera control, UI/UX, multiplayer networking, save/load, QA testing, horror mechanics, and AI coding assistant integration via Glitch Code CLI.",
 	"Category": "Development",
 	"CreatedBy": "GlitchStudio",
 	"CreatedByURL": "",
@@ -12,7 +12,7 @@
 	"CanContainContent": true,
 	"IsBetaVersion": false,
 	"IsExperimentalVersion": false,
-	"EngineVersion": "5.4",
+	"EngineVersion": "5.8",
 	"Installed": false,
 	"Modules": [
 		{

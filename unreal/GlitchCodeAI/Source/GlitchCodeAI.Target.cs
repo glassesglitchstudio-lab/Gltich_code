@@ -6,8 +6,8 @@ public class GlitchCodeAI Target : TargetRules
 	public GlitchCodeAI(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Game;
-		DefaultBuildSettings = BuildSettingsVersion.V4;
-		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_4;
+		DefaultBuildSettings = BuildSettingsVersion.V5;
+		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_8;
 		ExtraModuleNames.Add("GlitchCodeAI");
 	}
 }

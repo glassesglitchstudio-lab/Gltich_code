@@ -1291,14 +1291,23 @@ const layer: Layer.Layer<
         // load env (skipped in glitch-only mode so ANTHROPIC_API_KEY etc. don't auto-light other providers)
         if (!Flag.GLITCHCODE_DISABLE_PROVIDER_ENV) {
           const envs = yield* env.all()
+          const customLoaders = new Set(Object.keys(custom(dep)))
           for (const [id, provider] of Object.entries(database)) {
             const providerID = ProviderID.make(id)
             if (disabled.has(providerID)) continue
-            const apiKey = provider.env.map((item) => envs[item]).find(Boolean)
-            if (!apiKey) continue
+            const matchingEnv = provider.env.find((item) => envs[item])
+            if (!matchingEnv) continue
+            // Providers with custom loaders handle their own auth (e.g., amazon-bedrock, cloudflare).
+            // For providers without custom loaders, require the env var name to contain the provider ID
+            // to prevent cross-provider activation (e.g., minimax using ANTHROPIC_API_KEY).
+            if (!customLoaders.has(id)) {
+              const normalizedEnv = matchingEnv.toLowerCase().replace(/[_-]/g, "")
+              const normalizedID = id.toLowerCase().replace(/[_-]/g, "")
+              if (!normalizedEnv.includes(normalizedID)) continue
+            }
             mergeProvider(providerID, {
               source: "env",
-              key: provider.env.length === 1 ? apiKey : undefined,
+              key: provider.env.length === 1 ? envs[matchingEnv] : undefined,
             })
           }
         }
@@ -1340,7 +1349,7 @@ const layer: Layer.Layer<
         for (const [id, fn] of Object.entries(custom(dep))) {
           const providerID = ProviderID.make(id)
           if (disabled.has(providerID)) continue
-          if (!providers[providerID]) continue
+          if (!providers[providerID] && !cfg.provider?.[providerID]) continue
           const data = database[providerID]
           if (!data) {
             log.error("Provider does not exist in model list " + providerID)

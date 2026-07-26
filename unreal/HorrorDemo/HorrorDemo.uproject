@@ -1,6 +1,6 @@
 {
     "FileVersion": 3,
-    "EngineAssociation": "5.4",
+    "EngineAssociation": "5.8",
     "Category": "Game",
     "Description": "GlitchCode AI Horror Demo - Testbed for all 120 tools and 29 C++ components",
     "Modules": [

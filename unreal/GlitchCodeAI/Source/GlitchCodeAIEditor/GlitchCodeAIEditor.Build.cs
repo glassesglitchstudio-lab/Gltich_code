@@ -18,7 +18,6 @@ public class GlitchCodeAIEditor : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
-			"EditorStyle",
 			"UnrealEd",
 			"ToolMenus",
 			"InputCore"

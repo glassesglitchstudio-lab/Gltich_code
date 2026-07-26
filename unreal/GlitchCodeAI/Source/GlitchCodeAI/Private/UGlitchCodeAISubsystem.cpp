@@ -174,7 +174,7 @@ void UGlitchCodeAISubsystem::LoadSettings()
 
 	if (FPaths::FileExists(ConfigPath))
 	{
-		GConfig->GetString(
+		GConfig->GetBool(
 			TEXT("GlitchCodeAI"),
 			TEXT("AutoStart"),
 			bAutoStart,

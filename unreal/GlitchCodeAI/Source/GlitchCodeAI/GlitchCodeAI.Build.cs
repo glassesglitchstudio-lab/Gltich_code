@@ -12,6 +12,7 @@ public class GlitchCodeAI : ModuleRules
 			"CoreUObject",
 			"Engine",
 			"InputCore",
+			"EnhancedInput",
 			"HTTP",
 			"Json",
 			"JsonUtilities",
@@ -23,7 +24,8 @@ public class GlitchCodeAI : ModuleRules
 			"SlateCore",
 			"Slate",
 			"AudioMixer",
-			"GameplayTags"
+			"GameplayTags",
+			"DeveloperSettings"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]

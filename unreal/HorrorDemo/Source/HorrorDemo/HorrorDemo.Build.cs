@@ -12,6 +12,7 @@ public class HorrorDemo : ModuleRules
             "CoreUObject",
             "Engine",
             "InputCore",
+            "EnhancedInput",
             "GlitchCodeAI"
         });
     }
