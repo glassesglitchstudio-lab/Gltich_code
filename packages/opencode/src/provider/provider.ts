@@ -409,9 +409,9 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
         autoload: false,
         options: {
           headers: {
-            "HTTP-Referer": "https://mimo.xiaomi.com/coder/",
-            "X-Title": "mimocode",
-            "X-Source": "mimocode",
+            "HTTP-Referer": "https://glitchcode.ai/",
+            "X-Title": "glitchcode",
+            "X-Source": "glitchcode",
           },
         },
       }),
@@ -420,8 +420,8 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
         autoload: false,
         options: {
           headers: {
-            "HTTP-Referer": "https://mimo.xiaomi.com/coder/",
-            "X-Title": "mimocode",
+            "HTTP-Referer": "https://glitchcode.ai/",
+            "X-Title": "glitchcode",
             "X-OpenRouter-Categories": "programming,programming-app,cli-agent",
           },
         },
@@ -431,8 +431,8 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
         autoload: false,
         options: {
           headers: {
-            "HTTP-Referer": "https://mimo.xiaomi.com/coder/",
-            "X-Title": "mimocode",
+            "HTTP-Referer": "https://glitchcode.ai/",
+            "X-Title": "glitchcode",
           },
         },
       }),
@@ -441,8 +441,8 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
         autoload: false,
         options: {
           headers: {
-            "http-referer": "https://mimo.xiaomi.com/coder/",
-            "x-title": "mimocode",
+            "http-referer": "https://glitchcode.ai/",
+            "x-title": "glitchcode",
           },
         },
       }),
@@ -532,8 +532,8 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
         autoload: false,
         options: {
           headers: {
-            "HTTP-Referer": "https://mimo.xiaomi.com/coder/",
-            "X-Title": "mimocode",
+            "HTTP-Referer": "https://glitchcode.ai/",
+            "X-Title": "glitchcode",
           },
         },
       }),
@@ -761,8 +761,8 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
           autoload: false,
           async getModel() {
             throw new Error(
-              "CLOUDFLARE_API_TOKEN (or CF_AIG_TOKEN) is required for Cloudflare AI Gateway. " +
-                "Set it via environment variable or run `glitchcode auth cloudflare-ai-gateway`.",
+              "CLOUDFLARE_API_TOKEN (or CF_AIG_TOKEN) required. " +
+                "Set via environment variable or run `glitch auth cloudflare-ai-gateway`.",
             )
           },
         }
@@ -814,7 +814,7 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
         autoload: false,
         options: {
           headers: {
-            "X-Cerebras-3rd-Party-Integration": "mimocode",
+            "X-Cerebras-3rd-Party-Integration": "glitchcode",
           },
         },
       }),
@@ -823,8 +823,8 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
         autoload: false,
         options: {
           headers: {
-            "HTTP-Referer": "https://mimo.xiaomi.com/coder/",
-            "X-Title": "mimocode",
+            "HTTP-Referer": "https://glitchcode.ai/",
+            "X-Title": "glitchcode",
           },
         },
       }),
@@ -833,8 +833,8 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
         autoload: false,
         options: {
           headers: {
-            "HTTP-Referer": "https://mimo.xiaomi.com/coder/",
-            "X-Title": "mimocode",
+            "HTTP-Referer": "https://glitchcode.ai/",
+            "X-Title": "glitchcode",
           },
         },
       }),
@@ -843,8 +843,8 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
         autoload: false,
         options: {
           headers: {
-            "HTTP-Referer": "https://mimo.xiaomi.com/coder/",
-            "X-Title": "mimocode",
+            "HTTP-Referer": "https://glitchcode.ai/",
+            "X-Title": "glitchcode",
           },
         },
       }),
@@ -853,8 +853,8 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
         autoload: false,
         options: {
           headers: {
-            "HTTP-Referer": "https://mimo.xiaomi.com/coder/",
-            "X-Title": "mimocode",
+            "HTTP-Referer": "https://glitchcode.ai/",
+            "X-Title": "glitchcode",
           },
         },
       }),
@@ -1345,13 +1345,19 @@ const layer: Layer.Layer<
         for (const [id, fn] of Object.entries(custom(dep))) {
           const providerID = ProviderID.make(id)
           if (disabled.has(providerID)) continue
+          if (!providers[providerID]) continue
           const data = database[providerID]
           if (!data) {
             log.error("Provider does not exist in model list " + providerID)
             continue
           }
-          if (!providers[providerID] && !cfg.provider?.[providerID]) continue
-          const result = yield* fn(data)
+          const result = yield* fn(data).pipe(
+            Effect.catch((e) => {
+              log.warn("Provider custom loader error: " + providerID, { error: e })
+              console.warn(`[provider] ${providerID} loader error: ${String(e)}`)
+              return Effect.succeed(null)
+            }),
+          )
           if (result && (result.autoload || providers[providerID])) {
             if (result.getModel) modelLoaders[providerID] = result.getModel
             if (result.vars) varsLoaders[providerID] = result.vars
@@ -1432,7 +1438,10 @@ const layer: Layer.Layer<
             )
               delete provider.models[modelID]
             if (model.status === "alpha" && !Flag.GLITCHCODE_ENABLE_EXPERIMENTAL_MODELS) delete provider.models[modelID]
-            if (model.status === "deprecated") delete provider.models[modelID]
+            if (model.status === "deprecated") {
+              log.info("removing deprecated model", { providerID, modelID })
+              delete provider.models[modelID]
+            }
             if (
               (configProvider?.blacklist && configProvider.blacklist.includes(modelID)) ||
               (configProvider?.whitelist && !configProvider.whitelist.includes(modelID))
@@ -1767,7 +1776,7 @@ const layer: Layer.Layer<
       }
 
       const provider = Object.values(s.providers).find((p) => !cfg.provider || Object.keys(cfg.provider).includes(p.id))
-      if (!provider) throw new Error("No providers configured. Run `glitch auth login` to connect a provider (MiMo, GitHub Copilot, etc.) or set environment variables for Cloudflare.")
+      if (!provider) throw new Error("No providers configured. Run `glitch auth login` to connect a provider (MiMo, GitHub Copilot, OpenAI, etc.) or configure API keys in glitchcode.json.")
       const [model] = sort(Object.values(provider.models))
       if (!model) throw new Error(`No models available for provider "${provider.id}". Check your provider configuration in glitchcode.json or run \`glitch models\`.`)
       return {
