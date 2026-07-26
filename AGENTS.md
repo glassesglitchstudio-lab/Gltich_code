@@ -547,3 +547,33 @@ glitch solve "Test coverage'ı %80'e çıkar" -m anthropic/claude-sonnet-4-20250
 - `MessageCard` → Mesajları kart göstermek için
 - `GlassmorphismDialog` → Özel dialog sistemi
 - `StartupAnimation` → Mevcut startup loading yerine kullanılabilir
+
+## Session Notları (2026-07-26)
+
+### Provider Bug Fix — Kullanılmayan Provider'lar API Hatası Veriyordu ✅
+**Sorun**: Kullanılmayan provider'lar (cloudflare-ai-gateway, gitlab, vb.) init sırasında `throw` atıyor veya gereksiz IO yapıyordu. Özellikle `CLOUDFLARE_ACCOUNT_ID` gibi ortam değişkenleri başka bir provider için ayarlıysa, alakasız provider'ın custom loader'ı crash'e sebep oluyordu.
+
+**Yapılan 2 Düzeltme:**
+1. **`cloudflare-ai-gateway`** (`provider.ts:759`): `throw new Error()` → `{ autoload: false, getModel: () => throw }` — init'te crash atma, hata sadece model çağrılınca gösterilir.
+2. **Custom loader loop** (`provider.ts:1353`): `if (!providers[providerID] && !cfg.provider?.[providerID]) continue` — custom loader'lar sadece configured/active provider'lar için çalışır. Kullanılmayan provider'ların import/IO'su tetiklenmez.
+
+**Commit**: `d9a31ec` — push edildi, GitHub Actions başarılı ✅
+- test: success
+- typecheck: success
+- lint: success
+
+### Orca IDE'ye Geçiş
+Berkay bundan sonra VS Code yerine **Orca IDE** (stablyai/orca) kullanacak. Orca:
+- OpenCode/Glitch Code dahil 30+ agent'ı paralel worktree'lerde çalıştırabilir
+- CLI agent'ları görsel arayüzde yönetir
+- Mobil uygulaması var
+- Windows desteği var (.exe)
+
+### Projelerin Güncel Durumu
+| Proje | Son İşlem | Durum |
+|-------|-----------|-------|
+| **glitch-code** | v0.4.5, provider bug fix `d9a31ec` | ✅ Aktif |
+| **shadowcat-r1** | 3 dataset hazır (761K entry), Colab Pro+ bekliyor | ⏸ Beklemede |
+| **niko_ai** | V7_HYBRID_TITAN, X_FABLE_CODER_V1 | ⏸ Beklemede |
+| **deenemee** | Portfolyo sayfası cyberpunk tema | ✅ Hazır |
+| **jarvis my pc** | Snapchat entegrasyonu tamam | ⏸ Beklemede |
