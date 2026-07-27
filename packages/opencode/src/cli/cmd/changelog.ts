@@ -3,6 +3,7 @@ import { cmd } from "./cmd"
 import { bootstrap } from "../bootstrap"
 import { execSync } from "child_process"
 import fs from "fs"
+import path from "path"
 
 interface ChangelogEntry {
   hash: string
@@ -11,6 +12,48 @@ interface ChangelogEntry {
   type: string
   scope: string
   message: string
+}
+
+const CHANGELOG_FILE = "CHANGELOG.md"
+
+export function appendToChangelog(entries: ChangelogEntry[]) {
+  try {
+    const date = new Date().toISOString().split("T")[0]
+    const lines: string[] = []
+    lines.push(`\n## [Auto] ${date}\n`)
+
+    const groups: Record<string, typeof entries> = {}
+    for (const e of entries) {
+      if (!groups[e.type]) groups[e.type] = []
+      groups[e.type].push(e)
+    }
+
+    const typeOrder = ["feat", "fix", "refactor", "perf", "test", "docs", "style", "chore"]
+    const typeLabels: Record<string, string> = {
+      feat: "Features", fix: "Bug Fixes", refactor: "Refactoring",
+      perf: "Performance", test: "Tests", docs: "Documentation",
+      style: "Styles", chore: "Chores",
+    }
+
+    for (const type of typeOrder) {
+      const group = groups[type]
+      if (!group) continue
+      lines.push(`\n### ${typeLabels[type] || type}\n`)
+      for (const e of group) {
+        const scope = e.scope ? `**${e.scope}:** ` : ""
+        lines.push(`- ${scope}${e.message} \`${e.hash}\``)
+      }
+    }
+
+    const content = lines.join("\n")
+    if (fs.existsSync(CHANGELOG_FILE)) {
+      const existing = fs.readFileSync(CHANGELOG_FILE, "utf8")
+      const insertPos = existing.indexOf("\n## ") || existing.length
+      fs.writeFileSync(CHANGELOG_FILE, existing.substring(0, insertPos) + content + existing.substring(insertPos), "utf8")
+    } else {
+      fs.writeFileSync(CHANGELOG_FILE, `# Changelog\n${content}\n`, "utf8")
+    }
+  } catch {}
 }
 
 export const ChangelogCommand = cmd({
@@ -37,7 +80,7 @@ export const ChangelogCommand = cmd({
       .option("format", {
         describe: "Cikis formati",
         type: "string",
-        choices: ["markdown", "conventional", "json"],
+        choices: ["markdown", "conventional", "json", "auto"],
         default: "markdown",
       })
       .option("authors", {
@@ -45,9 +88,29 @@ export const ChangelogCommand = cmd({
         type: "boolean",
         default: false,
       })
+      .option("auto", {
+        describe: "Auto-pend to CHANGELOG.md instead of stdout",
+        type: "boolean",
+        default: false,
+      })
+      .option("watch", {
+        describe: "Watch mode: auto-update CHANGELOG on each commit",
+        type: "boolean",
+        default: false,
+      })
   },
   handler: async (args) => {
     await bootstrap(process.cwd(), async () => {
+      if (args.format === "auto" || args.auto) {
+        generateAutoChangelog()
+        return
+      }
+
+      if (args.watch) {
+        watchChangelog()
+        return
+      }
+
       const s = require("@clack/prompts").spinner()
       s.start("Changelog olusturuluyor...")
 
@@ -80,14 +143,7 @@ export const ChangelogCommand = cmd({
           const [hash, date, author, ...msgParts] = line.split("|")
           const message = msgParts.join("|")
           const { type, scope } = parseConventionalCommit(message)
-          return {
-            hash: hash.substring(0, 7),
-            date,
-            author,
-            type,
-            scope,
-            message,
-          }
+          return { hash: hash.substring(0, 7), date, author, type, scope, message }
         })
 
       s.stop(`${entries.length} commit bulundu.`)
@@ -113,6 +169,39 @@ export const ChangelogCommand = cmd({
     })
   },
 })
+
+function generateAutoChangelog() {
+  const lastTag = execSync("git describe --tags --abbrev=0 2>nul || git rev-list --max-parents=0 HEAD", { encoding: "utf-8" }).trim()
+  const logFormat = "%H|%ad|%an|%s"
+  const rawLog = execSync(`git log ${lastTag}..HEAD --pretty=format:"${logFormat}" --date=short --no-merges`, { encoding: "utf-8" })
+  if (!rawLog.trim()) { console.log("No new commits since last tag."); return }
+
+  const entries = rawLog.trim().split("\n").filter(Boolean).map((line) => {
+    const [hash, date, author, ...msgParts] = line.split("|")
+    const message = msgParts.join("|")
+    const { type, scope } = parseConventionalCommit(message)
+    return { hash: hash.substring(0, 7), date, author, type, scope, message }
+  })
+
+  appendToChangelog(entries)
+  console.log(`CHANGELOG.md guncellendi (${entries.length} commit)`)
+}
+
+function watchChangelog() {
+  console.log("Watching for new commits... (Ctrl+C to stop)")
+  const interval = setInterval(() => {
+    try {
+      const head = execSync("git rev-parse HEAD", { encoding: "utf-8" }).trim()
+      const lastLog = execSync(`git log -1 --pretty=format:"%H|%s"`, { encoding: "utf-8" })
+      const [hash, msg] = lastLog.split("|")
+      if (!hash) return
+      const { type, scope } = parseConventionalCommit(msg)
+      appendToChangelog([{ hash: hash.substring(0, 7), date: new Date().toISOString().split("T")[0], author: "", type, scope, message: msg }])
+    } catch {}
+  }, 30000)
+
+  process.on("SIGINT", () => { clearInterval(interval); console.log("\nWatch stopped."); process.exit(0) })
+}
 
 function parseConventionalCommit(message: string): { type: string; scope: string } {
   const match = message.match(/^(\w+)(?:\(([^)]+)\))?:\s*(.+)/)

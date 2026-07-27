@@ -8,6 +8,9 @@ import { ProviderID } from "../../provider/schema"
 import { Effect } from "effect"
 import { generateText } from "ai"
 import type { LanguageModel } from "ai"
+import fs from "fs"
+import path from "path"
+import { homedir } from "os"
 
 interface BenchResult {
   model: string
@@ -18,6 +21,8 @@ interface BenchResult {
   duration: number
   tokensPerSecond: number
   responseLength: number
+  cost: number
+  score: number
 }
 
 interface ModelRef {
@@ -26,10 +31,85 @@ interface ModelRef {
   model: LanguageModel
 }
 
+interface LeaderboardEntry {
+  provider: string
+  model: string
+  avgTokensPerSecond: number
+  avgScore: number
+  totalTests: number
+  avgCost: number
+  avgLatency: number
+}
+
+const BENCH_HISTORY_DIR = path.join(homedir(), ".glitchcode", "bench-history")
+const LEADERBOARD_FILE = path.join(BENCH_HISTORY_DIR, "leaderboard.json")
+
+function loadLeaderboard(): LeaderboardEntry[] {
+  try {
+    if (fs.existsSync(LEADERBOARD_FILE)) {
+      return JSON.parse(fs.readFileSync(LEADERBOARD_FILE, "utf8"))
+    }
+  } catch {}
+  return []
+}
+
+function saveLeaderboard(entries: LeaderboardEntry[]) {
+  try {
+    fs.mkdirSync(BENCH_HISTORY_DIR, { recursive: true })
+    entries.sort((a, b) => b.avgScore - a.avgScore || b.avgTokensPerSecond - a.avgTokensPerSecond)
+    fs.writeFileSync(LEADERBOARD_FILE, JSON.stringify(entries, null, 2), "utf8")
+  } catch {}
+}
+
+function updateLeaderboard(results: BenchResult[]) {
+  const leaderboard = loadLeaderboard()
+  const grouped: Record<string, BenchResult[]> = {}
+  for (const r of results) {
+    const key = `${r.provider}/${r.model}`
+    if (!grouped[key]) grouped[key] = []
+    grouped[key].push(r)
+  }
+  for (const [key, group] of Object.entries(grouped)) {
+    const [provider, model] = key.split("/")
+    const existing = leaderboard.find(e => e.provider === provider && e.model === model)
+    const entry: LeaderboardEntry = {
+      provider, model,
+      avgTokensPerSecond: group.reduce((a, b) => a + b.tokensPerSecond, 0) / group.length,
+      avgScore: group.reduce((a, b) => a + b.score, 0) / group.length,
+      totalTests: (existing?.totalTests || 0) + group.length,
+      avgCost: group.reduce((a, b) => a + b.cost, 0) / group.length,
+      avgLatency: group.reduce((a, b) => a + b.duration, 0) / group.length,
+    }
+    if (existing) {
+      Object.assign(existing, entry)
+      existing.totalTests = (existing.totalTests || 0) + group.length
+    } else {
+      leaderboard.push(entry)
+    }
+  }
+  saveLeaderboard(leaderboard)
+}
+
+function estimateCost(provider: string, model: string, tokens: number): number {
+  const rates: Record<string, number> = {
+    "openai/gpt-4o": 0.00001,
+    "openai/gpt-4o-mini": 0.0000015,
+    "anthropic/claude-sonnet-4-20250514": 0.000015,
+    "anthropic/claude-haiku": 0.0000025,
+    "google/gemini-2.0-flash": 0.0000005,
+    "google/gemini-2.0-pro": 0.00001,
+    "deepseek/deepseek-chat": 0.000002,
+    "mistral/mistral-large": 0.000008,
+    "groq/llama-3.3-70b": 0.000001,
+  }
+  const rate = rates[`${provider}/${model}`] || 0.000005
+  return tokens * rate
+}
+
 export const BenchCommand = cmd({
   command: "bench",
-  aliases: ["benchmark-models"],
-  describe: "Ayni gorevi farkli modellere calistir ve karsilastir",
+  aliases: ["benchmark-models", "leaderboard"],
+  describe: "Multi-model benchmark + leaderboard",
   builder: (yargs: Argv) => {
     return yargs
       .option("prompt", {
@@ -40,12 +120,12 @@ export const BenchCommand = cmd({
       })
       .option("models", {
         alias: "m",
-        describe: "Karsilastirilacak modeller (virgullu)",
+        describe: "Karsilastirilacak modeller (virgullu, max 10)",
         type: "array",
       })
       .option("rounds", {
         alias: "r",
-        describe: "Her model icin test tur sayisi",
+        describe: "Her model icin kac tur",
         type: "number",
         default: 1,
       })
@@ -53,16 +133,26 @@ export const BenchCommand = cmd({
         alias: "f",
         describe: "Cikis formati",
         type: "string",
-        choices: ["table", "json", "markdown"],
+        choices: ["table", "json", "markdown", "html", "leaderboard"],
         default: "table",
       })
       .option("max-tokens", {
-        describe: "Maksimum token siniri",
+        describe: "Maks token siniri",
         type: "number",
         default: 1024,
       })
+      .option("save", {
+        describe: "Sonuclari leaderboard'a kaydet",
+        type: "boolean",
+        default: true,
+      })
   },
   handler: async (args) => {
+    if (args.format === "leaderboard") {
+      showLeaderboard()
+      return
+    }
+
     await bootstrap(process.cwd(), async () => {
       const s = require("@clack/prompts").spinner()
       s.start("Benchmark baslatiliyor...")
@@ -75,109 +165,88 @@ export const BenchCommand = cmd({
               const svc = yield* Provider.Service
               const providers = yield* svc.list()
 
-              let selectedModels: ModelRef[] = []
-
-              if (args.models && (args.models as string[]).length > 0) {
-                selectedModels = (args.models as string[]).slice(0, 5).map((m) => {
-                  const [provider, model] = m.includes("/") ? m.split("/", 2) : ["auto", m]
-                  const pid = ProviderID.make(provider)
-                  const providerData = providers[pid]
-                  const modelData = providerData?.models?.[model]
-                  return { providerID: pid, modelID: model, model: modelData as unknown as LanguageModel }
-                }).filter((m) => m.model)
-              } else {
-                const allModels: ModelRef[] = []
-                for (const [pid, provider] of Object.entries(providers)) {
-                  const providerID = ProviderID.make(pid)
-                  for (const [modelID, model] of Object.entries((provider as { models?: Record<string, unknown> }).models ?? {})) {
-                    allModels.push({ providerID, modelID, model: model as unknown as LanguageModel })
-                  }
-                }
-                const preferred = ["claude-sonnet", "gpt-4o", "gemini", "mimo"]
-                for (const pref of preferred) {
-                  if (selectedModels.length >= 3) break
-                  const found = allModels.find((m) => m.modelID.toLowerCase().includes(pref))
-                  if (found && !selectedModels.some((s) => s.modelID === found.modelID)) {
-                    selectedModels.push(found)
-                  }
-                }
-                for (const m of allModels) {
-                  if (selectedModels.length >= 3) break
-                  if (!selectedModels.some((s) => s.modelID === m.modelID)) {
-                    selectedModels.push(m)
-                  }
-                }
-              }
-
-              if (selectedModels.length < 2) {
-                s.stop("En az 2 model gerekli.")
+              const selectedModels = selectBenchModels(args.models as string[] | undefined, providers, 10)
+              if (selectedModels.length === 0) {
+                s.stop("Model bulunamadi.")
                 return
               }
 
-              s.message(`Modeller: ${selectedModels.map((m) => `${m.providerID}/${m.modelID}`).join(", ")}`)
-              s.message(`Prompt: ${(args.prompt as string).substring(0, 80)}...`)
-              s.message(`Tur sayisi: ${args.rounds}`)
-
-              const results: BenchResult[] = []
+              s.message(`${selectedModels.length} model test ediliyor...`)
               const rounds = args.rounds as number
+              const prompt = args.prompt as string
+              const maxOutputTokens = args.maxOutputTokens as number || args.maxTokens as number
 
-              for (let round = 0; round < rounds; round++) {
-                s.message(`\n--- TUR ${round + 1}/${rounds} ---`)
+              const allResults: BenchResult[] = []
 
-                for (const m of selectedModels) {
-                  s.message(`${m.modelID} calistiriliyor...`)
+              for (const m of selectedModels) {
+                s.message(`Test: ${m.providerID}/${m.modelID}`)
 
-                  const startTime = Date.now()
+                for (let r = 0; r < rounds; r++) {
+                  const start = Date.now()
                   try {
                     const result = yield* Effect.promise(() =>
                       generateText({
                         model: m.model,
-                        messages: [{ role: "user", content: args.prompt as string }],
+                        messages: [{ role: "user", content: prompt }],
+                        maxOutputTokens,
                       }),
                     )
-                    const duration = Date.now() - startTime
-                    const tokens = (result.usage as { totalTokens?: number })?.totalTokens ?? result.text.split(/\s+/).length
-                    const tokensPerSecond = duration > 0 ? Math.round((tokens / duration) * 1000) : 0
 
-                    results.push({
+                    const duration = Date.now() - start
+                    const tokens = result.usage?.totalTokens || result.text.length / 4
+                    const tokensPerSecond = tokens / (duration / 1000)
+                    const score = evaluateBenchResult(result.text, prompt)
+
+                    allResults.push({
                       model: m.modelID,
                       provider: m.providerID as string,
-                      prompt: args.prompt as string,
+                      prompt,
                       response: result.text,
-                      tokens,
+                      tokens: Math.round(tokens),
                       duration,
-                      tokensPerSecond,
+                      tokensPerSecond: Math.round(tokensPerSecond * 100) / 100,
                       responseLength: result.text.length,
+                      cost: estimateCost(m.providerID as string, m.modelID, Math.round(tokens)),
+                      score,
                     })
 
-                    s.message(`  ${m.modelID}: ${tokens} token, ${duration}ms, ${tokensPerSecond} tok/s`)
-                  } catch (err) {
-                    s.message(`  ${m.modelID}: HATA - ${err instanceof Error ? err.message : String(err)}`)
-                    results.push({
+                    s.message(`  ${m.modelID}: ${Math.round(tokensPerSecond)} tok/s, ${Math.round(tokens)} token, ${score}/100`)
+                  } catch (err: any) {
+                    s.message(`  ${m.modelID}: HATA - ${err.message}`)
+                    allResults.push({
                       model: m.modelID,
                       provider: m.providerID as string,
-                      prompt: args.prompt as string,
-                      response: `HATA: ${err instanceof Error ? err.message : String(err)}`,
+                      prompt,
+                      response: "",
                       tokens: 0,
-                      duration: Date.now() - startTime,
+                      duration: Date.now() - start,
                       tokensPerSecond: 0,
                       responseLength: 0,
+                      cost: 0,
+                      score: 0,
                     })
                   }
                 }
               }
 
-              s.stop("Benchmark tamamlandi!")
+              if (args.save) {
+                updateLeaderboard(allResults)
+              }
+
+              s.stop(`Benchmark tamamlandi! ${selectedModels.length} model, ${rounds} tur`)
 
               switch (args.format) {
                 case "json":
-                  console.log(JSON.stringify(results, null, 2))
+                  printBenchJSON(allResults, prompt, rounds)
                   break
                 case "markdown":
-                  printMarkdown(results, args.prompt as string, rounds)
+                  printBenchMarkdown(allResults, prompt, rounds)
+                  break
+                case "html":
+                  printBenchHTML(allResults, prompt, rounds)
                   break
                 default:
-                  printTable(results, args.prompt as string, rounds)
+                  printBenchTable(allResults, prompt, rounds)
               }
             }),
           )
@@ -187,75 +256,226 @@ export const BenchCommand = cmd({
   },
 })
 
-function printTable(results: BenchResult[], prompt: string, rounds: number) {
-  console.log("\n" + "═".repeat(70))
-  console.log("  GLITCH BENCH - MODEL KARSILASTIRMASI")
-  console.log("═".repeat(70))
-  console.log(`\nPrompt: ${prompt.substring(0, 60)}...`)
-  console.log(`Tur: ${rounds}\n`)
-
-  const modelStats: Record<string, { tokens: number; duration: number; tps: number; length: number; count: number; errors: number }> = {}
-  for (const r of results) {
-    const key = `${r.provider}/${r.model}`
-    if (!modelStats[key]) modelStats[key] = { tokens: 0, duration: 0, tps: 0, length: 0, count: 0, errors: 0 }
-    modelStats[key].tokens += r.tokens
-    modelStats[key].duration += r.duration
-    modelStats[key].tps += r.tokensPerSecond
-    modelStats[key].length += r.responseLength
-    modelStats[key].count++
-    if (r.response.startsWith("HATA:")) modelStats[key].errors++
+function selectBenchModels(inputModels: string[] | undefined, providers: Record<string, any>, maxModels = 10): ModelRef[] {
+  if (inputModels && inputModels.length > 0) {
+    return inputModels.slice(0, maxModels).map((m) => {
+      const [provider, model] = m.includes("/") ? m.split("/", 2) : ["auto", m]
+      const pid = ProviderID.make(provider)
+      const providerData = providers[pid]
+      const modelData = providerData?.models?.[model]
+      return { providerID: pid, modelID: model, model: modelData as LanguageModel }
+    }).filter((m) => m.model)
   }
 
-  console.log("  Model".padEnd(35) + "Token".padStart(8) + "Sure".padStart(10) + "Tok/s".padStart(8) + "Uzunluk".padStart(10))
-  console.log("  " + "─".repeat(68))
-
-  const sorted = Object.entries(modelStats).sort((a, b) => b[1].tps - a[1].tps)
-  for (const [model, stats] of sorted) {
-    const avgTokens = Math.round(stats.tokens / stats.count)
-    const avgDuration = Math.round(stats.duration / stats.count)
-    const avgTps = Math.round(stats.tps / stats.count)
-    const avgLength = Math.round(stats.length / stats.count)
-    const errStr = stats.errors > 0 ? ` [HATA:${stats.errors}]` : ""
-
-    console.log(
-      `  ${model.substring(0, 33).padEnd(35)}` +
-      `${avgTokens}`.padStart(8) +
-      `${avgDuration}ms`.padStart(10) +
-      `${avgTps}`.padStart(8) +
-      `${avgLength}`.padStart(10) +
-      errStr
-    )
+  const allModels: ModelRef[] = []
+  for (const [pid, provider] of Object.entries(providers)) {
+    const providerID = ProviderID.make(pid)
+    for (const [modelID, model] of Object.entries(provider.models ?? {})) {
+      allModels.push({ providerID, modelID, model: model as LanguageModel })
+    }
   }
 
-  if (sorted.length > 0) {
-    const fastest = sorted[0]
-    console.log(`\n  En Hizli: ${fastest[0]} (${Math.round(fastest[1].tps / fastest[1].count)} tok/s)`)
+  const selected: ModelRef[] = []
+  const seen = new Set<string>()
+  const preferred = ["claude-sonnet", "gpt-4o", "gemini", "deepseek", "mistral-large", "llama", "command", "mixtral"]
+
+  for (const pref of preferred) {
+    for (const m of allModels) {
+      const key = `${m.providerID}/${m.modelID}`.toLowerCase()
+      if (!seen.has(key) && key.includes(pref)) {
+        seen.add(key)
+        selected.push(m)
+        if (selected.length >= maxModels) return selected
+      }
+    }
   }
 
-  console.log("\n" + "═".repeat(70))
+  for (const m of allModels) {
+    const key = `${m.providerID}/${m.modelID}`.toLowerCase()
+    if (!seen.has(key)) {
+      seen.add(key)
+      selected.push(m)
+      if (selected.length >= maxModels) break
+    }
+  }
+
+  return selected
 }
 
-function printMarkdown(results: BenchResult[], prompt: string, rounds: number) {
-  console.log(`# Glitch Bench Raporu\n`)
-  console.log(`**Prompt:** ${prompt}\n`)
-  console.log(`**Tur:** ${rounds}\n`)
+function evaluateBenchResult(response: string, prompt: string): number {
+  let score = 50
+  if (response.length > 50) score += 5
+  if (response.length > 200) score += 5
+  if (response.includes("```")) score += 10
+  if (response.includes("function") || response.includes("class") || response.includes("const")) score += 5
+  if (response.includes("import") || response.includes("require")) score += 5
+  if (response.includes("error") || response.includes("catch") || response.includes("try")) score += 5
+  if (response.includes("test") || response.includes("example")) score += 5
+  if (response.includes("explain") || response.includes("aciklama") || response.includes("örnek")) score += 5
+  const codeBlocks = (response.match(/```/g) || []).length
+  if (codeBlocks >= 2) score += 5
+  if (response.includes(prompt.substring(0, 20))) score += 5
+  return Math.min(100, Math.max(0, score))
+}
 
-  const modelStats: Record<string, { tokens: number; duration: number; tps: number; count: number }> = {}
+function showLeaderboard() {
+  const entries = loadLeaderboard()
+  if (entries.length === 0) {
+    console.log("\n  Leaderboard bos. Once 'glitch bench --prompt ...' calistirin.\n")
+    return
+  }
+
+  console.log("\n" + "=".repeat(80))
+  console.log("  PROVIDER BENCHMARK LEADERBOARD")
+  console.log("=".repeat(80))
+  console.log(`  ${"SIRALAMA".padEnd(4)} ${"PROVIDER/MODEL".padEnd(30)} ${"SKOR".padEnd(6)} ${"TOK/S".padEnd(8)} ${"LATENCY".padEnd(9)} ${"COST".padEnd(10)} ${"TEST".padEnd(5)}`)
+  console.log("-".repeat(80))
+
+  const sorted = [...entries].sort((a, b) => b.avgScore - a.avgScore || b.avgTokensPerSecond - a.avgTokensPerSecond)
+  sorted.forEach((e, i) => {
+    const rank = (i + 1).toString()
+    const name = `${e.provider}/${e.model}`
+    const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : rank.padStart(2)
+    console.log(`  ${medal} ${name.padEnd(30)} ${e.avgScore.toFixed(1).padStart(5)} ${e.avgTokensPerSecond.toFixed(1).padStart(7)} ${e.avgLatency.toFixed(0).padStart(7)}ms ${"$" + e.avgCost.toFixed(5).padStart(8)} ${e.totalTests.toString().padStart(4)}`)
+  })
+
+  console.log("=".repeat(80))
+  console.log(`  Toplam: ${entries.length} model, ${entries.reduce((a, e) => a + e.totalTests, 0)} test\n`)
+}
+
+function printBenchTable(results: BenchResult[], prompt: string, rounds: number) {
+  console.log("\n" + "=".repeat(80))
+  console.log("  BENCHMARK SONUCLARI")
+  console.log("=".repeat(80))
+  console.log(`  Prompt: ${prompt.substring(0, 60)}${prompt.length > 60 ? "..." : ""}`)
+  console.log(`  Rounds: ${rounds}`)
+  console.log("-".repeat(80))
+  console.log(`  ${"MODEL".padEnd(30)} ${"TOKENS".padEnd(8)} ${"SURESI".padEnd(8)} ${"TOK/S".padEnd(9)} ${"SKOR".padEnd(6)} ${"COST".padEnd(10)}`)
+  console.log("-".repeat(80))
+
+  const modelStats: Record<string, BenchResult[]> = {}
   for (const r of results) {
     const key = `${r.provider}/${r.model}`
-    if (!modelStats[key]) modelStats[key] = { tokens: 0, duration: 0, tps: 0, count: 0 }
-    modelStats[key].tokens += r.tokens
-    modelStats[key].duration += r.duration
-    modelStats[key].tps += r.tokensPerSecond
-    modelStats[key].count++
+    if (!modelStats[key]) modelStats[key] = []
+    modelStats[key].push(r)
   }
 
-  console.log(`## Sonuclar\n`)
-  console.log(`| Model | Ort. Token | Ort. Sure | Ort. Tok/s |`)
-  console.log(`|-------|-----------|----------|-----------|`)
+  const sorted = Object.entries(modelStats).sort((a, b) => {
+    const avgA = a[1].reduce((s, r) => s + r.tokensPerSecond, 0) / a[1].length
+    const avgB = b[1].reduce((s, r) => s + r.tokensPerSecond, 0) / b[1].length
+    return avgB - avgA
+  })
 
-  for (const [model, stats] of Object.entries(modelStats)) {
-    const avgTps = Math.round(stats.tps / stats.count)
-    console.log(`| ${model} | ${Math.round(stats.tokens / stats.count)} | ${Math.round(stats.duration / stats.count)}ms | ${avgTps} |`)
+  let fastest = ""
+  let fastestSpeed = 0
+
+  for (const [name, group] of sorted) {
+    const avgTokens = Math.round(group.reduce((s, r) => s + r.tokens, 0) / group.length)
+    const avgDuration = Math.round(group.reduce((s, r) => s + r.duration, 0) / group.length)
+    const avgTps = group.reduce((s, r) => s + r.tokensPerSecond, 0) / group.length
+    const avgScore = Math.round(group.reduce((s, r) => s + r.score, 0) / group.length)
+    const avgCost = group.reduce((s, r) => s + r.cost, 0) / group.length
+
+    if (avgTps > fastestSpeed) {
+      fastestSpeed = avgTps
+      fastest = name
+    }
+
+    const tpsStr = `${avgTps.toFixed(1)} tok/s`
+    const costStr = `$${avgCost.toFixed(5)}`
+    console.log(`  ${name.padEnd(30)} ${avgTokens.toString().padEnd(8)} ${(avgDuration + "ms").padEnd(8)} ${tpsStr.padEnd(9)} ${avgScore.toString().padEnd(6)} ${costStr.padEnd(10)}`)
   }
+
+  console.log("-".repeat(80))
+  console.log(`  En hizli: ${fastest} (${fastestSpeed.toFixed(1)} tok/s)`)
+  console.log("=".repeat(80) + "\n")
+}
+
+function printBenchJSON(results: BenchResult[], prompt: string, rounds: number) {
+  console.log(JSON.stringify({ prompt, rounds, results, timestamp: new Date().toISOString() }, null, 2))
+}
+
+function printBenchMarkdown(results: BenchResult[], prompt: string, rounds: number) {
+  console.log(`# Benchmark Raporu\n`)
+  console.log(`**Prompt:** ${prompt}\n`)
+  console.log(`**Rounds:** ${rounds}\n`)
+  console.log(`| Model | Tokens | Sure | Tok/s | Skor | Cost |`)
+  console.log(`|-------|--------|------|-------|------|------|`)
+
+  const modelStats: Record<string, BenchResult[]> = {}
+  for (const r of results) {
+    const key = `${r.provider}/${r.model}`
+    if (!modelStats[key]) modelStats[key] = []
+    modelStats[key].push(r)
+  }
+
+  for (const [name, group] of Object.entries(modelStats)) {
+    const avgTokens = Math.round(group.reduce((s, r) => s + r.tokens, 0) / group.length)
+    const avgDuration = Math.round(group.reduce((s, r) => s + r.duration, 0) / group.length)
+    const avgTps = (group.reduce((s, r) => s + r.tokensPerSecond, 0) / group.length).toFixed(1)
+    const avgScore = Math.round(group.reduce((s, r) => s + r.score, 0) / group.length)
+    const avgCost = group.reduce((s, r) => s + r.cost, 0) / group.length
+    console.log(`| ${name} | ${avgTokens} | ${avgDuration}ms | ${avgTps} | ${avgScore} | $${avgCost.toFixed(5)} |`)
+  }
+}
+
+function printBenchHTML(results: BenchResult[], prompt: string, rounds: number) {
+  const modelStats: Record<string, BenchResult[]> = {}
+  for (const r of results) {
+    const key = `${r.provider}/${r.model}`
+    if (!modelStats[key]) modelStats[key] = []
+    modelStats[key].push(r)
+  }
+
+  const rows = Object.entries(modelStats)
+    .sort((a, b) => {
+      const avgB = b[1].reduce((s, r) => s + r.tokensPerSecond, 0) / b[1].length
+      const avgA = a[1].reduce((s, r) => s + r.tokensPerSecond, 0) / a[1].length
+      return avgB - avgA
+    })
+    .map(([name, group], i) => {
+      const avgTokens = Math.round(group.reduce((s, r) => s + r.tokens, 0) / group.length)
+      const avgDuration = Math.round(group.reduce((s, r) => s + r.duration, 0) / group.length)
+      const avgTps = (group.reduce((s, r) => s + r.tokensPerSecond, 0) / group.length).toFixed(1)
+      const avgScore = Math.round(group.reduce((s, r) => s + r.score, 0) / group.length)
+      const avgCost = group.reduce((s, r) => s + r.cost, 0) / group.length
+      const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : ""
+      return `<tr>
+        <td>${medal} ${escapeHtml(name)}</td>
+        <td>${avgTokens}</td>
+        <td>${avgDuration}ms</td>
+        <td>${avgTps}</td>
+        <td><div class="bar"><div class="fill" style="width:${avgScore}%"></div></div></td>
+        <td>$${avgCost.toFixed(5)}</td>
+      </tr>`
+    }).join("\n")
+
+  console.log(`<!DOCTYPE html>
+<html lang="tr">
+<head><meta charset="UTF-8"><title>Benchmark - Glitch Code</title>
+<style>
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#121218; color:#e0e0e0; padding:2rem; }
+h1 { color:#FF6B00; }
+table { width:100%; border-collapse:collapse; margin-top:1rem; }
+th { background:#1a1a24; color:#FF6B00; padding:0.8rem; text-align:left; border-bottom:2px solid #FF6B00; }
+td { padding:0.6rem 0.8rem; border-bottom:1px solid #2a2a3a; }
+tr:hover { background:#1e1e2a; }
+.bar { background:#333; border-radius:4px; height:6px; width:80px; }
+.fill { background:#FF6B00; height:100%; border-radius:4px; }
+.meta { color:#666; font-size:0.85rem; }
+</style>
+</head>
+<body>
+<h1>⚡ Benchmark Sonuclari</h1>
+<p class="meta">Prompt: ${escapeHtml(prompt)} | Rounds: ${rounds}</p>
+<table>
+<tr><th>Model</th><th>Token</th><th>Süre</th><th>Tok/s</th><th>Skor</th><th>Cost</th></tr>
+${rows}
+</table>
+</body>
+</html>`)
+}
+
+function escapeHtml(text: string): string {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
 }

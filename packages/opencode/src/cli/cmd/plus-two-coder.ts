@@ -8,6 +8,9 @@ import { ProviderID } from "../../provider/schema"
 import { Effect } from "effect"
 import { generateText } from "ai"
 import type { LanguageModel } from "ai"
+import fs from "fs"
+import path from "path"
+import { homedir } from "os"
 
 export interface CoderOpinion {
   model: string
@@ -21,6 +24,14 @@ export interface DebateRound {
   round: number
   opinions: CoderOpinion[]
   consensus?: string
+  voteResults?: VoteResult[]
+}
+
+export interface VoteResult {
+  model: string
+  provider: string
+  votedFor: string
+  reason: string
 }
 
 interface ModelRef {
@@ -29,10 +40,21 @@ interface ModelRef {
   model: LanguageModel
 }
 
+const DEBATE_HISTORY_DIR = path.join(homedir(), ".glitchcode", "debate-history")
+
+function saveDebateResult(task: string, rounds: DebateRound[], models: string[]) {
+  try {
+    fs.mkdirSync(DEBATE_HISTORY_DIR, { recursive: true })
+    const filename = `debate-${Date.now()}.json`
+    const data = JSON.stringify({ task, models, rounds, timestamp: new Date().toISOString() }, null, 2)
+    fs.writeFileSync(path.join(DEBATE_HISTORY_DIR, filename), data, "utf8")
+  } catch {}
+}
+
 export const PlusTwoCoderCommand = cmd({
   command: "plus-two-coder",
   aliases: ["ptc", "debate"],
-  describe: "2-3 model birbiriyle tartisarak kod cozumu uretsin",
+  describe: "N-Way AI Debate: 2-5 model tartisarak en iyi cozumu uretir",
   builder: (yargs: Argv) => {
     return yargs
       .option("task", {
@@ -43,7 +65,7 @@ export const PlusTwoCoderCommand = cmd({
       })
       .option("models", {
         alias: "m",
-        describe: "Kullanilacak modeller (virgullu, max 3, orn: anthropic/claude-sonnet-4-20250514,openai/gpt-4o)",
+        describe: "Kullanilacak modeller (virgullu, max 5, orn: anthropic/claude-sonnet-4-20250514,openai/gpt-4o)",
         type: "array",
       })
       .option("rounds", {
@@ -55,14 +77,30 @@ export const PlusTwoCoderCommand = cmd({
       .option("format", {
         describe: "Cikis formati",
         type: "string",
-        choices: ["terminal", "json", "markdown"],
+        choices: ["terminal", "json", "markdown", "html"],
         default: "terminal",
+      })
+      .option("vote", {
+        describe: "Oy verme mekanizmasi (consensus, majority, weighted)",
+        type: "string",
+        choices: ["consensus", "majority", "weighted", "none"],
+        default: "weighted",
+      })
+      .option("max-models", {
+        describe: "Maksimum model sayisi (2-5)",
+        type: "number",
+        default: 5,
+      })
+      .option("save", {
+        describe: "Sonucu debate-history klasorune kaydet",
+        type: "boolean",
+        default: true,
       })
   },
   handler: async (args) => {
     await bootstrap(process.cwd(), async () => {
       const s = require("@clack/prompts").spinner()
-      s.start("PlusTwoCoder baslatiliyor...")
+      s.start("N-Way Debate baslatiliyor...")
 
       await Instance.provide({
         directory: process.cwd(),
@@ -72,19 +110,20 @@ export const PlusTwoCoderCommand = cmd({
               const svc = yield* Provider.Service
               const providers = yield* svc.list()
 
-              const selectedModels = selectModels(args.models as string[] | undefined, providers)
+              const maxModels = Math.min(Math.max(args.maxModels as number, 2), 5)
+              const selectedModels = selectModels(args.models as string[] | undefined, providers, maxModels)
               if (selectedModels.length < 2) {
                 s.stop("En az 2 model secilmeli.")
                 return
               }
 
-              s.message(`Modeller: ${selectedModels.map((m) => `${m.providerID}/${m.modelID}`).join(", ")}`)
+              s.message(`Modeller (${selectedModels.length}): ${selectedModels.map((m) => `${m.providerID}/${m.modelID}`).join(", ")}`)
               s.message(`Gorev: ${args.task}`)
-              s.message(`Tartisma turlari: ${args.rounds}`)
+              s.message(`Turlar: ${args.rounds} | Oy: ${args.vote}`)
 
               const rounds: DebateRound[] = []
               let currentContext = args.task as string
-              let previousScores: number[] = []
+              let previousAvgScore = 0
 
               for (let round = 0; round < (args.rounds as number); round++) {
                 s.message(`\n--- TUR ${round + 1} ---`)
@@ -93,7 +132,7 @@ export const PlusTwoCoderCommand = cmd({
 
                 for (let i = 0; i < selectedModels.length; i++) {
                   const m = selectedModels[i]
-                  s.message(`${m.providerID}/${m.modelID} dusuncesini paylasiyor...`)
+                  s.message(`${m.providerID}/${m.modelID} cozum uretiyor...`)
 
                   const prompt = round === 0
                     ? buildInitialPrompt(args.task as string)
@@ -106,7 +145,6 @@ export const PlusTwoCoderCommand = cmd({
                     }),
                   )
 
-                  // Cross-critique: bir sonraki model eleştirsin
                   const nextModel = selectedModels[(i + 1) % selectedModels.length]
                   const critiqueResult = yield* Effect.promise(() =>
                     generateText({
@@ -115,7 +153,6 @@ export const PlusTwoCoderCommand = cmd({
                     }),
                   )
 
-                  // Cross-scoring: 3. model puanlasın (self-scoring yerine)
                   const scorerModel = selectedModels[(i + 2) % selectedModels.length]
                   const score = yield* Effect.promise(() =>
                     scoreWithLLM({
@@ -135,24 +172,31 @@ export const PlusTwoCoderCommand = cmd({
                     score,
                   })
 
-                  s.message(`${m.modelID} skoru: ${score}/100`)
+                  s.message(`  ${m.modelID}: ${score}/100`)
                 }
 
                 opinions.sort((a, b) => b.score - a.score)
-                rounds.push({ round: round + 1, opinions })
 
-                // Convergence check: skorlar yakin ise erken dur
-                const currentScores = opinions.map((o) => o.score)
-                if (round > 0 && previousScores.length > 0) {
-                  const avgPrev = previousScores.reduce((a, b) => a + b, 0) / previousScores.length
-                  const avgCurr = currentScores.reduce((a, b) => a + b, 0) / currentScores.length
-                  const diff = Math.abs(avgPrev - avgCurr)
-                  if (diff < 5) {
-                    s.message(`\nSkorlar yaklasti (fark: ${diff.toFixed(1)}), tartisma erken sonlandirildi.`)
-                    break
+                let voteResults: VoteResult[] | undefined
+                const voteMode = args.vote as string
+                if (voteMode !== "none") {
+                  voteResults = yield* Effect.promise(() => runVote(args.task as string, opinions, selectedModels, voteMode))
+                  if (voteResults) {
+                    const sorted = [...voteResults].sort((a,b) => b.votedFor.localeCompare(a.votedFor))
+                    const winner = sorted[0]?.votedFor
+                    s.message(`  Kazanan: ${winner || "belirlenemedi"}`)
                   }
                 }
-                previousScores = currentScores
+
+                rounds.push({ round: round + 1, opinions, voteResults })
+
+                const currentAvgScore = opinions.reduce((a, b) => a + b.score, 0) / opinions.length
+                const diff = Math.abs(currentAvgScore - previousAvgScore)
+                if (round > 0 && diff < 3) {
+                  s.message(`Skorlar yaklasti (fark: ${diff.toFixed(1)}), erken sonlandirildi.`)
+                  break
+                }
+                previousAvgScore = currentAvgScore
 
                 currentContext = buildConsensusContext(opinions)
               }
@@ -162,7 +206,7 @@ export const PlusTwoCoderCommand = cmd({
                 .map((o) => `${o.provider}/${o.model} (Skor: ${o.score}):\n${o.solution.substring(0, 300)}`)
                 .join("\n\n")
 
-              const consensusPrompt = `Sen bir kod uzmani moderatörüsün. Tum modellerin goruslerini inceledin.
+              const consensusPrompt = `Sen bir AI moderatörüsün. ${selectedModels.length} modelin goruslerini inceledin.
 
 GOREV: ${args.task}
 
@@ -194,7 +238,11 @@ Cevabini su formatta ver:
 
               lastRound.consensus = consensusResult.text
 
-              s.stop("Tartisma tamamlandi!")
+              s.stop(`Tartisma tamamlandi! ${selectedModels.length} model, ${rounds.length} tur`)
+
+              if (args.save) {
+                saveDebateResult(args.task as string, rounds, selectedModels.map(m => `${m.providerID}/${m.modelID}`))
+              }
 
               switch (args.format) {
                 case "json":
@@ -202,6 +250,9 @@ Cevabini su formatta ver:
                   break
                 case "markdown":
                   printMarkdown(rounds, args.task as string)
+                  break
+                case "html":
+                  printHTML(rounds, args.task as string, selectedModels.map(m => `${m.providerID}/${m.modelID}`))
                   break
                 default:
                   printTerminal(rounds, args.task as string)
@@ -214,9 +265,9 @@ Cevabini su formatta ver:
   },
 })
 
-export function selectModels(inputModels: string[] | undefined, providers: Record<string, any>): ModelRef[] {
+export function selectModels(inputModels: string[] | undefined, providers: Record<string, any>, maxModels = 5): ModelRef[] {
   if (inputModels && inputModels.length >= 2) {
-    return inputModels.slice(0, 3).map((m) => {
+    return inputModels.slice(0, maxModels).map((m) => {
       const [provider, model] = m.includes("/") ? m.split("/", 2) : ["auto", m]
       const pid = ProviderID.make(provider)
       const providerData = providers[pid]
@@ -245,22 +296,25 @@ export function selectModels(inputModels: string[] | undefined, providers: Recor
 
   const selected: ModelRef[] = []
   const seen = new Set<string>()
+  const preferred = ["claude", "gpt", "gemini", "deepseek", "mistral"]
+
+  for (const pref of preferred) {
+    for (const m of allModels) {
+      const key = `${m.providerID}/${m.modelID}`.toLowerCase()
+      if (!seen.has(key) && key.includes(pref)) {
+        seen.add(key)
+        selected.push(m)
+        if (selected.length >= maxModels) return selected
+      }
+    }
+  }
 
   for (const m of allModels) {
     const key = `${m.providerID}/${m.modelID}`.toLowerCase()
     if (!seen.has(key)) {
       seen.add(key)
       selected.push(m)
-      if (selected.length >= 3) break
-    }
-  }
-
-  if (selected.length < 2) {
-    for (const m of allModels) {
-      if (!selected.some((s) => s.providerID === m.providerID && s.modelID === m.modelID)) {
-        selected.push(m)
-        if (selected.length >= 2) break
-      }
+      if (selected.length >= maxModels) break
     }
   }
 
@@ -346,7 +400,6 @@ SKOR: Bu cozumu 0-100 arasi degerlendir. Asagidaki JSON formatinda cevap ver:
 }
 
 export function parseLLMScore(text: string): number | null {
-  // JSON format: {"score": N} or {score: N}
   const jsonPatterns = [
     /\{\s*"score"\s*:\s*(\d{1,3})\s*\}/i,
     /\{\s*[^}]*"score"\s*:\s*(\d{1,3})[^}]*\}/i,
@@ -358,8 +411,6 @@ export function parseLLMScore(text: string): number | null {
       if (score >= 0 && score <= 100) return score
     }
   }
-
-  // Markdown/text patterns
   const patterns = [
     /##?\s*Skor:\s*(\d{1,3})/i,
     /##?\s*Score:\s*(\d{1,3})/i,
@@ -424,21 +475,14 @@ ELESTIRI:
 ${params.critique.substring(0, 1000)}
 
 Bu cozumu degerlendir. Su kriterlere gore 0-100 arasi skor ver:
-- Kod dogrulugu ve calisirligi (30 puan) — kod calisir mi? Mantiksal hata var mi?
-- Performans ve verimlilik (20 puan) — gereksiz dongu, bellek sizi var mi?
-- Guvenlik ve dayaniklilik (20 puan) — SQL injection, XSS, hata yonetimi var mi?
-- Kod kalitesi ve okunabilirlik (15 puan) — isimlendirme, yapi, yorumlar
-- Tamlik ve kapsam (15 puan) — gorevin tum gereksinimlerini karsiliyor mu?
-
-Dikkat:
-- Sadece JSON formatinda cevap ver
-- Extra metin yazma
-- Skoru adil ve katı degerlendir
+- Kod dogrulugu ve calisirligi (30 puan)
+- Performans ve verimlilik (20 puan)
+- Guvenlik ve dayaniklilik (20 puan)
+- Kod kalitesi ve okunabilirlik (15 puan)
+- Tamlik ve kapsam (15 puan)
 
 SADECE su JSON formatinda cevap ver:
-{"score": N}
-
-N = 0-100 arasi tam sayi`
+{"score": N}`
 
   try {
     const result = await generateText({
@@ -447,8 +491,8 @@ N = 0-100 arasi tam sayi`
     })
     const parsed = parseLLMScore(result.text)
     if (parsed !== null) return parsed
-  } catch (err) {
-    console.warn(`LLM skorlama basarisiz, keyword fallback kullaniliyor: ${err instanceof Error ? err.message : String(err)}`)
+  } catch {
+    return keywordFallback(params.solution)
   }
   return keywordFallback(params.solution)
 }
@@ -456,7 +500,6 @@ N = 0-100 arasi tam sayi`
 export function buildConsensusContext(opinions: CoderOpinion[]): string {
   const best = opinions[0]
   const worst = opinions[opinions.length - 1]
-
   return `En iyi cozum: ${best.provider}/${best.model} (Skor: ${best.score})
 En zayif cozum: ${worst.provider}/${worst.model} (Skor: ${worst.score})
 
@@ -467,9 +510,67 @@ En iyi elestiri:
 ${best.critique.substring(0, 300)}`
 }
 
+async function runVote(task: string, opinions: CoderOpinion[], models: ModelRef[], mode: string): Promise<VoteResult[]> {
+  const results: VoteResult[] = []
+
+  for (const opinion of opinions) {
+    const model = models.find(m => m.modelID === opinion.model)
+    if (!model) continue
+
+    if (mode === "weighted") {
+      results.push({
+        model: opinion.model,
+        provider: opinion.provider,
+        votedFor: opinions[0].model,
+        reason: `Weighted score: ${opinion.score} (highest: ${opinions[0].score} by ${opinions[0].model})`
+      })
+      continue
+    }
+
+    try {
+      const votePrompt = `Bir AI modeli olarak diger cozumleri degerlendiriyorsun.
+
+GOREV: ${task}
+
+COZUMLER:
+${opinions.map((o, i) => `[${i}] ${o.provider}/${o.model} (Skor: ${o.score}):
+${o.solution.substring(0, 500)}`).join("\n\n")}
+
+En iyi cozumu sec. SADECE JSON formatinda cevap ver:
+{"vote": N, "reason": "short reason"}
+N = 0-${opinions.length - 1} arasi index`
+      const result = await generateText({
+        model: model.model,
+        messages: [{ role: "user", content: votePrompt }],
+      })
+
+      const voteMatch = result.text.match(/\{\s*"vote"\s*:\s*(\d+)\s*/i)
+      const reasonMatch = result.text.match(/"reason"\s*:\s*"([^"]+)"/i)
+      const voteIndex = voteMatch ? parseInt(voteMatch[1]) : 0
+      const votedFor = opinions[Math.min(voteIndex, opinions.length - 1)]?.model || opinions[0].model
+
+      results.push({
+        model: opinion.model,
+        provider: opinion.provider,
+        votedFor,
+        reason: reasonMatch?.[1] || "best solution",
+      })
+    } catch {
+      results.push({
+        model: opinion.model,
+        provider: opinion.provider,
+        votedFor: opinions[0].model,
+        reason: "fallback to highest score",
+      })
+    }
+  }
+
+  return results
+}
+
 function printTerminal(rounds: DebateRound[], task: string) {
   console.log("\n" + "=".repeat(60))
-  console.log("  PLUS TWOCODER - MODEL TARTISMA OTURUMU")
+  console.log("  N-WAY DEBATE - MODEL TARTISMA OTURUMU")
   console.log("=".repeat(60))
   console.log(`\nGOREV: ${task}\n`)
 
@@ -478,16 +579,23 @@ function printTerminal(rounds: DebateRound[], task: string) {
     console.log(`  TUR ${round.round}`)
     console.log("-".repeat(60))
 
+    if (round.voteResults) {
+      const voteCounts: Record<string, number> = {}
+      for (const v of round.voteResults) {
+        voteCounts[v.votedFor] = (voteCounts[v.votedFor] || 0) + 1
+      }
+      const winner = Object.entries(voteCounts).sort((a, b) => b[1] - a[1])[0]
+      if (winner) {
+        console.log(`  Oylama: Kazanan ${winner[0]} (${winner[1]} oy)\n`)
+      }
+    }
+
     for (const opinion of round.opinions) {
       const bar = "#".repeat(Math.floor(opinion.score / 5)) + ".".repeat(20 - Math.floor(opinion.score / 5))
-      console.log(`\n  [AI] ${opinion.provider}/${opinion.model}`)
+      console.log(`  [AI] ${opinion.provider}/${opinion.model}`)
       console.log(`  Skor: [${bar}] ${opinion.score}/100`)
-      console.log(`\n  Cozum:`)
       const solutionLines = opinion.solution.split("\n")
-      console.log(`  ${solutionLines.slice(0, 15).join("\n  ")}${solutionLines.length > 15 ? "\n  ... (devami var)" : ""}`)
-      console.log(`\n  Elestiri (ozet):`)
-      const critiqueLines = opinion.critique.split("\n").filter(l => l.trim())
-      console.log(`  ${critiqueLines.slice(0, 8).join("\n  ")}`)
+      console.log(`  Cozum: ${solutionLines.slice(0, 10).join("\n  ")}${solutionLines.length > 10 ? "\n  ..." : ""}`)
     }
   }
 
@@ -517,6 +625,7 @@ function printJSON(rounds: DebateRound[], task: string) {
             solution: o.solution,
             critique: o.critique,
           })),
+          voteResults: r.voteResults,
         })),
         consensus: rounds[rounds.length - 1]?.consensus,
       },
@@ -527,11 +636,24 @@ function printJSON(rounds: DebateRound[], task: string) {
 }
 
 function printMarkdown(rounds: DebateRound[], task: string) {
-  console.log(`# PlusTwoCoder Tartisma Raporu\n`)
+  console.log(`# N-Way Debate Raporu\n`)
   console.log(`**Gorev:** ${task}\n`)
+  console.log(`**Turlar:** ${rounds.length}\n`)
 
   for (const round of rounds) {
     console.log(`## Tur ${round.round}\n`)
+
+    if (round.voteResults) {
+      console.log(`### Oylama Sonuclari\n`)
+      const voteCounts: Record<string, number> = {}
+      for (const v of round.voteResults) {
+        voteCounts[v.votedFor] = (voteCounts[v.votedFor] || 0) + 1
+      }
+      for (const [model, count] of Object.entries(voteCounts).sort((a, b) => b[1] - a[1])) {
+        console.log(`- **${model}**: ${count} oy`)
+      }
+      console.log()
+    }
 
     for (const opinion of round.opinions) {
       console.log(`### ${opinion.provider}/${opinion.model} (Skor: ${opinion.score}/100)\n`)
@@ -544,4 +666,86 @@ function printMarkdown(rounds: DebateRound[], task: string) {
     console.log(`## Nihai Konsensus\n`)
     console.log(rounds[rounds.length - 1].consensus)
   }
+}
+
+function printHTML(rounds: DebateRound[], task: string, models: string[]) {
+  const consensus = rounds[rounds.length - 1]?.consensus || ""
+  const roundsHtml = rounds.map((r, ri) => `
+    <div class="round">
+      <h2>Tur ${r.round}</h2>
+      ${r.voteResults ? `
+      <div class="vote-results">
+        <h3>Oylama</h3>
+        <ul>
+          ${Object.entries(
+            r.voteResults.reduce((acc, v) => {
+              acc[v.votedFor] = (acc[v.votedFor] || 0) + 1
+              return acc
+            }, {} as Record<string, number>)
+          ).sort((a, b) => b[1] - a[1]).map(([model, count]) => `<li><strong>${model}</strong>: ${count} oy</li>`).join("")}
+        </ul>
+      </div>` : ""}
+      ${r.opinions.map(o => `
+      <div class="opinion">
+        <div class="opinion-header">
+          <span class="model">${o.provider}/${o.model}</span>
+          <span class="score">${o.score}/100</span>
+        </div>
+        <div class="bar"><div class="bar-fill" style="width:${o.score}%"></div></div>
+        <details>
+          <summary>Cozum</summary>
+          <pre>${escapeHtml(o.solution)}</pre>
+        </details>
+        <details>
+          <summary>Elestiri</summary>
+          <pre>${escapeHtml(o.critique)}</pre>
+        </details>
+      </div>`).join("")}
+    </div>`).join("")
+
+  console.log(`<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>N-Way Debate - Glitch Code</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#121218; color:#e0e0e0; padding:2rem; }
+h1 { color:#FF6B00; font-size:1.8rem; margin-bottom:0.5rem; }
+h2 { color:#FF8C40; margin:1.5rem 0 0.5rem; }
+h3 { color:#aaa; margin:0.5rem 0; font-size:0.9rem; text-transform:uppercase; }
+.round { background:#1a1a24; border:1px solid #FF6B0033; border-radius:12px; padding:1.5rem; margin:1rem 0; }
+.opinion { background:#22222e; border-radius:8px; padding:1rem; margin:0.5rem 0; }
+.opinion-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; }
+.model { color:#FF6B00; font-weight:bold; }
+.score { color:#4caf50; font-size:1.2rem; font-weight:bold; }
+.bar { background:#333; border-radius:4px; height:8px; margin-bottom:0.5rem; overflow:hidden; }
+.bar-fill { background:#FF6B00; height:100%; border-radius:4px; transition:width 0.5s; }
+details { margin-top:0.5rem; }
+summary { cursor:pointer; color:#888; font-weight:bold; }
+pre { background:#0d0d14; border-radius:6px; padding:0.8rem; overflow-x:auto; margin-top:0.3rem; font-size:0.85rem; }
+.vote-results { background:#1e1e2a; border-radius:8px; padding:0.8rem; margin-bottom:0.5rem; }
+.vote-results ul { list-style:none; display:flex; gap:1rem; }
+.vote-results li { background:#2a2a3a; padding:0.3rem 0.8rem; border-radius:6px; }
+.consensus { background:#1a1a24; border:1px solid #4caf50; border-radius:12px; padding:1.5rem; margin:1rem 0; }
+.consensus h2 { color:#4caf50; }
+.meta { color:#666; font-size:0.85rem; margin-bottom:1rem; }
+footer { text-align:center; color:#444; margin-top:2rem; font-size:0.8rem; }
+</style>
+</head>
+<body>
+<h1>🔮 N-Way Debate</h1>
+<p class="meta">Gorev: ${escapeHtml(task)} | Modeller: ${models.join(", ")} | ${rounds.length} tur</p>
+${roundsHtml}
+<div class="consensus">
+<h2>Nihai Konsensus</h2>
+<pre>${escapeHtml(consensus)}</pre>
+</div>
+<footer>Generated by Glitch Code N-Way Debate</footer>
+</body>
+</html>`)
+}
+
+function escapeHtml(text: string): string {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
 }

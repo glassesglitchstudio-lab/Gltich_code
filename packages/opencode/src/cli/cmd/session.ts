@@ -11,6 +11,7 @@ import { Filesystem } from "../../util"
 import { Process } from "../../util"
 import { EOL } from "os"
 import path from "path"
+import fs from "fs"
 import { which } from "../../util/which"
 import { AppRuntime } from "@/effect/app-runtime"
 
@@ -45,8 +46,59 @@ export const SessionCommand = cmd({
   command: "session",
   describe: "manage sessions",
   builder: (yargs: Argv) =>
-    yargs.command(SessionListCommand).command(SessionDeleteCommand).command(SessionImportClaudeCommand).demandCommand(),
+    yargs
+      .command(SessionListCommand)
+      .command(SessionDeleteCommand)
+      .command(SessionImportClaudeCommand)
+      .command(SessionJSONLCommand)
+      .demandCommand(),
   async handler() {},
+})
+
+export const SessionJSONLCommand = cmd({
+  command: "jsonl <sessionID>",
+  describe: "export session to JSONL audit trail format",
+  builder: (yargs: Argv) => {
+    return yargs
+      .positional("sessionID", {
+        describe: "session ID to export",
+        type: "string",
+        demandOption: true,
+      })
+      .option("format", {
+        describe: "output format",
+        type: "string",
+        choices: ["jsonl", "json", "markdown"],
+        default: "jsonl",
+      })
+      .option("output", {
+        alias: "o",
+        describe: "output file (default: stdout)",
+        type: "string",
+      })
+  },
+  handler: async (args) => {
+    const { SessionJSONL } = await import("../../session/jsonl")
+    const sessionId = args.sessionID as string
+    let output: string
+    const fmt = args.format as string
+
+    if (fmt === "markdown") {
+      output = SessionJSONL.exportToMarkdown(sessionId)
+    } else if (fmt === "json") {
+      output = SessionJSONL.exportToJSON(sessionId, true)
+    } else {
+      const entries = SessionJSONL.replaySession(sessionId)
+      output = entries.map(e => JSON.stringify(e)).join("\n")
+    }
+
+    if (args.output) {
+      fs.writeFileSync(args.output as string, output, "utf8")
+      UI.println(`Session ${sessionId} exported to ${args.output}`)
+    } else {
+      console.log(output)
+    }
+  },
 })
 
 export const SessionImportClaudeCommand = cmd({

@@ -58,6 +58,7 @@ import { ChangelogCommand } from "./cli/cmd/changelog"
 import { ReplayCommand } from "./cli/cmd/replay"
 import { AuditCommand } from "./cli/cmd/audit"
 import { BenchCommand } from "./cli/cmd/bench"
+import { CostRouterCommand } from "./cli/cmd/cost-router"
 import { ProviderTestCommand } from "./cli/cmd/provider-test"
 import { DoctorCommand } from "./cli/cmd/doctor"
 import { AuthCommand } from "./cli/cmd/auth"
@@ -234,7 +235,8 @@ const cli = yargs(args)
   .command(ChangelogCommand)
   .command(ReplayCommand)
   .command(AuditCommand)
-  .command(BenchCommand)
+   .command(BenchCommand)
+  .command(CostRouterCommand)
   .command(ProviderTestCommand)
   .command(DoctorCommand)
   .command(AuthCommand)
