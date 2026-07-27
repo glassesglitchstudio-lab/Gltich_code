@@ -48,8 +48,15 @@ export function Dialog(
       paddingTop={dimensions().height / 4}
       left={0}
       top={0}
-      backgroundColor={RGBA.fromInts(0, 0, 0, 150)}
+      backgroundColor={RGBA.fromInts(0, 0, 0, 160)}
     >
+      {/* Outer glow border */}
+      <box
+        backgroundColor={theme.primary}
+        padding={0}
+        width={width() + 2}
+        maxWidth={dimensions().width}
+      >
       <box
         onMouseUp={(e) => {
           dismiss = false
@@ -64,13 +71,14 @@ export function Dialog(
           e.stopPropagation()
         }}
         width={width()}
-        maxWidth={dimensions().width - 2}
+        maxWidth={dimensions().width - 4}
         backgroundColor={theme.backgroundPanel}
         border={["top", "bottom", "left", "right"]}
-        borderColor={theme.primary}
+        borderColor={theme.borderActive}
         paddingTop={1}
       >
         {props.children}
+      </box>
       </box>
     </box>
   )

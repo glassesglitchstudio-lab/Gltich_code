@@ -1,10 +1,12 @@
-import { createMemo, Show } from "solid-js"
+import { createMemo, createSignal, onCleanup, onMount, Show } from "solid-js"
 import { useTheme } from "../context/theme"
 import { useSync } from "@tui/context/sync"
 import { useLocal } from "@tui/context/local"
 import { NeonPulse } from "./neon-pulse"
 import * as Model from "../util/model"
 import { Global } from "@/global"
+
+const DIR_FRAMES = ["◧", "◨", "◧", "◨"]
 
 type SessionFooterProps = {
   sessionID: string
@@ -14,6 +16,12 @@ export function SessionFooter(props: SessionFooterProps) {
   const { theme } = useTheme()
   const sync = useSync()
   const local = useLocal()
+  const [dirAnim, setDirAnim] = createSignal(0)
+
+  onMount(() => {
+    const interval = setInterval(() => setDirAnim((f) => (f + 1) % DIR_FRAMES.length), 500)
+    onCleanup(() => clearInterval(interval))
+  })
 
   const session = createMemo(() => sync.session.get(props.sessionID))
   const providers = createMemo(() => Model.index(sync.data.provider))
@@ -79,12 +87,15 @@ export function SessionFooter(props: SessionFooterProps) {
       {/* Directory */}
       <box flexDirection="row" gap={1} alignItems="center">
         <text fg={theme.primary} selectable={false}>
-          ●
+          {DIR_FRAMES[dirAnim()]}
         </text>
         <text fg={theme.textMuted} selectable={false}>
           {directory()}
         </text>
       </box>
+
+      {/* Divider */}
+      <text fg={theme.borderSubtle} selectable={false}>│</text>
 
       {/* Status */}
       <box flexDirection="row" gap={1} alignItems="center">
@@ -93,6 +104,9 @@ export function SessionFooter(props: SessionFooterProps) {
           {statusLabel()}
         </text>
       </box>
+
+      {/* Divider */}
+      <text fg={theme.borderSubtle} selectable={false}>│</text>
 
       {/* Model */}
       <Show when={modelName()}>

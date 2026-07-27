@@ -1934,6 +1934,12 @@ function InlineTool(props: {
     return theme.text
   })
 
+  const statusIcon = createMemo(() => {
+    if (!props.complete) return undefined
+    if (props.part.state.status === "error") return "✗"
+    return "✓"
+  })
+
   const error = createMemo(() => (props.part.state.status === "error" ? props.part.state.error : undefined))
 
   const denied = createMemo(
@@ -1944,9 +1950,6 @@ function InlineTool(props: {
       error()?.includes("user dismissed"),
   )
 
-  // Agent-recoverable failures (bad args, malformed call, unknown task/actor id)
-  // are flagged on the error state. Render them muted (struck through, no red
-  // block) like denials — the agent self-corrects; the user needn't be alarmed.
   const recoverable = createMemo(() => {
     const state = props.part.state
     return state.status === "error" && state.metadata?.recoverable === true
@@ -1994,6 +1997,12 @@ function InlineTool(props: {
             <NeonPulse active={!props.complete} color={theme.primary} />
             <text fg={fg()} attributes={denied() || recoverable() || props.dismissed ? TextAttributes.STRIKETHROUGH : undefined}>
               <Show fallback={<>{props.pending}</>} when={props.complete}>
+                <Show when={statusIcon()}>
+                  <span style={{ fg: props.part.state.status === "error" ? theme.error : theme.textMuted }}>
+                    {statusIcon()}
+                  </span>
+                </Show>
+                <text> </text>
                 <span style={{ fg: props.iconColor }}>{props.icon}</span> {props.children}
               </Show>
             </text>

@@ -1,5 +1,5 @@
 import { Prompt, type PromptRef } from "@tui/component/prompt"
-import { createEffect, createMemo, createSignal, Show } from "solid-js"
+import { createEffect, createMemo, createSignal, onCleanup, onMount, Show } from "solid-js"
 import path from "path"
 import { Logo } from "../component/logo"
 import { logoThin, logos, type LogoKey } from "@/cli/logo"
@@ -18,6 +18,7 @@ import { useTheme } from "../context/theme"
 import { TuiPluginRuntime } from "../plugin"
 import { Global } from "@/global"
 import { isPlainTerminal } from "../util/terminal"
+import { RGBA } from "@opentui/core"
 
 const GLITCH_BANNER = [
   "   ██████╗ ██╗  ██╗ ██████╗ ███████╗",
@@ -28,8 +29,11 @@ const GLITCH_BANNER = [
   "   ╚═════╝ ╚═╝  ╚═╝ ╚═════╝  ╚══════╝",
 ]
 
-const GLITCH_TAGLINE = "  ─── AI-Powered Software Engineering ───"
-const GLITCH_SUBTITLE = "  Code. Debug. Refactor. Ship."
+const GLITCH_TAGLINE = "  AI-Powered Software Engineering"
+const GLITCH_SUBTITLE = "  Code · Debug · Refactor · Ship"
+
+const BANNER_WIDTH = GLITCH_BANNER[0].length + 4
+const ORBIT_FRAMES = ["◆", "◇", "◆", "◇"]
 
 let once = false
 
@@ -92,6 +96,32 @@ export function Home() {
     r.submit()
   })
 
+  const [orbitFrame, setOrbitFrame] = createSignal(0)
+  const [pulsePhase, setPulsePhase] = createSignal(0)
+  let orbitInterval: ReturnType<typeof setInterval> | undefined
+  let pulseInterval: ReturnType<typeof setInterval> | undefined
+
+  onMount(() => {
+    orbitInterval = setInterval(() => setOrbitFrame((f) => (f + 1) % ORBIT_FRAMES.length), 600)
+    pulseInterval = setInterval(() => setPulsePhase((f) => (f + 1) % 6), 800)
+  })
+  onCleanup(() => {
+    if (orbitInterval) clearInterval(orbitInterval)
+    if (pulseInterval) clearInterval(pulseInterval)
+  })
+
+  const pulseBrightness = () => {
+    const phases = [1.0, 0.6, 0.3, 0.6, 1.0, 0.8]
+    return phases[pulsePhase()]
+  }
+
+  const pulsePrimary = () => RGBA.fromValues(
+    Math.round(theme.primary.r * pulseBrightness()),
+    Math.round(theme.primary.g * pulseBrightness()),
+    Math.round(theme.primary.b * pulseBrightness()),
+    theme.primary.a,
+  )
+
   return (
     <>
       <Show when={!plainTerminal}>
@@ -101,7 +131,7 @@ export function Home() {
       </Show>
       <box flexGrow={1} alignItems="center" paddingLeft={8} paddingRight={8} zIndex={1}>
         <box flexGrow={1} minHeight={0} />
-        <box height={6} minHeight={0} flexShrink={1} />
+        <box height={4} minHeight={0} flexShrink={1} />
 
         {/* Main content area */}
         <box flexShrink={0} flexDirection="column" alignItems="center" gap={0}>
@@ -111,18 +141,33 @@ export function Home() {
             fallback={
               <TuiPluginRuntime.Slot name="home_logo" mode="replace">
                 <box flexDirection="column" alignItems="center" gap={1}>
-                  {/* Top accent line */}
-                  <box width={GLITCH_BANNER[0].length + 4} height={1} backgroundColor={theme.primary} />
+                  {/* Top accent line with orbit ornaments */}
+                  <box flexDirection="row" gap={1} alignItems="center">
+                    <text fg={pulsePrimary()} selectable={false}>{ORBIT_FRAMES[orbitFrame()]}</text>
+                    <box width={BANNER_WIDTH} height={1} backgroundColor={pulsePrimary()} />
+                    <text fg={pulsePrimary()} selectable={false}>{ORBIT_FRAMES[(orbitFrame() + 2) % ORBIT_FRAMES.length]}</text>
+                  </box>
                   {GLITCH_BANNER.map((line) => (
-                    <text fg={theme.primary} selectable={false}>
-                      <b>{line}</b>
-                    </text>
+                    <box flexDirection="row" gap={2} alignItems="center">
+                      <text fg={theme.backgroundPanel} selectable={false}>║</text>
+                      <text fg={theme.primary} selectable={false}>
+                        <b>{line}</b>
+                      </text>
+                      <text fg={theme.backgroundPanel} selectable={false}>║</text>
+                    </box>
                   ))}
-                  {/* Bottom accent line */}
-                  <box width={GLITCH_BANNER[0].length + 4} height={1} backgroundColor={theme.primary} />
-                  <text fg={theme.textMuted} selectable={false}>
-                    {GLITCH_TAGLINE}
-                  </text>
+                  {/* Bottom accent line with orbit ornaments */}
+                  <box flexDirection="row" gap={1} alignItems="center">
+                    <text fg={pulsePrimary()} selectable={false}>{ORBIT_FRAMES[(orbitFrame() + 1) % ORBIT_FRAMES.length]}</text>
+                    <box width={BANNER_WIDTH} height={1} backgroundColor={pulsePrimary()} />
+                    <text fg={pulsePrimary()} selectable={false}>{ORBIT_FRAMES[(orbitFrame() + 3) % ORBIT_FRAMES.length]}</text>
+                  </box>
+                  {/* Tagline */}
+                  <box flexDirection="row" gap={2} alignItems="center" paddingTop={1}>
+                    <text fg={theme.textMuted} selectable={false}>└</text>
+                    <text fg={theme.textMuted} selectable={false}>{GLITCH_TAGLINE}</text>
+                    <text fg={theme.textMuted} selectable={false}>┘</text>
+                  </box>
                   <text fg={theme.textMuted} selectable={false}>
                     {GLITCH_SUBTITLE}
                   </text>
@@ -143,7 +188,7 @@ export function Home() {
 
         <box height={3} minHeight={0} flexShrink={1} />
 
-        {/* Prompt area */}
+        {/* Prompt area with animated border */}
         <box
           width="100%"
           maxWidth={80}
@@ -151,7 +196,7 @@ export function Home() {
           paddingTop={1}
           flexShrink={0}
           border={["left"]}
-          borderColor={theme.primary}
+          borderColor={pulsePrimary()}
         >
           <Show
             when={plainTerminal}

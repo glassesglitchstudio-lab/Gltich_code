@@ -1,13 +1,22 @@
-import { createMemo, Show } from "solid-js"
+import { createMemo, createSignal, onCleanup, onMount, Show } from "solid-js"
 import { useTheme } from "../context/theme"
 import { useSync } from "../context/sync"
 import { useLocal } from "../context/local"
 import { InstallationVersion } from "@/installation/version"
+import { RGBA } from "@opentui/core"
+
+const STATUS_FRAMES = ["◴", "◷", "◶", "◵"]
 
 export function TopBar(props: { sessionID?: string }) {
   const { theme } = useTheme()
   const sync = useSync()
   const local = useLocal()
+  const [statusFrame, setStatusFrame] = createSignal(0)
+
+  onMount(() => {
+    const interval = setInterval(() => setStatusFrame((f) => (f + 1) % STATUS_FRAMES.length), 400)
+    onCleanup(() => clearInterval(interval))
+  })
 
   const modelName = createMemo(() => {
     const parsed = local.model.parsed()
@@ -25,6 +34,14 @@ export function TopBar(props: { sessionID?: string }) {
 
   const lspCount = createMemo(() => {
     return Object.keys(sync.data.lsp).length
+  })
+
+  const isConnected = createMemo(() => {
+    return local.model.ready && !!local.model.parsed()
+  })
+
+  const connectionColor = createMemo(() => {
+    return isConnected() ? theme.success : theme.error
   })
 
   return (
@@ -48,7 +65,7 @@ export function TopBar(props: { sessionID?: string }) {
         flexShrink={0}
       >
         {/* Left: Logo */}
-          <box flexDirection="row" gap={2} alignItems="center">
+        <box flexDirection="row" gap={2} alignItems="center">
           <text fg={theme.primary} selectable={false}>
             ◆
           </text>
@@ -60,12 +77,15 @@ export function TopBar(props: { sessionID?: string }) {
               Code
             </text>
           </box>
+          <text fg={theme.borderSubtle} selectable={false}>
+            ─
+          </text>
         </box>
 
         {/* Center: Model & Agent */}
         <box flexDirection="row" gap={3} alignItems="center">
           <box flexDirection="row" gap={1} alignItems="center">
-            <text fg={theme.primary} selectable={false}>
+            <text fg={connectionColor()} selectable={false}>
               ●
             </text>
             <text fg={theme.text} selectable={false}>
@@ -91,12 +111,11 @@ export function TopBar(props: { sessionID?: string }) {
           </Show>
           <Show when={mcpCount() > 0}>
             <text fg={theme.textMuted} selectable={false}>
-              <span style={{ fg: theme.info ?? theme.success }}>◎</span> {mcpCount()} MCP
+              <span style={{ fg: theme.info }}>◎</span> {mcpCount()} MCP
             </text>
           </Show>
           <text fg={theme.textMuted} selectable={false}>
-            <span style={{ fg: theme.textMuted }}>v</span>
-            {InstallationVersion}
+            <span style={{ fg: theme.primary }}>{STATUS_FRAMES[statusFrame()]}</span> v{InstallationVersion}
           </text>
         </box>
       </box>
