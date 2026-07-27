@@ -25,12 +25,12 @@ const C = {
 
 // ─── GLITCH ASCII Logo ──────────────────────────────────────────────────────
 const LOGO = [
-  `${C.violet}${C.bold}   ██████╗  ██████╗  ██████╗  ███████╗${C.reset}`,
-  `${C.violet}${C.bold}  ██╔════╝ ██╔═══██╗ ██╔══██╗ ██╔════╝${C.reset}`,
-  `${C.violet}${C.bold}  ██║      ██║   ██║ ██║  ██║ █████╗  ${C.reset}`,
-  `${C.violet}${C.bold}  ██║      ██║   ██║ ██║  ██║ ██╔══╝  ${C.reset}`,
-  `${C.violet}${C.bold}  ╚██████╗ ╚██████╔╝ ██████╔╝ ███████╗${C.reset}`,
-  `${C.violet}${C.bold}   ╚═════╝  ╚═════╝  ╚═════╝  ╚══════╝${C.reset}`,
+  `${C.violet}${C.bold}  ██████╗ ██╗     ██╗████████╗ ██████╗██╗  ██╗${C.reset}`,
+  `${C.violet}${C.bold} ██╔════╝ ██║     ██║╚══██╔══╝██╔════╝██║  ██║${C.reset}`,
+  `${C.violet}${C.bold} ██║  ███╗██║     ██║   ██║   ██║     ███████║${C.reset}`,
+  `${C.violet}${C.bold} ██║   ██║██║     ██║   ██║   ██║     ██╔══██║${C.reset}`,
+  `${C.violet}${C.bold} ╚██████╔╝███████╗██║   ██║   ╚██████╗██║  ██║${C.reset}`,
+  `${C.violet}${C.bold}  ╚═════╝ ╚══════╝╚═╝   ╚═╝    ╚═════╝╚═╝  ╚═╝${C.reset}`,
 ]
 
 const TAGLINE = `${C.gray}  AI-Powered Coding Assistant${C.reset}`
