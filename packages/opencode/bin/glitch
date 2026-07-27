@@ -428,9 +428,9 @@ async function showFirstRunSetup(archiveName, releaseUrl, glitchDir, cachedBinar
   printStep("active", "Arşiv çıkarılıyor", "")
   try {
     if (platform === "windows") {
-      execSync(`powershell -Command "Expand-Archive -Path '${tmpFile}' -DestinationPath '${join(glitchDir, "bin")}' -Force"`)
+      execSync(`powershell -Command "Expand-Archive -Path '${tmpFile}' -DestinationPath '${glitchDir}' -Force"`)
     } else {
-      spawnSync("tar", ["-xzf", tmpFile, "-C", join(glitchDir, "bin")], { stdio: "pipe" })
+      spawnSync("tar", ["-xzf", tmpFile, "-C", glitchDir], { stdio: "pipe" })
     }
   } catch (e) {
     if (isInteractive) {
