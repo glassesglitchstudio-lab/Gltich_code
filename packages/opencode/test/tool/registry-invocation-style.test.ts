@@ -25,8 +25,8 @@ describe("ToolRegistry.tools: invocation style resolution", () => {
         const general = yield* agents.get("general")
         if (!general) throw new Error("no general agent")
         const tools = yield* reg.tools({
-          providerID: ProviderID.opencode,
-          modelID: ModelID.make("opencode/claude-sonnet-4-6"),
+          providerID: ProviderID.openai,
+          modelID: ModelID.make("gpt-4o"),
           agent: general,
         })
         const task = tools.find((t) => t.id === "task")
@@ -52,8 +52,8 @@ describe("ToolRegistry.tools: invocation style resolution", () => {
             const general = yield* agents.get("general")
             if (!general) throw new Error("no general agent")
             const tools = yield* reg.tools({
-              providerID: ProviderID.opencode,
-              modelID: ModelID.make("opencode/claude-sonnet-4-6"),
+              providerID: ProviderID.openai,
+              modelID: ModelID.make("gpt-4o"),
               agent: general,
             })
             const task = tools.find((t) => t.id === "task")
@@ -76,8 +76,8 @@ describe("ToolRegistry.tools: invocation style resolution", () => {
           const general = yield* agents.get("general")
           if (!general) throw new Error("no general agent")
           const tools = yield* reg.tools({
-            providerID: ProviderID.opencode,
-            modelID: ModelID.make("opencode/claude-sonnet-4-6"),
+            providerID: ProviderID.openai,
+            modelID: ModelID.make("gpt-4o"),
             agent: general,
           })
           const read = tools.find((t) => t.id === "read")
@@ -102,8 +102,8 @@ describe("ToolRegistry.tools: shell mode end-to-end on task", () => {
           const general = yield* agents.get("general")
           if (!general) throw new Error("no general agent")
           const tools = yield* reg.tools({
-            providerID: ProviderID.opencode,
-            modelID: ModelID.make("opencode/claude-sonnet-4-6"),
+            providerID: ProviderID.openai,
+            modelID: ModelID.make("gpt-4o"),
             agent: general,
           })
           const task = tools.find((t) => t.id === "task")!

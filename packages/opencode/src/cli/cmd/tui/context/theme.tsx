@@ -357,8 +357,8 @@ export const { use: useTheme, provider: ThemeProvider } = createSimpleContext({
         }
         draft.mode = mode
         draft.lock = lock
-        const active = props.plain ? "system" : config.theme ?? kv.get("theme", "glitch")
-        draft.active = typeof active === "string" ? active : "glitch"
+        const active = props.plain ? "system" : config.theme ?? kv.get("theme", "glitchcode")
+        draft.active = typeof active === "string" ? active : "glitchcode"
         draft.ready = false
       }),
     )
@@ -607,20 +607,20 @@ function generateSystem(colors: TerminalColors, mode: "dark" | "light"): ThemeJs
   const diffRemovedLineNumberBg = tint(diffContextBg, ansiColors.red, diffAlpha)
   const diffLineNumber = textMuted
 
-  const xiaomiOrange = RGBA.fromInts(255, 103, 0)
+  const glitchViolet = RGBA.fromInts(124, 58, 237)
 
   return {
     theme: {
-      // Primary colors using Xiaomi Orange
-      primary: xiaomiOrange,
-      secondary: xiaomiOrange,
-      accent: xiaomiOrange,
+      // Primary colors using Violet
+      primary: glitchViolet,
+      secondary: glitchViolet,
+      accent: RGBA.fromInts(236, 72, 153),
 
       // Status colors using ANSI
       error: ansiColors.red,
       warning: ansiColors.yellow,
-      success: xiaomiOrange,
-      info: xiaomiOrange,
+      success: glitchViolet,
+      info: glitchViolet,
 
       // Text colors
       text: fg,

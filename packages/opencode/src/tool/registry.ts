@@ -387,12 +387,11 @@ export const layer = Layer.effect(
         if (tool.id === CodeSearchTool.id || tool.id === WebSearchTool.id) {
           if (tool.id === WebSearchTool.id) {
             return (
-              input.providerID === ProviderID.opencode ||
               input.providerID === "xiaomi" ||
               Flag.GLITCHCODE_ENABLE_EXA
             )
           }
-          return input.providerID === ProviderID.opencode || Flag.GLITCHCODE_ENABLE_EXA
+          return input.providerID === "xiaomi" || Flag.GLITCHCODE_ENABLE_EXA
         }
 
         const usePatch =

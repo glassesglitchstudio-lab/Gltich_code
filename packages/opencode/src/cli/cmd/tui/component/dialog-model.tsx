@@ -22,10 +22,8 @@ export function useConnected() {
     if (Array.isArray(connectedIds) && connectedIds.length > 0) {
       return true
     }
-    // Check 2: any provider has loaded models (excluding free opencode)
-    return sync.data.provider.some(
-      (x) => x.id !== "opencode" || Object.values(x.models).some((y) => y.cost?.input !== 0),
-    )
+    // Check 2: any provider has loaded models
+    return sync.data.provider.some((x) => Object.keys(x.models).length > 0)
   })
 }
 
@@ -63,8 +61,6 @@ export function DialogModel(props: { providerID?: string }) {
             title: model.name ?? item.modelID,
             description: provider.name,
             category,
-            disabled: provider.id === "opencode" && model.id.includes("-nano"),
-            footer: model.cost?.input === 0 && provider.id === "opencode" ? "Free" : undefined,
             onSelect: () => {
               onSelect(provider.id, model.id)
             },
@@ -85,13 +81,9 @@ export function DialogModel(props: { providerID?: string }) {
       sync.data.provider,
       // Sadece key'i olan provider'lari goster
       filter((provider) => {
-        // opencode provider her zaman gorunur (ucretsiz modeller icin)
-        if (provider.id === "opencode") return true
-        // Diger provider'lar sadece key varsa gorunur
         return provider.source === "env" || provider.source === "api" || provider.source === "custom"
       }),
       sortBy(
-        (provider) => provider.id !== "opencode",
         (provider) => provider.name,
       ),
       flatMap((provider) => {
@@ -107,8 +99,6 @@ export function DialogModel(props: { providerID?: string }) {
               ? "(Favorite)"
               : undefined,
             category: connected() ? provider.name : undefined,
-            disabled: provider.id === "opencode" && model.includes("-nano"),
-            footer: info.cost?.input === 0 && provider.id === "opencode" ? "Free" : undefined,
             onSelect() {
               onSelect(provider.id, model)
             },
@@ -122,7 +112,6 @@ export function DialogModel(props: { providerID?: string }) {
             return true
           }),
           sortBy(
-            (x) => x.footer !== "Free",
             (x) => x.title,
           ),
         )

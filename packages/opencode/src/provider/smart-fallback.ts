@@ -122,8 +122,6 @@ export function buildFallbackChain(
  * Used when no explicit fallback is configured.
  */
 export const PROVIDER_TIERS: Record<string, number> = {
-  // Tier 0: Free / always available
-  opencode: 0,
   // Tier 1: Major providers (most reliable)
   openai: 1,
   anthropic: 1,

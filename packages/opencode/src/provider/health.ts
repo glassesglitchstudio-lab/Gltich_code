@@ -65,7 +65,7 @@ export function getSuccessRate(providerID: string, modelID: string): number {
   return successful / history.length
 }
 
-const OAUTH_PROVIDERS = new Set(["opencode", "xiaomi", "github-copilot"])
+const OAUTH_PROVIDERS = new Set(["xiaomi", "github-copilot"])
 
 /**
  * Test a provider's API key using provider-specific methods.

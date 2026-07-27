@@ -164,30 +164,6 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
           },
         },
       }),
-    opencode: Effect.fnUntraced(function* (input: Info) {
-      const env = yield* dep.env()
-      const hasKey = iife(() => {
-        if (input.env.some((item) => env[item])) return true
-        return false
-      })
-      const ok =
-        hasKey ||
-        Boolean(yield* dep.auth(input.id)) ||
-        Boolean((yield* dep.config()).provider?.["opencode"]?.options?.apiKey)
-
-      // Never surface the free/public tier (cost.input === 0). Without a
-      // subscription/key, hide the remaining (paid) models too — they can't be
-      // used unauthenticated. So: authenticated -> subscription models only,
-      // unauthenticated -> nothing.
-      for (const [key, value] of Object.entries(input.models)) {
-        if (!ok || value.cost.input === 0) delete input.models[key]
-      }
-
-      return {
-        autoload: Object.keys(input.models).length > 0,
-        options: {},
-      }
-    }),
     openai: () =>
       Effect.succeed({
         autoload: false,
@@ -1825,11 +1801,8 @@ const layer: Layer.Layer<
       const hasValidKey = (providerID: ProviderID): boolean => {
         const p = s.providers[providerID]
         if (!p) return false
-        // opencode provider her zaman kullanilabilir (ucretsiz)
-        if (providerID === "opencode") return true
         if (p.key && p.key.length > 10) return true
         if (p.options?.apiKey && p.options.apiKey.length > 10) return true
-        // Env-based provider'lar key olmadan kullanılamaz
         if (p.source === "env") return false
         return false
       }
