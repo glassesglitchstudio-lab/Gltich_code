@@ -84,7 +84,19 @@ function tryJsonParse(text: string): Record<string, unknown> | null {
   }
 }
 
+function checkAuthInBody(error: { data: { responseBody?: string } }): boolean {
+  if (!error.data.responseBody) return false
+  const body = tryJsonParse(error.data.responseBody)
+  if (!body?.error || typeof body.error !== "object") return false
+  const err = body.error as Record<string, unknown>
+  if (err.code === "invalid_api_key") return true
+  if (err.type === "authentication_error") return true
+  if (err.code === "access_denied" && String(err.message ?? "").toLowerCase().includes("api key")) return true
+  return false
+}
+
 export function isAuthError(error: unknown): boolean {
+  // Check APIError type (401/403 with auth keywords)
   if (MessageV2.APIError.isInstance(error)) {
     const status = error.data.statusCode
     if (status === 401) return true
@@ -94,19 +106,16 @@ export function isAuthError(error: unknown): boolean {
     }
     const lower = error.data.message.toLowerCase()
     if (lower.includes("invalid api key") || lower.includes("unauthorized") || lower.includes("authentication failed")) return true
-
-    // Check responseBody for auth indicators that message-only check might miss
-    // (e.g. {"error":{"code":"invalid_api_key"}} with generic "Forbidden" message)
-    if (error.data.responseBody) {
-      const body = tryJsonParse(error.data.responseBody)
-      if (body?.error && typeof body.error === "object") {
-        const err = body.error as Record<string, unknown>
-        if (err.code === "invalid_api_key") return true
-        if (err.type === "authentication_error") return true
-        if (err.code === "access_denied" && String(err.message ?? "").toLowerCase().includes("api key")) return true
-      }
-    }
+    if (checkAuthInBody(error)) return true
   }
+
+  // QuotaExceededError can be a misclassified auth error when the API returns
+  // 403 + insufficient_quota for an expired/invalid key. Check the body for
+  // auth indicators and re-classify if found.
+  if (MessageV2.QuotaExceededError.isInstance(error)) {
+    if (checkAuthInBody(error)) return true
+  }
+
   return false
 }
 
@@ -210,11 +219,10 @@ export function retryable(error: Err) {
   // the Effect.retry schedule to STOP and surface the error to the user.
   if (isAuthError(error)) return undefined
 
-  // quota/billing errors should not be retried on the same provider
-  // they require switching to a different provider
-  if (MessageV2.QuotaExceededError.isInstance(error)) {
-    return QUOTA_EXCEEDED_MESSAGE
-  }
+  // Quota/billing errors MUST NOT be retried on the same provider — repeating
+  // the same request will produce the same error. Returning undefined lets the
+  // error propagate to attemptFallback which handles provider switching.
+  if (MessageV2.QuotaExceededError.isInstance(error)) return undefined
 
   // Catch raw Error / network / SSE-timeout BEFORE APIError narrowing.
   // SessionRetry.policy unwraps Cause<unknown> via opts.parse, but raw
