@@ -68,29 +68,42 @@ export function SessionFooter(props: SessionFooterProps) {
     <box
       flexDirection="row"
       justifyContent="space-between"
-      paddingLeft={2}
-      paddingRight={2}
-      paddingTop={0}
-      paddingBottom={0}
-      border={["top"]}
-      borderColor={theme.borderSubtle}
+      alignItems="center"
+      paddingLeft={3}
+      paddingRight={3}
+      paddingTop={1}
+      paddingBottom={1}
+      flexShrink={0}
+      backgroundColor={theme.backgroundPanel}
     >
       {/* Directory */}
-      <text fg={theme.textMuted} selectable={false}>
-        <span style={{ fg: theme.primary }}>●</span> {directory()}
-      </text>
+      <box flexDirection="row" gap={1} alignItems="center">
+        <text fg={theme.primary} selectable={false}>
+          ●
+        </text>
+        <text fg={theme.textMuted} selectable={false}>
+          {directory()}
+        </text>
+      </box>
 
       {/* Status */}
-      <text fg={statusColor()} selectable={false}>
-        <NeonPulse active={status() === "running"} color={theme.primary} />{" "}
-        <span style={{ fg: statusColor() }}>{statusLabel()}</span>
-      </text>
+      <box flexDirection="row" gap={1} alignItems="center">
+        <NeonPulse active={status() === "running"} color={theme.primary} />
+        <text fg={statusColor()} selectable={false}>
+          {statusLabel()}
+        </text>
+      </box>
 
       {/* Model */}
       <Show when={modelName()}>
-        <text fg={theme.textMuted} selectable={false}>
-          ◆ {modelName()}
-        </text>
+        <box flexDirection="row" gap={1} alignItems="center">
+          <text fg={theme.accent} selectable={false}>
+            ◆
+          </text>
+          <text fg={theme.textMuted} selectable={false}>
+            {modelName()}
+          </text>
+        </box>
       </Show>
     </box>
   )

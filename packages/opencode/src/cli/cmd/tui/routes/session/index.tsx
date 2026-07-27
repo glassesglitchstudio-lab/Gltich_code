@@ -196,7 +196,7 @@ export function Session() {
     return false
   })
   const showTimestamps = createMemo(() => timestamps() === "show")
-  const contentWidth = createMemo(() => dimensions().width - (sidebarVisible() ? (sidebarCollapsed() === "collapsed" ? 6 : 42) : 0) - 4)
+  const contentWidth = createMemo(() => dimensions().width - (sidebarVisible() ? (sidebarCollapsed() === "collapsed" ? 6 : 44) : 0) - 4)
   const providers = createMemo(() => Model.index(sync.data.provider))
 
   const scrollAcceleration = createMemo(() => getScrollAcceleration(tuiConfig))

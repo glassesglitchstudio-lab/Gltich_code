@@ -29,51 +29,76 @@ export function TopBar(props: { sessionID?: string }) {
 
   return (
     <box
-      flexDirection="row"
-      justifyContent="space-between"
-      alignItems="center"
-      backgroundColor={theme.backgroundPanel}
-      paddingLeft={2}
-      paddingRight={2}
-      paddingTop={0}
-      paddingBottom={0}
+      flexDirection="column"
       flexShrink={0}
     >
-      {/* Left: Logo */}
-      <box flexDirection="row" gap={1}>
-        <text fg={theme.primary} selectable={false}>
-          <b>GLITCH</b>
-        </text>
-        <text fg={theme.textMuted} selectable={false}>
-          Code
-        </text>
-      </box>
+      {/* Neon accent line */}
+      <box height={1} width="100%" backgroundColor={theme.primary} flexShrink={0} />
 
-      {/* Center: Model & Agent */}
-      <box flexDirection="row" gap={2}>
-        <text fg={theme.textMuted} selectable={false}>
-          <span style={{ fg: theme.primary }}>●</span> {modelName()}
-        </text>
-        <text fg={theme.textMuted} selectable={false}>
-          <span style={{ fg: theme.secondary }}>◆</span> {agentName()}
-        </text>
-      </box>
+      {/* Main topbar */}
+      <box
+        flexDirection="row"
+        justifyContent="space-between"
+        alignItems="center"
+        backgroundColor={theme.backgroundPanel}
+        paddingLeft={3}
+        paddingRight={3}
+        paddingTop={1}
+        paddingBottom={1}
+        flexShrink={0}
+      >
+        {/* Left: Logo */}
+          <box flexDirection="row" gap={2} alignItems="center">
+          <text fg={theme.primary} selectable={false}>
+            ◆
+          </text>
+          <box flexDirection="row" gap={0}>
+            <text fg={theme.primary} selectable={false}>
+              <b>GLITCH</b>
+            </text>
+            <text fg={theme.textMuted} selectable={false}>
+              Code
+            </text>
+          </box>
+        </box>
 
-      {/* Right: Status */}
-      <box flexDirection="row" gap={2}>
-        <Show when={lspCount() > 0}>
+        {/* Center: Model & Agent */}
+        <box flexDirection="row" gap={3} alignItems="center">
+          <box flexDirection="row" gap={1} alignItems="center">
+            <text fg={theme.primary} selectable={false}>
+              ●
+            </text>
+            <text fg={theme.text} selectable={false}>
+              {modelName()}
+            </text>
+          </box>
+          <box flexDirection="row" gap={1} alignItems="center">
+            <text fg={theme.accent} selectable={false}>
+              ◆
+            </text>
+            <text fg={theme.textMuted} selectable={false}>
+              {agentName()}
+            </text>
+          </box>
+        </box>
+
+        {/* Right: Status */}
+        <box flexDirection="row" gap={3} alignItems="center">
+          <Show when={lspCount() > 0}>
+            <text fg={theme.textMuted} selectable={false}>
+              <span style={{ fg: theme.success }}>●</span> {lspCount()} LSP
+            </text>
+          </Show>
+          <Show when={mcpCount() > 0}>
+            <text fg={theme.textMuted} selectable={false}>
+              <span style={{ fg: theme.info ?? theme.success }}>◎</span> {mcpCount()} MCP
+            </text>
+          </Show>
           <text fg={theme.textMuted} selectable={false}>
-            <span style={{ fg: theme.success }}>•</span> {lspCount()} LSP
+            <span style={{ fg: theme.textMuted }}>v</span>
+            {InstallationVersion}
           </text>
-        </Show>
-        <Show when={mcpCount() > 0}>
-          <text fg={theme.textMuted} selectable={false}>
-            <span style={{ fg: theme.success }}>⊙</span> {mcpCount()} MCP
-          </text>
-        </Show>
-        <text fg={theme.textMuted} selectable={false}>
-          v{InstallationVersion}
-        </text>
+        </box>
       </box>
     </box>
   )

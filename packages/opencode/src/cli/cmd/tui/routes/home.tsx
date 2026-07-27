@@ -20,15 +20,16 @@ import { Global } from "@/global"
 import { isPlainTerminal } from "../util/terminal"
 
 const GLITCH_BANNER = [
-  "  ██████╗ ██╗  ██╗ ██████╗ ███████╗",
-  " ██╔════╝ ██║  ██║ ██╔══██╗ ██╔════╝",
-  " ██║      ███████║ ██║  ██║ █████╗  ",
-  " ██║      ██╔══██║ ██║  ██║ ██╔══╝  ",
-  " ╚██████╗ ██║  ██║ ██████╔╝ ███████╗",
-  "  ╚═════╝ ╚═╝  ╚═╝ ╚═════╝  ╚══════╝",
+  "   ██████╗ ██╗  ██╗ ██████╗ ███████╗",
+  "  ██╔════╝ ██║  ██║ ██╔══██╗ ██╔════╝",
+  "  ██║      ███████║ ██║  ██║ █████╗  ",
+  "  ██║      ██╔══██║ ██║  ██║ ██╔══╝  ",
+  "  ╚██████╗ ██║  ██║ ██████╔╝ ███████╗",
+  "   ╚═════╝ ╚═╝  ╚═╝ ╚═════╝  ╚══════╝",
 ]
 
-const GLITCH_TAGLINE = "  AI-Powered CLI for Software Engineering"
+const GLITCH_TAGLINE = "  ─── AI-Powered Software Engineering ───"
+const GLITCH_SUBTITLE = "  Code. Debug. Refactor. Ship."
 
 let once = false
 
@@ -100,21 +101,30 @@ export function Home() {
       </Show>
       <box flexGrow={1} alignItems="center" paddingLeft={8} paddingRight={8} zIndex={1}>
         <box flexGrow={1} minHeight={0} />
-        <box height={4} minHeight={0} flexShrink={1} />
-        <box flexShrink={0}>
+        <box height={6} minHeight={0} flexShrink={1} />
+
+        {/* Main content area */}
+        <box flexShrink={0} flexDirection="column" alignItems="center" gap={0}>
+          {/* Glitch Code ASCII Banner with neon glow feel */}
           <Show
             when={plainTerminal}
             fallback={
               <TuiPluginRuntime.Slot name="home_logo" mode="replace">
-                {/* Glitch Code ASCII Banner */}
-                <box flexDirection="column" alignItems="center" gap={0}>
+                <box flexDirection="column" alignItems="center" gap={1}>
+                  {/* Top accent line */}
+                  <box width={GLITCH_BANNER[0].length + 4} height={1} backgroundColor={theme.primary} />
                   {GLITCH_BANNER.map((line) => (
                     <text fg={theme.primary} selectable={false}>
-                      {line}
+                      <b>{line}</b>
                     </text>
                   ))}
+                  {/* Bottom accent line */}
+                  <box width={GLITCH_BANNER[0].length + 4} height={1} backgroundColor={theme.primary} />
                   <text fg={theme.textMuted} selectable={false}>
                     {GLITCH_TAGLINE}
+                  </text>
+                  <text fg={theme.textMuted} selectable={false}>
+                    {GLITCH_SUBTITLE}
                   </text>
                 </box>
               </TuiPluginRuntime.Slot>
@@ -130,13 +140,18 @@ export function Home() {
             </box>
           </Show>
         </box>
-        <box height={1} minHeight={0} flexShrink={1} />
+
+        <box height={3} minHeight={0} flexShrink={1} />
+
+        {/* Prompt area */}
         <box
           width="100%"
-          maxWidth={75}
+          maxWidth={80}
           zIndex={1000}
           paddingTop={1}
           flexShrink={0}
+          border={["left"]}
+          borderColor={theme.primary}
         >
           <Show
             when={plainTerminal}
@@ -163,6 +178,7 @@ export function Home() {
             />
           </Show>
         </box>
+
         <Show when={plainTerminal}>
           <box paddingTop={1} flexShrink={0}>
             <text selectable={false}>{t("tui.tips.plain_terminal")}</text>
