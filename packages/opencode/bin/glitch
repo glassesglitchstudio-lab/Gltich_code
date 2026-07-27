@@ -33,15 +33,46 @@ const LOGO = [
 ]
 
 const TAGLINE = `${C.gray}  AI-Powered Coding Assistant${C.reset}`
-const VERSION_LINE = (() => {
-  try {
-    const pkgPath = join(dirname(realpathSync(fileURLToPath(import.meta.url))), "..", "package.json")
-    const pkg = JSON.parse(readFileSync(pkgPath, "utf8"))
-    return `${C.darkGray}  v${pkg.version}${C.reset}`
-  } catch {
-    return `${C.darkGray}  v0.0.0${C.reset}`
+
+// ─── Robust Version Reader ──────────────────────────────────────────────────
+function getVersion() {
+  const methods = [
+    // Method 1: Import.meta.url relative to script
+    () => {
+      const pkgPath = join(dirname(realpathSync(fileURLToPath(import.meta.url))), "..", "package.json")
+      return JSON.parse(readFileSync(pkgPath, "utf8")).version
+    },
+    // Method 2: process.argv[1] (script path from node invocation)
+    () => {
+      if (!process.argv[1]) return
+      const pkgPath = join(dirname(realpathSync(process.argv[1])), "..", "package.json")
+      return JSON.parse(readFileSync(pkgPath, "utf8")).version
+    },
+    // Method 3: Walk up from script dir looking for package.json
+    () => {
+      const start = process.argv[1] || fileURLToPath(import.meta.url)
+      let dir = dirname(realpathSync(start))
+      for (let i = 0; i < 10; i++) {
+        const p = join(dir, "package.json")
+        if (existsSync(p)) {
+          const pkg = JSON.parse(readFileSync(p, "utf8"))
+          if (pkg.name && pkg.version) return pkg.version
+        }
+        const parent = dirname(dir)
+        if (parent === dir) break
+        dir = parent
+      }
+    },
+    // Method 4: npm_package_version env var
+    () => process.env.npm_package_version,
+  ]
+  for (const fn of methods) {
+    try { const v = fn(); if (v) return v } catch {}
   }
-})()
+  return "0.0.0"
+}
+const PKG_VERSION = getVersion()
+const VERSION_LINE = `${C.darkGray}  v${PKG_VERSION}${C.reset}`
 
 // ─── Setup Screen ───────────────────────────────────────────────────────────
 const isInteractive = process.stdout.isTTY && !process.env.CI
@@ -608,13 +639,7 @@ function findBinary(startDir) {
 // ─── Main ───────────────────────────────────────────────────────────────────
 // Intercept --version to report correct version from package.json
 if (process.argv.includes("--version") || process.argv.includes("-v")) {
-  try {
-    const pkgPath = join(dirname(realpathSync(fileURLToPath(import.meta.url))), "..", "package.json")
-    const pkg = JSON.parse(readFileSync(pkgPath, "utf8"))
-    console.log(pkg.version)
-  } catch {
-    console.log("0.0.0")
-  }
+  console.log(PKG_VERSION)
   process.exit(0)
 }
 
