@@ -75,8 +75,9 @@ export const layer = Layer.effect(
       const data = yield* all()
       if (norm !== key) delete data[key]
       delete data[norm + "/"]
+      const normalized = info.type === "api" ? { ...info, key: info.key.trim() } : info
       yield* fsys
-        .writeJson(file, { ...data, [norm]: info }, 0o600)
+        .writeJson(file, { ...data, [norm]: normalized }, 0o600)
         .pipe(Effect.mapError(fail("Failed to write auth data")))
     })
 

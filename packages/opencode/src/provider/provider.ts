@@ -1523,6 +1523,7 @@ const layer: Layer.Layer<
 
         if (baseURL !== undefined) options["baseURL"] = baseURL
         if (options["apiKey"] === undefined && provider.key) options["apiKey"] = provider.key
+        if (options["apiKey"]) options["apiKey"] = options["apiKey"].trim()
         if (model.headers)
           options["headers"] = {
             ...options["headers"],
