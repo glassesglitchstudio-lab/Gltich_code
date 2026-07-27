@@ -205,11 +205,10 @@ export function retryable(error: Err) {
   // context overflow errors should not be retried
   if (MessageV2.ContextOverflowError.isInstance(error)) return undefined
 
-  // auth errors should not be retried — the API key itself is invalid
-  // Sadece secilen provider'da hata goster, fallback provider'lar icin sessiz kal
-  if (isAuthError(error)) {
-    return "API key is invalid or expired. Check your provider configuration."
-  }
+  // Auth errors MUST NOT be retried — the API key itself is invalid, repeating
+  // the same request will produce the same 401/403. Returning undefined tells
+  // the Effect.retry schedule to STOP and surface the error to the user.
+  if (isAuthError(error)) return undefined
 
   // quota/billing errors should not be retried on the same provider
   // they require switching to a different provider
