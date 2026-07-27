@@ -139,7 +139,11 @@ export const Data = lazy(async () => {
   return Flock.withLock(`models-dev:${filepath}`, async () => {
     const result = await Filesystem.readJson(Flag.GLITCHCODE_MODELS_PATH ?? filepath).catch(() => {})
     if (result) return result
-    const result2 = await fetchApi()
+    const result2 = await fetchApi().catch((e) => {
+      log.error("Failed to fetch models.dev", { error: e })
+      return undefined
+    })
+    if (!result2) return {}
     if (result2.ok) {
       await Filesystem.write(filepath, result2.text).catch((e) => {
         log.error("Failed to write models cache", { error: e })

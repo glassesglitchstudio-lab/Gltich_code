@@ -1598,12 +1598,12 @@ const layer: Layer.Layer<
         delete options["aicoreServiceKey"]
 
         const bundledLoader = BUNDLED_PROVIDERS[model.api.npm]
-        if (bundledLoader) {
-          log.info("using bundled provider", {
-            providerID: model.providerID,
-            pkg: model.api.npm,
-          })
-          try {
+        try {
+          if (bundledLoader) {
+            log.info("using bundled provider", {
+              providerID: model.providerID,
+              pkg: model.api.npm,
+            })
             const factory = await bundledLoader()
             const loaded = factory({
               name: model.providerID,
@@ -1611,40 +1611,40 @@ const layer: Layer.Layer<
             })
             s.sdk.set(key, loaded)
             return loaded as SDK
-          } finally {
-            if (prevBedrockToken === undefined) delete process.env.AWS_BEARER_TOKEN_BEDROCK
-            else process.env.AWS_BEARER_TOKEN_BEDROCK = prevBedrockToken
-            if (prevAicoreKey === undefined) delete process.env.AICORE_SERVICE_KEY
-            else process.env.AICORE_SERVICE_KEY = prevAicoreKey
           }
-        }
 
-        let installedPath: string
-        if (!model.api.npm.startsWith("file://")) {
-          const item = await Npm.add(model.api.npm)
-          if (!item.entrypoint) throw new Error(`Package ${model.api.npm} has no import entrypoint`)
-          installedPath = item.entrypoint
-        } else {
-          log.info("loading local provider", { pkg: model.api.npm })
-          installedPath = model.api.npm
-        }
+          let installedPath: string
+          if (!model.api.npm.startsWith("file://")) {
+            const item = await Npm.add(model.api.npm)
+            if (!item.entrypoint) throw new Error(`Package ${model.api.npm} has no import entrypoint`)
+            installedPath = item.entrypoint
+          } else {
+            log.info("loading local provider", { pkg: model.api.npm })
+            installedPath = model.api.npm
+          }
 
-        // `installedPath` is a local entry path or an existing `file://` URL. Normalize
-        // only path inputs so Node on Windows accepts the dynamic import.
-        const importSpec = installedPath.startsWith("file://") ? installedPath : pathToFileURL(installedPath).href
-        const mod = await import(importSpec)
+          // `installedPath` is a local entry path or an existing `file://` URL. Normalize
+          // only path inputs so Node on Windows accepts the dynamic import.
+          const importSpec = installedPath.startsWith("file://") ? installedPath : pathToFileURL(installedPath).href
+          const mod = await import(importSpec)
 
-        const createKey = Object.keys(mod).find((key) => key.startsWith("create"))
-        if (!createKey) {
-          throw new Error(`No "create*" export found in package ${model.api.npm} for provider ${model.providerID}`)
+          const createKey = Object.keys(mod).find((key) => key.startsWith("create"))
+          if (!createKey) {
+            throw new Error(`No "create*" export found in package ${model.api.npm} for provider ${model.providerID}`)
+          }
+          const fn = mod[createKey]
+          const loaded = fn({
+            name: model.providerID,
+            ...options,
+          })
+          s.sdk.set(key, loaded)
+          return loaded as SDK
+        } finally {
+          if (prevBedrockToken === undefined) delete process.env.AWS_BEARER_TOKEN_BEDROCK
+          else process.env.AWS_BEARER_TOKEN_BEDROCK = prevBedrockToken
+          if (prevAicoreKey === undefined) delete process.env.AICORE_SERVICE_KEY
+          else process.env.AICORE_SERVICE_KEY = prevAicoreKey
         }
-        const fn = mod[createKey]
-        const loaded = fn({
-          name: model.providerID,
-          ...options,
-        })
-        s.sdk.set(key, loaded)
-        return loaded as SDK
       } catch (e) {
         throw new InitError({ providerID: model.providerID }, { cause: e })
       }
@@ -1801,7 +1801,7 @@ const layer: Layer.Layer<
         return { providerID: mimo.id, modelID: ModelID.make("mimo-auto") }
       }
 
-      const provider = Object.values(s.providers).find((p) => !cfg.provider || Object.keys(cfg.provider).includes(p.id))
+      const provider = Object.values(s.providers).find((p) => !cfg.provider || !Object.keys(cfg.provider).length || Object.keys(cfg.provider).includes(p.id))
       if (!provider) throw new Error("No providers configured. Run `glitch auth login` to connect a provider (MiMo, GitHub Copilot, OpenAI, etc.) or configure API keys in glitchcode.json.")
       const [model] = sort(Object.values(provider.models))
       if (!model) throw new Error(`No models available for provider "${provider.id}". Check your provider configuration in glitchcode.json or run \`glitch models\`.`)
