@@ -363,13 +363,23 @@ async function showFirstRunSetup(archiveName, releaseUrl, glitchDir, cachedBinar
   }
   await sleep(100)
 
-  // If any prerequisite failed, show errors and exit
-  if (prereqs.issues.length > 0) {
+  // If any CRITICAL prerequisite failed (node.js required), show errors and exit.
+  // npm/curl warnings are non-fatal — the binary can run without them.
+  const criticalIssues = prereqs.issues.filter((i) => i.name === "Node.js" || i.name.startsWith("Node.js"))
+  const optionalIssues = prereqs.issues.filter((i) => !(i.name === "Node.js" || i.name.startsWith("Node.js")))
+  if (optionalIssues.length > 0) {
+    console.log("")
+    for (const issue of optionalIssues) {
+      console.log(`${C.gray}  ⚠ ${issue.name} bulunamadı${C.reset}`)
+    }
+    console.log("")
+  }
+  if (criticalIssues.length > 0) {
     printSeparator()
     console.log("")
     console.log(`${C.red}${C.bold}  Eksik bağımlılıklar bulundu:${C.reset}`)
     console.log("")
-    for (const issue of prereqs.issues) {
+    for (const issue of criticalIssues) {
       console.log(`${C.red}  ✗ ${C.white}${issue.name}${C.reset}`)
       console.log(`${C.gray}    → ${issue.fix}${C.reset}`)
       console.log("")
