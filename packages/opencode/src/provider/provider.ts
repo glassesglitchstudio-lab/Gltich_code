@@ -472,15 +472,17 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
           project,
           location,
           fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
-            const { GoogleAuth } = await import("google-auth-library")
-            const auth = new GoogleAuth()
-            const client = await auth.getApplicationDefault()
-            const token = await client.credential.getAccessToken()
-
-            const headers = new Headers(init?.headers)
-            headers.set("Authorization", `Bearer ${token.token}`)
-
-            return fetch(input, { ...init, headers })
+            try {
+              const { GoogleAuth } = await import("google-auth-library")
+              const auth = new GoogleAuth()
+              const client = await auth.getApplicationDefault()
+              const token = await client.credential.getAccessToken()
+              const headers = new Headers(init?.headers)
+              headers.set("Authorization", `Bearer ${token.token}`)
+              return fetch(input, { ...init, headers })
+            } catch (e) {
+              throw new Error(`Google Vertex auth failed: ${e instanceof Error ? e.message : String(e)}`)
+            }
           },
         },
         async getModel(sdk: any, modelID: string) {
@@ -1358,7 +1360,7 @@ const layer: Layer.Layer<
           const result = yield* fn(data).pipe(
             Effect.catch((e) => {
               log.warn("Provider custom loader error: " + providerID, { error: e })
-              console.warn(`[provider] ${providerID} loader error: ${String(e)}`)
+              console.warn(`⚠ [${providerID}] Failed to initialize: ${String(e)}`)
               return Effect.succeed(null)
             }),
           )

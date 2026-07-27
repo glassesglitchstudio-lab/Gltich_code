@@ -76,6 +76,14 @@ export function isRetryableTransientError(error: unknown): boolean {
  * Check if an error is an authentication/authorization error.
  * Auth errors should NOT trigger fallback — the key itself is invalid.
  */
+function tryJsonParse(text: string): Record<string, unknown> | null {
+  try {
+    return JSON.parse(text) as Record<string, unknown>
+  } catch {
+    return null
+  }
+}
+
 export function isAuthError(error: unknown): boolean {
   if (MessageV2.APIError.isInstance(error)) {
     const status = error.data.statusCode
@@ -86,6 +94,18 @@ export function isAuthError(error: unknown): boolean {
     }
     const lower = error.data.message.toLowerCase()
     if (lower.includes("invalid api key") || lower.includes("unauthorized") || lower.includes("authentication failed")) return true
+
+    // Check responseBody for auth indicators that message-only check might miss
+    // (e.g. {"error":{"code":"invalid_api_key"}} with generic "Forbidden" message)
+    if (error.data.responseBody) {
+      const body = tryJsonParse(error.data.responseBody)
+      if (body?.error && typeof body.error === "object") {
+        const err = body.error as Record<string, unknown>
+        if (err.code === "invalid_api_key") return true
+        if (err.type === "authentication_error") return true
+        if (err.code === "access_denied" && String(err.message ?? "").toLowerCase().includes("api key")) return true
+      }
+    }
   }
   return false
 }
