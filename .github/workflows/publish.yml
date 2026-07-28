@@ -191,7 +191,7 @@ jobs:
       - name: Build and package extension
         run: |
           cd packages/vscode
-          bun install
+          bun install --linker hoisted
           bun run build
           vsce package --allow-package-secrets slack --allow-package-all-secrets
 

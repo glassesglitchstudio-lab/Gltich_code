@@ -5,5 +5,5 @@
 !package.json
 !README.md
 !LICENSE
-# Exclude parent directory references (symlinks from bun workspace)
-../../**
+# Exclude parent directory entirely (bun workspace symlinks)
+..
