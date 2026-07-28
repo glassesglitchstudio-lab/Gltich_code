@@ -497,6 +497,34 @@ function ensureProjectConfig() {
   }
 }
 
+// ─── Cache Version Tracking ──────────────────────────────────────────────────
+const VERSION_FILE = ".glitchcode-version"
+
+function getCacheVersion(glitchDir) {
+  try {
+    const vFile = join(glitchDir, "bin", VERSION_FILE)
+    return existsSync(vFile) ? readFileSync(vFile, "utf8").trim() : null
+  } catch {
+    return null
+  }
+}
+
+function setCacheVersion(glitchDir, version) {
+  try {
+    const binDir = join(glitchDir, "bin")
+    if (!existsSync(binDir)) mkdirSync(binDir, { recursive: true })
+    writeFileSync(join(binDir, VERSION_FILE), version, "utf8")
+  } catch {}
+}
+
+function clearCache(glitchDir, binary) {
+  const binDir = join(glitchDir, "bin")
+  const target = join(binDir, binary)
+  const vFile = join(binDir, VERSION_FILE)
+  try { unlinkSync(target) } catch {}
+  try { unlinkSync(vFile) } catch {}
+}
+
 // ─── Run Binary ─────────────────────────────────────────────────────────────
 function run(target) {
   const result = spawnSync(target, process.argv.slice(2), {
@@ -662,28 +690,44 @@ if (envPath) {
 const scriptPath = realpathSync(fileURLToPath(import.meta.url))
 const scriptDir = dirname(scriptPath)
 
-// Check cached binary next to script
+// Check cached binary next to script (legacy — no version check, skip)
 const cached = join(scriptDir, ".glitchcode")
 if (existsSync(cached)) {
-  run(cached)
+  // Compare its version against the npm package version
+  try {
+    const result = spawnSync(cached, ["--version"], { encoding: "utf8", timeout: 5000, windowsHide: true })
+    const binVer = (result.stdout || "").trim()
+    if (binVer === PKG_VERSION) {
+      run(cached)
+    }
+  } catch {}
+  // Version mismatch or error — fall through to home cache
 }
 
-// Try to find binary in node_modules or user-global cache
+// Try to find binary in user-global cache with version check
 const glitchDir = join(homedir(), ".glitchcode")
 const cachedBinary = join(glitchDir, "bin", binary)
+const cachedVer = getCacheVersion(glitchDir)
+
+// If cached binary exists but version doesn't match npm package version, delete it
+if (existsSync(cachedBinary) && cachedVer !== PKG_VERSION) {
+  clearCache(glitchDir, binary)
+}
+
 let resolved = findBinary(scriptDir) || (existsSync(cachedBinary) ? cachedBinary : null)
 
+// ═══ Binary Download (first-run OR version mismatch) ═══════════════════════════
 if (!resolved) {
-  // First run — show animated setup screen
   const ext = platform === "windows" ? "zip" : "tar.gz"
   const archiveName = `glitchcode-${platform}-${arch}${arch === "x64" && !supportsAvx2() ? "-baseline" : ""}.${ext}`
   const releaseUrl =
-    "https://github.com/glassesglitchstudio-lab/Gltich_code/releases/latest/download/" + archiveName
+    "https://github.com/glassesglitchstudio-lab/Gltich_code/releases/download/v" + PKG_VERSION + "/" + archiveName
   const tmpFile = join(glitchDir, "bin", archiveName)
 
   ;(async () => {
     try {
       const result = await showFirstRunSetup(archiveName, releaseUrl, glitchDir, cachedBinary, tmpFile, platform)
+      setCacheVersion(glitchDir, PKG_VERSION)
       run(result)
     } catch (err) {
       showCursor()
@@ -694,5 +738,6 @@ if (!resolved) {
   })()
 } else {
   ensureProjectConfig()
+  setCacheVersion(glitchDir, PKG_VERSION)
   run(resolved)
 }
