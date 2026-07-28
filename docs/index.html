@@ -383,63 +383,7 @@
       color:var(--orange-light);
     }
 
-    /* VS CODE SECTION */
-    .vscode-section{
-      border-top:1px solid var(--border);
-    }
-    .vscode-card{
-      text-align:center;
-      max-width:500px;margin:0 auto;
-      background:rgba(255,107,0,.02);
-      border:1px solid var(--border);
-      border-radius:var(--radius-lg);
-      padding:40px 32px;
-      transition:border-color .3s;
-    }
-    .vscode-card:hover{border-color:var(--border-glow)}
-    .vscode-icon{font-size:48px;margin-bottom:16px;display:block}
-    .vscode-card h3{font-size:22px;margin-bottom:8px}
-    .vscode-card p{color:var(--text2);font-size:14px;margin-bottom:24px}
-    .vscode-shortcut{
-      display:inline-flex;align-items:center;gap:12px;
-      background:rgba(0,0,0,.3);
-      border:1px solid var(--border);
-      border-radius:10px;
-      padding:12px 20px;
-      font-family:'JetBrains Mono',monospace;
-      font-size:14px;color:var(--orange-light);
-      margin-bottom:24px;
-    }
-    .vscode-features{
-      display:grid;
-      grid-template-columns:repeat(2,1fr);
-      gap:12px;
-      max-width:400px;margin:0 auto 28px;
-    }
-    .vscode-feat{
-      padding:16px;
-      background:rgba(255,107,0,.02);
-      border:1px solid var(--border);
-      border-radius:10px;
-      font-size:13px;
-    }
-    .vscode-feat-icon{font-size:20px;display:block;margin-bottom:6px}
-    .vscode-feat h4{font-size:13px;margin-bottom:2px}
-    .vscode-feat p{font-size:11px;color:var(--text3);margin-bottom:0}
-    .vscode-install-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-    .vscode-dl-btn{
-      padding:10px 24px;
-      background:var(--orange);
-      border:none;border-radius:10px;
-      color:#fff;font-size:13px;font-weight:600;
-      font-family:inherit;
-      cursor:pointer;text-decoration:none;
-      transition:all .2s;
-    }
-    .vscode-dl-btn:hover{background:var(--orange-dim);transform:scale(1.02)}
-
-    /* FOOTER */
-    .site-footer{
+.site-footer{
       z-index:1;position:relative;
       padding:48px 0 32px;
       border-top:1px solid var(--border);
@@ -466,8 +410,7 @@
       .platform-grid{grid-template-columns:repeat(2,1fr)}
       .nav-links{display:none}
       .footer-inner{flex-direction:column;gap:20px;text-align:center}
-      .vscode-features{grid-template-columns:1fr}
-    }
+      }
   </style>
 </head>
 <body>
@@ -600,26 +543,89 @@
     </div>
   </div></section>
 
-  <section class="section vscode-section" id="vscode"><div class="container">
-    <h2 class="section-title">VS Code Extension</h2>
-    <p class="section-desc">Glitch Code'u doğrudan VS Code içinde kullanın.</p>
-    <div class="vscode-card">
-      <span class="vscode-icon">☾</span>
-      <h3>Sidebar Chat</h3>
-      <p>Activity bar'dan AI ile sohbet edin</p>
-      <div class="vscode-shortcut">
-        <span style="color:var(--text3)">⌨</span> Ctrl+Shift+G
-        <span style="color:var(--text3);font-family:'Inter',sans-serif;font-size:12px">ile chat panelini açın</span>
+  <section class="section section--glow" id="vscode"><div class="container">
+    <h2 class="section-title">20+ Komut</h2>
+    <p class="section-desc">Ne yapmak istersen, bir komutu var.</p>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:800px;margin:0 auto;">
+      <div style="background:rgba(255,107,0,.02);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;transition:border-color .3s;" onmouseover="this.style.borderColor='var(--border-glow)'" onmouseout="this.style.borderColor=''">
+        <div style="font-size:20px;margin-bottom:6px">☾</div>
+        <code style="font-size:12px;color:var(--orange-light);font-family:'JetBrains Mono',monospace">glitch fix</code>
+        <p style="font-size:11px;color:var(--text3);margin-top:6px">7 fazlı otomatik düzeltme</p>
       </div>
-      <div class="vscode-features">
-        <div class="vscode-feat"><span class="vscode-feat-icon">☄</span><h4>Fix Selection</h4><p>Seçili kodu düzelt</p></div>
-        <div class="vscode-feat"><span class="vscode-feat-icon">✦</span><h4>Solve Task</h4><p>Görev planla ve çöz</p></div>
-        <div class="vscode-feat"><span class="vscode-feat-icon">⚡</span><h4>Model Select</h4><p>40+ model arasından seçim</p></div>
-        <div class="vscode-feat"><span class="vscode-feat-icon">🌙</span><h4>Diff View</h4><p>Kod değişikliklerini karşılaştır</p></div>
+      <div style="background:rgba(255,107,0,.02);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;transition:border-color .3s;" onmouseover="this.style.borderColor='var(--border-glow)'" onmouseout="this.style.borderColor=''">
+        <div style="font-size:20px;margin-bottom:6px">✦</div>
+        <code style="font-size:12px;color:var(--orange-light);font-family:'JetBrains Mono',monospace">glitch solve</code>
+        <p style="font-size:11px;color:var(--text3);margin-top:6px">görev parçala + sub-agent</p>
       </div>
-      <div class="vscode-install-row">
-        <a href="https://github.com/glassesglitchstudio-lab/Gltich_code/releases/latest/download/glitch-code.vsix" target="_blank" class="vscode-dl-btn">📥 VSIX İndir</a>
-        <code style="background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:10px;padding:10px 18px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--orange-light);display:inline-flex;align-items:center;">code --install-extension glitch-code.vsix</code>
+      <div style="background:rgba(255,107,0,.02);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;transition:border-color .3s;" onmouseover="this.style.borderColor='var(--border-glow)'" onmouseout="this.style.borderColor=''">
+        <div style="font-size:20px;margin-bottom:6px">⚡</div>
+        <code style="font-size:12px;color:var(--orange-light);font-family:'JetBrains Mono',monospace">glitch ptc</code>
+        <p style="font-size:11px;color:var(--text3);margin-top:6px">PlusTwoCoder debate</p>
+      </div>
+      <div style="background:rgba(255,107,0,.02);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;transition:border-color .3s;" onmouseover="this.style.borderColor='var(--border-glow)'" onmouseout="this.style.borderColor=''">
+        <div style="font-size:20px;margin-bottom:6px">🌙</div>
+        <code style="font-size:12px;color:var(--orange-light);font-family:'JetBrains Mono',monospace">glitch review</code>
+        <p style="font-size:11px;color:var(--text3);margin-top:6px">teknik + stil + güvenlik</p>
+      </div>
+      <div style="background:rgba(255,107,0,.02);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;transition:border-color .3s;" onmouseover="this.style.borderColor='var(--border-glow)'" onmouseout="this.style.borderColor=''">
+        <div style="font-size:20px;margin-bottom:6px">☄</div>
+        <code style="font-size:12px;color:var(--orange-light);font-family:'JetBrains Mono',monospace">glitch cost</code>
+        <p style="font-size:11px;color:var(--text3);margin-top:6px">token/maliyet takibi</p>
+      </div>
+      <div style="background:rgba(255,107,0,.02);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;transition:border-color .3s;" onmouseover="this.style.borderColor='var(--border-glow)'" onmouseout="this.style.borderColor=''">
+        <div style="font-size:20px;margin-bottom:6px">◉</div>
+        <code style="font-size:12px;color:var(--orange-light);font-family:'JetBrains Mono',monospace">glitch bench</code>
+        <p style="font-size:11px;color:var(--text3);margin-top:6px">multi-model benchmark</p>
+      </div>
+      <div style="background:rgba(255,107,0,.02);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;transition:border-color .3s;" onmouseover="this.style.borderColor='var(--border-glow)'" onmouseout="this.style.borderColor=''">
+        <div style="font-size:20px;margin-bottom:6px">⚙</div>
+        <code style="font-size:12px;color:var(--orange-light);font-family:'JetBrains Mono',monospace">glitch audit</code>
+        <p style="font-size:11px;color:var(--text3);margin-top:6px">bağımlılık denetimi</p>
+      </div>
+      <div style="background:rgba(255,107,0,.02);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;transition:border-color .3s;" onmouseover="this.style.borderColor='var(--border-glow)'" onmouseout="this.style.borderColor=''">
+        <div style="font-size:20px;margin-bottom:6px">★</div>
+        <code style="font-size:12px;color:var(--orange-light);font-family:'JetBrains Mono',monospace">glitch replay</code>
+        <p style="font-size:11px;color:var(--text3);margin-top:6px">oturum tekrar oynatma</p>
+      </div>
+      <div style="background:rgba(255,107,0,.02);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;transition:border-color .3s;" onmouseover="this.style.borderColor='var(--border-glow)'" onmouseout="this.style.borderColor=''">
+        <div style="font-size:20px;margin-bottom:6px">📋</div>
+        <code style="font-size:12px;color:var(--orange-light);font-family:'JetBrains Mono',monospace">glitch changelog</code>
+        <p style="font-size:11px;color:var(--text3);margin-top:6px">git→CHANGELOG</p>
+      </div>
+      <div style="background:rgba(255,107,0,.02);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;transition:border-color .3s;" onmouseover="this.style.borderColor='var(--border-glow)'" onmouseout="this.style.borderColor=''">
+        <div style="font-size:20px;margin-bottom:6px">☾</div>
+        <code style="font-size:12px;color:var(--orange-light);font-family:'JetBrains Mono',monospace">glitch onboard</code>
+        <p style="font-size:11px;color:var(--text3);margin-top:6px">interaktif başlangıç</p>
+      </div>
+      <div style="background:rgba(255,107,0,.02);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;transition:border-color .3s;" onmouseover="this.style.borderColor='var(--border-glow)'" onmouseout="this.style.borderColor=''">
+        <div style="font-size:20px;margin-bottom:6px">✦</div>
+        <code style="font-size:12px;color:var(--orange-light);font-family:'JetBrains Mono',monospace">glitch share</code>
+        <p style="font-size:11px;color:var(--text3);margin-top:6px">session export</p>
+      </div>
+      <div style="background:rgba(255,107,0,.02);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;transition:border-color .3s;" onmouseover="this.style.borderColor='var(--border-glow)'" onmouseout="this.style.borderColor=''">
+        <div style="font-size:20px;margin-bottom:6px">◉</div>
+        <code style="font-size:12px;color:var(--orange-light);font-family:'JetBrains Mono',monospace">glitch plugins</code>
+        <p style="font-size:11px;color:var(--text3);margin-top:6px">plugin market</p>
+      </div>
+      <div style="background:rgba(255,107,0,.02);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;transition:border-color .3s;" onmouseover="this.style.borderColor='var(--border-glow)'" onmouseout="this.style.borderColor=''">
+        <div style="font-size:20px;margin-bottom:6px">⚡</div>
+        <code style="font-size:12px;color:var(--orange-light);font-family:'JetBrains Mono',monospace">glitch team</code>
+        <p style="font-size:11px;color:var(--text3);margin-top:6px">workspace yönetimi</p>
+      </div>
+      <div style="background:rgba(255,107,0,.02);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;transition:border-color .3s;" onmouseover="this.style.borderColor='var(--border-glow)'" onmouseout="this.style.borderColor=''">
+        <div style="font-size:20px;margin-bottom:6px">🌙</div>
+        <code style="font-size:12px;color:var(--orange-light);font-family:'JetBrains Mono',monospace">glitch suggest</code>
+        <p style="font-size:11px;color:var(--text3);margin-top:6px">context-aware öneri</p>
+      </div>
+      <div style="background:rgba(255,107,0,.02);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;transition:border-color .3s;" onmouseover="this.style.borderColor='var(--border-glow)'" onmouseout="this.style.borderColor=''">
+        <div style="font-size:20px;margin-bottom:6px">☾</div>
+        <code style="font-size:12px;color:var(--orange-light);font-family:'JetBrains Mono',monospace">glitch theme</code>
+        <p style="font-size:11px;color:var(--text3);margin-top:6px">7 tema + glassmorphism</p>
+      </div>
+      <div style="background:rgba(255,107,0,.02);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;transition:border-color .3s;" onmouseover="this.style.borderColor='var(--border-glow)'" onmouseout="this.style.borderColor=''">
+        <div style="font-size:20px;margin-bottom:6px">★</div>
+        <code style="font-size:12px;color:var(--orange-light);font-family:'JetBrains Mono',monospace">glitch offline</code>
+        <p style="font-size:11px;color:var(--text3);margin-top:6px">Ollama/LMStudio</p>
       </div>
     </div>
   </div></section>
