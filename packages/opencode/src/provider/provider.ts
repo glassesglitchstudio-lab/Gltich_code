@@ -172,6 +172,21 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
         },
         options: {},
       }),
+    alibaba: () =>
+      Effect.succeed({
+        autoload: false,
+        options: {},
+      }),
+    "alibaba-cn": () =>
+      Effect.succeed({
+        autoload: false,
+        options: {},
+      }),
+    "opencode-go": () =>
+      Effect.succeed({
+        autoload: false,
+        options: {},
+      }),
     xai: () =>
       Effect.succeed({
         autoload: false,
