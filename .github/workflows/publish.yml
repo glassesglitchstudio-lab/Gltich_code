@@ -193,11 +193,11 @@ jobs:
           cd packages/vscode
           bun install
           bun run build
-          vsce package
+          vsce package --allow-package-all-secrets
 
       - name: Publish to VS Code Marketplace
         run: |
           cd packages/vscode
-          vsce publish -p ${{ secrets.VSCE_PAT }}
+          vsce publish -p ${{ secrets.VSCE_PAT }} --allow-package-all-secrets
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
