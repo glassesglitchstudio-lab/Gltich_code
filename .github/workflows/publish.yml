@@ -168,36 +168,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  publish-vscode:
-    needs: build
-    if: ${{ always() && !cancelled() && startsWith(github.ref, 'refs/tags/v') }}
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Bun
-        uses: ./.github/actions/setup-bun
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Install vsce
-        run: npm install -g @vscode/vsce
-
-      - name: Build and package extension
-        run: |
-          cd packages/vscode
-          bun install --linker hoisted
-          bun run build
-          vsce package --allow-package-secrets slack
-
-      - name: Publish to VS Code Marketplace
-        run: |
-          cd packages/vscode
-          vsce publish -p ${{ secrets.VSCE_PAT }} --allow-package-secrets slack
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+  

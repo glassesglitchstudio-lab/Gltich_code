@@ -3,166 +3,333 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Glitch Code Marketplace — Plugin Dükkanı</title>
+  <title>Marketplace — Glitch Code</title>
   <meta name="description" content="Glitch Code plugin marketplace. Keşfet ve kur.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    :root{--bg:#09090f;--surface:rgba(139,92,246,.05);--surface2:rgba(139,92,246,.08);--border:rgba(139,92,246,.12);--violet:#8b5cf6;--violet-dim:#7c3aed;--violet-light:#a78bfa;--orange:#ff6b00;--text:#eeeef0;--text2:#8b8a9e;--text3:#5c5b6e;--radius:12px}
+    :root {
+      --bg: #0a0a0f;
+      --surface: rgba(255,107,0,.04);
+      --surface2: rgba(255,107,0,.08);
+      --surface3: rgba(255,107,0,.12);
+      --border: rgba(255,107,0,.15);
+      --border-glow: rgba(255,107,0,.25);
+      --orange: #FF6B00;
+      --orange-dim: #E05E00;
+      --orange-light: #FF8A33;
+      --orange-glow: rgba(255,107,0,.12);
+      --text: #f0eee8;
+      --text2: #a09888;
+      --text3: #605850;
+      --radius: 12px;
+      --radius-lg: 20px;
+    }
     *{margin:0;padding:0;box-sizing:border-box}
     html{scroll-behavior:smooth}
-    body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
-    code,.cmd,.mono{font-family:'JetBrains Mono','Fira Code',monospace}
+    body{
+      font-family:'Inter',-apple-system,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+      overflow-x:hidden;
+    }
+    code,.mono{font-family:'JetBrains Mono','Fira Code',monospace}
     .container{max-width:1100px;margin:0 auto;padding:0 24px}
 
+    ::selection{background:var(--orange);color:#fff}
+    ::-webkit-scrollbar{width:8px}
+    ::-webkit-scrollbar-track{background:var(--bg)}
+    ::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:4px}
+    ::-webkit-scrollbar-thumb:hover{background:var(--orange)}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes glowPulse{0%,100%{box-shadow:0 0 20px rgba(255,107,0,.1)}50%{box-shadow:0 0 40px rgba(255,107,0,.2)}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .animate-in{animation:fadeUp .4s ease both}
+    .delay-1{animation-delay:.05s}.delay-2{animation-delay:.1s}.delay-3{animation-delay:.15s}.delay-4{animation-delay:.2s}.delay-5{animation-delay:.25s}.delay-6{animation-delay:.3s}
+
+    .moon-bg{
+      position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+      width:800px;height:800px;pointer-events:none;z-index:0;
+      background:radial-gradient(circle,rgba(255,107,0,.03) 0%,transparent 60%);
+    }
+
     /* NAV */
-    .topnav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(9,9,15,.8);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
-    .nav-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px}
-    .nav-logo{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:16px;color:var(--violet);text-decoration:none;letter-spacing:2px}
-    .nav-links{display:flex;gap:28px;align-items:center}
-    .nav-links a{color:var(--text2);text-decoration:none;font-size:14px;transition:color .2s}
+    .topnav{
+      position:fixed;top:0;left:0;right:0;z-index:100;
+      background:rgba(10,10,15,.75);
+      backdrop-filter:blur(16px) saturate(1.2);
+      border-bottom:1px solid var(--border);
+    }
+    .nav-inner{
+      max-width:1100px;margin:0 auto;padding:0 24px;
+      display:flex;align-items:center;justify-content:space-between;height:60px;
+    }
+    .nav-logo{
+      font-family:'JetBrains Mono',monospace;
+      font-weight:800;font-size:18px;
+      color:var(--orange);
+      text-decoration:none;
+      letter-spacing:3px;
+      display:flex;align-items:center;gap:10px;
+    }
+    .nav-logo-moon{font-size:14px;opacity:.7}
+    .nav-links{display:flex;gap:32px;align-items:center}
+    .nav-links a{
+      color:var(--text2);text-decoration:none;
+      font-size:14px;font-weight:500;
+      transition:color .2s;position:relative;
+    }
     .nav-links a:hover,.nav-links a.active{color:var(--text)}
-    .nav-links a.active{color:var(--violet)}
+    .nav-links a.active{color:var(--orange)}
+    .nav-links a::after{
+      content:'';position:absolute;bottom:-4px;left:0;right:0;
+      height:1px;background:var(--orange);
+      transform:scaleX(0);transition:transform .2s;
+    }
+    .nav-links a:hover::after,.nav-links a.active::after{transform:scaleX(1)}
 
     /* HERO */
-    .hero{position:relative;padding:140px 0 80px;text-align:center;overflow:hidden}
-    .hero-glow{position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:800px;height:600px;background:radial-gradient(ellipse,rgba(139,92,246,.12) 0%,transparent 70%);pointer-events:none}
-    .hero h1{font-size:48px;font-weight:800;line-height:1.1;margin-bottom:16px}
-    .hero-accent{background:linear-gradient(135deg,var(--violet),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-    .hero-sub{font-size:18px;color:var(--text2);max-width:520px;margin:0 auto 40px}
+    .hero{position:relative;z-index:1;padding:140px 0 60px;text-align:center;overflow:hidden}
+    .hero h1{font-size:44px;font-weight:900;line-height:1.1;margin-bottom:12px;letter-spacing:-.5px}
+    .hero-accent{background:linear-gradient(135deg,var(--orange),var(--orange-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hero-sub{font-size:16px;color:var(--text2);max-width:480px;margin:0 auto 36px}
 
     /* SEARCH */
-    .search-bar{max-width:560px;margin:0 auto;position:relative}
-    .search-input{width:100%;padding:14px 20px 14px 48px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:15px;font-family:inherit;outline:none;transition:border-color .2s}
+    .search-bar{max-width:520px;margin:0 auto;position:relative}
+    .search-input{
+      width:100%;padding:14px 20px 14px 48px;
+      background:rgba(255,107,0,.03);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      color:var(--text);font-size:14px;font-family:inherit;
+      outline:none;transition:border-color .3s;
+    }
     .search-input::placeholder{color:var(--text3)}
-    .search-input:focus{border-color:var(--violet)}
-    .search-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--text3);pointer-events:none}
-    .search-stats{margin-top:12px;font-size:13px;color:var(--text3)}
+    .search-input:focus{border-color:var(--orange);box-shadow:0 0 20px rgba(255,107,0,.06)}
+    .search-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--text3);pointer-events:none}
+    .search-stats{margin-top:10px;font-size:12px;color:var(--text3)}
 
     /* SECTIONS */
-    .section{padding:80px 0}
-    .section--alt{background:var(--surface)}
-    .section-title{font-size:32px;font-weight:800;text-align:center;margin-bottom:12px}
-    .section-desc{font-size:16px;color:var(--text2);text-align:center;max-width:480px;margin:0 auto 48px}
+    .section{z-index:1;position:relative;padding:60px 0}
+    .section--alt{background:rgba(255,107,0,.015)}
+    .section-title{font-size:28px;font-weight:800;text-align:center;margin-bottom:8px}
+    .section-desc{font-size:14px;color:var(--text2);text-align:center;max-width:440px;margin:0 auto 36px}
 
-    /* CATEGORIES GRID */
-    .cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-    .cat-card{display:flex;flex-direction:column;align-items:center;gap:8px;padding:28px 16px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .3s;text-decoration:none;color:inherit}
-    .cat-card:hover{border-color:var(--violet);transform:translateY(-3px);box-shadow:0 8px 32px rgba(139,92,246,.12)}
-    .cat-card.active{border-color:var(--violet);background:rgba(139,92,246,.08)}
-    .cat-emoji{font-size:32px}
-    .cat-name{font-size:14px;font-weight:600}
-    .cat-count{font-size:12px;color:var(--text3)}
+    /* CATEGORIES */
+    .cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+    .cat-card{
+      display:flex;flex-direction:column;align-items:center;gap:8px;
+      padding:24px 12px;
+      background:rgba(255,107,0,.02);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      cursor:pointer;
+      transition:all .3s;text-decoration:none;color:inherit;
+    }
+    .cat-card:hover{
+      border-color:var(--border-glow);
+      transform:translateY(-2px);
+      box-shadow:0 8px 24px rgba(255,107,0,.06);
+    }
+    .cat-card.active{border-color:var(--orange);background:rgba(255,107,0,.06)}
+    .cat-emoji{font-size:28px;line-height:1}
+    .cat-name{font-size:13px;font-weight:600}
+    .cat-count{font-size:11px;color:var(--text3)}
 
     /* FEATURED SCROLL */
-    .featured-scroll{display:flex;gap:16px;overflow-x:auto;padding-bottom:16px;scroll-snap-type:x mandatory;-ms-overflow-style:none;scrollbar-width:none}
+    .featured-scroll{display:flex;gap:14px;overflow-x:auto;padding-bottom:12px;scroll-snap-type:x mandatory;-ms-overflow-style:none;scrollbar-width:none}
     .featured-scroll::-webkit-scrollbar{display:none}
-    .featured-card{flex:0 0 320px;scroll-snap-align:start;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:24px;cursor:pointer;transition:all .3s}
-    .featured-card:hover{border-color:var(--violet);transform:translateY(-2px);box-shadow:0 8px 32px rgba(139,92,246,.1)}
-    .featured-top{display:flex;align-items:flex-start;gap:14px;margin-bottom:14px}
-    .featured-icon{font-size:36px;flex-shrink:0}
+    .featured-card{
+      flex:0 0 300px;scroll-snap-align:start;
+      background:rgba(255,107,0,.02);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:22px;
+      cursor:pointer;transition:all .3s;
+    }
+    .featured-card:hover{
+      border-color:var(--border-glow);
+      transform:translateY(-2px);
+      box-shadow:0 8px 24px rgba(255,107,0,.05);
+    }
+    .featured-top{display:flex;align-items:flex-start;gap:14px;margin-bottom:12px}
+    .featured-icon{font-size:32px;flex-shrink:0}
     .featured-info{flex:1;min-width:0}
-    .featured-name{font-size:16px;font-weight:700;display:flex;align-items:center;gap:6px}
-    .verified-badge{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;background:var(--violet);border-radius:50%;font-size:9px;color:#fff}
-    .featured-author{font-size:12px;color:var(--text3);margin-top:2px}
-    .featured-desc{font-size:13px;color:var(--text2);margin-bottom:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .featured-name{font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px}
+    .verified-badge{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:15px;height:15px;
+      background:var(--orange);border-radius:50%;
+      font-size:8px;color:#fff;
+    }
+    .featured-author{font-size:11px;color:var(--text3);margin-top:2px}
+    .featured-desc{font-size:12px;color:var(--text2);margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
     .featured-meta{display:flex;align-items:center;justify-content:space-between}
-    .featured-stats{display:flex;align-items:center;gap:12px;font-size:12px;color:var(--text3)}
-    .featured-dl{display:flex;align-items:center;gap:4px}
-    .featured-stars{color:#f59e0b}
-    .featured-rating{display:flex;align-items:center;gap:4px}
-
-    /* INSTALL BTN */
-    .install-btn{padding:8px 16px;background:var(--violet);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s;white-space:nowrap}
-    .install-btn:hover{background:var(--violet-dim);transform:scale(1.04)}
-    .install-btn.installed{background:rgba(34,197,94,.15);color:#22c55e}
+    .featured-stats{display:flex;align-items:center;gap:10px;font-size:11px;color:var(--text3)}
 
     /* FILTER BAR */
-    .filter-bar{display:flex;gap:12px;margin-bottom:32px;flex-wrap:wrap;align-items:center}
-    .filter-select{padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;cursor:pointer;outline:none;transition:border-color .2s}
-    .filter-select:focus{border-color:var(--violet)}
-    .filter-count{margin-left:auto;font-size:13px;color:var(--text3)}
+    .filter-bar{display:flex;gap:12px;margin-bottom:28px;flex-wrap:wrap;align-items:center}
+    .filter-select{
+      padding:10px 14px;
+      background:rgba(255,107,0,.02);
+      border:1px solid var(--border);
+      border-radius:8px;
+      color:var(--text);font-size:12px;font-family:inherit;
+      cursor:pointer;outline:none;transition:border-color .2s;
+    }
+    .filter-select:focus{border-color:var(--orange)}
+    .filter-count{margin-left:auto;font-size:12px;color:var(--text3)}
 
     /* PLUGIN GRID */
-    .plugin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-    .plugin-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:24px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
-    .plugin-card:hover{border-color:var(--violet);transform:translateY(-2px);box-shadow:0 12px 40px rgba(139,92,246,.1)}
-    .plugin-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--violet),transparent);opacity:0;transition:opacity .3s}
+    .plugin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .plugin-card{
+      background:rgba(255,107,0,.02);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:22px;
+      cursor:pointer;transition:all .3s;
+      position:relative;overflow:hidden;
+    }
+    .plugin-card::before{
+      content:'';position:absolute;top:0;left:0;right:0;height:2px;
+      background:linear-gradient(90deg,transparent,var(--orange),transparent);
+      opacity:0;transition:opacity .3s;
+    }
     .plugin-card:hover::before{opacity:1}
-    .plugin-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
-    .plugin-icon{font-size:32px;flex-shrink:0}
+    .plugin-card:hover{
+      border-color:var(--border-glow);
+      transform:translateY(-2px);
+      box-shadow:0 12px 32px rgba(255,107,0,.05);
+    }
+    .plugin-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
+    .plugin-icon{font-size:30px;flex-shrink:0}
     .plugin-title-group{flex:1;min-width:0}
-    .plugin-name{font-size:15px;font-weight:700;display:flex;align-items:center;gap:6px}
-    .plugin-author{font-size:12px;color:var(--text3)}
-    .plugin-desc{font-size:13px;color:var(--text2);margin-bottom:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-    .plugin-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
-    .plugin-tag{padding:3px 8px;background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.1);border-radius:6px;font-size:11px;color:var(--violet-light)}
+    .plugin-name{font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px}
+    .plugin-author{font-size:11px;color:var(--text3)}
+    .plugin-desc{font-size:12px;color:var(--text2);margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .plugin-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+    .plugin-tag{
+      padding:3px 8px;
+      background:rgba(255,107,0,.06);
+      border:1px solid rgba(255,107,0,.08);
+      border-radius:5px;
+      font-size:10px;color:var(--orange-light);
+    }
     .plugin-bottom{display:flex;align-items:center;justify-content:space-between}
-    .plugin-stats{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text3)}
-    .plugin-dl{display:flex;align-items:center;gap:4px}
+    .plugin-stats{display:flex;align-items:center;gap:10px;font-size:11px;color:var(--text3)}
+    .plugin-dl{display:flex;align-items:center;gap:3px}
+
+    /* INSTALL BTN */
+    .install-btn{
+      padding:7px 14px;
+      background:var(--orange);border:none;
+      border-radius:7px;color:#fff;
+      font-size:11px;font-weight:600;font-family:inherit;
+      cursor:pointer;transition:all .2s;white-space:nowrap;
+    }
+    .install-btn:hover{background:var(--orange-dim);transform:scale(1.04)}
 
     /* MODAL */
-    .modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+    .modal-overlay{
+      position:fixed;inset:0;z-index:200;
+      background:rgba(0,0,0,.7);backdrop-filter:blur(8px);
+      display:flex;align-items:center;justify-content:center;
+      opacity:0;pointer-events:none;transition:opacity .25s;
+    }
     .modal-overlay.open{opacity:1;pointer-events:auto}
-    .modal{background:var(--bg);border:1px solid var(--border);border-radius:16px;max-width:560px;width:90%;max-height:85vh;overflow-y:auto;padding:32px;position:relative;transform:translateY(20px) scale(.97);transition:transform .25s}
+    .modal{
+      background:var(--bg);
+      border:1px solid var(--border);
+      border-radius:var(--radius-lg);
+      max-width:520px;width:90%;max-height:85vh;
+      overflow-y:auto;padding:28px;
+      position:relative;
+      transform:translateY(20px) scale(.97);
+      transition:transform .25s;
+    }
     .modal-overlay.open .modal{transform:translateY(0) scale(1)}
-    .modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
-    .modal-close:hover{background:var(--violet);color:#fff;border-color:var(--violet)}
-    .modal-header{display:flex;gap:16px;align-items:flex-start;margin-bottom:20px}
-    .modal-icon{font-size:48px}
+    .modal-close{
+      position:absolute;top:14px;right:14px;
+      width:30px;height:30px;
+      background:var(--surface2);
+      border:1px solid var(--border);border-radius:7px;
+      color:var(--text2);font-size:16px;
+      cursor:pointer;display:flex;align-items:center;justify-content:center;
+      transition:all .2s;
+    }
+    .modal-close:hover{background:var(--orange);color:#fff;border-color:var(--orange)}
+    .modal-header{display:flex;gap:16px;align-items:flex-start;margin-bottom:16px}
+    .modal-icon{font-size:40px}
     .modal-title-group{flex:1}
-    .modal-name{font-size:22px;font-weight:800;display:flex;align-items:center;gap:8px}
-    .modal-author{font-size:14px;color:var(--text3);margin-top:4px}
-    .modal-desc{font-size:15px;color:var(--text2);margin-bottom:24px;line-height:1.7}
-    .modal-meta{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
-    .modal-meta-item{padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px}
-    .modal-meta-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
-    .modal-meta-value{font-size:14px;font-weight:600}
-    .modal-install{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:12px;margin-bottom:20px}
-    .modal-cmd{flex:1;font-size:13px;color:var(--violet-light);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .modal-copy{padding:8px 14px;background:var(--violet);border:none;border-radius:6px;color:#fff;font-size:12px;font-family:inherit;cursor:pointer;transition:background .2s;white-space:nowrap}
-    .modal-copy:hover{background:var(--violet-dim)}
-    .modal-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
-    .modal-section-title{font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
-    .modal-perms{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
-    .perm-badge{padding:4px 10px;background:rgba(255,107,0,.08);border:1px solid rgba(255,107,0,.15);border-radius:6px;font-size:12px;color:var(--orange)}
-    .modal-install-row{display:flex;gap:10px}
-    .modal-install-btn{flex:1;padding:12px;background:var(--violet);border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s}
-    .modal-install-btn:hover{background:var(--violet-dim)}
+    .modal-name{font-size:20px;font-weight:800;display:flex;align-items:center;gap:8px}
+    .modal-author{font-size:13px;color:var(--text3);margin-top:4px}
+    .modal-desc{font-size:14px;color:var(--text2);margin-bottom:20px;line-height:1.7}
+    .modal-meta{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+    .modal-meta-item{
+      padding:10px 14px;
+      background:rgba(255,107,0,.03);
+      border:1px solid var(--border);border-radius:8px;
+    }
+    .modal-meta-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+    .modal-meta-value{font-size:13px;font-weight:600}
+    .modal-install{
+      background:rgba(255,107,0,.03);
+      border:1px solid var(--border);border-radius:10px;
+      padding:12px 16px;display:flex;align-items:center;gap:10px;
+      margin-bottom:16px;
+    }
+    .modal-cmd{flex:1;font-size:12px;color:var(--orange-light);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .modal-copy{
+      padding:7px 12px;background:var(--orange);border:none;
+      border-radius:6px;color:#fff;font-size:11px;font-family:inherit;
+      cursor:pointer;transition:background .2s;white-space:nowrap;
+    }
+    .modal-copy:hover{background:var(--orange-dim)}
+    .modal-section-title{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+    .modal-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:16px}
+    .perm-badge{
+      padding:4px 10px;
+      background:rgba(255,107,0,.06);
+      border:1px solid rgba(255,107,0,.1);
+      border-radius:6px;font-size:11px;color:var(--orange-light);
+    }
+    .modal-perms{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+    .modal-install-btn{
+      width:100%;padding:12px;
+      background:var(--orange);border:none;border-radius:8px;
+      color:#fff;font-size:13px;font-weight:600;font-family:inherit;
+      cursor:pointer;transition:all .2s;
+    }
+    .modal-install-btn:hover{background:var(--orange-dim)}
 
-    /* ANIMATIONS */
-    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-    .animate-in{animation:fadeUp .4s ease both}
-    .delay-1{animation-delay:.05s}.delay-2{animation-delay:.1s}.delay-3{animation-delay:.15s}.delay-4{animation-delay:.2s}
+    /* EMPTY / LOADING */
+    .empty-state{text-align:center;padding:50px 20px;color:var(--text3)}
+    .empty-state .empty-icon{font-size:40px;margin-bottom:12px;opacity:.5}
+    .empty-state p{font-size:14px}
+    .loading{text-align:center;padding:50px 20px}
+    .loading-spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--orange);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px}
+    .loading p{font-size:13px;color:var(--text3)}
 
     /* FOOTER */
-    .site-footer{padding:48px 0 32px;border-top:1px solid var(--border)}
+    .site-footer{z-index:1;position:relative;padding:48px 0 32px;border-top:1px solid var(--border)}
     .footer-inner{display:flex;justify-content:space-between;align-items:center}
     .footer-brand{display:flex;flex-direction:column;gap:4px}
-    .footer-logo{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:800;color:var(--violet);letter-spacing:1px}
+    .footer-logo{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:800;color:var(--orange);letter-spacing:2px}
     .footer-copy{font-size:13px;color:var(--text3)}
     .footer-links{display:flex;gap:24px}
     .footer-links a{color:var(--text2);text-decoration:none;font-size:13px;transition:color .2s}
-    .footer-links a:hover{color:var(--violet)}
-
-    /* EMPTY STATE */
-    .empty-state{text-align:center;padding:60px 20px;color:var(--text3)}
-    .empty-state .empty-icon{font-size:48px;margin-bottom:16px;opacity:.5}
-    .empty-state p{font-size:15px}
-
-    /* LOADING */
-    .loading{text-align:center;padding:60px 20px}
-    .loading-spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--violet);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 16px}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .loading p{font-size:14px;color:var(--text3)}
+    .footer-links a:hover{color:var(--orange)}
 
     @media(max-width:768px){
-      .hero h1{font-size:32px}
+      .hero h1{font-size:28px}
       .cat-grid{grid-template-columns:repeat(2,1fr)}
       .plugin-grid{grid-template-columns:1fr}
-      .featured-card{flex:0 0 280px}
-      .modal{padding:24px}
+      .featured-card{flex:0 0 260px}
+      .modal{padding:20px}
       .modal-meta{grid-template-columns:1fr}
       .nav-links{display:none}
       .footer-inner{flex-direction:column;gap:20px;text-align:center}
@@ -170,17 +337,26 @@
   </style>
 </head>
 <body>
-  <nav class="topnav"><div class="nav-inner"><a href="/" class="nav-logo">GLITCH</a><div class="nav-links"><a href="/">Home</a><a href="/marketplace.html" class="active">Plugins</a><a href="#">Docs</a><a href="https://github.com/glassesglitchstudio-lab/Gltich_code" target="_blank">GitHub</a></div></div></nav>
+  <div class="moon-bg"></div>
+
+  <nav class="topnav"><div class="nav-inner">
+    <a href="/" class="nav-logo"><span class="nav-logo-moon">☾</span> GLITCH</a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/marketplace.html" class="active">Market</a>
+      <a href="#">Docs</a>
+      <a href="https://github.com/glassesglitchstudio-lab/Gltich_code" target="_blank" style="color:var(--orange)">★ GitHub</a>
+    </div>
+  </div></nav>
 
   <!-- HERO -->
   <header class="hero">
-    <div class="hero-glow"></div>
     <div class="container">
-      <h1><span class="hero-accent">Glitch Code Marketplace</span></h1>
-      <p class="hero-sub">Discover and install plugins to extend Glitch Code</p>
+      <h1><span class="hero-accent">Marketplace</span></h1>
+      <p class="hero-sub">Glitch Code için plugin keşfet ve kur</p>
       <div class="search-bar">
-        <span class="search-icon">🔍</span>
-        <input type="text" class="search-input" placeholder="Search plugins..." id="searchInput">
+        <span class="search-icon">☾</span>
+        <input type="text" class="search-input" placeholder="Plugin, kategori, etiket ara..." id="searchInput">
       </div>
       <div class="search-stats" id="searchStats"></div>
     </div>
@@ -189,8 +365,8 @@
   <!-- CATEGORIES -->
   <section class="section" id="categories">
     <div class="container">
-      <h2 class="section-title">Categories</h2>
-      <p class="section-desc">Browse by category</p>
+      <h2 class="section-title">Kategoriler</h2>
+      <p class="section-desc">Kategoriye göre göz at</p>
       <div class="cat-grid" id="catGrid"></div>
     </div>
   </section>
@@ -198,8 +374,8 @@
   <!-- FEATURED -->
   <section class="section section--alt" id="featured">
     <div class="container">
-      <h2 class="section-title">Featured Plugins</h2>
-      <p class="section-desc">Hand-picked by the Glitch Code team</p>
+      <h2 class="section-title">Öne Çıkanlar</h2>
+      <p class="section-desc">Glitch Code ekibi tarafından seçildi</p>
       <div class="featured-scroll" id="featuredScroll"></div>
     </div>
   </section>
@@ -207,16 +383,16 @@
   <!-- ALL PLUGINS -->
   <section class="section" id="plugins">
     <div class="container">
-      <h2 class="section-title">All Plugins</h2>
-      <p class="section-desc">Browse the full collection</p>
+      <h2 class="section-title">Tüm Pluginler</h2>
+      <p class="section-desc">Tam koleksiyona göz at</p>
       <div class="filter-bar">
         <select class="filter-select" id="filterCategory">
-          <option value="all">All Categories</option>
+          <option value="all">Tümü</option>
         </select>
         <select class="filter-select" id="filterSort">
-          <option value="downloads">Most Downloads</option>
-          <option value="rating">Highest Rated</option>
-          <option value="name">Name A–Z</option>
+          <option value="downloads">Çok İndirilen</option>
+          <option value="rating">En Yüksek Puan</option>
+          <option value="name">İsim A–Z</option>
         </select>
         <span class="filter-count" id="filterCount"></span>
       </div>
@@ -227,33 +403,32 @@
   <!-- MODAL -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal" id="modal">
-      <button class="modal-close" id="modalClose">&times;</button>
+      <button class="modal-close" id="modalClose">✕</button>
       <div id="modalContent"></div>
     </div>
   </div>
 
-  <!-- FOOTER -->
   <footer class="site-footer"><div class="container"><div class="footer-inner">
-    <div class="footer-brand"><span class="footer-logo">GLITCH CODE</span><span class="footer-copy">GlassesCat AI tarafından geliştirildi.</span></div>
+    <div class="footer-brand"><span class="footer-logo">☾ GLITCH CODE</span><span class="footer-copy">GlassesCat AI tarafından geliştirildi.</span></div>
     <div class="footer-links"><a href="https://github.com/glassesglitchstudio-lab/Gltich_code" target="_blank">GitHub</a><a href="https://www.npmjs.com/package/glitchcode-cli" target="_blank">npm</a><a href="/">Home</a><a href="#">Docs</a></div>
   </div></div></footer>
 
   <script>
     const CATEGORY_META = {
-      ai:          { emoji: '🤖', label: 'AI' },
-      devtools:    { emoji: '🔧', label: 'DevTools' },
-      ui:          { emoji: '🎨', label: 'UI' },
-      auth:        { emoji: '🔐', label: 'Auth' },
-      database:    { emoji: '🗄️', label: 'Database' },
-      search:      { emoji: '🔍', label: 'Search' },
-      automation:  { emoji: '⚙️', label: 'Automation' },
-      productivity:{ emoji: '📋', label: 'Productivity' }
+      ai:          { emoji: '☾', label: 'AI' },
+      devtools:    { emoji: '☄', label: 'DevTools' },
+      ui:          { emoji: '✦', label: 'UI' },
+      auth:        { emoji: '🌙', label: 'Auth' },
+      database:    { emoji: '⚡', label: 'Database' },
+      search:      { emoji: '◉', label: 'Search' },
+      automation:  { emoji: '⚙', label: 'Automation' },
+      productivity:{ emoji: '★', label: 'Productivity' }
     };
 
     const PLUGIN_ICONS = {
       github:'🐙', filesystem:'📁', postgres:'🐘', sqlite:'💾',
       'brave-search':'🦁', puppeteer:'🎭', memory:'🧠',
-      'brave-local-search':'📍', ollama:'🦙', slack:'💬',
+      'brave-local-search':'📍', ollama:'☾', slack:'💬',
       linear:'📐', notion:'📝'
     };
 
@@ -289,7 +464,7 @@
         if (count === 0) return;
         const card = document.createElement('div');
         card.className = 'cat-card' + (currentCategory === key ? ' active' : '');
-        card.innerHTML = `<span class="cat-emoji">${meta.emoji}</span><span class="cat-name">${meta.label}</span><span class="cat-count">${count} plugin${count !== 1 ? 's' : ''}</span>`;
+        card.innerHTML = `<span class="cat-emoji">${meta.emoji}</span><span class="cat-name">${meta.label}</span><span class="cat-count">${count} plugin</span>`;
         card.onclick = () => {
           currentCategory = currentCategory === key ? 'all' : key;
           document.getElementById('filterCategory').value = currentCategory;
@@ -304,7 +479,7 @@
       const featured = allPlugins.filter(p => p.featured);
       scroll.innerHTML = '';
       if (featured.length === 0) {
-        scroll.innerHTML = '<p style="color:var(--text3);font-size:14px;padding:20px;">No featured plugins yet.</p>';
+        scroll.innerHTML = '<p style="color:var(--text3);font-size:13px;padding:16px;">Henüz öne çıkan plugin yok.</p>';
         return;
       }
       featured.forEach(p => {
@@ -323,9 +498,9 @@
           <div class="featured-meta">
             <div class="featured-stats">
               <span class="featured-dl">⬇ ${formatDownloads(p.downloads)}</span>
-              <span class="featured-rating"><span class="featured-stars">${renderStars(p.rating)}</span> ${p.rating}</span>
+              <span style="color:#f59e0b">${renderStars(p.rating)} ${p.rating}</span>
             </div>
-            <button class="install-btn" onclick="event.stopPropagation();openModal(${JSON.stringify(p).replace(/"/g, '&quot;')})">Install</button>
+            <button class="install-btn" onclick="event.stopPropagation();openModal(${JSON.stringify(p).replace(/"/g,'&quot;')})">Kur</button>
           </div>`;
         card.onclick = () => openModal(p);
         scroll.appendChild(card);
@@ -359,10 +534,10 @@
     function renderPlugins() {
       const grid = document.getElementById('pluginGrid');
       const list = getFilteredPlugins();
-      document.getElementById('filterCount').textContent = `${list.length} plugin${list.length !== 1 ? 's' : ''}`;
+      document.getElementById('filterCount').textContent = `${list.length} plugin`;
 
       if (list.length === 0) {
-        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🔍</div><p>No plugins found matching your criteria.</p></div>`;
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">☾</div><p>Kriterlerine uygun plugin bulunamadı.</p></div>`;
         return;
       }
 
@@ -387,7 +562,7 @@
               <span class="plugin-dl">⬇ ${formatDownloads(p.downloads)}</span>
               <span style="color:#f59e0b">★ ${p.rating}</span>
             </div>
-            <button class="install-btn" onclick="event.stopPropagation();openModal(${JSON.stringify(p).replace(/"/g, '&quot;')})">Install</button>
+            <button class="install-btn" onclick="event.stopPropagation();openModal(${JSON.stringify(p).replace(/"/g,'&quot;')})">Kur</button>
           </div>`;
         card.onclick = () => openModal(p);
         grid.appendChild(card);
@@ -406,13 +581,12 @@
       const q = document.getElementById('searchInput').value.trim();
       const el = document.getElementById('searchStats');
       if (q) {
-        el.textContent = `${filtered.length} result${filtered.length !== 1 ? 's' : ''} for "${q}"`;
+        el.textContent = `${filtered.length} sonuç "${q}" için`;
       } else {
-        el.textContent = `${allPlugins.length} plugins available`;
+        el.textContent = `${allPlugins.length} plugin mevcut`;
       }
     }
 
-    // MODAL
     function openModal(p) {
       const icon = PLUGIN_ICONS[p.name] || '📦';
       const perms = ['file:read', 'file:write', 'network:outbound', 'exec:subprocess'].slice(0, 2 + Math.floor(Math.random() * 2));
@@ -420,31 +594,29 @@
         <div class="modal-header">
           <span class="modal-icon">${icon}</span>
           <div class="modal-title-group">
-            <div class="modal-name">${p.name}${p.verified ? '<span class="verified-badge" style="width:20px;height:20px;font-size:11px">✓</span>' : ''}</div>
+            <div class="modal-name">${p.name}${p.verified ? '<span class="verified-badge" style="width:18px;height:18px;font-size:10px">✓</span>' : ''}</div>
             <div class="modal-author">by ${p.author}</div>
           </div>
         </div>
         <div class="modal-desc">${p.description}</div>
         <div class="modal-meta">
-          <div class="modal-meta-item"><div class="modal-meta-label">Version</div><div class="modal-meta-value">${p.version}</div></div>
-          <div class="modal-meta-item"><div class="modal-meta-label">License</div><div class="modal-meta-value">${p.license}</div></div>
-          <div class="modal-meta-item"><div class="modal-meta-label">Downloads</div><div class="modal-meta-value">${formatDownloads(p.downloads)}</div></div>
-          <div class="modal-meta-item"><div class="modal-meta-label">Rating</div><div class="modal-meta-value" style="color:#f59e0b">★ ${p.rating}</div></div>
+          <div class="modal-meta-item"><div class="modal-meta-label">Versiyon</div><div class="modal-meta-value">${p.version}</div></div>
+          <div class="modal-meta-item"><div class="modal-meta-label">Lisans</div><div class="modal-meta-value">${p.license}</div></div>
+          <div class="modal-meta-item"><div class="modal-meta-label">İndirme</div><div class="modal-meta-value">${formatDownloads(p.downloads)}</div></div>
+          <div class="modal-meta-item"><div class="modal-meta-label">Puan</div><div class="modal-meta-value" style="color:#f59e0b">★ ${p.rating}</div></div>
         </div>
-        <div class="modal-section-title">Install Command</div>
+        <div class="modal-section-title">Kurulum Komutu</div>
         <div class="modal-install">
           <code class="modal-cmd">glitch registry install ${p.name}</code>
-          <button class="modal-copy" onclick="copyCmd(this)">Copy</button>
+          <button class="modal-copy" onclick="copyCmd(this)">Kopyala</button>
         </div>
-        <div class="modal-section-title">Tags</div>
+        <div class="modal-section-title">Etiketler</div>
         <div class="modal-tags">${p.tags.map(t => `<span class="plugin-tag">${t}</span>`).join('')}</div>
-        <div class="modal-section-title">Required Permissions</div>
+        <div class="modal-section-title">Gerekli İzinler</div>
         <div class="modal-perms">${perms.map(pr => `<span class="perm-badge">${pr}</span>`).join('')}</div>
-        <div class="modal-section-title">Compatibility</div>
-        <div class="modal-meta-item" style="margin-bottom:20px"><div class="modal-meta-label">Min Version</div><div class="modal-meta-value mono" style="font-size:13px">glitchcode-cli ≥ 1.0.0</div></div>
-        <div class="modal-install-row">
-          <button class="modal-install-btn" onclick="copyCmd(this)">📋 Copy Install Command</button>
-        </div>`;
+        <div class="modal-section-title">Uyumluluk</div>
+        <div class="modal-meta-item" style="margin-bottom:16px"><div class="modal-meta-label">Minimum Versiyon</div><div class="modal-meta-value mono" style="font-size:12px">glitchcode-cli ≥ 1.0.0</div></div>
+        <button class="modal-install-btn" onclick="copyCmd(this)">☾ Kopyala</button>`;
       document.getElementById('modalOverlay').classList.add('open');
       document.body.style.overflow = 'hidden';
     }
@@ -458,7 +630,7 @@
       const cmd = 'glitch registry install ' + (document.querySelector('.modal-name')?.textContent?.replace('✓', '').trim() || '');
       navigator.clipboard.writeText(cmd).then(() => {
         const orig = btn.textContent;
-        btn.textContent = 'Copied!';
+        btn.textContent = '✓ Kopyalandı';
         setTimeout(() => { btn.textContent = orig; }, 1500);
       });
     }
@@ -467,7 +639,6 @@
     document.getElementById('modalOverlay').onclick = e => { if (e.target === e.currentTarget) closeModal(); };
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-    // FILTERS
     document.getElementById('searchInput').addEventListener('input', () => { renderPlugins(); updateStats(); });
     document.getElementById('filterCategory').addEventListener('change', e => {
       currentCategory = e.target.value;
@@ -475,12 +646,10 @@
     });
     document.getElementById('filterSort').addEventListener('change', () => renderPlugins());
 
-    // INIT
     fetch('../plugins-registry.json')
       .then(r => { if (!r.ok) throw new Error('Not found'); return r.json(); })
       .then(data => {
         allPlugins = data.plugins || [];
-        // populate filter dropdown
         const counts = getPluginsByCategory();
         const sel = document.getElementById('filterCategory');
         Object.entries(CATEGORY_META).forEach(([key, meta]) => {
@@ -493,8 +662,7 @@
         renderAll();
       })
       .catch(() => {
-        // fallback: load from inline if fetch fails (file:// protocol)
-        document.getElementById('catGrid').innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">⚠️</div><p>Could not load plugins-registry.json.<br>Try serving via a local server instead of file://.</p></div>';
+        document.getElementById('catGrid').innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">☾</div><p>plugins-registry.json yüklenemedi.<br>Yerel sunucu ile çalıştırmayı dene.</p></div>';
         document.getElementById('featuredScroll').innerHTML = '';
         document.getElementById('pluginGrid').innerHTML = '';
       });
