@@ -1149,12 +1149,8 @@ export function Session() {
                                     {(file) => (
                                       <text fg={theme.text}>
                                         {file.filename}
-                                        <Show when={file.additions > 0}>
-                                          <span style={{ fg: theme.diffAdded }}> +{file.additions}</span>
-                                        </Show>
-                                        <Show when={file.deletions > 0}>
-                                          <span style={{ fg: theme.diffRemoved }}> -{file.deletions}</span>
-                                        </Show>
+                                        {file.additions > 0 && <span style={{ fg: theme.diffAdded }}> +{file.additions}</span>}
+                                        {file.deletions > 0 && <span style={{ fg: theme.diffRemoved }}> -{file.deletions}</span>}
                                       </text>
                                     )}
                                   </For>
@@ -1473,12 +1469,8 @@ function AssistantMessage(props: { message: AssistantMessage; parts: Part[]; las
                 <b>Glitch</b>
               </span>
               <span style={{ fg: theme.textMuted }}> · {model()}</span>
-              <Show when={duration()}>
-                <span style={{ fg: theme.textMuted }}> · {Locale.duration(duration())}</span>
-              </Show>
-              <Show when={props.message.error?.name === "MessageAbortedError"}>
-                <span style={{ fg: theme.textMuted }}> · interrupted</span>
-              </Show>
+              {duration() && <span style={{ fg: theme.textMuted }}> · {Locale.duration(duration())}</span>}
+              {props.message.error?.name === "MessageAbortedError" && <span style={{ fg: theme.textMuted }}> · interrupted</span>}
             </text>
             <Show when={props.message.time.completed}>
               <box
@@ -1633,22 +1625,11 @@ function ReasoningHeader(props: {
       </Match>
       <Match when={true}>
         <text fg={fg()} wrapMode="none">
-          <Show when={props.toggleable}>
-            <span>{props.open ? "- " : "+ "}</span>
-          </Show>
+          {props.toggleable && <span>{props.open ? "- " : "+ "}</span>}
           <span>Thought</span>
-          <Show when={props.title || props.duration}>
-            <span>: </span>
-          </Show>
-          <Show when={props.title}>
-            <span>{props.title}</span>
-          </Show>
-          <Show when={props.duration}>
-            <span>
-              {props.title ? " · " : ""}
-              {props.duration}
-            </span>
-          </Show>
+          {(props.title || props.duration) && <span>: </span>}
+          {props.title && <span>{props.title}</span>}
+          {props.duration && <span>{props.title ? " · " : ""}{props.duration}</span>}
         </text>
       </Match>
     </Switch>
@@ -2209,10 +2190,8 @@ function Write(props: ToolProps<typeof WriteTool>) {
 function Glob(props: ToolProps<typeof GlobTool>) {
   return (
     <InlineTool icon="✱" pending="Finding files..." complete={props.input.pattern} part={props.part}>
-      Glob "{props.input.pattern}" <Show when={props.input.path}>in {normalizePath(props.input.path)} </Show>
-      <Show when={props.metadata.count}>
-        ({props.metadata.count} {props.metadata.count === 1 ? "match" : "matches"})
-      </Show>
+      Glob "{props.input.pattern}" {props.input.path && <>in {normalizePath(props.input.path)} </>}
+      {props.metadata.count && <>({props.metadata.count} {props.metadata.count === 1 ? "match" : "matches"})</>}
     </InlineTool>
   )
 }
@@ -2254,10 +2233,8 @@ function Read(props: ToolProps<typeof ReadTool>) {
 function Grep(props: ToolProps<typeof GrepTool>) {
   return (
     <InlineTool icon="✱" pending="Searching content..." complete={props.input.pattern} part={props.part}>
-      Grep "{props.input.pattern}" <Show when={props.input.path}>in {normalizePath(props.input.path)} </Show>
-      <Show when={props.metadata.matches}>
-        ({props.metadata.matches} {props.metadata.matches === 1 ? "match" : "matches"})
-      </Show>
+      Grep "{props.input.pattern}" {props.input.path && <>in {normalizePath(props.input.path)} </>}
+      {props.metadata.matches && <>({props.metadata.matches} {props.metadata.matches === 1 ? "match" : "matches"})</>}
     </InlineTool>
   )
 }
@@ -2274,7 +2251,7 @@ function CodeSearch(props: ToolProps<typeof CodeSearchTool>) {
   const metadata = props.metadata as { results?: number }
   return (
     <InlineTool icon="◇" pending="Searching code..." complete={props.input.query} part={props.part}>
-      Exa Code Search "{props.input.query}" <Show when={metadata.results}>({metadata.results} results)</Show>
+      Exa Code Search "{props.input.query}" {metadata.results && <>({metadata.results} results)</>}
     </InlineTool>
   )
 }
@@ -2283,7 +2260,7 @@ function WebSearch(props: ToolProps<typeof WebSearchTool>) {
   const metadata = props.metadata as { numResults?: number }
   return (
     <InlineTool icon="◈" pending="Searching web..." complete={props.input.query} part={props.part}>
-      Web Search "{props.input.query}" <Show when={metadata.numResults}>({metadata.numResults} results)</Show>
+      Web Search "{props.input.query}" {metadata.numResults && <>({metadata.numResults} results)</>}
     </InlineTool>
   )
 }

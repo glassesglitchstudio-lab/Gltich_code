@@ -213,10 +213,10 @@ function MimoOAuthFlow(props: { url: string; instructions: string }) {
       description={
         <box gap={1}>
           <Show when={props.url}>
-            <text fg={theme.textMuted}>
-              {t("tui.dialog.login.flow.manual_hint")}
-              <Show when={copied()}>{" "}<span style={{ fg: theme.primary }}>({t("tui.dialog.login.flow.copied")})</span></Show>
-            </text>
+              <text fg={theme.textMuted}>
+                {t("tui.dialog.login.flow.manual_hint")}
+                {copied() && <span style={{ fg: theme.primary }}> ({t("tui.dialog.login.flow.copied")})</span>}
+              </text>
             <text
               fg={theme.primary}
               onMouseUp={() => {
