@@ -1997,11 +1997,11 @@ function InlineTool(props: {
             <NeonPulse active={!props.complete} color={theme.primary} />
             <text fg={fg()} attributes={denied() || recoverable() || props.dismissed ? TextAttributes.STRIKETHROUGH : undefined}>
               <Show fallback={<>{props.pending}</>} when={props.complete}>
-                <Show when={statusIcon()}>
+                {statusIcon() ? (
                   <span style={{ fg: props.part.state.status === "error" ? theme.error : theme.textMuted }}>
                     {statusIcon()}
                   </span>
-                </Show>
+                ) : null}
                 <text> </text>
                 <span style={{ fg: props.iconColor }}>{props.icon}</span> {props.children}
               </Show>
