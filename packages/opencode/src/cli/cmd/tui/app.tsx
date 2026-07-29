@@ -14,7 +14,7 @@ import {
   batch,
   Show,
 } from "solid-js"
-import { win32DisableProcessedInput, win32InstallCtrlCGuard } from "./win32"
+import { win32DisableProcessedInput, win32FlushInputBuffer, win32InstallCtrlCGuard, win32StartMinimizeMonitor } from "./win32"
 import { Flag } from "@/flag/flag"
 import semver from "semver"
 import { DialogProvider, useDialog } from "@tui/ui/dialog"
@@ -141,7 +141,23 @@ export function tui(input: {
     const unguard = win32InstallCtrlCGuard()
     win32DisableProcessedInput()
 
+    const plainTerminal = isPlainTerminal()
+    const renderer = await createCliRenderer(rendererConfig(input.config, plainTerminal))
+
+    // Minimize/background monitor — suspend renderer when terminal minimized
+    const stopMonitor = win32StartMinimizeMonitor(
+      () => renderer.suspend(),
+      () => {
+        win32FlushInputBuffer()
+        renderer.currentRenderBuffer.clear()
+        renderer.resume()
+        renderer.currentRenderBuffer.clear()
+        renderer.requestRender()
+      },
+    )
+
     const onExit = async () => {
+      stopMonitor()
       unguard?.()
       resolve()
     }
@@ -149,9 +165,6 @@ export function tui(input: {
     const onBeforeExit = async () => {
       await TuiPluginRuntime.dispose()
     }
-
-    const plainTerminal = isPlainTerminal()
-    const renderer = await createCliRenderer(rendererConfig(input.config, plainTerminal))
     // 默认使用 dark 模式(不跟随终端背景);用户手动切换后会被 theme_mode_lock 记住并优先。
     const mode = "dark"
 

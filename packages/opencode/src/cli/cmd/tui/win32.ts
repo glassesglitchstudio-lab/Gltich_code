@@ -53,6 +53,66 @@ export function win32FlushInputBuffer() {
   k32!.symbols.FlushConsoleInputBuffer(handle)
 }
 
+let monitorStop: (() => void) | undefined
+
+/**
+ * Watch for terminal minimize/restore.
+ *
+ * The @opentui/core renderer only listens on SIGWINCH with a `|| 80 / || 24`
+ * fallback, so it never detects minimize (0-sized terminal). This monitor:
+ * 1. Checks raw `process.stdout.columns/rows` (without fallback)
+ * 2. Uses `process.stdout.on("resize", ...)` — works on all platforms
+ * 3. Polls every 2s on Windows as fallback (resize event unreliable on minimize)
+ *
+ * When terminal is minimized (cols/rows <= 2), calls `onMinimize`.
+ * When restored, calls `onRestore`.
+ */
+export function win32StartMinimizeMonitor(
+  onMinimize: () => void,
+  onRestore: () => void,
+): () => void {
+  if (!process.stdout.isTTY) return () => {}
+
+  let minimized = false
+
+  const check = () => {
+    const cols = process.stdout.columns
+    const rows = process.stdout.rows
+    if (cols == null || rows == null) return
+    const isMinimized = cols <= 2 || rows <= 2
+
+    if (isMinimized && !minimized) {
+      minimized = true
+      onMinimize()
+    } else if (!isMinimized && minimized) {
+      minimized = false
+      onRestore()
+    }
+  }
+
+  // Primary: listen for resize events (works on all platforms)
+  process.stdout.on("resize", check)
+
+  // Fallback: poll every 2s (some terminals don't emit resize on minimize)
+  const poll = setInterval(check, 2000)
+  poll.unref()
+
+  let stopped = false
+  monitorStop = () => {
+    if (stopped) return
+    stopped = true
+    process.stdout.off("resize", check)
+    clearInterval(poll)
+    monitorStop = undefined
+  }
+
+  return monitorStop
+}
+
+export function win32StopMinimizeMonitor() {
+  monitorStop?.()
+}
+
 let unhook: (() => void) | undefined
 
 /**
