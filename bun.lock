@@ -281,7 +281,7 @@
     },
     "packages/opencode": {
       "name": "glitchcode-cli",
-      "version": "1.0.2",
+      "version": "1.0.10",
       "bin": {
         "glitch": "./bin/glitch",
       },
@@ -630,17 +630,17 @@
     },
   },
   "trustedDependencies": [
-    "esbuild",
     "tree-sitter-powershell",
-    "protobufjs",
-    "electron",
-    "web-tree-sitter",
+    "esbuild",
     "tree-sitter-bash",
+    "web-tree-sitter",
+    "electron",
+    "protobufjs",
   ],
   "patchedDependencies": {
+    "gitlab-ai-provider@6.6.0": "patches/gitlab-ai-provider@6.6.0.patch",
     "solid-js@1.9.10": "patches/solid-js@1.9.10.patch",
     "@standard-community/standard-openapi@0.2.9": "patches/@standard-community%2Fstandard-openapi@0.2.9.patch",
-    "gitlab-ai-provider@6.6.0": "patches/gitlab-ai-provider@6.6.0.patch",
   },
   "overrides": {
     "@types/bun": "catalog:",

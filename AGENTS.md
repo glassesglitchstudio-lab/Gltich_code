@@ -11,8 +11,8 @@
 
 ## Publish Pipeline Durumu
 
-- **Son successful version**: `v0.2.34`
-- **npm'de yayında olan**: `glitchcode-cli@0.2.34` ✅
+- **Son successful version**: `v1.0.10`
+- **npm'de yayında olan**: `glitchcode-cli@1.0.10` ✅
 - **10 platform build**: linux/darwin/win32 x arm64/x64 + musl/baseline
 - **Workflow**: `.github/workflows/publish.yml`
 - **Tag ile tetikleniyor**: `v*` push
@@ -29,11 +29,16 @@
 - Windows'da otomatik `--skip-install` aktif ediliyor (native binding compile edilemez)
 - `@opentui/core` + `@parcel/watcher` kurulumu korunuyor
 
-### 3. npm token
+### 3. CI'da compiled binary crash (`state.value.asEffect is not a function`) ✅ ÇÖZÜLDÜ (2026-07-29)
+- **Kök neden**: Windows CI'da `bun install --linker hoisted` (Bun#28147 workaround'u) node_modules yapısını düzleştiriyordu → `effect` paketinde versiyon çakışması → compiled binary'de `asEffect()` method'u kayboluyor
+- **Fix**: `--linker hoisted` kaldırıldı, `bun upgrade --canary` eklendi (Bun 1.4.0-canary, PR #33646 isolated linker fix'ini içeriyor)
+- **CI akışı**: setup-bun (1.3.14) → `bun upgrade --canary` (1.4.0-canary) → `bun install` (default isolated linker) → build → smoke test
+
+### 4. npm token
 - CLI'da sorunlu — web UI üzerinden Automation tipinde oluşturulmalı
 - `gh secret set NPM_TOKEN` ile GitHub secret eklenebilir
 
-### 4. Version stratejisi
+### 5. Version stratejisi
 - Her publish öncesi version bump zorunlu (npm overwrite mümkün değil)
 - `package.json` version = npmjs.com'daki version olmalı
 
