@@ -355,7 +355,7 @@
 
   <section class="hero">
     <div class="container">
-      <div class="hero-badge"><span class="dot"></span> v0.3.0 — VS Code Extension yayınlandı!</div>
+      <div class="hero-badge"><span class="dot"></span> v1.0.11 — Windows build fix, minimize bug çözüldü!</div>
       <pre class="ascii-logo"> ██████╗  ██████╗  ██████╗  ███████╗
 ██╔════╝ ██╔═══██╗ ██╔══██╗ ██╔════╝
 ██║      ██║   ██║ ██║  ██║ █████╗  
@@ -379,8 +379,8 @@
     <div class="container">
       <div class="stats-grid">
         <div><span class="stat-num">40+</span><span class="stat-label">AI Provider</span></div>
-        <div><span class="stat-num">84+</span><span class="stat-label">CLI + TUI Komut</span></div>
-        <div><span class="stat-num">380+</span><span class="stat-label">Test</span></div>
+        <div><span class="stat-num">48+</span><span class="stat-label">CLI Komut</span></div>
+        <div><span class="stat-num">1000+</span><span class="stat-label">Test</span></div>
         <div><span class="stat-num">13</span><span class="stat-label">Platform</span></div>
       </div>
     </div>
@@ -394,42 +394,195 @@
         <div class="feature-card">
           <div class="feature-icon">🤖</div>
           <h3>PlusTwoCoder Debate</h3>
-          <p>2-3 model aynı sorunu tartışır, cross-critique ile en iyi çözümü üretir.</p>
+          <p>2-3 model aynı sorunu tartışır, cross-critique ile en iyi çözümü üretir. Moderatör nihai konsensusu sağlar.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">🔧</div>
-          <h3>Otomatik Kod Düzeltme</h3>
-          <p><code>glitch fix</code> ile GitHub issue'larını 7 fazda otomatik çöz.</p>
+          <h3>7 Fazlı Fix Pipeline</h3>
+          <p><code>glitch fix</code> ile GitHub issue'larını otomatik çöz: Triage → Plan → Keşif → Kod Önerisi → Review → Uygula → PR.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">🧠</div>
-          <h3>Sınırsız Hafıza</h3>
-          <p>Obsidian tabanlı .md hafıza sistemi. Geçmiş oturumları hatırla.</p>
+          <h3>Obsidian Hafıza</h3>
+          <p>.md dosyalarıyla sınırsız hafıza. Geçmiş oturumları hatırla, proje bilgisi biriksin. Session search ile anında bul.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">🌐</div>
-          <h3>40+ Provider</h3>
-          <p>OpenAI, Anthropic, Google, Ollama ve daha fazlası tek arayüzde.</p>
+          <h3>40+ AI Provider</h3>
+          <p>OpenAI, Anthropic, Google, Mistral, Cohere, Ollama, LMStudio, Copilot, Alibaba Qwen ve daha fazlası. Tek arayüzde tüm modeller.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">📊</div>
-          <h3>Görev Yönetimi</h3>
-          <p><code>glitch solve</code> ile karmaşık görevleri parçalara böl ve çalıştır.</p>
+          <h3>Görev Parçalama</h3>
+          <p><code>glitch solve</code> ile karmaşık görevleri analiz et, alt görevlere böl, topological sort ile bağımlılıkları yönet ve paralel çalıştır.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">🔒</div>
           <h3>Güvenlik Denetimi</h3>
-          <p>OWASP kontrollü security review. Kod değişiklikleri otomatik taranır.</p>
+          <p><code>glitch audit</code> ile OWASP kontrollü güvenlik taraması. <code>glitch review</code> ile kod incelemesi.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">🎨</div>
-          <h3>Tema Desteği</h3>
-          <p>7 hazır tema, neon-turuncu Glassmorphism, koyu mod default.</p>
+          <h3>7+ Tema</h3>
+          <p>Neon-turuncu Glassmorphism, koyu mod default. <code>glitch theme</code> ile tema değiştir, kendi temanı oluştur.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📡</div>
+          <h3>Offline Çalışma</h3>
+          <p>Ollama ve LMStudio ile internet olmadan çalış. <code>glitch offline setup</code> ile yerel model kurulumu.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔌</div>
+          <h3>MCP Desteği</h3>
+          <p>Model Context Protocol ile dış araçları bağla. Dosya sistemi, veritabanı, API'ler ve daha fazlası. <code>glitch mcp add</code> ile ekle.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🧩</div>
+          <h3>Plugin Sistemi</h3>
+          <p>Topluluk plugin'lerini keşfet ve kur. <code>glitch plugin search</code>, <code>glitch plugin add</code> ile yönet.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🤖</div>
+          <h3>Sub-Agent Sistemi</h3>
+          <p>Alt ajanları paralel çalıştır, görevleri delege et. Her ajan farklı model/config kullanabilir.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📝</div>
+          <h3>Plan Mode</h3>
+          <p>Tab tuşu ile Plan mode'a geç. AI kod yazmaz, sadece plan yapar. Onaydan sonra Build mode'da uygula.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🛡️</div>
+          <h3>Permission Gates</h3>
+          <p>Dosya erişimi ve komut çalıştırma izinlerini kontrol et. Zararlı işlemleri otomatik engelle.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📤</div>
+          <h3>Session Paylaşma</h3>
+          <p><code>glitch share</code> ile oturumları markdown/json/html olarak dışa aktar. Link ile takımınla paylaş.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔍</div>
+          <h3>LSP Desteği</h3>
+          <p>Language Server Protocol entegrasyonu. Kod sembolleri, tanımlar, referanslar. Daha akıllı kod anlayışı.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <h3>Özel Komutlar</h3>
+          <p><code>/komut-adı</code> ile kendi prompt'larını oluştur. Markdown veya JSON ile tanımla, argument geç, shell output ekle.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🏷️</div>
+          <h3>Cost Takibi</h3>
+          <p><code>glitch cost</code> ile token/maliyet takibi. Provider karşılaştırması, günlük/aylık rapor.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📦</div>
+          <h3>GitHub Entegrasyonu</h3>
+          <p><code>glitch issue</code> ile issue yönetimi. <code>glitch pr</code> ile PR oluşturma, inceleme, listeleme.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📋</div>
+          <h3>Session Yönetimi</h3>
+          <p><code>glitch history</code> ile geçmiş oturumları ara, filtrele. <code>glitch replay</code> ile eski oturumları tekrar oynat.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔄</div>
+          <h3>Undo/Redo</h3>
+          <p><code>/undo</code> ile AI değişikliklerini geri al. <code>/redo</code> ile yeniden uygula. Çoklu seviye destekler.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⏱️</div>
+          <h3>Benchmark</h3>
+          <p><code>glitch bench</code> ile multi-model karşılaştırma. Hangi model hangi görevde daha iyi? Veriyle karar ver.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>CHANGELOG Otomasyonu</h3>
+          <p><code>glitch changelog</code> ile git commit'lerinden otomatik CHANGELOG üret. Conventional commits ile uyumlu.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">👥</div>
+          <h3>Takım Çalışması</h3>
+          <p><code>glitch team</code> ile takım workspace yönetimi. Ortak konfigürasyon, paylaşımlı session'lar.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔐</div>
+          <h3>Auth & Provider</h3>
+          <p><code>glitch auth</code> ile giriş yap. <code>glitch providers</code> ile provider'ları yönet, API key'leri güvenle sakla.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- Terminal UI Features                            -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="features">
+    <div class="container">
+      <h2 class="section-title">Terminal Arayüzü</h2>
+      <p class="section-desc">Güçlü TUI ile terminalden hiç çıkmadan tüm geliştirme akışını yönet.</p>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">⌨️</div>
+          <h3>Multi-panel TUI</h3>
+          <p>Split view ile aynı anda kod, terminal ve AI sohbeti. Yeniden boyutlandırılabilir paneller, fare desteği.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔍</div>
+          <h3>Fuzzy Search</h3>
+          <p>@ ile dosya ara, # ile sembol ara. Anlık fuzzy matching, 10K+ dosyada milisaniyeler içinde sonuç.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📎</div>
+          <h3>Multi-modal Girdi</h3>
+          <p>Resim sürükle-bırak, PDF, ses dosyası ekle. AI görselleri analiz eder, belgeleri okur.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📜</div>
+          <h3>Context Yönetimi</h3>
+          <p>Token limit yönetimi, otomatik context özetleme. Uzun oturumlarda önemli bilgileri korur.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">⚡</div>
-          <h3>Offline Çalışma</h3>
-          <p>Ollama ve LMStudio ile internet olmadan çalış. Yerel modellerle geliştir.</p>
+          <h3>Inline Tool Çıktısı</h3>
+          <p>Bash, Read, Write, Edit, Glob, Grep, WebFetch, WebSearch araçları anlık çıktı gösterir. Streaming ile canlı güncelleme.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🛠️</div>
+          <h3>Skill Sistemi</h3>
+          <p>Projeye özel beceri setleri. SKILL.md ile tanımla, AI otomatik yükler. Framework/spesifik görevler için ideal.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🗂️</div>
+          <h3>Multi-file Edit</h3>
+          <p>AI aynı anda birden çok dosyayı düzenler. Değişiklikleri tek tek onayla veya toplu kabul et.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎤</div>
+          <h3>Sesli Komut</h3>
+          <p>Mikrofon ile AI'ya komut ver. Konuşarak kod düzeltme, dosya açma, arama yapma.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔐</div>
+          <h3>Diff View</h3>
+          <p>AI değişikliklerini satır satır incele. Ekleme/silme vurgulu, eski/yeni karşılaştırmalı.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🌙</div>
+          <h3>Neon Tema</h3>
+          <p>Turuncu neon Glassmorphism tema. 7 hazır tema, özel tema oluşturma. Dark mode default.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⏸️</div>
+          <h3>Minimize Yönetimi</h3>
+          <p>Terminal minimize olunca renderer otomatik suspend edilir. Geri gelince resume. CPU/RAM tasarrufu.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🌐</div>
+          <h3>i18n Desteği</h3>
+          <p>8 dil desteği (Türkçe, İngilizce, Rusça, Japonca, Çince, Fransızca, İspanyolca, Almanca).</p>
         </div>
       </div>
     </div>
@@ -752,8 +905,8 @@
           <div class="step-num">3</div>
           <div>
             <h3>Geliştir</h3>
-            <code class="step-cmd">glitch fix https://github.com/user/repo/issues/42</code>
-            <p>GitHub issue'sunu yapay zeka ile otomatik çöz. 7 fazlı pipeline, PR oluşturma.</p>
+            <code class="step-cmd">glitch</code>
+            <p>TUI'yi aç, AI ile kod üret, düzelt, incele. 40+ provider, sub-agent sistemi, MCP araçları, sınırsız hafıza. Terminalden çıkma.</p>
           </div>
         </div>
       </div>
@@ -796,25 +949,78 @@
 
   <section class="commands" id="commands">
     <div class="container">
-      <h2 class="section-title">Komutlar</h2>
-      <p class="section-desc">Güçlü komut seti ile geliştirme akışını hızlandır.</p>
-      <div class="commands-grid">
-        <div class="cmd-item"><code>glitch fix</code><span>GitHub issue'yu otomatik çöz</span></div>
-        <div class="cmd-item"><code>glitch solve</code><span>Karmaşık görevi parçalara böl</span></div>
-        <div class="cmd-item"><code>glitch pr list</code><span>PR'ları listele</span></div>
-        <div class="cmd-item"><code>glitch pr view</code><span>PR detaylarını göster</span></div>
-        <div class="cmd-item"><code>glitch pr create</code><span>Yeni PR oluştur</span></div>
-        <div class="cmd-item"><code>glitch pr review</code><span>PR incele (approve/change)</span></div>
-        <div class="cmd-item"><code>glitch issue list</code><span>Issue'ları listele</span></div>
-        <div class="cmd-item"><code>glitch issue view</code><span>Issue detayını göster</span></div>
-        <div class="cmd-item"><code>glitch issue search</code><span>Issue/PR ara</span></div>
-        <div class="cmd-item"><code>glitch issue create</code><span>Yeni issue oluştur</span></div>
-        <div class="cmd-item"><code>glitch review</code><span>Otomatik kod incelemesi</span></div>
-        <div class="cmd-item"><code>glitch cost</code><span>Token/maliyet takibi</span></div>
-        <div class="cmd-item"><code>glitch bench</code><span>Multi-model karşılaştırma</span></div>
-        <div class="cmd-item"><code>glitch changelog</code><span>Otomatik CHANGELOG</span></div>
-        <div class="cmd-item"><code>glitch replay</code><span>Eski oturumları tekrar oynat</span></div>
-        <div class="cmd-item"><code>glitch audit</code><span>Güvenlik denetimi</span></div>
+      <h2 class="section-title">48+ Komut</h2>
+      <p class="section-desc">Her iş için bir komut. Terminalden çıkmadan tüm geliştirme akışını yönet.</p>
+
+      <div style="margin-bottom:32px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+        <span class="cmd-filter active" data-cmd="all" style="padding:6px 16px;background:var(--violet);border-radius:100px;font-size:13px;color:white;cursor:pointer;">Tümü</span>
+        <span class="cmd-filter" data-cmd="ai" style="padding:6px 16px;background:var(--surface);border:1px solid var(--border);border-radius:100px;font-size:13px;color:var(--text2);cursor:pointer;">AI & Kod</span>
+        <span class="cmd-filter" data-cmd="git" style="padding:6px 16px;background:var(--surface);border:1px solid var(--border);border-radius:100px;font-size:13px;color:var(--text2);cursor:pointer;">Git & GitHub</span>
+        <span class="cmd-filter" data-cmd="manage" style="padding:6px 16px;background:var(--surface);border:1px solid var(--border);border-radius:100px;font-size:13px;color:var(--text2);cursor:pointer;">Yönetim</span>
+        <span class="cmd-filter" data-cmd="data" style="padding:6px 16px;background:var(--surface);border:1px solid var(--border);border-radius:100px;font-size:13px;color:var(--text2);cursor:pointer;">Veri & Rapor</span>
+        <span class="cmd-filter" data-cmd="ext" style="padding:6px 16px;background:var(--surface);border:1px solid var(--border);border-radius:100px;font-size:13px;color:var(--text2);cursor:pointer;">Eklenti & Servis</span>
+      </div>
+
+      <div class="commands-grid" id="cmd-grid">
+        <!-- AI & Code -->
+        <div class="cmd-item" data-cmd-cat="ai"><code>glitch</code><span>TUI'yi başlat (ana arayüz)</span></div>
+        <div class="cmd-item" data-cmd-cat="ai"><code>glitch fix</code><span>GitHub issue'yu 7 fazda otomatik çöz</span></div>
+        <div class="cmd-item" data-cmd-cat="ai"><code>glitch solve</code><span>Karmaşık görevi parçalara böl + çalıştır</span></div>
+        <div class="cmd-item" data-cmd-cat="ai"><code>glitch plus-two-coder</code><span>Multi-model debate ile kod üret</span></div>
+        <div class="cmd-item" data-cmd-cat="ai"><code>glitch review</code><span>Otomatik kod incelemesi (teknik + stil + güvenlik)</span></div>
+        <div class="cmd-item" data-cmd-cat="ai"><code>glitch suggest</code><span>Context-aware kod önerileri al</span></div>
+        <div class="cmd-item" data-cmd-cat="ai"><code>glitch generate</code><span>Kod/şablon oluştur</span></div>
+        <div class="cmd-item" data-cmd-cat="ai"><code>glitch run</code><span>AI ile komut çalıştır</span></div>
+        <div class="cmd-item" data-cmd-cat="ai"><code>glitch init</code><span>Projeyi Glitch Code'a hazırla (AGENTS.md oluştur)</span></div>
+
+        <!-- Git & GitHub -->
+        <div class="cmd-item" data-cmd-cat="git"><code>glitch issue list</code><span>Issue'ları listele</span></div>
+        <div class="cmd-item" data-cmd-cat="git"><code>glitch issue view</code><span>Issue detayını göster</span></div>
+        <div class="cmd-item" data-cmd-cat="git"><code>glitch issue search</code><span>Issue/PR ara</span></div>
+        <div class="cmd-item" data-cmd-cat="git"><code>glitch issue create</code><span>Yeni issue oluştur</span></div>
+        <div class="cmd-item" data-cmd-cat="git"><code>glitch pr list</code><span>PR'ları listele</span></div>
+        <div class="cmd-item" data-cmd-cat="git"><code>glitch pr view</code><span>PR detayını göster</span></div>
+        <div class="cmd-item" data-cmd-cat="git"><code>glitch pr create</code><span>Yeni PR oluştur</span></div>
+        <div class="cmd-item" data-cmd-cat="git"><code>glitch pr review</code><span>PR incele (approve/change/comment)</span></div>
+        <div class="cmd-item" data-cmd-cat="git"><code>glitch github install</code><span>GitHub App kur</span></div>
+        <div class="cmd-item" data-cmd-cat="git"><code>glitch github run</code><span>GitHub Actions workflow çalıştır</span></div>
+
+        <!-- Yönetim -->
+        <div class="cmd-item" data-cmd-cat="manage"><code>glitch onboard</code><span>Interaktif başlangıç turu</span></div>
+        <div class="cmd-item" data-cmd-cat="manage"><code>glitch providers</code><span>Provider listele/giriş yap/çıkış yap</span></div>
+        <div class="cmd-item" data-cmd-cat="manage"><code>glitch auth</code><span>Oturum aç/kapat</span></div>
+        <div class="cmd-item" data-cmd-cat="manage"><code>glitch models</code><span>Tüm modelleri listele</span></div>
+        <div class="cmd-item" data-cmd-cat="manage"><code>glitch agent</code><span>Agent oluştur/listele</span></div>
+        <div class="cmd-item" data-cmd-cat="manage"><code>glitch theme</code><span>Tema değiştir/listele</span></div>
+        <div class="cmd-item" data-cmd-cat="manage"><code>glitch offline</code><span>Offline model kur/durum/models/test</span></div>
+        <div class="cmd-item" data-cmd-cat="manage"><code>glitch upgrade</code><span>Glitch Code'u güncelle</span></div>
+        <div class="cmd-item" data-cmd-cat="manage"><code>glitch uninstall</code><span>Glitch Code'u kaldır</span></div>
+        <div class="cmd-item" data-cmd-cat="manage"><code>glitch doctor</code><span>Sistem tanılama ve sorun giderme</span></div>
+        <div class="cmd-item" data-cmd-cat="manage"><code>glitch provider-test</code><span>Provider bağlantı testi</span></div>
+
+        <!-- Session & Veri -->
+        <div class="cmd-item" data-cmd-cat="data"><code>glitch history</code><span>Geçmiş oturumları ara ve yönet</span></div>
+        <div class="cmd-item" data-cmd-cat="data"><code>glitch session</code><span>Session listele/sil/import et</span></div>
+        <div class="cmd-item" data-cmd-cat="data"><code>glitch share</code><span>Oturumu link/paylaş</span></div>
+        <div class="cmd-item" data-cmd-cat="data"><code>glitch export</code><span>Session'ı JSON/MD olarak dışa aktar</span></div>
+        <div class="cmd-item" data-cmd-cat="data"><code>glitch import</code><span>Session içe aktar (Claude dahil)</span></div>
+        <div class="cmd-item" data-cmd-cat="data"><code>glitch replay</code><span>Eski oturumları tekrar oynat</span></div>
+        <div class="cmd-item" data-cmd-cat="data"><code>glitch cost</code><span>Token/maliyet takibi ve raporlama</span></div>
+        <div class="cmd-item" data-cmd-cat="data"><code>glitch stats</code><span>Kullanım istatistikleri</span></div>
+        <div class="cmd-item" data-cmd-cat="data"><code>glitch changelog</code><span>Git commit'lerinden CHANGELOG üret</span></div>
+        <div class="cmd-item" data-cmd-cat="data"><code>glitch bench</code><span>Multi-model benchmark karşılaştırması</span></div>
+        <div class="cmd-item" data-cmd-cat="data"><code>glitch audit</code><span>Bağımlılık güvenlik denetimi</span></div>
+
+        <!-- Eklenti & Servis -->
+        <div class="cmd-item" data-cmd-cat="ext"><code>glitch mcp</code><span>MCP server ekle/listele/auth/debug/yönet</span></div>
+        <div class="cmd-item" data-cmd-cat="ext"><code>glitch plugin</code><span>Plugin listele/ara/ekle/kaldır/aç/kapat</span></div>
+        <div class="cmd-item" data-cmd-cat="ext"><code>glitch plugin-market</code><span>Plugin marketi keşfet</span></div>
+        <div class="cmd-item" data-cmd-cat="ext"><code>glitch registry</code><span>Araç/şablon registry'si (ara/kur/yayınla)</span></div>
+        <div class="cmd-item" data-cmd-cat="ext"><code>glitch web</code><span>Web arayüzünü başlat</span></div>
+        <div class="cmd-item" data-cmd-cat="ext"><code>glitch serve</code><span>API server olarak çalıştır</span></div>
+        <div class="cmd-item" data-cmd-cat="ext"><code>glitch acp</code><span>ACP (Agent Communication Protocol) sunucusu</span></div>
+        <div class="cmd-item" data-cmd-cat="ext"><code>glitch team</code><span>Takım workspace yönetimi</span></div>
+        <div class="cmd-item" data-cmd-cat="ext"><code>glitch debug</code><span>Hata ayıklama araçları (config/lsp/rg/skill vb.)</span></div>
       </div>
     </div>
   </section>
@@ -882,6 +1088,27 @@
   </footer>
 
   <script>
+    // ═══════════════════════════════════════════════
+    // Command Category Filter
+    // ═══════════════════════════════════════════════
+    document.querySelectorAll('.cmd-filter').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const cat = btn.dataset.cmd;
+        document.querySelectorAll('.cmd-filter').forEach(b => {
+          b.style.background = b === btn ? 'var(--violet)' : 'var(--surface)';
+          b.style.color = b === btn ? 'white' : 'var(--text2)';
+          b.style.borderColor = b === btn ? 'transparent' : 'var(--border)';
+        });
+        document.querySelectorAll('.cmd-item').forEach(item => {
+          if (cat === 'all') {
+            item.style.display = '';
+          } else {
+            item.style.display = item.dataset.cmdCat === cat ? '' : 'none';
+          }
+        });
+      });
+    });
+
     // ═══════════════════════════════════════════════
     // Particle Effects
     // ═══════════════════════════════════════════════
