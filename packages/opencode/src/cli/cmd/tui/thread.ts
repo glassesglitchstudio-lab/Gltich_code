@@ -4,6 +4,7 @@ import { Rpc } from "@/util"
 import { type rpc } from "./worker"
 import path from "path"
 import { fileURLToPath } from "url"
+import fs from "fs"
 import { UI } from "@/cli/ui"
 import { Log } from "@/util"
 import { errorMessage } from "@/util/error"
@@ -18,6 +19,7 @@ import { TuiConfig } from "./config/tui"
 import { GLITCHCODE_PROCESS_ROLE, GLITCHCODE_RUN_ID, ensureRunID, sanitizedProcessEnv } from "@/util/mimo-process"
 import { checkTrust, markTrusted } from "@/project/workspace-trust"
 import { t } from "@/cli/i18n"
+import * as prompts from "@clack/prompts"
 
 declare global {
   const OPENCODE_WORKER_PATH: string
@@ -124,6 +126,25 @@ async function promptWorkspaceTrust(directory: string, level: "untrusted" | "dan
   return result
 }
 
+async function checkFirstRunSetup(cwd: string): Promise<boolean> {
+  const configPath = path.join(cwd, ".glitchcode", "glitchcode.json")
+  if (fs.existsSync(configPath)) return true
+
+  prompts.log.warn("Ilk kurulum tespit edildi.")
+  const runSetup = await prompts.confirm({
+    message: "Kurulum sihirbazini simdi calistirmak ister misin?",
+    initialValue: true,
+  })
+  if (prompts.isCancel(runSetup) || !runSetup) {
+    prompts.log.info("Kurulum atlandi. Varsayilan ayarlarla devam ediliyor.")
+    prompts.log.info("Daha sonra 'glitch setup' ile kurulumu yapabilirsin.")
+    return true
+  }
+
+  const { runSetupWizard } = await import("../setup")
+  return runSetupWizard(cwd)
+}
+
 export const TuiThreadCommand = cmd({
   command: "$0 [project]",
   describe: "start glitchcode tui",
@@ -211,6 +232,12 @@ export const TuiThreadCommand = cmd({
           }
           if (trustLevel === "untrusted") await markTrusted(cwd)
         }
+      }
+
+      const setupDone = await checkFirstRunSetup(cwd)
+      if (!setupDone) {
+        process.exit(0)
+        return
       }
 
       const env = sanitizedProcessEnv({

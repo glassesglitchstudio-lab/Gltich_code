@@ -62,6 +62,7 @@ import { CostRouterCommand } from "./cli/cmd/cost-router"
 import { ProviderTestCommand } from "./cli/cmd/provider-test"
 import { DoctorCommand } from "./cli/cmd/doctor"
 import { AuthCommand } from "./cli/cmd/auth"
+import { SetupCommand } from "./cli/cmd/setup-command"
 import { Heap } from "./cli/heap"
 import { drizzle } from "drizzle-orm/bun-sqlite"
 import { ensureProcessMetadata } from "./util/glitch-process"
@@ -227,6 +228,7 @@ const cli = yargs(args)
   .command(ThemeCommand)
   .command(OfflineCommand)
   .command(HistoryCommand)
+  .command(SetupCommand)
   .command(PlusTwoCoderCommand)
   .command(PlusThinkingCommand)
   .command(FixCommand)
