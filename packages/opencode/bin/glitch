@@ -6,14 +6,14 @@ import { dirname, join } from "path"
 import { homedir, platform as osPlatform, arch as osArch } from "os"
 import { fileURLToPath } from "url"
 
-// ─── ANSI Colors (violet-rose theme #7C3AED) ────────────────────────────────
+// ─── ANSI Colors (neon orange #FF6B00) ───────────────────────────────────────
 const C = {
   reset: "\x1b[0m",
   bold: "\x1b[1m",
   dim: "\x1b[2m",
-  violet: "\x1b[38;2;124;58;237m",
-  violetBright: "\x1b[38;2;139;92;246m",
-  rose: "\x1b[38;2;236;72;153m",
+  neon: "\x1b[38;2;255;107;0m",
+  neonBright: "\x1b[38;2;255;140;0m",
+  neonDim: "\x1b[38;2;204;85;0m",
   white: "\x1b[38;2;232;232;240m",
   gray: "\x1b[38;2;124;124;168m",
   darkGray: "\x1b[38;2;66;66;82m",
@@ -25,12 +25,12 @@ const C = {
 
 // ─── GLITCH ASCII Logo ──────────────────────────────────────────────────────
 const LOGO = [
-  `${C.violet}${C.bold}  ██████╗ ██╗     ██╗████████╗ ██████╗██╗  ██╗${C.reset}`,
-  `${C.violet}${C.bold} ██╔════╝ ██║     ██║╚══██╔══╝██╔════╝██║  ██║${C.reset}`,
-  `${C.violet}${C.bold} ██║  ███╗██║     ██║   ██║   ██║     ███████║${C.reset}`,
-  `${C.violet}${C.bold} ██║   ██║██║     ██║   ██║   ██║     ██╔══██║${C.reset}`,
-  `${C.violet}${C.bold} ╚██████╔╝███████╗██║   ██║   ╚██████╗██║  ██║${C.reset}`,
-  `${C.violet}${C.bold}  ╚═════╝ ╚══════╝╚═╝   ╚═╝    ╚═════╝╚═╝  ╚═╝${C.reset}`,
+  `${C.neon}${C.bold}  ██████╗ ██╗     ██╗████████╗ ██████╗██╗  ██╗${C.reset}`,
+  `${C.neon}${C.bold} ██╔════╝ ██║     ██║╚══██╔══╝██╔════╝██║  ██║${C.reset}`,
+  `${C.neon}${C.bold} ██║  ███╗██║     ██║   ██║   ██║     ███████║${C.reset}`,
+  `${C.neon}${C.bold} ██║   ██║██║     ██║   ██║   ██║     ██╔══██║${C.reset}`,
+  `${C.neon}${C.bold} ╚██████╔╝███████╗██║   ██║   ╚██████╗██║  ██║${C.reset}`,
+  `${C.neon}${C.bold}  ╚═════╝ ╚══════╝╚═╝   ╚═╝    ╚═════╝╚═╝  ╚═╝${C.reset}`,
 ]
 
 const TAGLINE = `${C.gray}  AI-Powered Coding Assistant${C.reset}`
@@ -117,14 +117,14 @@ const PULSE_FRAMES = ["◯", "◎", "●", "◎"]
 function renderBar(pct, width = 30) {
   const filled = Math.round((pct / 100) * width)
   const empty = width - filled
-  const bar = `${C.violet}${"█".repeat(filled)}${C.darkGray}${"░".repeat(empty)}${C.reset}`
+  const bar = `${C.neon}${"█".repeat(filled)}${C.darkGray}${"░".repeat(empty)}${C.reset}`
   const pctStr = pct >= 100 ? "100%" : `${Math.floor(pct)}%`
   return `${bar} ${C.white}${pctStr}${C.reset}`
 }
 
 // Step status indicators
 const STEP_DONE = `${C.green}  ✓  ${C.reset}`
-const STEP_ACTIVE = `${C.violet}  ▶  ${C.reset}`
+const STEP_ACTIVE = `${C.neon}  ▶  ${C.reset}`
 const STEP_PENDING = `${C.darkGray}  ○  ${C.reset}`
 const STEP_FAIL = `${C.red}  ✗  ${C.reset}`
 
@@ -161,13 +161,13 @@ async function withSpinner(text, fn) {
 
   let frame = 0
   let running = true
-  const spinnerLine = `\r     ${C.violet}${SPIN_FRAMES[0]}${C.reset} ${C.white}${text}${C.reset}`
+  const spinnerLine = `\r     ${C.neon}${SPIN_FRAMES[0]}${C.reset} ${C.white}${text}${C.reset}`
 
   process.stdout.write(spinnerLine)
 
   const timer = setInterval(() => {
     frame = (frame + 1) % SPIN_FRAMES.length
-    process.stdout.write(`\r     ${C.violet}${SPIN_FRAMES[frame]}${C.reset} ${C.white}${text}${C.reset}`)
+    process.stdout.write(`\r     ${C.neon}${SPIN_FRAMES[frame]}${C.reset} ${C.white}${text}${C.reset}`)
   }, 80)
 
   try {
@@ -199,7 +199,7 @@ function downloadWithProgress(url, dest, platform) {
         // We just show the bar pulsing
         const pulse = PULSE_FRAMES[frame % PULSE_FRAMES.length]
         process.stdout.write(
-          `\r     ${C.violet}${pulse}${C.reset} ${renderBar(Math.min(pct, 95))}  ${C.gray}indiriliyor...${C.reset}`
+          `\r     ${C.neon}${pulse}${C.reset} ${renderBar(Math.min(pct, 95))}  ${C.gray}indiriliyor...${C.reset}`
         )
         frame++
         if (pct < 90) pct += Math.random() * 3

@@ -2,15 +2,10 @@ import { createEffect, createMemo, createSignal, onCleanup, Show } from "solid-j
 import { useTheme } from "../context/theme"
 import { Spinner } from "./spinner"
 import { isPlainTerminal } from "../util/terminal"
+import { logo } from "@/cli/logo"
 
-const GLITCH_LOGO = [
-  "  ██████╗ ██╗  ██╗ ██████╗ ███████╗",
-  " ██╔════╝ ██║  ██║ ██╔══██╗ ██╔════╝",
-  " ██║      ███████║ ██║  ██║ █████╗  ",
-  " ██║      ██╔══██║ ██║  ██║ ██╔══╝  ",
-  " ╚██████╗ ██║  ██║ ██████╔╝ ███████╗",
-  "  ╚═════╝ ╚═╝  ╚═╝ ╚═════╝  ╚══════╝",
-]
+const GAP = 1
+const GLITCH_LOGO = logo.left.map((line, i) => line + " ".repeat(GAP) + logo.right[i])
 
 export function StartupLoading(props: { ready: () => boolean }) {
   const theme = useTheme().theme

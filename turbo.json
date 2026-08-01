@@ -13,12 +13,12 @@
       "cache": false,
       "persistent": true
     },
-    "@glitchcode/cli#test": {
+    "glitchcode-cli#test": {
       "dependsOn": ["^build"],
       "outputs": [],
       "passThroughEnv": ["*"]
     },
-    "@glitchcode/cli#test:ci": {
+    "glitchcode-cli#test:ci": {
       "dependsOn": ["^build"],
       "outputs": [".artifacts/unit/junit.xml"],
       "passThroughEnv": ["*"]

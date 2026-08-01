@@ -1,15 +1,10 @@
 import { createEffect, createMemo, createSignal, onCleanup, onMount, Show } from "solid-js"
 import { useTheme } from "../context/theme"
 import { InstallationVersion } from "@/installation/version"
+import { logo } from "@/cli/logo"
 
-const GLITCH_LOGO = [
-  "  ██████╗ ██╗  ██╗ ██████╗ ███████╗",
-  " ██╔════╝ ██║  ██║ ██╔══██╗ ██╔════╝",
-  " ██║      ███████║ ██║  ██║ █████╗  ",
-  " ██║      ██╔══██║ ██║  ██║ ██╔══╝  ",
-  " ╚██████╗ ██║  ██║ ██████╔╝ ███████╗",
-  "  ╚═════╝ ╚═╝  ╚═╝ ╚═════╝  ╚══════╝",
-]
+const GAP = 1
+const GLITCH_LOGO = logo.left.map((line, i) => line + " ".repeat(GAP) + logo.right[i])
 
 const GLITCH_CHARS = "!@#$%^&*()_+-=[]{}|;':\",./<>?`~"
 const FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
