@@ -1917,7 +1917,7 @@ export type Config = {
   logLevel?: LogLevel
   server?: ServerConfig
   /**
-   * Command configuration, see https://opencode.ai/docs/commands
+   * Command configuration, see https://github.com/glassesglitchstudio-lab/Gltich_code
    */
   command?: {
     [key: string]: {
@@ -2013,7 +2013,7 @@ export type Config = {
     [key: string]: AgentConfig | undefined
   }
   /**
-   * Agent configuration, see https://opencode.ai/docs/agents
+   * Agent configuration, see https://github.com/glassesglitchstudio-lab/Gltich_code
    */
   agent?: {
     plan?: AgentConfig
