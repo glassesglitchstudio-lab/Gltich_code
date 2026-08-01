@@ -257,6 +257,10 @@ export const layer: Layer.Layer<Service, never, HttpClient.HttpClient | ChildPro
           return data.version
         }
 
+        if (detectedMethod === "unknown") {
+          return yield* Effect.die(new Error(`unsupported update channel: ${detectedMethod}`))
+        }
+
         const ghResponse = yield* httpOk.execute(
           HttpClientRequest.get("https://api.github.com/repos/glassesglitchstudio-lab/Gltich_code/releases/latest").pipe(
             HttpClientRequest.acceptJson,
@@ -264,9 +268,6 @@ export const layer: Layer.Layer<Service, never, HttpClient.HttpClient | ChildPro
         )
         const ghData = yield* HttpClientResponse.schemaBodyJson(GitHubRelease)(ghResponse)
         return ghData.tag_name.replace(/^v/, "")
-
-        log.warn("unsupported update channel, skipping", { method: detectedMethod })
-        return yield* Effect.die(new Error(`unsupported update channel: ${detectedMethod}`))
       }, Effect.orDie)
 
       const upgradeImpl = Effect.fn("Installation.upgrade")(function* (m: Method, target: string) {
