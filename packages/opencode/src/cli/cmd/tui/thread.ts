@@ -19,7 +19,6 @@ import { TuiConfig } from "./config/tui"
 import { GLITCHCODE_PROCESS_ROLE, GLITCHCODE_RUN_ID, ensureRunID, sanitizedProcessEnv } from "@/util/mimo-process"
 import { checkTrust, markTrusted } from "@/project/workspace-trust"
 import { t } from "@/cli/i18n"
-import * as prompts from "@clack/prompts"
 
 declare global {
   const OPENCODE_WORKER_PATH: string
@@ -130,6 +129,12 @@ async function checkFirstRunSetup(cwd: string): Promise<boolean> {
   const configPath = path.join(cwd, ".glitchcode", "glitchcode.json")
   if (fs.existsSync(configPath)) return true
 
+  if (!process.stdin.isTTY) {
+    Log.Default.info("first-run setup skipped: non-interactive environment")
+    return true
+  }
+
+  const prompts = await import("@clack/prompts")
   prompts.log.warn("Ilk kurulum tespit edildi.")
   const runSetup = await prompts.confirm({
     message: "Kurulum sihirbazini simdi calistirmak ister misin?",
