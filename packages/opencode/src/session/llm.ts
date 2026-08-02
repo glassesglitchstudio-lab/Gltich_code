@@ -538,6 +538,19 @@ const live: Layer.Layer<
           })
         : undefined
 
+      // Fix B: Thinking mode + tool_choice: required/object uyumsuzluğu.
+      // Bazı provider'lar (Alibaba/Qwen, bazı Anthropic proxy'ler) thinking/reasoning
+      // mode açıkken tool_choice: required'ı reddeder (400 InvalidParameter).
+      // Eğer thinking mode aktif görünüyorsa, "required" → "auto" düşür ki provider
+      // hata vermesin ve model yine de tool çağırabilsin.
+      const hasThinkingMode =
+        options?.reasoningEffort !== undefined ||
+        options?.thinking !== undefined ||
+        options?.enableThinking === true ||
+        options?.reasoning !== undefined
+      const effectiveToolChoice =
+        input.toolChoice === "required" && hasThinkingMode ? "auto" : input.toolChoice
+
       const streamStartTs = Date.now()
       l.debug("streamText starting", {
         messageID: input.user.id,
@@ -583,7 +596,7 @@ const live: Layer.Layer<
         providerOptions: ProviderTransform.providerOptions(input.model, params.options),
         activeTools: Object.keys(tools).filter((x) => x !== "invalid"),
         tools,
-        toolChoice: input.toolChoice,
+        toolChoice: effectiveToolChoice,
         maxOutputTokens: params.maxOutputTokens,
         abortSignal: input.abort,
         headers: {

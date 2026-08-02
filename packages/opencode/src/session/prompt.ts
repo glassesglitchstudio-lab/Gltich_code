@@ -5,6 +5,7 @@ import { SessionID, MessageID, PartID } from "./schema"
 import { MessageV2 } from "./message-v2"
 import { classifyAssistantStep } from "./classify"
 import { Log } from "../util"
+import { errorMessage } from "../util/error"
 import { SessionRevert } from "./revert"
 import * as Session from "./session"
 import { Agent } from "../agent/agent"
@@ -59,6 +60,7 @@ import { spawnRef } from "@/actor/spawn-ref"
 import { Inbox } from "@/inbox"
 import { sessionPromptRef } from "@/inbox/inbox-ref"
 import { Tool } from "@/tool"
+import { isRecoverableError } from "@/tool/recoverable"
 import { Permission } from "@/permission"
 import { SessionStatus } from "./status"
 import { LLM } from "./llm"
@@ -709,7 +711,36 @@ NOTE: At any point in time through this workflow you should feel free to ask the
                   yield* input.processor.completeToolCall(options.toolCallId, cancelOutput)
                   return cancelOutput
                 }
-                const result = yield* item.execute(beforeOutput.args, ctx)
+                const exit = yield* Effect.exit(item.execute(beforeOutput.args, ctx))
+                if (exit._tag === "Failure") {
+                  const error = Cause.squash(exit.cause)
+                  const recoverable = isRecoverableError(error)
+                  log.error("tool execute failed", {
+                    tool: item.id,
+                    callID,
+                    durationMs: Date.now() - startTs,
+                    error: errorMessage(error),
+                    recoverable,
+                  })
+                  const errorOutput = {
+                    title: "Error",
+                    output: errorMessage(error),
+                    metadata: { error: true, ...(recoverable ? { recoverable: true } : {}) },
+                  }
+                  yield* bus
+                    .publish(Metrics.ToolCall, {
+                      sessionID: ctx.sessionID,
+                      tool_name: item.id,
+                      input_bytes: Metrics.jsonByteLength(beforeOutput.args),
+                      output_bytes: 0,
+                      tool_call_id: options.toolCallId,
+                      tool_call_status: "error",
+                    })
+                    .pipe(Effect.ignore)
+                  yield* input.processor.completeToolCall(options.toolCallId, errorOutput)
+                  return errorOutput
+                }
+                const result = exit.value
                 log.debug("tool execute done", {
                   tool: item.id,
                   callID,
@@ -815,9 +846,37 @@ NOTE: At any point in time through this workflow you should feel free to ask the
                 return cancelResult
               }
               yield* ctx.ask({ permission: key, metadata: {}, patterns: ["*"], always: ["*"] })
-              const result: Awaited<ReturnType<NonNullable<typeof execute>>> = yield* Effect.promise(() =>
-                execute(mcpBeforeOutput.args, opts),
+              const mcpExit = yield* Effect.exit(
+                Effect.promise(() => execute(mcpBeforeOutput.args, opts)),
               )
+              if (mcpExit._tag === "Failure") {
+                const error = Cause.squash(mcpExit.cause)
+                log.error("tool execute failed (mcp)", {
+                  tool: key,
+                  callID,
+                  durationMs: Date.now() - startTs,
+                  error: errorMessage(error),
+                })
+                yield* bus
+                  .publish(Metrics.ToolCall, {
+                    sessionID: ctx.sessionID,
+                    tool_name: key,
+                    input_bytes: Metrics.jsonByteLength(mcpBeforeOutput.args),
+                    output_bytes: 0,
+                    tool_call_id: opts.toolCallId,
+                    tool_call_status: "error",
+                  })
+                  .pipe(Effect.ignore)
+                const mcpErrorOutput = {
+                  title: "Error",
+                  output: errorMessage(error),
+                  metadata: { error: true },
+                  content: [{ type: "text" as const, text: errorMessage(error) }],
+                }
+                yield* input.processor.completeToolCall(opts.toolCallId, mcpErrorOutput)
+                return mcpErrorOutput
+              }
+              const result: Awaited<ReturnType<NonNullable<typeof execute>>> = mcpExit.value
               log.debug("tool execute done (mcp)", {
                 tool: key,
                 callID,

@@ -1,9 +1,10 @@
 import { describe, test, expect } from "bun:test"
-import { Effect, Layer, ManagedRuntime } from "effect"
+import { Effect, Layer, ManagedRuntime, Cause, Exit } from "effect"
 import z from "zod"
 import { Agent } from "../../src/agent/agent"
 import { Tool } from "../../src/tool"
 import { Truncate } from "../../src/tool"
+import { isRecoverableError, RecoverableError } from "../../src/tool/recoverable"
 
 const runtime = ManagedRuntime.make(Layer.mergeAll(Truncate.defaultLayer, Agent.defaultLayer))
 
@@ -55,5 +56,82 @@ describe("Tool.define", () => {
     const second = await Effect.runPromise(info.init())
 
     expect(first).not.toBe(second)
+  })
+})
+
+// Tests for the Fix C crash-prevention pattern: Effect.exit catches both
+// failures and defects so the tool execute promise never rejects, preventing
+// TUI crash screens. Mirrors the wrap() in tool.ts (Effect.orDie) + the
+// Effect.exit guard in prompt.ts.
+describe("Tool execute crash prevention (Fix C)", () => {
+  // Minimal ctx that satisfies Tool.Context — the wrap() calls agents.get(ctx.agent)
+  // and truncate.output() after a successful execute, so we need a real agent name
+  // and the required context fields.
+  const testCtx = {
+    sessionID: "ses_test" as any,
+    messageID: "msg_test" as any,
+    agent: "build",
+    abort: AbortSignal.any([]),
+    messages: [],
+    metadata: () => Effect.void,
+    ask: () => Effect.void,
+  } as any
+
+  test("Effect.exit catches a defect from Effect.orDie (network/timeout-like error)", async () => {
+    // A tool that fails with a non-recoverable error — wrap() turns this into
+    // a defect via Effect.orDie, exactly like the real tool.ts wrap.
+    const crashingTool = {
+      description: "crashes",
+      parameters: params,
+      execute() {
+        return Effect.fail(new Error("Network timeout simulated"))
+      },
+    }
+
+    const info = await runtime.runPromise(Tool.define("crash-tool", Effect.succeed(crashingTool)))
+    const def = await Effect.runPromise(info.init())
+
+    // Simulate the prompt.ts pattern: Effect.exit instead of bare yield*
+    const exit = await Effect.runPromise(Effect.exit(def.execute({ input: "test" } as any, testCtx)))
+
+    expect(exit._tag).toBe("Failure")
+    // Cause.squash extracts the original error from the defect
+    const error = Cause.squash((exit as Exit.Failure<any, any>).cause)
+    expect(error).toBeInstanceOf(Error)
+    expect((error as Error).message).toBe("Network timeout simulated")
+  })
+
+  test("Effect.exit catches a RecoverableError defect and isRecoverableError detects it", async () => {
+    const recoverableTool = {
+      description: "recoverable crash",
+      parameters: params,
+      execute() {
+        return Effect.fail(new RecoverableError("Bad arguments simulated"))
+      },
+    }
+
+    const info = await runtime.runPromise(Tool.define("recoverable-tool", Effect.succeed(recoverableTool)))
+    const def = await Effect.runPromise(info.init())
+
+    const exit = await Effect.runPromise(Effect.exit(def.execute({ input: "test" } as any, testCtx)))
+
+    expect(exit._tag).toBe("Failure")
+    const error = Cause.squash((exit as Exit.Failure<any, any>).cause)
+    // isRecoverableError must detect it even after the orDie → defect hop
+    expect(isRecoverableError(error)).toBe(true)
+    expect((error as Error).message).toBe("Bad arguments simulated")
+  })
+
+  test("Effect.exit lets successful tool results pass through unchanged", async () => {
+    // Test Effect.exit directly (not through Tool.define wrap, which adds
+    // truncation that needs full config). This verifies the prompt.ts pattern:
+    // a successful Effect exits as Success and .value is accessible.
+    const okEffect = Effect.succeed({ title: "OK", output: "success", metadata: {} })
+
+    const exit = await Effect.runPromise(Effect.exit(okEffect))
+
+    expect(exit._tag).toBe("Success")
+    const result = (exit as Exit.Success<any, any>).value
+    expect(result.output).toBe("success")
   })
 })
