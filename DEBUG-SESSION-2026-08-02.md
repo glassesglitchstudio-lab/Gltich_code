@@ -154,4 +154,25 @@ Modified (uncommitted):
 
 ---
 
-*Devam: "DEBUG-SESSION-2026-08-02'den devam et" de yeterli.*
+## Nihai Durum (oturum sonu — 2026-08-02)
+
+**Commit'ler push edildi (main):**
+- `c8eac21` — fix: prevent TUI crash on tool execute errors (Fix B + C)
+- `12422d6` — fix: resolve typecheck error in crash-prevention tests
+
+**GitHub Actions sonucu:**
+- ✅ typecheck: PASS
+- ✅ lint: PASS
+- ✅ pages: PASS
+- ✅ os-eval (ubuntu/macos/windows): TÜM smoke test'ler PASS
+- ❌ test: FAIL — **benim fix'imle alakasız**:
+  - 548 test geçti (tool-define + Fix C testleri dahil)
+  - 18 test başarısız → hepsi `plugin.signing` (1) + `plugin.install.task` (17) — önceki oturumun uncommitted plugin değişiklikleriyle ilgili **önceden var olan** hata
+  - Ayrıca unit step `exit 137` (OOM — bellek yetmedi)
+
+**Açık iş (ayrı):**
+- [ ] 18 plugin test hatası (`plugin/signing.test.ts` + `plugin.install.task`) düzeltilmeli
+- [ ] Unit test OOM (exit 137) sorunu
+- [ ] TUI manuel test: `glitch --print-logs --trust` → tool çağır, crash yerine error kartı görmelisin
+
+*Devam: "tool crash fix sonrası plugin test hatalarını düzelt" de yeterli.*
