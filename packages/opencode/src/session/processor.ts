@@ -737,10 +737,10 @@ export const layer: Layer.Layer<
                 Stream.runDrain,
               )
             }).pipe(
-              Effect.catchCauseIf(
-                (cause) => !Cause.hasInterruptsOnly(cause),
-                (cause) => Effect.fail(Cause.squash(cause)),
-              ),
+            Effect.catchCauseIf(
+              (cause) => !Cause.hasInterruptsOnly(cause),
+              (cause) => Effect.fail(Cause.squash(cause)),
+            ),
             )
 
             return yield* Effect.void
@@ -821,6 +821,7 @@ export const layer: Layer.Layer<
                 }
               }),
             ),
+            Effect.ensuring(cleanup()),
           )
 
           if (ctx.needsOverflowHandling) return "overflow"

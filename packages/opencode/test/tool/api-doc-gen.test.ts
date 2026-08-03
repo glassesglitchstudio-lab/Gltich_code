@@ -33,13 +33,17 @@ async function withTmpDir(fn: (dir: string) => Promise<void>) {
 
 const originalSpawn = Bun.spawn
 function mockSpawn(responses: { [cmd: string]: { stdout: string; stderr: string; code: number } }) {
-  Bun.spawn = ((args: string[], opts?: any) => {
-    const cmd = args.join(" ")
+  Bun.spawn = ((...params: any[]) => {
+    const first = params[0]
+    if (!Array.isArray(first)) {
+      return originalSpawn.apply(null, params as [any])
+    }
+    const cmd = first.join(" ")
     const matchingKey = Object.keys(responses).find((key) => cmd.includes(key))
     const resp = matchingKey ? responses[matchingKey] : { stdout: "", stderr: "", code: 0 }
     return {
-      stdout: new Response(resp.stdout),
-      stderr: new Response(resp.stderr),
+      stdout: resp.stdout,
+      stderr: resp.stderr,
       exited: Promise.resolve(resp.code),
     }
   }) as any

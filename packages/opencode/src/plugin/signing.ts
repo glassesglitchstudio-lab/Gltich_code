@@ -2,7 +2,6 @@ import { generateKeyPairSync, sign, verify, createHash } from "crypto"
 import { join } from "path"
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs"
 import os from "os"
-import { Filesystem } from "@/util"
 import { Glob } from "@glitchcode/shared/util/glob"
 
 const KEYS_DIR = join(os.homedir(), ".glitchcode", "keys")
@@ -49,8 +48,9 @@ export function generateKeyPair(): KeyPair {
   const publicKeyPath = join(keysDir, "public.pem")
   const privateKeyPath = join(keysDir, "private.pem")
 
-  Filesystem.write(publicKeyPath, publicKey, 0o644)
-  Filesystem.write(privateKeyPath, privateKey, 0o600)
+  mkdirSync(keysDir, { recursive: true })
+  writeFileSync(publicKeyPath, publicKey, { mode: 0o644 })
+  writeFileSync(privateKeyPath, privateKey, { mode: 0o600 })
 
   return { publicKey, privateKey }
 }
@@ -65,7 +65,7 @@ function hashPackageContent(packagePath: string): string {
 
   // Always include package.json first for determinism
   const pkgJsonPath = join(packagePath, "package.json")
-  const pkgJson = Filesystem.readText(pkgJsonPath)
+  const pkgJson = readFileSync(pkgJsonPath, "utf-8")
   hash.update(`---package.json---\n${pkgJson}\n`)
 
   // Find all signable source files
@@ -88,7 +88,7 @@ function hashPackageContent(packagePath: string): string {
 
   files.sort()
   for (const file of files) {
-    const content = Filesystem.readText(join(packagePath, file))
+    const content = readFileSync(join(packagePath, file), "utf-8")
     hash.update(`---${file}---\n${content}\n`)
   }
 
@@ -118,7 +118,7 @@ export function signPlugin(
   }
 
   const signaturePath = join(packagePath, SIGNATURE_FILE)
-  Filesystem.writeJson(signaturePath, pluginSignature)
+  writeFileSync(signaturePath, JSON.stringify(pluginSignature, null, 2))
 
   return pluginSignature
 }
@@ -145,7 +145,7 @@ export function verifyPlugin(
 ): VerificationResult {
   const signaturePath = join(packagePath, SIGNATURE_FILE)
 
-  if (!Filesystem.exists(signaturePath)) {
+  if (!existsSync(signaturePath)) {
     return { valid: false, error: "No plugin-signature.json found in package" }
   }
 

@@ -94,7 +94,7 @@ const integrationLayer = SessionStatus.layer.pipe(
 const integrationIt = testEffect(integrationLayer)
 
 integrationIt.live(
-  "integration: real SessionStatus.Service drives query; busy→idle resolves tracker",
+  "integration: real SessionStatus.Service drives query; busy->idle resolves tracker",
   () =>
     provideTmpdirInstance(() =>
       Effect.gen(function* () {

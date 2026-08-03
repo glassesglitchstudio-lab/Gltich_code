@@ -1,4 +1,5 @@
 import z from "zod"
+import path from "path"
 import { Effect } from "effect"
 import * as Tool from "./tool"
 import { RepoMapAnalyzer } from "../repo-map/analyzer"
@@ -55,6 +56,21 @@ export const RepoMapTool = Tool.define(
 
           const graph = new RepoMapGraph(index)
 
+          // Resolve a (possibly relative) target against the index. Keys are
+          // absolute paths; users often pass bare file names ("helper.ts").
+          const resolveTarget = (target: string): string | undefined => {
+            if (index.files.has(target)) return target
+            const abs = path.resolve(root, target)
+            if (index.files.has(abs)) return abs
+            const base = path.basename(target)
+            for (const key of index.files.keys()) {
+              if (path.basename(key) === base) return key
+            }
+            return undefined
+          }
+
+          const target = params.target ? resolveTarget(params.target) : undefined
+
           switch (params.operation) {
             case "build":
               return {
@@ -65,18 +81,25 @@ export const RepoMapTool = Tool.define(
 
             case "query": {
               if (!params.target) return { title: "Error", metadata: { error: true } as Tool.Metadata, output: "target gerekli" }
-              const file = index.files.get(params.target)
-              if (!file) return { title: "Error", metadata: { error: true } as Tool.Metadata, output: `Bulunamadı: ${params.target}` }
+              if (!target) return { title: "Error", metadata: { error: true } as Tool.Metadata, output: `Bulunamadı: ${params.target}` }
+              const file = index.files.get(target)!
+              const langNames: Record<string, string> = {
+                typescript: "TypeScript",
+                javascript: "JavaScript",
+                tsx: "TSX",
+                jsx: "JSX",
+              }
               return {
                 title: file.path,
                 metadata: { success: true } as Tool.Metadata,
-                output: `Dil: ${file.language}\nExport: ${file.exports.map(e => e.name).join(", ")}\nImport: ${file.imports.map(i => i.source).join(", ")}`,
+                output: `Dil: ${langNames[file.language] || file.language}\nExport: ${file.exports.map(e => e.name).join(", ")}\nImport: ${file.imports.map(i => i.source).join(", ")}`,
               }
             }
 
             case "dependents": {
               if (!params.target) return { title: "Error", metadata: { error: true } as Tool.Metadata, output: "target gerekli" }
-              const deps = graph.getDependents(params.target, params.depth)
+              if (!target) return { title: "Error", metadata: { error: true } as Tool.Metadata, output: `Bulunamadı: ${params.target}` }
+              const deps = graph.getDependents(target, params.depth)
               return {
                 title: "Dependents",
                 metadata: { success: true } as Tool.Metadata,
@@ -86,7 +109,8 @@ export const RepoMapTool = Tool.define(
 
             case "dependencies": {
               if (!params.target) return { title: "Error", metadata: { error: true } as Tool.Metadata, output: "target gerekli" }
-              const deps = graph.getDependencies(params.target, params.depth)
+              if (!target) return { title: "Error", metadata: { error: true } as Tool.Metadata, output: `Bulunamadı: ${params.target}` }
+              const deps = graph.getDependencies(target, params.depth)
               return {
                 title: "Dependencies",
                 metadata: { success: true } as Tool.Metadata,
@@ -96,7 +120,8 @@ export const RepoMapTool = Tool.define(
 
             case "impact": {
               if (!params.target) return { title: "Error", metadata: { error: true } as Tool.Metadata, output: "target gerekli" }
-              const impact = graph.getImpact(params.target, params.depth)
+              if (!target) return { title: "Error", metadata: { error: true } as Tool.Metadata, output: `Bulunamadı: ${params.target}` }
+              const impact = graph.getImpact(target, params.depth)
               return {
                 title: "Impact",
                 metadata: { success: true } as Tool.Metadata,

@@ -207,7 +207,7 @@ function makeLayer() {
 
 const it = testEffect(makeLayer())
 
-const ref = {
+const _ref = {
   providerID: ProviderID.make("test"),
   modelID: ModelID.make("test-model"),
 }

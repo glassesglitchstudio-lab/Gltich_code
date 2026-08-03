@@ -991,8 +991,13 @@ describe("Actor.spawn return-format injection (F21)", () => {
 
         const msgs = yield* session.messages({ sessionID: result.sessionID })
         const subAgentUser = msgs.find((m) => m.info.role === "user" && m.info.agentID === result.actorID)
-        expect(subAgentUser).toBeDefined()
-        const text = subAgentUser?.parts.find((p) => p.type === "text")?.text ?? ""
+        if (!subAgentUser) {
+          yield* Effect.sleep(500)
+        }
+        const finalMsgs = yield* session.messages({ sessionID: result.sessionID })
+        const finalSubAgentUser = finalMsgs.find((m) => m.info.role === "user" && m.info.agentID === result.actorID)
+        expect(finalSubAgentUser).toBeDefined()
+        const text = finalSubAgentUser?.parts.find((p) => p.type === "text")?.text ?? ""
         expect(text).toContain("Return format (required)")
         expect(text).toContain("**Status**:")
       }),

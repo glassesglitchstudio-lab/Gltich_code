@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test"
-import { Effect, Layer, ManagedRuntime } from "effect"
+import { Layer, ManagedRuntime } from "effect"
 import { Inbox } from "../../src/inbox"
 import { ActorRegistry } from "../../src/actor/registry"
 import { Session } from "../../src/session"

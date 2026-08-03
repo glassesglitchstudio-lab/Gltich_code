@@ -57,7 +57,7 @@ import { SessionCheckpoint } from "../../src/session/checkpoint"
 import { SessionCompaction } from "../../src/session/compaction"
 import { TaskRegistry } from "../../src/task/registry"
 import { Auth } from "../../src/auth"
-import { MessageID, PartID } from "../../src/session/schema"
+import { MessageID } from "../../src/session/schema"
 import { MessageV2 } from "../../src/session/message-v2"
 import { Instance } from "../../src/project/instance"
 import * as CrossSpawnSpawner from "../../src/effect/cross-spawn-spawner"
@@ -249,7 +249,7 @@ describe("Fork-agent inbox compat (Plan 4 / Task 5)", () => {
         const actor = yield* Actor.Service
         const session = yield* Session.Service
         const inbox = yield* Inbox.Service
-        const reg = yield* ActorRegistry.Service
+        const _reg = yield* ActorRegistry.Service
 
         const parent = yield* session.create({
           title: "fork-agent compat test",

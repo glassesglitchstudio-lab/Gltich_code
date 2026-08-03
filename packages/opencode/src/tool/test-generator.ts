@@ -129,10 +129,11 @@ export const TestGeneratorTool = Tool.define(
       }),
       execute: (
         params: { path: string; framework?: string; coverage?: string; output?: string },
-        ctx: Tool.Context,
       ) =>
         Effect.gen(function* () {
-          const content = yield* fs.readFileString(params.path)
+          const content = yield* fs
+            .readFileString(params.path)
+            .pipe(Effect.orElseSucceed(() => ""))
           if (!content) {
             return {
               title: "Test Generator",
@@ -176,7 +177,7 @@ export const TestGeneratorTool = Tool.define(
               `**Exports found:** ${exports.length}`,
               "",
               "## Generated for:",
-              ...exports.map((e) => `- \`${e.type}\` ${e.name}`),
+              ...exports.map((e) => `- ${e.type} ${e.name}`),
               "",
               "Run tests with:",
               `  bun test ${testPath}`,

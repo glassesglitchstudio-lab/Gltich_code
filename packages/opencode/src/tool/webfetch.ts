@@ -24,6 +24,10 @@ function isPrivateIP(hostname: string): boolean {
 }
 
 function isBlockedURL(url: string): boolean {
+  // Test/dev escape hatch: local test servers (Bun.serve) fetch localhost.
+  // Never enabled in production — the CLI is a server tool where localhost
+  // fetching is a deliberate SSRF risk.
+  if (process.env.GLITCHCODE_ALLOW_PRIVATE_URLS === "1") return false
   try {
     const parsed = new URL(url)
     if (isPrivateIP(parsed.hostname)) return true

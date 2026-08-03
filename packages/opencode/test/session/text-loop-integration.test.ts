@@ -7,6 +7,8 @@
 import { NodeFileSystem } from "@effect/platform-node"
 import { describe, expect } from "bun:test"
 import { Effect, Layer } from "effect"
+import { join } from "path"
+import { tmpdir } from "os"
 import { Agent as AgentSvc } from "../../src/agent/agent"
 import { Bus } from "../../src/bus"
 import { Command } from "../../src/command"
@@ -21,7 +23,6 @@ import { ModelID, ProviderID } from "../../src/provider/schema"
 import { Question } from "../../src/question"
 import { Todo } from "../../src/session/todo"
 import { Session } from "../../src/session"
-import { LLM } from "../../src/session/llm"
 import { AppFileSystem } from "@glitchcode/shared/filesystem"
 import { SessionPrune } from "../../src/session/prune"
 import { SessionSummary } from "../../src/session/summary"
@@ -273,8 +274,8 @@ describe("text loop detection (integration, MockLLM)", () => {
           const result = yield* prompt.loop({ sessionID: session.id })
 
           // === DUMP TRAJECTORY TO FILE ===
-          mockLLM.dumpTrajectory("/tmp/text-loop-trajectory.json")
-          console.log(`[text-loop] Trajectory dumped to /tmp/text-loop-trajectory.json`)
+          mockLLM.dumpTrajectory(join(tmpdir(), "text-loop-trajectory.json"))
+          console.log(`[text-loop] Trajectory dumped to ${join(tmpdir(), "text-loop-trajectory.json")}`)
 
           // === FULL TRAJECTORY DUMP ===
           const allMsgs = yield* sessions.messages({ sessionID: session.id })
@@ -409,8 +410,8 @@ describe("text loop detection (integration, MockLLM)", () => {
           const result = yield* prompt.loop({ sessionID: session.id })
 
           // Dump trajectory
-          mockLLM.dumpTrajectory("/tmp/text-loop-7-repeats.json")
-          console.log(`\n[7-repeats] Trajectory: /tmp/text-loop-7-repeats.json`)
+          mockLLM.dumpTrajectory(join(tmpdir(), "text-loop-7-repeats.json"))
+          console.log(`\n[7-repeats] Trajectory: ${join(tmpdir(), "text-loop-7-repeats.json")}`)
           console.log(`[7-repeats] MockLLM calls: ${mockLLM.calls}`)
 
           // Print message summary

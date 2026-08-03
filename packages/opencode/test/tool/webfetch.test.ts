@@ -8,6 +8,10 @@ import { Instance } from "../../src/project/instance"
 import { WebFetchTool } from "../../src/tool/webfetch"
 import { SessionID, MessageID } from "../../src/session/schema"
 
+// Tests spin up local Bun.serve servers; the SSRF guard blocks localhost by
+// default, so opt in via the test escape hatch.
+process.env.GLITCHCODE_ALLOW_PRIVATE_URLS = "1"
+
 const projectRoot = path.join(import.meta.dir, "../..")
 
 const ctx = {

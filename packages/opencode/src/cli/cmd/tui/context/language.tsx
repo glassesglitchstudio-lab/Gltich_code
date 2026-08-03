@@ -1,4 +1,4 @@
-﻿import * as i18n from "@solid-primitives/i18n"
+import * as i18n from "@solid-primitives/i18n"
 import { createMemo, createResource, type ParentProps } from "solid-js"
 import { I18nProvider } from "@glitchcode/ui/context/i18n"
 import { dict as tuiEn } from "../i18n/en"

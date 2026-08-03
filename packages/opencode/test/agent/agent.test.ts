@@ -390,10 +390,11 @@ test("Agent.list keeps the default agent first, then native primaries, then the 
     directory: tmp.path,
     fn: async () => {
       const names = (await load(tmp.path, (svc) => svc.list())).map((a) => a.name)
-      // default_agent comes first
+      // default_agent comes first, then native primaries sorted by name
       expect(names[0]).toBe("plan")
       expect(names[1]).toBe("build")
-      expect(names[2]).toBe("compose")
+      expect(names[2]).toBe("architect")
+      expect(names[3]).toBe("compose")
     },
   })
 })
@@ -708,6 +709,10 @@ test("defaultAgent throws when all primary agents are disabled", async () => {
         build: { disable: true },
         plan: { disable: true },
         compose: { disable: true },
+        architect: { disable: true },
+        review: { disable: true },
+        ptc: { disable: true },
+        plusthinking: { disable: true },
       },
     },
   })

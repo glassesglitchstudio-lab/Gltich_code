@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test"
-import { mkdirSync, writeFileSync, readFileSync, rmSync } from "fs"
+import { existsSync, mkdirSync, writeFileSync, readFileSync, rmSync } from "fs"
 import { join } from "path"
 import os from "os"
 
@@ -10,29 +10,6 @@ mkdirSync(join(testHome, ".glitchcode"), { recursive: true })
 
 // Mock os.homedir for the signing module's path constants
 const homeSpy = spyOn(os, "homedir").mockReturnValue(testHome)
-
-// Mock Filesystem using the SAME path the signing module imports from
-// The @/ alias resolves to src/, so we mock the namespace directly
-const { Filesystem } = await import("../../src/util")
-const writeJsonSpy = spyOn(Filesystem, "writeJson").mockImplementation(async (p: string, data: unknown) => {
-  mkdirSync(join(p, ".."), { recursive: true })
-  writeFileSync(p, JSON.stringify(data))
-})
-const existsSpy = spyOn(Filesystem, "exists").mockImplementation(async (p: string) => {
-  try { require("fs").accessSync(p); return true } catch { return false }
-})
-// readJson MUST return synchronously — verifyPlugin calls it without await
-const readJsonSpy = spyOn(Filesystem, "readJson").mockImplementation((p: string) => {
-  return JSON.parse(require("fs").readFileSync(p, "utf8")) as any
-})
-const writeSpy = spyOn(Filesystem, "write").mockImplementation(async (p: string, content: string | Buffer | Uint8Array, _mode?: number) => {
-  mkdirSync(join(p, ".."), { recursive: true })
-  writeFileSync(p, content)
-})
-// readText MUST return synchronously — hashPackageContent calls it without await
-const readTextSpy = spyOn(Filesystem, "readText").mockImplementation((p: string) => {
-  return require("fs").readFileSync(p, "utf8") as any
-})
 
 const {
   generateKeyPair,
@@ -94,7 +71,7 @@ describe("plugin.signing", () => {
       const keys = generateKeyPair()
       signPlugin(keys.privateKey, pkgDir)
       await Bun.sleep(50)
-      expect(await existsSpy(join(pkgDir, "plugin-signature.json"))).toBe(true)
+      expect(existsSync(join(pkgDir, "plugin-signature.json"))).toBe(true)
     })
 
     test("same content produces same hash", async () => {

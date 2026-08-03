@@ -46,7 +46,7 @@ export class RepoMapParser {
 
   extractExports(tree: any, language: Language): SymbolEntry[] {
     if (!tree.rootNode) {
-      return this.extractExportsRegex(tree as string, language)
+      return this.extractExportsRegex(tree.content || "", language)
     }
 
     const exports: SymbolEntry[] = []
@@ -116,7 +116,7 @@ export class RepoMapParser {
 
   extractImports(tree: any, language: Language): ImportEntry[] {
     if (!tree.rootNode) {
-      return this.extractImportsRegex(tree as string, language)
+      return this.extractImportsRegex(tree.content || "", language)
     }
 
     const imports: ImportEntry[] = []

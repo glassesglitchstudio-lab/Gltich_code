@@ -30,7 +30,10 @@ function migrateVarToConst(content: string): { result: string; changes: number }
 
   result = result.replace(/\bvar\s+(\w+)\s*=/g, (match, name) => {
     const reassigned = new RegExp(`\\b${name}\\s*=`).test(result.replace(match, ""))
-    if (reassigned) return `let ${name} =`
+    if (reassigned) {
+      changes++
+      return `let ${name} =`
+    }
     changes++
     return `const ${name} =`
   })
@@ -113,7 +116,9 @@ export const CodeMigrationTool = Tool.define(
         ctx: Tool.Context,
       ) =>
         Effect.gen(function* () {
-          const content = yield* fs.readFileString(params.path)
+          const content = yield* fs
+            .readFileString(params.path)
+            .pipe(Effect.orElseSucceed(() => ""))
           if (!content) {
             return {
               title: "Code Migration",

@@ -142,7 +142,7 @@ async function fix(pr: PR, files: string[], prs: PR[], applied: number[], idx: n
   return true
 }
 
-async function smoke(prs: PR[], applied: number[]) {
+async function _smoke(prs: PR[], applied: number[]) {
   console.log("\nRunning final smoke check with opencode...")
 
   const done = lines(prs.filter((x) => applied.includes(x.number)))
