@@ -8,10 +8,6 @@ runs:
       with:
         bun-version-file: package.json
 
-    - name: Upgrade to latest Bun (includes isolated linker fix #33646)
-      run: bun upgrade --canary
-      shell: bash
-
     - name: Get cache directory
       id: cache
       shell: bash
