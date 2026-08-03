@@ -394,7 +394,7 @@ test("Agent.list keeps the default agent first, then native primaries, then the 
       expect(names[0]).toBe("plan")
       expect(names[1]).toBe("build")
       expect(names[2]).toBe("architect")
-      expect(names[3]).toBe("compose")
+      expect(names[3]).toBe("review")
     },
   })
 })
