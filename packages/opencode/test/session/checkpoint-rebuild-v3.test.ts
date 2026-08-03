@@ -1,4 +1,4 @@
-import { afterEach, describe, expect } from "bun:test"
+import { afterEach, beforeEach, describe, expect } from "bun:test"
 import { Effect, Layer } from "effect"
 import * as fs from "fs/promises"
 import path from "path"
@@ -10,12 +10,18 @@ import { SessionCheckpoint } from "../../src/session/checkpoint"
 import { TaskRegistry } from "../../src/task/registry"
 import { ActorRegistry } from "../../src/actor/registry"
 import { Instance } from "../../src/project/instance"
+import { Global } from "../../src/global"
 import * as CrossSpawnSpawner from "../../src/effect/cross-spawn-spawner"
 import { provideTmpdirInstance } from "../fixture/fixture"
 import { testEffect } from "../lib/effect"
 
 afterEach(async () => {
   await Instance.disposeAll()
+})
+
+beforeEach(async () => {
+  const memRoot = path.join(Global.Path.data, "memory")
+  await fs.rm(memRoot, { recursive: true, force: true }).catch(() => {})
 })
 
 const it = testEffect(

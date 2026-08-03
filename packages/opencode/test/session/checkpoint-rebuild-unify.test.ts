@@ -1,5 +1,7 @@
-import { afterEach, describe, expect } from "bun:test"
+import { afterEach, beforeEach, describe, expect } from "bun:test"
 import { Effect, Layer } from "effect"
+import * as fs from "fs/promises"
+import path from "path"
 import { Bus } from "../../src/bus"
 import { Config } from "../../src/config"
 import { Memory } from "../../src/memory"
@@ -11,6 +13,7 @@ import { ActorRegistry } from "../../src/actor/registry"
 import { MessageID, PartID, SessionID } from "../../src/session/schema"
 import { ModelID, ProviderID } from "../../src/provider/schema"
 import { Instance } from "../../src/project/instance"
+import { Global } from "../../src/global"
 import * as CrossSpawnSpawner from "../../src/effect/cross-spawn-spawner"
 import { provideTmpdirInstance } from "../fixture/fixture"
 import { testEffect } from "../lib/effect"
@@ -25,6 +28,11 @@ const ref = {
 
 afterEach(async () => {
   await Instance.disposeAll()
+})
+
+beforeEach(async () => {
+  const memRoot = path.join(Global.Path.data, "memory")
+  await fs.rm(memRoot, { recursive: true, force: true }).catch(() => {})
 })
 
 const it = testEffect(
