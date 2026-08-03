@@ -15,7 +15,9 @@ export async function isDir(p: string): Promise<boolean> {
   try {
     return statSync(p).isDirectory()
   } catch (err) {
-    console.warn('[filesystem] isDir error:', err)
+    if (!isEnoent(err)) {
+      console.warn('[filesystem] isDir error:', err)
+    }
     return false
   }
 }
@@ -117,7 +119,9 @@ export function normalizePath(p: string): string {
   try {
     return realpathSync.native(resolved)
   } catch (err) {
-    console.warn('[filesystem] normalizePath error:', err)
+    if (!isEnoent(err)) {
+      console.warn('[filesystem] normalizePath error:', err)
+    }
     return resolved
   }
 }
