@@ -136,8 +136,8 @@ describe("GLITCHCODE_HOME end-to-end", () => {
     })
     expect(result.ok).toBe(true)
     if (!result.ok) return
-    // Paths should reflect XDG layout (ends with "/mimocode"), not GLITCHCODE_HOME layout
-    expect(result.paths.config).toBe(path.join(tmp.path, "config", "mimocode"))
-    expect(result.paths.data).toBe(path.join(tmp.path, "data", "mimocode"))
+    // Paths should reflect XDG layout (ends with "/glitchcode"), not GLITCHCODE_HOME layout
+    expect(result.paths.config).toBe(path.join(tmp.path, "config", "glitchcode"))
+    expect(result.paths.data).toBe(path.join(tmp.path, "data", "glitchcode"))
   })
 })
