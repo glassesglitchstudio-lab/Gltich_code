@@ -44,11 +44,13 @@ const SECRET_PATTERNS: { pattern: RegExp; type: string; severity: SecretMatch["s
 function scanLine(line: string, lineNum: number, filePath: string): SecretMatch[] {
   const matches: SecretMatch[] = []
   for (const { pattern, type, severity } of SECRET_PATTERNS) {
-    const regex = new RegExp(pattern.source, pattern.flags)
+    const flags = pattern.flags.includes("g") ? pattern.flags : pattern.flags + "g"
+    const regex = new RegExp(pattern.source, flags)
     let m: RegExpExecArray | null
     while ((m = regex.exec(line)) !== null) {
       const preview = line.trim().slice(0, 80)
       matches.push({ file: filePath, line: lineNum, severity, type, preview })
+      if (regex.lastIndex === 0) break
     }
   }
   return matches

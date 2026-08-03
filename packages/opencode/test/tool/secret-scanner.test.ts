@@ -96,7 +96,7 @@ describe("secret-scanner", () => {
   test("detects GitHub tokens", async () => {
     await withTmpDir(async (dir) => {
       const filePath = path.join(dir, "env.ts")
-      await fs.writeFile(filePath, 'const token = "ghp_1234567890abcdefghij1234567890ab"\n')
+      await fs.writeFile(filePath, 'const token = "ghp_1234567890abcdefghij1234567890abcdefgh"\n')
       mockSpawn({
         find: { stdout: filePath, stderr: "", code: 0 },
         cat: { stdout: "", stderr: "", code: 1 },
