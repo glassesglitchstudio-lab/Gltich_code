@@ -21,7 +21,6 @@ function extractRoutes(content: string, filePath: string): ApiRoute[] {
   const patterns = [
     { regex: /\.(get|post|put|delete|patch|head|options)\s*\(\s*['"`]([^'"`]+)['"`]/gi, framework: "express" },
     { regex: /router\.(get|post|put|delete|patch)\s*\(\s*['"`]([^'"`]+)['"`]/gi, framework: "express" },
-    { regex: /app\.(get|post|put|delete|patch)\s*\(\s*['"`]([^'"`]+)['"`]/gi, framework: "express" },
     { regex: /@(Get|Post|Put|Delete|Patch)\s*\(\s*['"`]([^'"`]+)['"`]/gi, framework: "nest" },
     { regex: /\.(route|api)\s*\(\s*['"`]([^'"`]+)['"`]/gi, framework: "generic" },
   ]

@@ -64,7 +64,7 @@ describe("Worktree", () => {
             const info = yield* svc.makeWorktreeInfo("my-feature")
 
             expect(info.name).toBe("my-feature")
-            expect(info.branch).toBe("mimocode/my-feature")
+            expect(info.branch).toBe("glitchcode/my-feature")
           }),
         { git: true },
       ),
@@ -105,7 +105,7 @@ describe("Worktree", () => {
             const info = yield* svc.create()
 
             expect(info.name).toBeDefined()
-            expect(info.branch).toStartWith("mimocode/")
+            expect(info.branch).toStartWith("glitchcode/")
             expect(info.directory).toBeDefined()
 
             yield* Effect.promise(() => Bun.sleep(1000))
@@ -126,7 +126,7 @@ describe("Worktree", () => {
             const info = yield* svc.create()
 
             expect(info.name).toBeDefined()
-            expect(info.branch).toStartWith("mimocode/")
+            expect(info.branch).toStartWith("glitchcode/")
 
             const text = yield* Effect.promise(() => $`git worktree list --porcelain`.cwd(dir).quiet().text())
             const next = yield* Effect.promise(() => fs.realpath(info.directory).catch(() => info.directory))
@@ -153,7 +153,7 @@ describe("Worktree", () => {
             const info = yield* svc.create({ name: "test-workspace" })
 
             expect(info.name).toBe("test-workspace")
-            expect(info.branch).toBe("mimocode/test-workspace")
+            expect(info.branch).toBe("glitchcode/test-workspace")
 
             yield* Effect.promise(() => ready)
             yield* Effect.promise(() => Instance.dispose()).pipe(provideInstance(info.directory))

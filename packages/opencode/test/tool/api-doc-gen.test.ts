@@ -71,7 +71,7 @@ describe("api-doc-gen", () => {
         Effect.provide(Layer.mergeAll(Truncate.defaultLayer, Agent.defaultLayer, AppFileSystem.defaultLayer)),
         Effect.runPromise,
       )
-      expect(result.output).toContain("4 routes")
+      expect(result.output).toContain("Routes found:** 4")
       expect(result.output).toContain("GET")
       expect(result.output).toContain("POST")
       expect(result.output).toContain("DELETE")
@@ -95,7 +95,7 @@ describe("api-doc-gen", () => {
         Effect.provide(Layer.mergeAll(Truncate.defaultLayer, Agent.defaultLayer, AppFileSystem.defaultLayer)),
         Effect.runPromise,
       )
-      expect(result.output).toContain("3 routes")
+      expect(result.output).toContain("Routes found:** 3")
       expect(result.metadata.routes).toBe(3)
     })
   })
@@ -166,7 +166,7 @@ describe("api-doc-gen", () => {
         Effect.provide(Layer.mergeAll(Truncate.defaultLayer, Agent.defaultLayer, AppFileSystem.defaultLayer)),
         Effect.runPromise,
       )
-      expect(result.output).toContain("1 routes")
+      expect(result.output).toContain("Routes found:** 1")
     })
   })
 

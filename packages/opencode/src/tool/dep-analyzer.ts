@@ -4,6 +4,7 @@ import * as Tool from "./tool"
 import { AppFileSystem } from "@glitchcode/shared/filesystem"
 import DESCRIPTION from "./dep-analyzer.txt"
 import path from "path"
+import { Instance } from "../project/instance"
 
 function exec(cmd: string, cwd?: string): Effect.Effect<{ stdout: string; stderr: string; code: number }> {
   return Effect.promise(async () => {
@@ -63,8 +64,16 @@ export const DepAnalyzerTool = Tool.define(
       }),
       execute: (params: { operation: string; fix?: boolean }, ctx: Tool.Context) =>
         Effect.gen(function* () {
-          const cwd = process.cwd()
+          const cwd = Instance.directory
           const pkgPath = path.join(cwd, "package.json")
+          const exists = yield* fs.existsSafe(pkgPath)
+          if (!exists) {
+            return {
+              title: "Dep Analyzer",
+              metadata: { error: true } as Tool.Metadata,
+              output: "No package.json found in current directory.",
+            }
+          }
           const pkgContent = yield* fs.readFileString(pkgPath)
           if (!pkgContent) {
             return {
