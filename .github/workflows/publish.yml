@@ -54,10 +54,6 @@ jobs:
       - name: Setup Bun
         uses: ./.github/actions/setup-bun
 
-      - name: Upgrade to latest Bun (isolated linker fix #33646)
-        run: bun upgrade --canary
-        shell: bash
-
       - name: Cache Bun dependencies
         uses: actions/cache@v4
         with:
