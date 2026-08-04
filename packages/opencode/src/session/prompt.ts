@@ -1068,7 +1068,7 @@ NOTE: At any point in time through this workflow you should feel free to ask the
                     status: "error",
                     error: "Cancelled",
                     time: { start: part.state.time.start, end: Date.now() },
-            metadata: part.state.status === "pending" ? undefined : part.state.metadata,
+            metadata: part.state.metadata,
                     input: part.state.input,
                   },
                 } satisfies MessageV2.ToolPart)
@@ -1119,7 +1119,7 @@ NOTE: At any point in time through this workflow you should feel free to ask the
               start: part.state.status === "running" ? part.state.time.start : Date.now(),
               end: Date.now(),
             },
-            metadata: part.state.metadata,
+            metadata: "metadata" in part.state ? part.state.metadata : undefined,
             input: part.state.input,
           },
         } satisfies MessageV2.ToolPart)
