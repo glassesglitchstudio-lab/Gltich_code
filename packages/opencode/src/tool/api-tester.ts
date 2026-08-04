@@ -60,51 +60,57 @@ export const ApiTesterTool = Tool.define(
           }
 
           const startTime = Date.now()
-          let result: HttpResponse
 
-          try {
-            const init: RequestInit = {
-              method,
-              headers,
-              signal: AbortSignal.timeout(params.timeout || 10000),
-            }
-            if (params.body && method !== "GET" && method !== "HEAD") {
-              init.body = params.body
-            }
+          const init: RequestInit = {
+            method,
+            headers,
+            signal: AbortSignal.timeout(params.timeout || 10000),
+          }
+          if (params.body && method !== "GET" && method !== "HEAD") {
+            init.body = params.body
+          }
 
-            const response = yield* Effect.promise(() => fetch(params.url, init))
-            const elapsed = Date.now() - startTime
-            const body = yield* Effect.promise(() => response.text())
+          const result = yield* Effect.tryPromise({
+            try: async () => {
+              const response = await fetch(params.url, init)
+              const elapsed = Date.now() - startTime
+              const body = await response.text()
+              const respHeaders: Record<string, string> = {}
+              response.headers.forEach((v, k) => { respHeaders[k] = v })
+              return {
+                status: response.status,
+                statusText: response.statusText,
+                headers: respHeaders,
+                body,
+                time: elapsed,
+              } satisfies HttpResponse
+            },
+            catch: (err: any) => {
+              const elapsed = Date.now() - startTime
+              const output: string[] = [
+                `# API Request Failed`,
+                "",
+                `**URL:** \`${params.url}\``,
+                `**Method:** ${method}`,
+                `**Time:** ${elapsed}ms`,
+                "",
+                `## Error`,
+                `\`\`\``,
+                err?.message || String(err),
+                `\`\`\``,
+              ]
+              return {
+                title: `API Error: ${method} ${new URL(params.url).hostname}`,
+                metadata: { error: true } as Tool.Metadata,
+                output: output.join("\n"),
+                _error: true as const,
+              }
+            },
+          })
 
-            const respHeaders: Record<string, string> = {}
-            response.headers.forEach((v, k) => { respHeaders[k] = v })
-
-            result = {
-              status: response.status,
-              statusText: response.statusText,
-              headers: respHeaders,
-              body,
-              time: elapsed,
-            }
-          } catch (err: any) {
-            const elapsed = Date.now() - startTime
-            const output: string[] = [
-              `# API Request Failed`,
-              "",
-              `**URL:** \`${params.url}\``,
-              `**Method:** ${method}`,
-              `**Time:** ${elapsed}ms`,
-              "",
-              `## Error`,
-              `\`\`\``,
-              err?.message || String(err),
-              `\`\`\``,
-            ]
-            return {
-              title: `API Error: ${method} ${new URL(params.url).hostname}`,
-              metadata: { error: true } as Tool.Metadata,
-              output: output.join("\n"),
-            }
+          if ("_error" in result) {
+            const { _error: _, ...rest } = result as any
+            return rest
           }
 
           const output: string[] = [
