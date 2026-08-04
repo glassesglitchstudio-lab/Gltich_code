@@ -266,6 +266,7 @@ export const layer: Layer.Layer<
       ) {
         const match = yield* readToolCall(toolCallID)
         if (!match || !["running", "pending"].includes(match.part.state.status)) return
+        const startTime = match.part.state.status === "running" ? match.part.state.time.start : Date.now()
         yield* session.updatePart({
           ...match.part,
           state: {
@@ -274,7 +275,7 @@ export const layer: Layer.Layer<
             output: output.output,
             metadata: output.metadata,
             title: output.title,
-            time: { start: match.part.state.time.start, end: Date.now() },
+            time: { start: startTime, end: Date.now() },
             attachments: output.attachments,
           },
         })
