@@ -460,6 +460,9 @@ export function topologicalSort(tasks: SubTask[]): string[] {
 
   if (skipped.length > 0) {
     console.warn(`  Uyari: Döngüsel bagimlilik tespit edildi, atlanan gorevler: ${skipped.join(", ")}`)
+    for (const id of skipped) {
+      if (!sorted.includes(id)) sorted.push(id)
+    }
   }
 
   return sorted

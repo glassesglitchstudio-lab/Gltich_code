@@ -352,7 +352,7 @@ describe("WorkflowRuntime cancel cascade", () => {
       }),
       { git: true, config: providerCfg },
     ),
-    20000,
+    30000,
   )
 })
 

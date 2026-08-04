@@ -1119,7 +1119,7 @@ NOTE: At any point in time through this workflow you should feel free to ask the
               start: part.state.status === "running" ? part.state.time.start : Date.now(),
               end: Date.now(),
             },
-            metadata: part.state.status === "pending" ? undefined : part.state.metadata,
+            metadata: part.state.metadata,
             input: part.state.input,
           },
         } satisfies MessageV2.ToolPart)

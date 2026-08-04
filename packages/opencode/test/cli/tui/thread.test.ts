@@ -79,14 +79,24 @@ describe("tui thread", () => {
     const pwd = process.env.PWD
     const worker = globalThis.Worker
     const tty = Object.getOwnPropertyDescriptor(process.stdin, "isTTY")
+    const rawMode = Object.getOwnPropertyDescriptor(process.stdin, "setRawMode")
     const link = path.join(path.dirname(tmp.path), path.basename(tmp.path) + "-link")
     const type = process.platform === "win32" ? "junction" : "dir"
     seen.tui.length = 0
     await fs.symlink(tmp.path, link, type)
 
+    // Pre-create .glitchcode config so checkFirstRunSetup skips the interactive prompt
+    const configDir = path.join(tmp.path, ".glitchcode")
+    await fs.mkdir(configDir, { recursive: true })
+    await Bun.write(path.join(configDir, "glitchcode.json"), JSON.stringify({}))
+
     Object.defineProperty(process.stdin, "isTTY", {
       configurable: true,
       value: true,
+    })
+    Object.defineProperty(process.stdin, "setRawMode", {
+      configurable: true,
+      value: () => {},
     })
     globalThis.Worker = class extends EventTarget {
       onerror = null
@@ -107,6 +117,8 @@ describe("tui thread", () => {
       else process.env.PWD = pwd
       if (tty) Object.defineProperty(process.stdin, "isTTY", tty)
       else delete (process.stdin as { isTTY?: boolean }).isTTY
+      if (rawMode) Object.defineProperty(process.stdin, "setRawMode", rawMode)
+      else delete (process.stdin as { setRawMode?: any }).setRawMode
       globalThis.Worker = worker
       await fs.rm(link, { recursive: true, force: true }).catch(() => undefined)
     }

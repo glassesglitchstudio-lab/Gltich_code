@@ -265,7 +265,7 @@ export const layer: Layer.Layer<
         },
       ) {
         const match = yield* readToolCall(toolCallID)
-        if (!match || match.part.state.status !== "running") return
+        if (!match || !["running", "pending"].includes(match.part.state.status)) return
         yield* session.updatePart({
           ...match.part,
           state: {

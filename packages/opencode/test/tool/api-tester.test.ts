@@ -94,8 +94,13 @@ describe("api-tester", () => {
   })
 
   test("handles fetch failure gracefully", async () => {
-    // Mock fetch to never resolve, relying on the timeout to trigger AbortError
-    globalThis.fetch = mock(() => new Promise(() => {})) as any
+    globalThis.fetch = mock((_url: string, init?: RequestInit) => {
+      return new Promise((_, reject) => {
+        init?.signal?.addEventListener("abort", () => {
+          reject(new DOMException("The operation was aborted.", "AbortError"))
+        })
+      })
+    }) as any
     const result = await exec({ url: "https://api.example.com/fail", method: "GET" as const, timeout: 1 })
     expect(result.output).toContain("API Request Failed")
     expect(result.metadata.error).toBe(true)

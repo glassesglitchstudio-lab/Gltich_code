@@ -254,7 +254,7 @@ describe("plus-two-coder", () => {
         b: { models: { m3: {}, m4: {} } },
         c: { models: { m5: {}, m6: {} } },
       }
-      const result = selectModels(undefined, manyProviders)
+      const result = selectModels(undefined, manyProviders, 3)
       expect(result.length).toBeLessThanOrEqual(3)
     })
   })
