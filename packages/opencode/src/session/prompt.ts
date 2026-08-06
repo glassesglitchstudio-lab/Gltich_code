@@ -585,7 +585,7 @@ NOTE: At any point in time through this workflow you should feel free to ask the
       model: Provider.Model
       session: Session.Info
       tools?: Record<string, boolean>
-      processor: Pick<SessionProcessor.Handle, "message" | "updateToolCall" | "completeToolCall">
+      processor: Pick<SessionProcessor.Handle, "message" | "updateToolCall" | "completeToolCall" | "failToolCall">
       bypassAgentCheck: boolean
       messages: MessageV2.WithParts[]
       agentID?: string
@@ -737,7 +737,7 @@ NOTE: At any point in time through this workflow you should feel free to ask the
                       tool_call_status: "error",
                     })
                     .pipe(Effect.ignore)
-                  yield* input.processor.completeToolCall(options.toolCallId, errorOutput)
+                  yield* input.processor.failToolCall(options.toolCallId, error)
                   return errorOutput
                 }
                 const result = exit.value

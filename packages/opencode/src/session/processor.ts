@@ -99,6 +99,7 @@ export interface Handle {
       attachments?: MessageV2.FilePart[]
     },
   ) => Effect.Effect<void>
+  readonly failToolCall: (toolCallID: string, error: unknown) => Effect.Effect<boolean>
   readonly process: (streamInput: LLM.StreamInput) => Effect.Effect<Result>
   /**
    * Replay a pre-selected candidate (max mode): synthesize the stream events a
@@ -295,7 +296,7 @@ export const layer: Layer.Layer<
             status: "error",
             input: match.part.state.input,
             error: errorMessage(error),
-            ...(recoverable ? { metadata: { ...match.part.state.metadata, recoverable: true } } : {}),
+            metadata: { ...match.part.state.metadata, ...(recoverable ? { recoverable: true } : {}) },
             time: { start: match.part.state.time.start, end: Date.now() },
           },
         })
@@ -1033,6 +1034,7 @@ export const layer: Layer.Layer<
         },
         updateToolCall,
         completeToolCall,
+        failToolCall,
         process,
         replay,
       } satisfies Handle

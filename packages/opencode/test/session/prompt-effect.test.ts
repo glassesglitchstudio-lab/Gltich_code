@@ -1344,6 +1344,7 @@ unix(
             yield* Effect.sleep(50)
 
             yield* prompt.cancel(chat.id)
+            yield* Effect.sleep(100)
 
             const status = yield* SessionStatus.Service
             expect((yield* status.get(chat.id)).type).toBe("idle")
