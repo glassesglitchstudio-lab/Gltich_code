@@ -15,7 +15,7 @@ export function createMenu(deps: Deps) {
 
   const template: Electron.MenuItemConstructorOptions[] = [
     {
-      label: "OpenCode",
+      label: "Glitch Code",
       submenu: [
         { role: "about" },
         {
@@ -115,18 +115,18 @@ export function createMenu(deps: Deps) {
     {
       label: "Help",
       submenu: [
-        { label: "OpenCode Documentation", click: () => shell.openExternal("https://opencode.ai/docs") },
-        { label: "Support Forum", click: () => shell.openExternal("https://discord.com/invite/opencode") },
+        { label: "Glitch Code Documentation", click: () => shell.openExternal("https://github.com/glassesglitchstudio-lab/Glitch-Code/wiki") },
+        { label: "Support Forum", click: () => shell.openExternal("https://discord.gg/glitchcode") },
         { type: "separator" },
         { type: "separator" },
         {
           label: "Share Feedback",
           click: () =>
-            shell.openExternal("https://github.com/anomalyco/opencode/issues/new?template=feature_request.yml"),
+            shell.openExternal("https://github.com/glassesglitchstudio-lab/Glitch-Code/issues/new?template=feature_request.yml"),
         },
         {
           label: "Report a Bug",
-          click: () => shell.openExternal("https://github.com/anomalyco/opencode/issues/new?template=bug_report.yml"),
+          click: () => shell.openExternal("https://github.com/glassesglitchstudio-lab/Glitch-Code/issues/new?template=bug_report.yml"),
         },
       ],
     },

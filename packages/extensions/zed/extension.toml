@@ -1,36 +1,36 @@
-id = "opencode"
-name = "OpenCode"
-description = "The open source coding agent."
-version = "1.14.19"
+id = "glitchcode"
+name = "Glitch Code"
+description = "AI-powered coding agent with UE5 integration."
+version = "0.3.0"
 schema_version = 1
-authors = ["Anomaly"]
-repository = "https://github.com/anomalyco/opencode"
+authors = ["GlitchStudio"]
+repository = "https://github.com/glassesglitchstudio-lab/Glitch-Code"
 
-[agent_servers.opencode]
-name = "OpenCode"
-icon = "./icons/opencode.svg"
+[agent_servers.glitchcode]
+name = "Glitch Code"
+icon = "./icons/glitchcode.svg"
 
-[agent_servers.opencode.targets.darwin-aarch64]
-archive = "https://github.com/anomalyco/opencode/releases/download/v1.14.19/opencode-darwin-arm64.zip"
-cmd = "./opencode"
+[agent_servers.glitchcode.targets.darwin-aarch64]
+archive = "https://github.com/glassesglitchstudio-lab/Glitch-Code/releases/download/v0.3.0/glitchcode-darwin-arm64.zip"
+cmd = "./glitchcode"
 args = ["acp"]
 
-[agent_servers.opencode.targets.darwin-x86_64]
-archive = "https://github.com/anomalyco/opencode/releases/download/v1.14.19/opencode-darwin-x64.zip"
-cmd = "./opencode"
+[agent_servers.glitchcode.targets.darwin-x86_64]
+archive = "https://github.com/glassesglitchstudio-lab/Glitch-Code/releases/download/v0.3.0/glitchcode-darwin-x64.zip"
+cmd = "./glitchcode"
 args = ["acp"]
 
-[agent_servers.opencode.targets.linux-aarch64]
-archive = "https://github.com/anomalyco/opencode/releases/download/v1.14.19/opencode-linux-arm64.tar.gz"
-cmd = "./opencode"
+[agent_servers.glitchcode.targets.linux-aarch64]
+archive = "https://github.com/glassesglitchstudio-lab/Glitch-Code/releases/download/v0.3.0/glitchcode-linux-arm64.tar.gz"
+cmd = "./glitchcode"
 args = ["acp"]
 
-[agent_servers.opencode.targets.linux-x86_64]
-archive = "https://github.com/anomalyco/opencode/releases/download/v1.14.19/opencode-linux-x64.tar.gz"
-cmd = "./opencode"
+[agent_servers.glitchcode.targets.linux-x86_64]
+archive = "https://github.com/glassesglitchstudio-lab/Glitch-Code/releases/download/v0.3.0/glitchcode-linux-x64.tar.gz"
+cmd = "./glitchcode"
 args = ["acp"]
 
-[agent_servers.opencode.targets.windows-x86_64]
-archive = "https://github.com/anomalyco/opencode/releases/download/v1.14.19/opencode-windows-x64.zip"
-cmd = "./opencode.exe"
+[agent_servers.glitchcode.targets.windows-x86_64]
+archive = "https://github.com/glassesglitchstudio-lab/Glitch-Code/releases/download/v0.3.0/glitchcode-windows-x64.zip"
+cmd = "./glitchcode.exe"
 args = ["acp"]

@@ -21,13 +21,13 @@ async function signWindows(configuration: { path: string }) {
 }
 
 const channel = (() => {
-  const raw = process.env.OPENCODE_CHANNEL
+  const raw = process.env.GLITCHCODE_CHANNEL
   if (raw === "dev" || raw === "beta" || raw === "prod") return raw
   return "dev"
 })()
 
 const getBase = (): Configuration => ({
-  artifactName: "opencode-desktop-${os}-${arch}.${ext}",
+  artifactName: "glitchcode-desktop-${os}-${arch}.${ext}",
   directories: {
     output: "dist",
     buildResources: "resources",
@@ -54,8 +54,8 @@ const getBase = (): Configuration => ({
     sign: true,
   },
   protocols: {
-    name: "OpenCode",
-    schemes: ["opencode"],
+    name: "Glitch Code",
+    schemes: ["glitchcode"],
   },
   win: {
     icon: `resources/icons/icon.ico`,
@@ -84,29 +84,29 @@ function getConfig() {
     case "dev": {
       return {
         ...base,
-        appId: "ai.opencode.desktop.dev",
-        productName: "OpenCode Dev",
-        rpm: { packageName: "opencode-dev" },
+        appId: "studio.glitchcode.desktop.dev",
+        productName: "Glitch Code Dev",
+        rpm: { packageName: "glitchcode-dev" },
       }
     }
     case "beta": {
       return {
         ...base,
-        appId: "ai.opencode.desktop.beta",
-        productName: "OpenCode Beta",
-        protocols: { name: "OpenCode Beta", schemes: ["opencode"] },
-        publish: { provider: "github", owner: "anomalyco", repo: "opencode-beta", channel: "latest" },
-        rpm: { packageName: "opencode-beta" },
+        appId: "studio.glitchcode.desktop.beta",
+        productName: "Glitch Code Beta",
+        protocols: { name: "Glitch Code Beta", schemes: ["glitchcode"] },
+        publish: { provider: "github", owner: "glassesglitchstudio-lab", repo: "Glitch-Code-beta", channel: "latest" },
+        rpm: { packageName: "glitchcode-beta" },
       }
     }
     case "prod": {
       return {
         ...base,
-        appId: "ai.opencode.desktop",
-        productName: "OpenCode",
-        protocols: { name: "OpenCode", schemes: ["opencode"] },
-        publish: { provider: "github", owner: "anomalyco", repo: "opencode", channel: "latest" },
-        rpm: { packageName: "opencode" },
+        appId: "studio.glitchcode.desktop",
+        productName: "Glitch Code",
+        protocols: { name: "Glitch Code", schemes: ["glitchcode"] },
+        publish: { provider: "github", owner: "glassesglitchstudio-lab", repo: "Glitch-Code", channel: "latest" },
+        rpm: { packageName: "glitchcode" },
       }
     }
   }
