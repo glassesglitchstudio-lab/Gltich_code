@@ -1,0 +1,20 @@
+Glitch Code - Hızlı Tarama Raporu (2026-08-03)
+
+Özet:
+- Toplam eşleşme: 1692 (370 dosya)
+- Ana bulgular:
+  • Çok sayıda console.log / console.error üretim kodunda (ör: packages/slack/src/index.ts)
+  • Bazı test fixture'larında process.exit çağrıları
+  • 'bun test' root'tan çalıştırıldığında hata: "do-not-run-tests-from-root"
+  • Typecheck: başarılı (turbo cached sonuçlar)
+
+Önerilen ilk düzeltmeler:
+1) Üretim kodundaki console.log'ları logger/console.debug ile değiştir (özellikle Slack başlangıç logları).
+2) Kütüphane kodunda process.exit kullanımını kaldır; hata fırlat veya hata durumu döndür.
+3) CI/test komutlarını paket bazlı çalıştırmak (root'tan test çalıştırma hatasını düzelt).
+4) Kritik secret kontrolleri throw yerine kontrollere bağla (örn. eksik env → log uyarısı + dev fallback).
+
+Yapılacak ilk adımlar (başladı):
+- packages/slack/src/index.ts içindeki başlatma loglarını console.debug'e çeviriyorum.
+
+Detaylı bulgular için grep çıktısı büyük; gerekirse tam listeyi de eklerim.
