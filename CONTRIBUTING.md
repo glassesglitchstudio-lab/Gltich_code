@@ -23,7 +23,7 @@ bun run dev
 
 ```
 packages/
-├── opencode/          # Ana CLI ve core kütüphane
+├── opencode/          # Ana CLI ve core kütüphane (Glitch Code CLI)
 │   ├── src/
 │   │   ├── cli/cmd/   # CLI komutları
 │   │   ├── agent/     # Agent sistemi
