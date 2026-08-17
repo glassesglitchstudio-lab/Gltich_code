@@ -5,12 +5,22 @@ import { onCleanup } from "solid-js"
 
 export function DialogThemeList() {
   const theme = useTheme()
-  const options = Object.keys(theme.all())
-    .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }))
-    .map((value) => ({
-      title: value,
-      value: value,
-    }))
+  const allKeys = Object.keys(theme.all())
+  
+  const featured = ["crafted", "glitch", "glitchcode"].filter((k) => allKeys.includes(k))
+  const others = allKeys.filter((k) => !featured.includes(k)).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }))
+  
+  const formatTitle = (key: string) => {
+    if (key === "crafted") return "✦ Crafted Minimal (New / Clean)"
+    if (key === "glitch") return "✦ Glitch Classic (Neon / Animated)"
+    if (key === "glitchcode") return "✦ Glitch Code (Standard)"
+    return key
+  }
+
+  const options = [...featured, ...others].map((value) => ({
+    title: formatTitle(value),
+    value: value,
+  }))
   const dialog = useDialog()
   let confirmed = false
   let ref: DialogSelectRef<string>

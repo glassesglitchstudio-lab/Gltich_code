@@ -1,0 +1,76 @@
+{
+  "$schema": "https://glitchcode.dev/theme.json",
+  "defs": {
+    "slateBg":      "#0c0d10",
+    "slateElevated":"#13151a",
+    "slateSubtle":  "#1a1d24",
+    "slateBorder":  "#27272a",
+    "slateText":    "#f4f4f5",
+    "slateMuted":   "#71717a",
+    "slateDim":     "#52525b",
+    "mintGreen":    "#22c55e",
+    "mintDark":     "#16a34a",
+    "amber":        "#f59e0b",
+    "red":          "#ef4444",
+    "cyan":         "#06b6d4",
+    "blue":         "#3b82f6"
+  },
+  "theme": {
+    "primary": {
+      "dark": "mintGreen",
+      "light": "mintDark"
+    },
+    "secondary": {
+      "dark": "cyan",
+      "light": "blue"
+    },
+    "accent": {
+      "dark": "mintGreen",
+      "light": "mintDark"
+    },
+    "error": {
+      "dark": "red",
+      "light": "red"
+    },
+    "warning": {
+      "dark": "amber",
+      "light": "amber"
+    },
+    "success": {
+      "dark": "mintGreen",
+      "light": "mintDark"
+    },
+    "info": {
+      "dark": "cyan",
+      "light": "blue"
+    },
+    "text": {
+      "dark": "slateText",
+      "light": "#18181b"
+    },
+    "textMuted": {
+      "dark": "slateMuted",
+      "light": "#71717a"
+    },
+    "background": {
+      "dark": "slateBg",
+      "light": "#fafafa"
+    },
+    "backgroundMenu": {
+      "dark": "slateElevated",
+      "light": "#ffffff"
+    },
+    "border": {
+      "dark": "slateBorder",
+      "light": "#e4e4e7"
+    },
+    "borderFocused": {
+      "dark": "mintGreen",
+      "light": "mintDark"
+    },
+    "selectedListItemText": {
+      "dark": "slateBg",
+      "light": "#ffffff"
+    }
+  }
+}

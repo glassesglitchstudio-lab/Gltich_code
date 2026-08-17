@@ -22,6 +22,20 @@ interface Theme {
 
 const THEMES: Theme[] = [
   {
+    name: "crafted-minimal",
+    description: "Yeni sade, arduvaz ve nane yeşili mühendislik teması (Pro)",
+    colors: {
+      primary: "#22c55e",
+      secondary: "#06b6d4",
+      accent: "#22c55e",
+      background: "#0c0d10",
+      text: "#f4f4f5",
+      success: "#22c55e",
+      warning: "#f59e0b",
+      error: "#ef4444",
+    },
+  },
+  {
     name: "neon-orange",
     description: "Varsayilan neon turuncu tema",
     colors: {
