@@ -74,6 +74,7 @@ export const Default = {
   THEME: "theme",
   OFFLINE: "offline",
   HISTORY: "history",
+  DOCTOR: "doctor",
 } as const
 
 export function deepResearchTemplate(): string {
@@ -433,6 +434,27 @@ export const layer = Layer.effect(
             "- Relevance score",
             "",
             "If no query provided, show recent session history.",
+          ].join("\n")
+        },
+        hints: ["$ARGUMENTS"],
+      }
+
+      commands[Default.DOCTOR] = {
+        name: Default.DOCTOR,
+        description: "run interactive auto-doctor & self-healing diagnostics",
+        source: "command",
+        subtask: true,
+        get template() {
+          return [
+            "Run the Glitch Auto-Doctor interactive diagnostic and self-healing engine on the workspace.",
+            "",
+            "Arguments: $ARGUMENTS",
+            "",
+            "Instructions:",
+            "1. Inspect recent test errors, linter diagnostics, or user-reported symptoms in $ARGUMENTS.",
+            "2. Invoke `auto-doctor` tool to perform root-cause analysis and generate verified unified diffs.",
+            "3. Format the solution using the crafted non-slop minimal developer menu.",
+            "4. Provide confidence scores and step-by-step resolution advice.",
           ].join("\n")
         },
         hints: ["$ARGUMENTS"],

@@ -42,6 +42,7 @@ import { CodeMigrationTool } from "./code-migration"
 import { DbQueryTool } from "./db-query"
 import { ApiDocGenTool } from "./api-doc-gen"
 import { RepoMapTool } from "./repo-map"
+import { AutoDoctorTool } from "./auto-doctor"
 import { Flag } from "@/flag/flag"
 import { Log } from "@/util"
 import { LspTool } from "./lsp"
@@ -178,6 +179,7 @@ export const layer = Layer.effect(
     const dbQuery = yield* DbQueryTool
     const apiDocGen = yield* ApiDocGenTool
     const repoMap = yield* RepoMapTool
+    const autoDoctor = yield* AutoDoctorTool
 
     const state = yield* InstanceState.make<State>(
       Effect.fn("ToolRegistry.state")(function* (ctx) {
@@ -280,6 +282,7 @@ export const layer = Layer.effect(
           dbQuery: Tool.init(dbQuery),
           apiDocGen: Tool.init(apiDocGen),
           repoMap: Tool.init(repoMap),
+          autoDoctor: Tool.init(autoDoctor),
         })
 
         return {
@@ -324,6 +327,7 @@ export const layer = Layer.effect(
             tool.dbQuery,
             tool.apiDocGen,
             tool.repoMap,
+            tool.autoDoctor,
           ],
           actor: tool.actor,
           read: tool.read,

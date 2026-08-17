@@ -1,0 +1,9 @@
+Auto-Doctor & Interactive Self-Healing diagnostic engine for Glitch Code.
+Use this tool to automatically inspect errors, perform root-cause analysis, calculate fix confidence, and generate verified unified diffs with interactive user confirmation or automated healing.
+
+Parameters:
+- `issue`: The error message, stack trace, or problem description.
+- `file_path`: (Optional) The specific file path suspected or affected.
+- `interactive`: (Optional, default true) Whether to format the diagnostic output for interactive menu selection.
+- `sandbox`: (Optional, default true) Simulate the patch in-memory before writing to disk.
+- `max_retries`: (Optional, default 3) Number of iterative diagnostic/refinement attempts.

@@ -23,6 +23,12 @@ export const DoctorCommand = cmd({
         type: "boolean",
         default: false,
       })
+      .option("interactive", {
+        alias: "i",
+        describe: "Launch interactive Auto-Doctor menu",
+        type: "boolean",
+        default: false,
+      })
       .option("fix", {
         describe: "Attempt automatic fixes",
         type: "boolean",
@@ -46,6 +52,15 @@ export const DoctorCommand = cmd({
       s.stop("Health checks complete")
 
       displayResults(checks, args.verbose)
+
+      if (args.interactive) {
+        const { detectRootCause, renderCraftedMenu } = await import("../../tool/auto-doctor")
+        const issueSummary =
+          checks.find((c) => c.status === "error" || c.status === "warn")?.message || "Genel Sistem Teşhisi"
+        const diag = detectRootCause(issueSummary)
+        const menu = renderCraftedMenu(diag, issueSummary)
+        console.log("\n" + menu.join("\n") + "\n")
+      }
 
       if (args.fix) {
         await attemptFixes(checks)
@@ -198,38 +213,37 @@ function checkPermissions(): HealthCheck {
 }
 
 function displayResults(checks: HealthCheck[], verbose: boolean) {
-  const width = 60
   const okCount = checks.filter((c) => c.status === "ok").length
   const warnCount = checks.filter((c) => c.status === "warn").length
   const errorCount = checks.filter((c) => c.status === "error").length
 
-  console.log("\n" + "═".repeat(width))
-  console.log("  GLITCH DOCTOR — SYSTEM HEALTH")
-  console.log("═".repeat(width))
+  console.log("\n╭─ 🩺 GLITCH DOCTOR — SYSTEM HEALTH & DIAGNOSTICS ────────────────────────╮")
+  console.log("│                                                                          │")
 
   for (const check of checks) {
     const icon = check.status === "ok" ? "✓" : check.status === "warn" ? "⚠" : "✗"
     const color = check.status === "ok" ? "\x1b[32m" : check.status === "warn" ? "\x1b[33m" : "\x1b[31m"
     const reset = "\x1b[0m"
 
-    console.log(`\n  ${color}${icon}${reset} ${check.name}`)
-    console.log(`    ${check.message}`)
+    const line = `  ${color}${icon}${reset} ${check.name.padEnd(20)} │ ${check.message}`
+    console.log(`│ ${line.padEnd(80)} │`)
     if (verbose && check.details) {
-      console.log(`    \x1b[2m${check.details}\x1b[0m`)
+      console.log(`│   \x1b[2m└─ ${check.details}\x1b[0m`.padEnd(80) + " │")
     }
   }
 
-  console.log("\n" + "─".repeat(width))
-  console.log(`  Summary: ${okCount} passed, ${warnCount} warnings, ${errorCount} errors`)
+  console.log("│                                                                          │")
+  console.log("├─ 📊 ÖZET ─────────────────────────────────────────────────────────────────┤")
+  console.log(`│  Sonuç: \x1b[32m${okCount} Başarılı\x1b[0m, \x1b[33m${warnCount} Uyarı\x1b[0m, \x1b[31m${errorCount} Hata\x1b[0m`.padEnd(85) + "│")
 
   if (errorCount > 0) {
-    console.log("\n  \x1b[31mSome checks failed. Run with --verbose for details.\x1b[0m")
+    console.log("│  \x1b[31mKritik sorunlar tespit edildi. Çözüm için: glitch doctor -i\x1b[0m".padEnd(85) + "│")
   } else if (warnCount > 0) {
-    console.log("\n  \x1b[33mAll critical checks passed with warnings.\x1b[0m")
+    console.log("│  \x1b[33mSistem çalışabilir durumda ancak performans uyarıları var.\x1b[0m".padEnd(85) + "│")
   } else {
-    console.log("\n  \x1b[32mAll checks passed!\x1b[0m")
+    console.log("│  \x1b[32mSistem mükemmel durumda! Tüm kontroller başarıyla tamamlandı.\x1b[0m".padEnd(85) + "│")
   }
-  console.log("═".repeat(width) + "\n")
+  console.log("╰──────────────────────────────────────────────────────────────────────────╯\n")
 }
 
 async function attemptFixes(checks: HealthCheck[]) {
