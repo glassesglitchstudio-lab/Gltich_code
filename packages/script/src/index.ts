@@ -24,14 +24,10 @@ const env = {
   GLITCHCODE_RELEASE: process.env["GLITCHCODE_RELEASE"],
 }
 const CHANNEL = await (async () => {
+  if (env.GLITCHCODE_CHANNEL === "prod") return "latest"
   if (env.GLITCHCODE_CHANNEL) return env.GLITCHCODE_CHANNEL
   if (env.GLITCHCODE_BUMP) return "latest"
   if (env.GLITCHCODE_VERSION && !env.GLITCHCODE_VERSION.startsWith("0.0.0-")) return "latest"
-  // Check if we're in the project's git repo (dev mode) vs npm install
-  try {
-    const branch = await $`git branch --show-current`.text().then((x) => x.trim())
-    if (branch) return branch
-  } catch {}
   return "latest"
 })()
 const IS_PREVIEW = CHANNEL !== "latest"
