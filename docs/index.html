@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Elytra AI — Otonom Zeka & Mühendislik Ekosistemi</title>
-  <meta name="description" content="Elytra-ai ve GlassesCat Studio tarafından geliştirilen bağımsız otonom yapay zeka araçları: Glitch Code, Niko AI ve Unreal Engine AI entegrasyonu.">
-  <meta name="keywords" content="Elytra AI, Glitch Code, Niko AI, GlassesCat, AI CLI, Unreal Engine AI, Multi-Model Debate, LLM Coding Agent">
+  <meta name="description" content="Elytra-ai ve GlassesCat Studio tarafından geliştirilen bağımsız otonom yapay zeka araçları: Glitch Code, GlassesCat-AI ve Unreal Engine AI entegrasyonu.">
+  <meta name="keywords" content="Elytra AI, Glitch Code, GlassesCat-AI, GlassesCat, AI CLI, Unreal Engine AI, Multi-Model Debate, LLM Coding Agent">
   
   <!-- Open Graph -->
   <meta property="og:title" content="Elytra AI — Otonom Zeka & Mühendislik Ekosistemi">
@@ -665,7 +665,7 @@
 
       <nav class="nav-menu">
         <a href="#glitch-code" class="nav-link">Glitch Code</a>
-        <a href="#niko-ai" class="nav-link">Niko AI</a>
+        <a href="#glassescat-ai" class="nav-link">GlassesCat-AI</a>
         <a href="#unreal-ai" class="nav-link">Unreal AI</a>
         <a href="#specs" class="nav-link">Mimarî</a>
         <a href="marketplace.html" class="nav-link">Marketplace</a>
@@ -694,7 +694,7 @@
       </h1>
 
       <p class="hero-description">
-        Yapay zeka araçlarını şablon kalıplardan kurtarıyoruz. <strong>Glitch Code</strong> ile yerel çoklu model tartışmaları, <strong>Niko AI</strong> ile nöral bellekli ajanlar ve <strong>Unreal Engine</strong> için yaşayan LLM diyalog sistemleri üretiyoruz.
+        Yapay zeka araçlarını şablon kalıplardan kurtarıyoruz. <strong>Glitch Code</strong> ile yerel çoklu model tartışmaları, <strong>GlassesCat-AI</strong> ile nöral bellekli ajanlar ve <strong>Unreal Engine</strong> için yaşayan LLM diyalog sistemleri üretiyoruz.
       </p>
 
       <div class="hero-cta-group">
@@ -719,7 +719,7 @@
           <div class="terminal-tabs">
             <button class="t-tab active" onclick="switchTab('ptc')">1. /ptc Debate</button>
             <button class="t-tab" onclick="switchTab('doctor')">2. /doctor Health</button>
-            <button class="t-tab" onclick="switchTab('niko')">3. Niko Nexus</button>
+            <button class="t-tab" onclick="switchTab('glassescat')">3. GlassesCat Nexus</button>
             <button class="t-tab" onclick="switchTab('unreal')">4. Unreal Telemetry</button>
           </div>
           <span class="mono" style="font-size:11px; color:var(--text-muted);">glitch-tui v2.1.0</span>
@@ -774,11 +774,11 @@
         </a>
       </div>
 
-      <!-- Card 2: Niko AI -->
-      <div class="trilogy-card" id="niko-ai">
+      <!-- Card 2: GlassesCat-AI -->
+      <div class="trilogy-card" id="glassescat-ai">
         <div>
           <span class="card-badge badge-cyan">AUTONOMOUS MULTI-AGENT</span>
-          <h3 class="card-title">Niko AI</h3>
+          <h3 class="card-title">GlassesCat-AI</h3>
           <p class="card-desc">
             Web paneli ve yerel çalışma alanları için geliştirilmiş çoklu ajan platformu. Nexus Memory ile konuşmalar arasındaki bağlamı asla unutmayan nöral hafıza ağı.
           </p>
@@ -891,7 +891,7 @@
             <h5>Ürünler</h5>
             <ul>
               <li><a href="#glitch-code">Glitch Code</a></li>
-              <li><a href="#niko-ai">Niko AI</a></li>
+              <li><a href="#glassescat-ai">GlassesCat-AI</a></li>
               <li><a href="#unreal-ai">Unreal AI</a></li>
               <li><a href="marketplace.html">Marketplace</a></li>
             </ul>
@@ -982,16 +982,16 @@
         </div>
         <div class="t-line t-success">📊 Sonuç: 5 Başarılı, 0 Hata &bull; Sistem %100 kararlı durumda.</div>
       `,
-      niko: `
-        <div class="t-line"><span class="t-prompt">$</span> <span>niko-agent --nexus-memory</span></div>
-        <div class="t-line t-dim">[Niko Core] Nexus Neural Memory Graph başlatılıyor...</div>
+      glassescat: `
+        <div class="t-line"><span class="t-prompt">$</span> <span>glassescat-agent --nexus-memory</span></div>
+        <div class="t-line t-dim">[GlassesCat Core] Nexus Neural Memory Graph başlatılıyor...</div>
         <div class="t-box">
           <div style="color:var(--accent-cyan); font-weight:bold;">[Nexus Semantik Düğüm #842]</div>
           <div style="color:#9aa2b5;">Önceki oturum hatırlandı: Kullanıcı 'horror-demo' projesinde ses optimizasyonu yapıyordu.</div>
           <div style="color:var(--text-muted); font-size:12px; margin-top:4px;">İlişkili Dosyalar: unreal/HorrorDemo/Source/SoundManager.cpp</div>
         </div>
         <div class="t-line t-cyan">⚡ 3 Ajan Görevlendirildi: [Kod Denetçisi] &bull; [Mantık Ajanı] &bull; [Dokümantasyon]</div>
-        <div class="t-line t-success">✓ Niko çalışma alanı senkronizasyonu tamamlandı.</div>
+        <div class="t-line t-success">✓ GlassesCat-AI çalışma alanı senkronizasyonu tamamlandı.</div>
       `,
       unreal: `
         <div class="t-line"><span class="t-prompt">[UE5.4]</span> <span>LogGlitchCodeAI: Initializing Fear Curve Telemetry...</span></div>
