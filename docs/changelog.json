@@ -1,0 +1,56 @@
+{
+  "latestVersion": "2.1.0",
+  "lastUpdated": "2026-08-18",
+  "updates": [
+    {
+      "id": "up-01",
+      "tag": "NEW",
+      "badge": "badge-orange",
+      "category": "Glitch Code",
+      "version": "v2.1.0",
+      "date": "Bugün",
+      "title": "PlusTwoCoder (PTC) & PlusThinking İnteraktif TUI Diyalogları",
+      "description": "3 farklı yapay zeka modelinin (Claude 3.7, DeepSeek-R1, GPT) aynı anda bir problemi tartışıp puanlayarak en iyi mimarî çözümü üretmesini sağlayan `/ptc` ve `/think` komutları tam klavye odaklı olarak TUI'ye eklendi."
+    },
+    {
+      "id": "up-02",
+      "tag": "NEW",
+      "badge": "badge-orange",
+      "category": "Glitch Code",
+      "version": "v2.1.0",
+      "date": "Bugün",
+      "title": "Glitch Auto-Doctor & Otomatik Sistem Teşhisi",
+      "description": "Terminalde `/doctor` komutu ile sistem belleği, SQLite veritabanı bütünlüğü, Git entegrasyonu ve disk izinlerini tek tıkla analiz edip onaran otonom doktor modülü yayında."
+    },
+    {
+      "id": "up-03",
+      "tag": "NEW",
+      "badge": "badge-cyan",
+      "category": "GlassesCat-AI",
+      "version": "v2.0.0",
+      "date": "Yeni",
+      "title": "Nexus Neural Memory Graph Entegrasyonu",
+      "description": "GlassesCat-AI ajanları için oturumlar arası semantik bağlamı ve çalışma alanı hafızasını canlı tutan derin bellek grafı motoru entegre edildi."
+    },
+    {
+      "id": "up-04",
+      "tag": "NEW",
+      "badge": "badge-violet",
+      "category": "Unreal AI",
+      "version": "v1.4.0",
+      "date": "Yeni",
+      "title": "Dinamik Korku Eğrisi & Yaşayan NPC Diyalog Köprüsü",
+      "description": "Unreal Engine 5.4+ için oyuncu nabzı ve korku seviyesine göre ortamı ve NPC tepkilerini yöneten C++ / Blueprint AI eklentisi HorrorDemo ile birlikte yayınlandı."
+    },
+    {
+      "id": "up-05",
+      "tag": "GÜNCELLEME",
+      "badge": "badge-orange",
+      "category": "Glitch Code",
+      "version": "v2.1.0",
+      "date": "Bugün",
+      "title": "SearXNG & Çoklu Arama Motoru (WebSearch) Entegrasyonu",
+      "description": "Glitch Code konfigürasyon şemasına gizlilik odaklı bağımsız yerel ve harici arama sağlayıcıları (SearXNG/MCP) resmi olarak dahil edildi."
+    }
+  ]
+}

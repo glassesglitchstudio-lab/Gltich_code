@@ -644,6 +644,155 @@
       font-family: var(--font-mono);
     }
 
+    /* ANNOUNCEMENT BANNER */
+    .hero-announcement {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 107, 0, 0.08);
+      border: 1px solid rgba(255, 107, 0, 0.3);
+      padding: 6px 16px;
+      border-radius: 100px;
+      font-size: 13px;
+      color: #fff;
+      text-decoration: none;
+      margin-bottom: 24px;
+      transition: all 0.2s ease;
+    }
+    .hero-announcement:hover {
+      background: rgba(255, 107, 0, 0.16);
+      border-color: var(--accent-orange);
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px var(--accent-orange-glow);
+    }
+    .ann-badge {
+      background: var(--accent-orange);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 100px;
+      letter-spacing: 0.05em;
+    }
+    .ann-arrow {
+      color: var(--accent-orange);
+      font-weight: bold;
+    }
+
+    /* UPDATES / WHAT'S NEW SECTION */
+    .updates-section {
+      padding: 60px 0 100px;
+    }
+    .updates-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+    .update-filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .u-filter-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .u-filter-btn:hover, .u-filter-btn.active {
+      background: rgba(255,107,0,0.12);
+      border-color: var(--accent-orange);
+      color: #fff;
+      font-weight: 600;
+    }
+    .updates-timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .update-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 24px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      transition: all 0.25s ease;
+    }
+    .update-card:hover {
+      border-color: var(--border-medium);
+      transform: translateX(4px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+    .update-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .update-tag-new {
+      background: linear-gradient(135deg, var(--accent-orange), #e65100);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      box-shadow: 0 0 10px var(--accent-orange-glow);
+    }
+    .update-tag-update {
+      background: rgba(0, 229, 255, 0.15);
+      border: 1px solid rgba(0, 229, 255, 0.4);
+      color: var(--accent-cyan);
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .update-version {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .update-category {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.04);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+    }
+    .update-date {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-left: auto;
+    }
+    .update-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .update-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
     /* RESPONSIVE */
     @media (max-width: 768px) {
       .nav-menu { display: none; }
@@ -671,6 +820,10 @@
         <a href="#glitch-code" class="nav-link">Glitch Code</a>
         <a href="#glassescat-ai" class="nav-link">GlassesCat-AI</a>
         <a href="#unreal-ai" class="nav-link">Unreal AI</a>
+        <a href="#updates" class="nav-link" style="display:flex; align-items:center; gap:6px;">
+          <span>Yenilikler</span>
+          <span style="background:var(--accent-orange); color:#fff; font-size:10px; font-weight:800; padding:1px 6px; border-radius:100px; font-family:var(--font-mono); letter-spacing:0.05em;">NEW</span>
+        </a>
         <a href="#specs" class="nav-link">Mimarî</a>
         <a href="marketplace.html" class="nav-link">Marketplace</a>
       </nav>
@@ -687,9 +840,16 @@
   <!-- HERO SECTION -->
   <section class="hero-section">
     <div class="container">
-      <div class="hero-pill">
-        <div class="pulse-dot"></div>
-        <span>Elytra-ai &bull; GlassesCat Autonomous AI Lab</span>
+      <div style="display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-bottom:24px;">
+        <div class="hero-pill" style="margin-bottom:0;">
+          <div class="pulse-dot"></div>
+          <span>Elytra-ai &bull; GlassesCat Autonomous AI Lab</span>
+        </div>
+        <a href="#updates" class="hero-announcement" style="margin-bottom:0;">
+          <span class="ann-badge">YENİ</span>
+          <span>Glitch Code v2.1.0 & PTC Çoklu Model Tartışması Yayında!</span>
+          <span class="ann-arrow">&rarr;</span>
+        </a>
       </div>
 
       <h1 class="hero-title">
@@ -842,6 +1002,27 @@
           <span>Unreal Plugin Deposu</span>
           <span>&rarr;</span>
         </a>
+      </div>
+    </div>
+
+    <!-- CANLI YENİLİKLER & WHAT'S NEW SECTION -->
+    <div class="updates-section" id="updates">
+      <div class="updates-header">
+        <div>
+          <div class="section-eyebrow">WHAT'S NEW & LIVE CHANGELOG</div>
+          <h2 class="section-title">Canlı Yenilikler & Güncellemeler</h2>
+          <p class="section-desc">GlassesCat & Elytra-ai ekosistemindeki tüm yeni özellikler, güncellemeler ve iyileştirmeler anlık olarak burada listelenir.</p>
+        </div>
+        <div class="update-filters">
+          <button class="u-filter-btn active" onclick="filterUpdates('all', this)">Tümü</button>
+          <button class="u-filter-btn" onclick="filterUpdates('Glitch Code', this)">Glitch Code</button>
+          <button class="u-filter-btn" onclick="filterUpdates('GlassesCat-AI', this)">GlassesCat-AI</button>
+          <button class="u-filter-btn" onclick="filterUpdates('Unreal AI', this)">Unreal AI</button>
+        </div>
+      </div>
+
+      <div class="updates-timeline" id="updatesContainer">
+        <!-- Injected dynamically via JS or Fallback -->
       </div>
     </div>
 
@@ -1010,12 +1191,111 @@
 
     function switchTab(tabKey) {
       document.querySelectorAll('.t-tab').forEach(b => b.classList.remove('active'));
-      event.currentTarget.classList.add('active');
+      if (event && event.currentTarget) event.currentTarget.classList.add('active');
       document.getElementById('terminalBody').innerHTML = terminalContents[tabKey];
     }
 
+    // Dynamic Updates & Changelog Loading
+    let allUpdates = [
+      {
+        id: "up-01",
+        tag: "NEW",
+        badge: "badge-orange",
+        category: "Glitch Code",
+        version: "v2.1.0",
+        date: "Bugün",
+        title: "PlusTwoCoder (PTC) & PlusThinking İnteraktif TUI Diyalogları",
+        description: "3 farklı yapay zeka modelinin (Claude 3.7, DeepSeek-R1, GPT) aynı anda bir problemi tartışıp puanlayarak en iyi mimarî çözümü üretmesini sağlayan /ptc ve /think komutları tam klavye odaklı olarak TUI'ye eklendi."
+      },
+      {
+        id: "up-02",
+        tag: "NEW",
+        badge: "badge-orange",
+        category: "Glitch Code",
+        version: "v2.1.0",
+        date: "Bugün",
+        title: "Glitch Auto-Doctor & Otomatik Sistem Teşhisi",
+        description: "Terminalde /doctor komutu ile sistem belleği, SQLite veritabanı bütünlüğü, Git entegrasyonu ve disk izinlerini tek tıkla analiz edip onaran otonom doktor modülü yayında."
+      },
+      {
+        id: "up-03",
+        tag: "NEW",
+        badge: "badge-cyan",
+        category: "GlassesCat-AI",
+        version: "v2.0.0",
+        date: "Yeni",
+        title: "Nexus Neural Memory Graph Entegrasyonu",
+        description: "GlassesCat-AI ajanları için oturumlar arası semantik bağlamı ve çalışma alanı hafızasını canlı tutan derin bellek grafı motoru entegre edildi."
+      },
+      {
+        id: "up-04",
+        tag: "NEW",
+        badge: "badge-violet",
+        category: "Unreal AI",
+        version: "v1.4.0",
+        date: "Yeni",
+        title: "Dinamik Korku Eğrisi & Yaşayan NPC Diyalog Köprüsü",
+        description: "Unreal Engine 5.4+ için oyuncu nabzı ve korku seviyesine göre ortamı ve NPC tepkilerini yöneten C++ / Blueprint AI eklentisi HorrorDemo ile birlikte yayınlandı."
+      },
+      {
+        id: "up-05",
+        tag: "GÜNCELLEME",
+        badge: "badge-orange",
+        category: "Glitch Code",
+        version: "v2.1.0",
+        date: "Bugün",
+        title: "SearXNG & Çoklu Arama Motoru (WebSearch) Entegrasyonu",
+        description: "Glitch Code konfigürasyon şemasına gizlilik odaklı bağımsız yerel ve harici arama sağlayıcıları (SearXNG/MCP) resmi olarak dahil edildi."
+      }
+    ];
+
+    function renderUpdates(items) {
+      const container = document.getElementById('updatesContainer');
+      if (!items || items.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted);">Bu kategoride henüz güncelleme bulunmuyor.</div>';
+        return;
+      }
+      container.innerHTML = items.map(u => `
+        <div class="update-card">
+          <div class="update-meta-row">
+            <span class="${u.tag === 'NEW' ? 'update-tag-new' : 'update-tag-update'}">${u.tag}</span>
+            <span class="update-category">${u.category}</span>
+            <span class="update-version">${u.version}</span>
+            <span class="update-date">${u.date}</span>
+          </div>
+          <div class="update-title">${u.title}</div>
+          <div class="update-desc">${u.description}</div>
+        </div>
+      `).join('');
+    }
+
+    function filterUpdates(category, btn) {
+      document.querySelectorAll('.u-filter-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      if (category === 'all') {
+        renderUpdates(allUpdates);
+      } else {
+        const filtered = allUpdates.filter(u => u.category.toLowerCase().includes(category.toLowerCase()));
+        renderUpdates(filtered);
+      }
+    }
+
+    // Try fetching live changelog.json
+    fetch('changelog.json')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.updates) {
+          allUpdates = data.updates;
+          renderUpdates(allUpdates);
+        }
+      })
+      .catch(() => {
+        renderUpdates(allUpdates);
+      });
+
     // Initialize first tab
     document.getElementById('terminalBody').innerHTML = terminalContents.ptc;
+    renderUpdates(allUpdates);
   </script>
 </body>
 </html>
