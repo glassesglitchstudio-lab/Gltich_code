@@ -1,16 +1,17 @@
-import { createSignal, createMemo, Show } from "solid-js"
+import { createSignal, createMemo, Show, onMount } from "solid-js"
 import { useTheme } from "../context/theme"
 import { useDialog } from "../ui/dialog"
 import { useSDK } from "../context/sdk"
-import { useLanguage } from "../context/language"
 import { Spinner } from "./spinner"
 import { PartID } from "@/session/schema"
+import { TextareaRenderable, TextAttributes } from "@opentui/core"
+import { useKeyboard } from "@opentui/solid"
 
 export function DialogPlusThinking() {
   const { theme } = useTheme()
   const dialog = useDialog()
   const sdk = useSDK()
-  const lang = useLanguage()
+  let textarea: TextareaRenderable
 
   const [task, setTask] = createSignal("")
   const [status, setStatus] = createSignal<"idle" | "running" | "done" | "error">("idle")
@@ -18,8 +19,38 @@ export function DialogPlusThinking() {
 
   const canStart = createMemo(() => task().trim().length > 0 && status() === "idle")
 
+  useKeyboard((evt) => {
+    if (status() === "running") {
+      if (evt.name === "escape") return
+      evt.preventDefault()
+      evt.stopPropagation()
+      return
+    }
+    if (evt.name === "escape") {
+      dialog.clear()
+      return
+    }
+    if (evt.name === "return") {
+      const text = textarea?.plainText ?? task()
+      if (text.trim().length > 0 && status() === "idle") {
+        setTask(text)
+        runThinking()
+      }
+    }
+  })
+
+  onMount(() => {
+    dialog.setSize("medium")
+    setTimeout(() => {
+      if (!textarea || textarea.isDestroyed) return
+      textarea.focus()
+      textarea.gotoLineEnd()
+    }, 1)
+  })
+
   async function runThinking() {
-    if (!canStart()) return
+    const taskText = textarea?.plainText?.trim() || task().trim()
+    if (!taskText || status() !== "idle") return
 
     setStatus("running")
 
@@ -31,47 +62,47 @@ export function DialogPlusThinking() {
 
       const sessionID = sessionResult.data.id
 
-      const thinkingPrompt = `Sen bir PlusThinking analiz moderatörüsun. 3 model derin dusunce sureclerini karsilastirarak kapsamli bir analiz uretir.
+      const thinkingPrompt = `Sen bir PlusThinking analiz moderatörüsün. 3 model derin düşünce süreçlerini karşılaştırarak kapsamlı bir analiz üretir.
 
-KONU: ${task()}
+KONU: ${taskText}
 
 TALİMATLAR:
-1. Her perspektif icin <thinking> blogu icinde adim adim dusun
-2. Varsayimlarini ve kenar vakalarini belirt
-3. Mantıksal zincirini kur ve degerlendir
-4. Her analizi 0-100 arasi skorla
-5. Nihai sentezi olustur
+1. Her perspektif için <thinking> bloğu içinde adım adım düşün
+2. Varsayımlarını ve kenar vakalarını belirt
+3. Mantıksal zincirini kur ve değerlendir
+4. Her analizi 0-100 arası skorla
+5. Nihai sentezi oluştur
 
 ÇIKTI FORMATI:
-## Perspektif A — Derin Dusunce
+## Perspektif A — Derin Düşünce
 <thinking>
-[adim adim dusunceler, varsayim analizi, kenar vakalari]
+[adım adım düşünceler, varsayım analizi, kenar vakaları]
 </thinking>
-**Analiz:** [detayli analiz]
+**Analiz:** [detaylı analiz]
 **Skor:** X/100
 
-## Perspektif B — Kritik Dusunce
+## Perspektif B — Kritik Düşünce
 <thinking>
-[karsit gorus, risk analizi, alternatif yaklasim]
+[karşıt görüş, risk analizi, alternatif yaklaşım]
 </thinking>
-**Analiz:** [detayli analiz]
+**Analiz:** [detaylı analiz]
 **Skor:** X/100
 
-## Perspektif C — Yaratici Dusunce
+## Perspektif C — Yaratıcı Düşünce
 <thinking>
-[yenilikci yaklasim, beklenmedik acilar, sentez]
+[yenilikçi yaklaşım, beklenmedik açılar, sentez]
 </thinking>
-**Analiz:** [detayli analiz]
+**Analiz:** [detaylı analiz]
 **Skor:** X/100
 
 ## Nihai Sentez
-[en iyi dusunce sureclerini birlestir, nihai sonucu cikar]
+[en iyi düşünce süreçlerini birleştir, nihai sonucu çıkar]
 
-## Mantıksal Degerlendirme
-[hangi yaklasim en tutarli ve neden]
+## Mantıksal Değerlendirme
+[hangi yaklaşım en tutarlı ve neden]
 
-## Kenar vakalari
-[iyi ele alinan ve atlanan kenar vakalari listesi]`
+## Kenar Vakaları
+[iyi ele alınan ve atlanan kenar vakaları listesi]`
 
       const promptResult = await sdk.client.session.promptAsync({
         sessionID,
@@ -85,7 +116,7 @@ TALİMATLAR:
       })
 
       if (promptResult.error) {
-        throw new Error("Mesaj gonderilemedi")
+        throw new Error("Mesaj gönderilemedi")
       }
 
       setStatus("done")
@@ -97,40 +128,54 @@ TALİMATLAR:
   }
 
   return (
-    <box flexDirection="column" padding={2} gap={1}>
+    <box paddingLeft={2} paddingRight={2} paddingTop={1} paddingBottom={1} gap={1}>
       {/* Header */}
       <box flexDirection="row" justifyContent="space-between">
-        <text fg={theme.primary} selectable={false}>
-          ◆ <b>PlusThinking</b> — Derin Analiz
+        <text fg={theme.primary} attributes={TextAttributes.BOLD}>
+          ◆ PlusThinking — Çoklu Model Derin Düşünce Analizi
         </text>
-        <text fg={theme.textMuted} selectable={false} onMouseUp={() => dialog.clear()}>
-          ESC
+        <text fg={theme.textMuted} onMouseUp={() => dialog.clear()}>
+          ESC Kapat
         </text>
       </box>
 
       {/* Task Input */}
       <Show when={status() === "idle"}>
         <box flexDirection="column" gap={1}>
-          <text fg={theme.text} selectable={false}>
-            Analiz konusu:
+          <text fg={theme.text}>
+            Analiz edilecek konu / soru / mimari karar:
           </text>
-          <input
-            value={task()}
-            onInput={(e) => setTask(e)}
-            placeholder="Örn: Bu mimariye ne dersin?"
+          <textarea
+            onSubmit={() => {
+              const text = textarea?.plainText?.trim()
+              if (text) {
+                setTask(text)
+                runThinking()
+              }
+            }}
+            height={4}
+            keyBindings={[{ name: "return", action: "submit" }]}
+            ref={(val: TextareaRenderable) => {
+              textarea = val
+            }}
+            placeholder="Örn: Bu mimaride WebSocket vs gRPC seçimi için ne dersin?"
             placeholderColor={theme.textMuted}
-            focusedBackgroundColor={theme.backgroundPanel}
-            cursorColor={theme.primary}
+            textColor={theme.text}
             focusedTextColor={theme.text}
-            width="100%"
+            cursorColor={theme.primary}
           />
-          <box flexDirection="row" gap={1}>
+          <box flexDirection="row" justifyContent="space-between" paddingTop={1}>
+            <text fg={theme.textMuted}>
+              [Enter] Başlat &bull; [Esc] İptal
+            </text>
             <text
               fg={canStart() ? theme.primary : theme.textMuted}
-              selectable={false}
-              onMouseUp={canStart() ? runThinking : undefined}
+              attributes={canStart() ? TextAttributes.BOLD : undefined}
+              onMouseUp={() => {
+                if (canStart()) runThinking()
+              }}
             >
-              {canStart() ? "▶ Baslat" : "○ Konu girin"}
+              {canStart() ? "▶ Analizi Başlat (Enter)" : "○ Konu yazın..."}
             </text>
           </box>
         </box>
@@ -138,36 +183,39 @@ TALİMATLAR:
 
       {/* Running */}
       <Show when={status() === "running"}>
-        <box flexDirection="column" gap={1}>
-          <Spinner color={theme.primary}>Derin analiz baslatiliyor...</Spinner>
-          <text fg={theme.textMuted} selectable={false}>
-            Modeller dusunce sureclerini karsilastiriyor...
+        <box flexDirection="column" gap={1} paddingTop={1} paddingBottom={1}>
+          <Spinner color={theme.primary}>Derin analiz oturumu başlatılıyor...</Spinner>
+          <text fg={theme.textMuted}>
+            Modeller düşünce süreçlerini ve kenar vakalarını analiz ediyor...
           </text>
         </box>
       </Show>
 
       {/* Done */}
       <Show when={status() === "done"}>
-        <box flexDirection="column" gap={1}>
-          <text fg={theme.success} selectable={false}>
-            ✓ Analiz tamamlandi!
+        <box flexDirection="column" gap={1} paddingTop={1}>
+          <text fg={theme.success} attributes={TextAttributes.BOLD}>
+            ✓ Analiz oturumu başarıyla başlatıldı!
           </text>
-          <text fg={theme.textMuted} selectable={false}>
-            Sonuçları görmek için yeni session'a yönlendirileceksiniz.
+          <text fg={theme.textMuted}>
+            Sonuçlar oturum ekranına aktarılıyor.
           </text>
         </box>
       </Show>
 
       {/* Error */}
       <Show when={error()}>
-        <box flexDirection="column" gap={1}>
-          <text fg={theme.error} selectable={false}>
+        <box flexDirection="column" gap={1} paddingTop={1}>
+          <text fg={theme.error}>
             ✗ Hata: {error()}
           </text>
           <text
             fg={theme.primary}
-            selectable={false}
-            onMouseUp={() => { setStatus("idle"); setError("") }}
+            onMouseUp={() => {
+              setStatus("idle")
+              setError("")
+              setTimeout(() => textarea?.focus(), 1)
+            }}
           >
             Tekrar dene
           </text>

@@ -1,16 +1,17 @@
-import { createSignal, createMemo, Show } from "solid-js"
+import { createSignal, createMemo, Show, onMount } from "solid-js"
 import { useTheme } from "../context/theme"
 import { useDialog } from "../ui/dialog"
 import { useSDK } from "../context/sdk"
-import { useLanguage } from "../context/language"
 import { Spinner } from "./spinner"
 import { PartID } from "@/session/schema"
+import { TextareaRenderable, TextAttributes } from "@opentui/core"
+import { useKeyboard } from "@opentui/solid"
 
 export function DialogPTC() {
   const { theme } = useTheme()
   const dialog = useDialog()
   const sdk = useSDK()
-  const lang = useLanguage()
+  let textarea: TextareaRenderable
 
   const [task, setTask] = createSignal("")
   const [status, setStatus] = createSignal<"idle" | "running" | "done" | "error">("idle")
@@ -18,8 +19,38 @@ export function DialogPTC() {
 
   const canStart = createMemo(() => task().trim().length > 0 && status() === "idle")
 
+  useKeyboard((evt) => {
+    if (status() === "running") {
+      if (evt.name === "escape") return
+      evt.preventDefault()
+      evt.stopPropagation()
+      return
+    }
+    if (evt.name === "escape") {
+      dialog.clear()
+      return
+    }
+    if (evt.name === "return") {
+      const text = textarea?.plainText ?? task()
+      if (text.trim().length > 0 && status() === "idle") {
+        setTask(text)
+        runPTC()
+      }
+    }
+  })
+
+  onMount(() => {
+    dialog.setSize("medium")
+    setTimeout(() => {
+      if (!textarea || textarea.isDestroyed) return
+      textarea.focus()
+      textarea.gotoLineEnd()
+    }, 1)
+  })
+
   async function runPTC() {
-    if (!canStart()) return
+    const taskText = textarea?.plainText?.trim() || task().trim()
+    if (!taskText || status() !== "idle") return
 
     setStatus("running")
 
@@ -35,7 +66,7 @@ export function DialogPTC() {
       // Send the PTC debate prompt
       const ptcPrompt = `Sen bir PlusTwoCoder (PTC) moderatörüsün. 3 model birbiriyle tartışarak en iyi kod çözümünü üretir.
 
-GÖREV: ${task()}
+GÖREV: ${taskText}
 
 TALİMATLAR:
 1. 3 farklı perspektiften çözüm üret (Her biri ayrı paragrafta)
@@ -83,9 +114,6 @@ TALİMATLAR:
 
       setStatus("done")
       dialog.clear()
-
-      // Navigate to the new session to show results
-      // The user will see the debate results in the chat
     } catch (err) {
       setError(err instanceof Error ? err.message : "Bilinmeyen hata")
       setStatus("error")
@@ -93,40 +121,54 @@ TALİMATLAR:
   }
 
   return (
-    <box flexDirection="column" padding={2} gap={1}>
+    <box paddingLeft={2} paddingRight={2} paddingTop={1} paddingBottom={1} gap={1}>
       {/* Header */}
       <box flexDirection="row" justifyContent="space-between">
-        <text fg={theme.primary} selectable={false}>
-          ◆ <b>PlusTwoCoder</b> — Model Tartışma
+        <text fg={theme.primary} attributes={TextAttributes.BOLD}>
+          ◆ PlusTwoCoder (PTC) — Çoklu Model Tartışması
         </text>
-        <text fg={theme.textMuted} selectable={false} onMouseUp={() => dialog.clear()}>
-          ESC
+        <text fg={theme.textMuted} onMouseUp={() => dialog.clear()}>
+          ESC Kapat
         </text>
       </box>
 
       {/* Task Input */}
       <Show when={status() === "idle"}>
         <box flexDirection="column" gap={1}>
-          <text fg={theme.text} selectable={false}>
-            Görev açıklaması:
+          <text fg={theme.text}>
+            Tartışılacak ve çözülecek görev / kod isteği:
           </text>
-          <input
-            value={task()}
-            onInput={(e) => setTask(e)}
-            placeholder="Örn: JWT authentication ekle..."
+          <textarea
+            onSubmit={() => {
+              const text = textarea?.plainText?.trim()
+              if (text) {
+                setTask(text)
+                runPTC()
+              }
+            }}
+            height={4}
+            keyBindings={[{ name: "return", action: "submit" }]}
+            ref={(val: TextareaRenderable) => {
+              textarea = val
+            }}
+            placeholder="Örn: JWT tabanlı kimlik doğrulama middleware'i ekle..."
             placeholderColor={theme.textMuted}
-            focusedBackgroundColor={theme.backgroundPanel}
-            cursorColor={theme.primary}
+            textColor={theme.text}
             focusedTextColor={theme.text}
-            width="100%"
+            cursorColor={theme.primary}
           />
-          <box flexDirection="row" gap={1}>
+          <box flexDirection="row" justifyContent="space-between" paddingTop={1}>
+            <text fg={theme.textMuted}>
+              [Enter] Başlat &bull; [Esc] İptal
+            </text>
             <text
               fg={canStart() ? theme.primary : theme.textMuted}
-              selectable={false}
-              onMouseUp={canStart() ? runPTC : undefined}
+              attributes={canStart() ? TextAttributes.BOLD : undefined}
+              onMouseUp={() => {
+                if (canStart()) runPTC()
+              }}
             >
-              {canStart() ? "▶ Başlat" : "○ Görev girin"}
+              {canStart() ? "▶ Tartışmayı Başlat (Enter)" : "○ Görev yazın..."}
             </text>
           </box>
         </box>
@@ -134,36 +176,39 @@ TALİMATLAR:
 
       {/* Running */}
       <Show when={status() === "running"}>
-        <box flexDirection="column" gap={1}>
-          <Spinner color={theme.primary}>Tartışma başlatılıyor...</Spinner>
-          <text fg={theme.textMuted} selectable={false}>
-            Yeni session oluşturulup debate gönderilecek...
+        <box flexDirection="column" gap={1} paddingTop={1} paddingBottom={1}>
+          <Spinner color={theme.primary}>Modeller arası tartışma ve çözüm oturumu başlatılıyor...</Spinner>
+          <text fg={theme.textMuted}>
+            Yeni oturum oluşturuluyor ve modeller görevi analiz ediyor...
           </text>
         </box>
       </Show>
 
       {/* Done */}
       <Show when={status() === "done"}>
-        <box flexDirection="column" gap={1}>
-          <text fg={theme.success} selectable={false}>
-            ✓ Tartışma başlatıldı!
+        <box flexDirection="column" gap={1} paddingTop={1}>
+          <text fg={theme.success} attributes={TextAttributes.BOLD}>
+            ✓ Tartışma oturumu başarıyla başlatıldı!
           </text>
-          <text fg={theme.textMuted} selectable={false}>
-            Sonuçları görmek için yeni session'a yönlendirileceksiniz.
+          <text fg={theme.textMuted}>
+            Sonuçlar oturum ekranına aktarılıyor.
           </text>
         </box>
       </Show>
 
       {/* Error */}
       <Show when={error()}>
-        <box flexDirection="column" gap={1}>
-          <text fg={theme.error} selectable={false}>
+        <box flexDirection="column" gap={1} paddingTop={1}>
+          <text fg={theme.error}>
             ✗ Hata: {error()}
           </text>
           <text
             fg={theme.primary}
-            selectable={false}
-            onMouseUp={() => { setStatus("idle"); setError("") }}
+            onMouseUp={() => {
+              setStatus("idle")
+              setError("")
+              setTimeout(() => textarea?.focus(), 1)
+            }}
           >
             Tekrar dene
           </text>
