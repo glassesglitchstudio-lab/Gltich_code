@@ -1280,22 +1280,96 @@
       }
     }
 
-    // Try fetching live changelog.json
-    fetch('changelog.json')
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.updates) {
-          allUpdates = data.updates;
-          renderUpdates(allUpdates);
-        }
-      })
-      .catch(() => {
-        renderUpdates(allUpdates);
-      });
+    // Intelligent Turkish Commit Classifier & Analyzer
+    function parseGitHubCommit(commit) {
+      const msg = (commit.commit?.message || "").trim().split('\n')[0];
+      if (!msg || msg.startsWith('Merge ') || msg.startsWith('chore(deps)')) return null;
+      
+      const lower = msg.toLowerCase();
+      let category = 'Glitch Code';
+      let tag = 'NEW';
+      let title = msg;
+      let description = msg;
 
-    // Initialize first tab
+      if (lower.includes('unreal') || lower.includes('horror') || lower.includes('ue5')) {
+        category = 'Unreal AI';
+      } else if (lower.includes('glassescat') || lower.includes('niko') || lower.includes('nexus')) {
+        category = 'GlassesCat-AI';
+      }
+
+      if (lower.startsWith('fix') || lower.includes('fix(')) {
+        tag = 'DÜZELTME';
+      } else if (lower.startsWith('feat') || lower.includes('feat(')) {
+        tag = 'NEW';
+      } else {
+        tag = 'GÜNCELLEME';
+      }
+
+      if (lower.includes('ptc') || lower.includes('debate')) {
+        title = 'PlusTwoCoder (PTC) — Çoklu Model Tartışma & Konsensüs';
+        description = '3 yapay zeka modelinin aynı anda çözümleri tartışıp puanlayarak konsensüs ürettiği sistem.';
+      } else if (lower.includes('thinking') || lower.includes('plusthinking')) {
+        title = 'PlusThinking — Çoklu Model Derin Analiz Modülü';
+        description = 'Modellerin adım adım derin mantık yürüterek mimari kararları tartıştığı arayüz.';
+      } else if (lower.includes('doctor') || lower.includes('auto-doctor')) {
+        title = 'Glitch Auto-Doctor — Otonom Sistem Teşhisi';
+        description = 'SQLite veritabanı, Git, bellek ve disk izinlerini denetleyip onaran sağlık motoru.';
+      } else if (lower.includes('websearch') || lower.includes('searxng')) {
+        title = 'SearXNG & Gizlilik Odaklı Web Araması (WebSearch)';
+        description = 'Glitch Code için bağımsız yerel ve harici arama sağlayıcıları resmi şemaya eklendi.';
+      } else if (lower.includes('branding') || lower.includes('showcase') || lower.includes('logo')) {
+        title = 'Elytra-ai & GlassesCat Canlı Ekosistem Portalı';
+        description = 'GitHub Pages üzerinde interaktif terminal, canlı yenilikler ve özgün marka entegrasyonu.';
+      } else {
+        title = msg.replace(/^(feat|fix|perf|chore|refactor|docs)(\([^)]+\))?:\s*/i, '');
+        title = title.charAt(0).toUpperCase() + title.slice(1);
+        description = `Son GitHub güncellemesi [${commit.sha.slice(0, 7)}]: ${msg}`;
+      }
+
+      const dateObj = new Date(commit.commit?.author?.date || Date.now());
+      const dateStr = dateObj.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+
+      return {
+        id: commit.sha,
+        tag,
+        category,
+        version: 'v2.1.0',
+        date: dateStr,
+        title,
+        description
+      };
+    }
+
+    // Try fetching live GitHub commits directly
+    async function scanGitHubLive() {
+      try {
+        const res = await fetch('https://api.github.com/repos/glassesglitchstudio-lab/Gltich_code/commits?per_page=12');
+        if (!res.ok) return;
+        const commits = await res.json();
+        if (Array.isArray(commits)) {
+          const liveItems = [];
+          const seen = new Set();
+          for (const c of commits) {
+            const parsed = parseGitHubCommit(c);
+            if (parsed && !seen.has(parsed.title)) {
+              seen.add(parsed.title);
+              liveItems.push(parsed);
+            }
+          }
+          if (liveItems.length > 0) {
+            allUpdates = liveItems;
+            renderUpdates(allUpdates);
+          }
+        }
+      } catch (err) {
+        // Fallback to changelog.json or bundled updates
+      }
+    }
+
+    // Initialize first tab & auto-scan
     document.getElementById('terminalBody').innerHTML = terminalContents.ptc;
     renderUpdates(allUpdates);
+    scanGitHubLive();
   </script>
 </body>
 </html>
