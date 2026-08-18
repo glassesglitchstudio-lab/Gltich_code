@@ -22,15 +22,15 @@ const PROVIDERS: Array<{ value: string; label: string; hint: string }> = [
 
 const THEMES: Array<{ value: string; label: string; hint: string }> = [
   { value: "glitchcode", label: "Neon Turuncu", hint: "Glitch Code varsayilan" },
-  { value: "cyberpunk", label: "Cyberpunk", hint: "mor/cyan neon" },
-  { value: "minimal", label: "Minimal", hint: "sade, serif" },
+  { value: "crafted", label: "Crafted Minimal", hint: "sade, minimal & modern" },
+  { value: "synthwave84", label: "Cyberpunk", hint: "mor/cyan neon" },
+  { value: "tokyonight", label: "Tokyo Night", hint: "karanlik modern" },
   { value: "auto", label: "Otomatik", hint: "sistem temasina gore" },
 ]
 
 const MEMORY_OPTIONS: Array<{ value: string; label: string; hint: string }> = [
-  { value: "enabled", label: "Acik", hint: "otomatik kaydetme" },
+  { value: "enabled", label: "Acik", hint: "otomatik indeksleme" },
   { value: "disabled", label: "Kapali", hint: "hafiza yok" },
-  { value: "manual", label: "Manuel", hint: "sadece /save ile" },
 ]
 
 function ensureDirs(root: string) {
@@ -79,13 +79,17 @@ export async function runSetupWizard(root: string): Promise<boolean> {
   })
   if (prompts.isCancel(provider)) throw new UI.CancelledError()
 
-  const apiKey = await prompts.password({
-    message: "API anahtarin ne? (bos gecersen sonra .env'den okur)",
-    validate: (v) => {
-      if (v && v.length < 10) return "Gecersiz API anahtari"
-    },
-  })
-  if (prompts.isCancel(apiKey)) throw new UI.CancelledError()
+  let apiKey: string | undefined
+  if (provider && provider !== "__skip__" && provider !== "auto" && provider !== "ollama") {
+    const key = await prompts.password({
+      message: "API anahtarin ne? (bos gecersen sonra .env'den okur)",
+      validate: (v) => {
+        if (v && v.length < 5) return "Gecersiz API anahtari"
+      },
+    })
+    if (prompts.isCancel(key)) throw new UI.CancelledError()
+    apiKey = key as string
+  }
 
   const webSearch = await prompts.select({
     message: "Web aramasi nasil olsun?",
@@ -102,7 +106,7 @@ export async function runSetupWizard(root: string): Promise<boolean> {
   if (webSearch === "searxng") {
     const rawUrl = await prompts.text({
       message: "SearXNG instance URL'n ne?",
-      initialValue: "http://localhost:8888",
+      initialValue: "https://searx.space/",
       placeholder: "https://search.example.com",
     })
     if (prompts.isCancel(rawUrl)) throw new UI.CancelledError()
@@ -131,50 +135,68 @@ export async function runSetupWizard(root: string): Promise<boolean> {
   s.start("Kaydediliyor...")
 
   const config: Record<string, unknown> = {
-    version: "1.0",
-    project: path.basename(root),
-    created: new Date().toISOString(),
+    $schema: "https://glitchcode.ai/config.json",
   }
 
-  if (provider && provider !== "__skip__") {
-    config.provider = provider
-    config.model = provider === "auto" ? "auto" : "auto"
+  if (provider && provider !== "__skip__" && provider !== "auto") {
+    const providerDefaultModels: Record<string, string> = {
+      anthropic: "anthropic/claude-3-7-sonnet-20250219",
+      openai: "openai/gpt-4o",
+      google: "google/gemini-2.5-pro",
+      ollama: "ollama/llama3",
+      groq: "groq/llama-3.3-70b-versatile",
+      openrouter: "openrouter/anthropic/claude-3.7-sonnet",
+      deepseek: "deepseek/deepseek-chat",
+    }
+    if (providerDefaultModels[provider as string]) {
+      config.model = providerDefaultModels[provider as string]
+    }
   }
 
-  if (webSearch && webSearch !== "__skip__") {
+  if (webSearch && webSearch !== "__skip__" && webSearch !== "none") {
     config.websearch = {
-      provider: webSearch === "none" ? "none" : webSearch,
+      provider: webSearch,
       ...(searxngUrl ? { instanceUrl: searxngUrl } : {}),
       timeout: 30,
       maxResults: 10,
     }
   }
 
-  if (memory && memory !== "__skip__") {
-    config.memory = { mode: memory }
-  }
-
-  if (theme && theme !== "__skip__") {
-    config.tui = { theme }
+  if (memory && memory === "enabled") {
+    config.memory = { cc_index: true }
   }
 
   const configPath = path.join(root, GLITCHCODE_DIR, CONFIG_FILE)
   fs.writeFileSync(configPath, JSON.stringify(config, null, 2))
 
-    if (apiKey && provider && provider !== "__skip__" && provider !== "auto") {
+  if (theme && theme !== "__skip__") {
+    const tuiConfigPath = path.join(root, GLITCHCODE_DIR, "tui.json")
+    let existingTui: Record<string, unknown> = {}
+    if (fs.existsSync(tuiConfigPath)) {
       try {
-        const put = (key: string, info: Auth.Info) =>
-          AppRuntime.runPromise(
-            Effect.gen(function* () {
-              const auth = yield* Auth.Service
-              yield* auth.set(key, info)
-            }),
-          )
-        await put(provider, { type: "api", key: apiKey as string } as Auth.Info)
-      } catch (err) {
-        prompts.log.warn("API anahtari kaydedilemedi: " + errorMessage(err))
+        existingTui = JSON.parse(fs.readFileSync(tuiConfigPath, "utf-8"))
+      } catch {
+        existingTui = {}
       }
     }
+    existingTui.theme = theme === "minimal" ? "crafted" : theme === "cyberpunk" ? "synthwave84" : theme
+    fs.writeFileSync(tuiConfigPath, JSON.stringify(existingTui, null, 2))
+  }
+
+  if (apiKey && provider && provider !== "__skip__" && provider !== "auto") {
+    try {
+      const put = (key: string, info: Auth.Info) =>
+        AppRuntime.runPromise(
+          Effect.gen(function* () {
+            const auth = yield* Auth.Service
+            yield* auth.set(key, info)
+          }),
+        )
+      await put(provider as string, { type: "api", key: apiKey } as Auth.Info)
+    } catch (err) {
+      prompts.log.warn("API anahtari kaydedilemedi: " + errorMessage(err))
+    }
+  }
 
   s.stop("Hazir!")
 

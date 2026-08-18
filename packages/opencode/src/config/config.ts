@@ -58,6 +58,9 @@ function mergeConfigConcatArrays(target: Info, source: Info): Info {
 function normalizeLoadedConfig(data: unknown, source: string) {
   if (!isRecord(data)) return data
   const copy = { ...data }
+  delete copy.version
+  delete copy.project
+  delete copy.created
   const hadLegacy = "theme" in copy || "keybinds" in copy || "tui" in copy
   if (!hadLegacy) return copy
   delete copy.theme
@@ -229,6 +232,14 @@ const InfoSchema = Schema.Struct({
       url: Schema.optional(Schema.String).annotate({ description: "Enterprise URL" }),
     }),
   ),
+  websearch: Schema.optional(
+    Schema.Struct({
+      provider: Schema.optional(Schema.String).annotate({ description: "Web search provider (e.g. searxng, mcp, exa, none)" }),
+      instanceUrl: Schema.optional(Schema.String).annotate({ description: "SearXNG or custom instance URL" }),
+      timeout: Schema.optional(Schema.Number).annotate({ description: "Timeout in seconds" }),
+      maxResults: Schema.optional(Schema.Number).annotate({ description: "Max search results" }),
+    }),
+  ).annotate({ description: "Web search configuration" }),
   compaction: Schema.optional(
     Schema.Struct({
       auto: Schema.optional(Schema.Boolean).annotate({
