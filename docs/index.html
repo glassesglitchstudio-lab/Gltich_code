@@ -1,57 +1,54 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Elytra AI — Otonom Zeka & Mühendislik Ekosistemi</title>
-  <meta name="description" content="Elytra-ai ve GlassesCat Studio tarafından geliştirilen bağımsız otonom yapay zeka araçları: Glitch Code, GlassesCat-AI ve Unreal Engine AI entegrasyonu.">
-  <meta name="keywords" content="Elytra AI, Glitch Code, GlassesCat-AI, GlassesCat, AI CLI, Unreal Engine AI, Multi-Model Debate, LLM Coding Agent">
+  <title>Glitch Code — Autonomous AI Coding Assistant for Builders</title>
+  <meta name="description" content="Next-generation autonomous AI coding CLI with interactive TUI, visual diff engine, built-in Free Tier Providers hub, OpenCode Zen, and local Elytra NPU driver support.">
+  <meta name="keywords" content="Glitch Code, AI Coding Assistant, Terminal User Interface, TUI, OpenCode, LLM CLI, Groq, Cerebras, Elytra NPU">
   
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="logo.png">
-  <link rel="apple-touch-icon" href="logo.png">
-
   <!-- Open Graph -->
-  <meta property="og:title" content="Elytra AI — Otonom Zeka & Mühendislik Ekosistemi">
-  <meta property="og:description" content="Yerel öncelikli, çoklu model tartışmalı (PTC) ve sıfır telemetrili yapay zeka sistemleri.">
+  <meta property="og:title" content="Glitch Code — Autonomous AI Coding Assistant">
+  <meta property="og:description" content="Zero telemetry, 100% Free Tier Hub, OpenCode Zen, and local Elytra NPU acceleration.">
   <meta property="og:type" content="website">
+  <meta property="og:url" content="https://glassesglitchstudio-lab.github.io/Gltich_code/">
   
-  <!-- Fonts -->
+  <link rel="icon" type="image/png" href="logo.png">
+
+  <!-- Typography: Cabinet Grotesk / Outfit + JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@500;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@600;700;800;900&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
     :root {
-      --bg: #06070a;
-      --bg-surface: #0c0e14;
-      --bg-elevated: #131722;
-      --bg-glass: rgba(12, 14, 20, 0.75);
+      --bg: #050608;
+      --bg-surface: #0b0d13;
+      --bg-elevated: #11141d;
+      --bg-glass: rgba(11, 13, 19, 0.78);
       
       --border-subtle: rgba(255, 255, 255, 0.07);
       --border-medium: rgba(255, 255, 255, 0.14);
-      --border-accent: rgba(255, 107, 0, 0.35);
+      --border-highlight: rgba(255, 107, 0, 0.45);
       
-      --accent-orange: #ff6b00;
-      --accent-orange-glow: rgba(255, 107, 0, 0.18);
-      --accent-cyan: #00e5ff;
-      --accent-cyan-glow: rgba(0, 229, 255, 0.18);
-      --accent-violet: #a855f7;
-      --accent-green: #10b981;
+      --accent-neon: #ff6b00;
+      --accent-neon-bright: #ff851b;
+      --accent-neon-glow: rgba(255, 107, 0, 0.22);
+      --accent-emerald: #10b981;
+      --accent-cyan: #06b6d4;
       
-      --text-primary: #f4f5f8;
-      --text-secondary: #9aa2b5;
-      --text-muted: #5e667b;
-      --text-accent: #ff8a33;
+      --text-main: #f3f4f8;
+      --text-muted: #8e95a5;
+      --text-dark: #51586a;
+      
+      --font-display: 'Cabinet Grotesk', 'Outfit', -apple-system, sans-serif;
+      --font-sans: 'Outfit', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
       
       --radius-sm: 6px;
       --radius-md: 10px;
       --radius-lg: 16px;
       --radius-xl: 24px;
-      
-      --font-display: 'Cabinet Grotesk', 'Inter', -apple-system, sans-serif;
-      --font-sans: 'Inter', -apple-system, sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
     }
 
     * {
@@ -63,1313 +60,963 @@
     html {
       scroll-behavior: smooth;
       background-color: var(--bg);
-      color: var(--text-primary);
+      color: var(--text-main);
     }
 
     body {
       font-family: var(--font-sans);
       background-color: var(--bg);
-      color: var(--text-primary);
+      color: var(--text-main);
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
-      position: relative;
     }
 
-    /* Ambient Background Engineering Grid */
-    .grid-bg {
+    /* Ambient Cyber Grid & Glows */
+    .cyber-grid {
       position: fixed;
       inset: 0;
       background-image: 
-        linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
-      background-size: 48px 48px;
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 56px 56px;
       pointer-events: none;
       z-index: 0;
     }
 
-    .glow-sphere {
+    .ambient-glow-1 {
       position: fixed;
+      top: -10vw;
+      left: 30vw;
       width: 700px;
       height: 700px;
       border-radius: 50%;
+      background: radial-gradient(circle, var(--accent-neon-glow) 0%, transparent 70%);
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .ambient-glow-2 {
+      position: fixed;
+      bottom: 10vw;
+      right: -10vw;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%);
       filter: blur(140px);
       pointer-events: none;
       z-index: 0;
-      opacity: 0.18;
-    }
-    .glow-sphere.orange {
-      top: -150px;
-      left: 20%;
-      background: radial-gradient(circle, var(--accent-orange), transparent 70%);
-    }
-    .glow-sphere.cyan {
-      top: 40%;
-      right: -100px;
-      background: radial-gradient(circle, var(--accent-cyan), transparent 70%);
-      opacity: 0.12;
     }
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 28px;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* TYPOGRAPHY */
-    h1, h2, h3, h4, .brand-font {
-      font-family: var(--font-display);
-      font-weight: 800;
-      letter-spacing: -0.025em;
-      color: #fff;
-    }
-
-    .mono {
-      font-family: var(--font-mono);
-    }
-
-    /* NAVIGATION */
-    .nav-wrap {
-      position: fixed;
+    /* Navigation */
+    header {
+      position: sticky;
       top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      padding: 16px 0;
-      transition: all 0.3s ease;
-    }
-    .nav-wrap.scrolled {
-      background: rgba(6, 7, 10, 0.85);
+      z-index: 100;
+      background: var(--bg-glass);
       backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border-subtle);
-      padding: 12px 0;
     }
-    .nav-inner {
+
+    .nav-container {
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 16px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
-    .nav-brand {
+
+    .brand-group {
       display: flex;
       align-items: center;
       gap: 12px;
       text-decoration: none;
+      color: inherit;
     }
-    .brand-symbol {
-      width: 32px;
-      height: 32px;
-      background: linear-gradient(135deg, var(--accent-orange), #b83d00);
+
+    .brand-badge {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 20px;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-icon {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, var(--accent-neon), var(--accent-neon-bright));
       border-radius: var(--radius-sm);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: var(--font-mono);
+      color: #000;
       font-weight: 900;
-      color: #fff;
-      font-size: 14px;
-      box-shadow: 0 0 16px var(--accent-orange-glow);
-    }
-    .brand-name {
-      font-size: 17px;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #fff;
-    }
-    .brand-tag {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--text-muted);
-      border: 1px solid var(--border-subtle);
-      padding: 2px 6px;
-      border-radius: 4px;
-      letter-spacing: 0.05em;
+      box-shadow: 0 0 16px var(--accent-neon-glow);
     }
 
-    .nav-menu {
+    .version-pill {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      background: rgba(255, 107, 0, 0.12);
+      border: 1px solid var(--border-highlight);
+      border-radius: 999px;
+      color: var(--accent-neon-bright);
+    }
+
+    .nav-links {
       display: flex;
       align-items: center;
       gap: 28px;
+      list-style: none;
     }
-    .nav-link {
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
       font-size: 14px;
       font-weight: 500;
-      color: var(--text-secondary);
-      text-decoration: none;
       transition: color 0.2s ease;
     }
-    .nav-link:hover {
-      color: #fff;
-    }
-    .nav-link.active {
-      color: var(--accent-orange);
+
+    .nav-links a:hover {
+      color: var(--text-main);
     }
 
     .nav-actions {
       display: flex;
       align-items: center;
-      gap: 14px;
-    }
-    .btn-nav-primary {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(255, 107, 0, 0.12);
-      border: 1px solid rgba(255, 107, 0, 0.35);
-      color: var(--text-accent);
-      padding: 7px 14px;
-      border-radius: var(--radius-sm);
-      font-size: 13px;
-      font-family: var(--font-mono);
-      font-weight: 500;
-      text-decoration: none;
-      transition: all 0.2s ease;
-    }
-    .btn-nav-primary:hover {
-      background: var(--accent-orange);
-      color: #fff;
-      box-shadow: 0 0 20px var(--accent-orange-glow);
-    }
-
-    /* HERO SECTION */
-    .hero-section {
-      padding: 160px 0 90px;
-      position: relative;
-    }
-    .hero-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-medium);
-      padding: 6px 14px;
-      border-radius: 100px;
-      font-size: 12px;
-      font-family: var(--font-mono);
-      color: var(--text-secondary);
-      margin-bottom: 28px;
-    }
-    .pulse-dot {
-      width: 7px;
-      height: 7px;
-      background: var(--accent-green);
-      border-radius: 50%;
-      box-shadow: 0 0 8px var(--accent-green);
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.85); }
-    }
-
-    .hero-title {
-      font-size: clamp(38px, 6vw, 68px);
-      line-height: 1.06;
-      max-width: 960px;
-      margin-bottom: 24px;
-    }
-    .hero-title .gradient-text {
-      background: linear-gradient(135deg, #ffffff 40%, #a2aabf 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .hero-title .accent-text {
-      background: linear-gradient(135deg, var(--accent-orange) 20%, #ffaa66 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .hero-description {
-      font-size: 18px;
-      color: var(--text-secondary);
-      max-width: 720px;
-      line-height: 1.65;
-      margin-bottom: 38px;
-      font-weight: 400;
-    }
-
-    .hero-cta-group {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 60px;
-    }
-    .command-box {
-      display: flex;
-      align-items: center;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-medium);
-      border-radius: var(--radius-sm);
-      padding: 4px 6px 4px 14px;
-      font-family: var(--font-mono);
-      font-size: 14px;
-      color: var(--text-primary);
       gap: 12px;
-      cursor: pointer;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-    .command-box:hover {
-      border-color: var(--accent-orange);
-      box-shadow: 0 0 16px var(--accent-orange-glow);
-    }
-    .command-box .dollar {
-      color: var(--accent-orange);
-      font-weight: 700;
-      user-select: none;
-    }
-    .copy-btn {
-      background: var(--bg-elevated);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-secondary);
-      padding: 6px 12px;
-      border-radius: 4px;
-      font-size: 12px;
-      cursor: pointer;
-      font-family: var(--font-mono);
-      transition: all 0.2s;
-    }
-    .copy-btn:hover {
-      background: #fff;
-      color: #000;
     }
 
-    .btn-secondary {
+    .btn-github {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: transparent;
+      background: var(--bg-elevated);
       border: 1px solid var(--border-medium);
-      color: var(--text-primary);
-      padding: 11px 20px;
-      border-radius: var(--radius-sm);
-      font-size: 14px;
+      color: var(--text-main);
+      padding: 8px 16px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
       font-weight: 600;
       text-decoration: none;
       transition: all 0.2s ease;
     }
-    .btn-secondary:hover {
-      background: rgba(255,255,255,0.06);
-      border-color: rgba(255,255,255,0.3);
+
+    .btn-github:hover {
+      border-color: var(--text-muted);
+      transform: translateY(-1px);
     }
 
-    /* INTERACTIVE TERMINAL SHOWCASE */
+    .btn-github:active {
+      transform: translateY(1px) scale(0.98);
+    }
+
+    /* Main Container */
+    main {
+      position: relative;
+      z-index: 10;
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Asymmetric Hero Section */
+    .hero-grid {
+      min-height: calc(100dvh - 72px);
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: 48px;
+      align-items: center;
+      padding: 60px 0 80px 0;
+    }
+
+    .hero-content {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: 999px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-muted);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    .tag-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--accent-neon);
+      box-shadow: 0 0 10px var(--accent-neon);
+    }
+
+    h1.hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(38px, 5.2vw, 68px);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -1.5px;
+      color: #fff;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #ffffff 40%, var(--accent-neon-bright) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p.hero-desc {
+      font-size: 17px;
+      line-height: 1.65;
+      color: var(--text-muted);
+      max-width: 540px;
+    }
+
+    /* Interactive Install Card */
+    .install-box {
+      width: 100%;
+      max-width: 500px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      margin-top: 10px;
+    }
+
+    .install-tabs {
+      display: flex;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .install-tab-btn {
+      flex: 1;
+      padding: 10px 14px;
+      background: transparent;
+      border: none;
+      color: var(--text-dark);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .install-tab-btn.active {
+      color: var(--accent-neon-bright);
+      background: rgba(255, 107, 0, 0.06);
+      border-bottom: 2px solid var(--accent-neon);
+    }
+
+    .install-code-row {
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--text-main);
+    }
+
+    .code-prefix {
+      color: var(--accent-neon);
+      user-select: none;
+    }
+
+    .btn-copy {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-copy:hover {
+      color: #fff;
+      border-color: var(--border-highlight);
+      background: rgba(255, 107, 0, 0.15);
+    }
+
+    .btn-copy:active {
+      transform: scale(0.96);
+    }
+
+    .hero-features-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .chip svg {
+      color: var(--accent-emerald);
+    }
+
+    /* Right Column: Live Interactive Terminal Simulator */
     .terminal-window {
       background: #090b10;
       border: 1px solid var(--border-medium);
       border-radius: var(--radius-lg);
-      box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.7), 0 0 40px rgba(255, 107, 0, 0.05);
+      box-shadow: 
+        0 30px 70px rgba(0, 0, 0, 0.8),
+        0 0 50px var(--accent-neon-glow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
       overflow: hidden;
-      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
     }
+
     .terminal-header {
       background: #0f121a;
+      border-bottom: 1px solid var(--border-subtle);
       padding: 12px 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid var(--border-subtle);
     }
+
     .terminal-dots {
       display: flex;
-      gap: 7px;
+      gap: 8px;
     }
-    .dot {
+
+    .tdot {
       width: 11px;
       height: 11px;
       border-radius: 50%;
+      background: #252a38;
     }
-    .dot.red { background: #ff5f56; }
-    .dot.yellow { background: #ffbd2e; }
-    .dot.green { background: #27c93f; }
+
+    .tdot.red { background: #ef4444; }
+    .tdot.yellow { background: #f59e0b; }
+    .tdot.green { background: #10b981; }
+
+    .terminal-title {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
 
     .terminal-tabs {
       display: flex;
       gap: 4px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 6px 12px;
+      border-bottom: 1px solid var(--border-subtle);
     }
-    .t-tab {
+
+    .term-tab {
       background: transparent;
-      border: none;
+      border: 1px solid transparent;
       color: var(--text-muted);
       font-family: var(--font-mono);
-      font-size: 12px;
-      padding: 4px 12px;
-      border-radius: 4px;
+      font-size: 11px;
+      padding: 5px 10px;
+      border-radius: var(--radius-sm);
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.2s ease;
     }
-    .t-tab.active {
-      background: var(--bg-surface);
-      color: var(--accent-orange);
-      font-weight: 600;
+
+    .term-tab.active {
+      background: var(--bg-elevated);
+      border-color: var(--border-subtle);
+      color: var(--text-main);
     }
+
     .terminal-body {
-      padding: 24px 28px;
+      padding: 22px;
       font-family: var(--font-mono);
       font-size: 13.5px;
-      line-height: 1.7;
+      line-height: 1.65;
       min-height: 380px;
-      color: #d1d5db;
-    }
-    .t-line {
-      margin-bottom: 8px;
-      display: flex;
-      gap: 10px;
-    }
-    .t-prompt {
-      color: var(--accent-orange);
-      font-weight: 700;
-      user-select: none;
-    }
-    .t-dim { color: var(--text-muted); }
-    .t-success { color: var(--accent-green); }
-    .t-cyan { color: var(--accent-cyan); }
-    .t-orange { color: var(--accent-orange); }
-    .t-box {
-      border: 1px solid var(--border-subtle);
-      background: rgba(255,255,255,0.02);
-      border-radius: 6px;
-      padding: 12px 16px;
-      margin: 12px 0;
+      background: #07080d;
+      color: #cbd5e1;
+      overflow-y: auto;
     }
 
-    /* ECOSYSTEM TRILOGY GRID */
-    .section-title-wrap {
-      margin-bottom: 50px;
+    .term-banner {
+      color: var(--accent-neon);
+      font-weight: 700;
+      white-space: pre;
+      line-height: 1.25;
+      margin-bottom: 12px;
     }
-    .section-eyebrow {
+
+    .term-accent { color: var(--accent-neon-bright); font-weight: 600; }
+    .term-green { color: var(--accent-emerald); }
+    .term-cyan { color: var(--accent-cyan); }
+    .term-gray { color: var(--text-dark); }
+    .term-diff-add { color: #34d399; background: rgba(16, 185, 129, 0.12); padding: 1px 4px; border-radius: 2px; }
+    .term-diff-del { color: #f87171; background: rgba(239, 68, 68, 0.12); padding: 1px 4px; border-radius: 2px; }
+
+    /* Feature Cards Section */
+    .section-header {
+      text-align: left;
+      margin-bottom: 48px;
+    }
+
+    .section-label {
       font-family: var(--font-mono);
       font-size: 12px;
-      color: var(--accent-orange);
+      font-weight: 600;
+      color: var(--accent-neon);
       text-transform: uppercase;
-      letter-spacing: 0.12em;
+      letter-spacing: 1px;
       margin-bottom: 8px;
     }
-    .section-title {
-      font-size: clamp(28px, 4vw, 42px);
-    }
-    .section-desc {
-      color: var(--text-secondary);
-      font-size: 16px;
-      max-width: 600px;
-      margin-top: 10px;
+
+    h2.section-title {
+      font-family: var(--font-display);
+      font-size: clamp(28px, 3.8vw, 44px);
+      font-weight: 800;
+      letter-spacing: -1px;
+      color: #fff;
     }
 
-    .trilogy-grid {
+    .features-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
       gap: 24px;
-      margin-bottom: 120px;
+      margin-bottom: 100px;
     }
-    .trilogy-card {
+
+    .feature-card {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
-      padding: 36px 32px;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      transition: all 0.3s ease;
-      overflow: hidden;
-    }
-    .trilogy-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--border-medium), transparent);
-      transition: background 0.3s ease;
-    }
-    .trilogy-card:hover {
-      border-color: var(--border-medium);
-      transform: translateY(-4px);
-      box-shadow: 0 16px 36px -10px rgba(0,0,0,0.6);
-    }
-    .trilogy-card:hover::before {
-      background: linear-gradient(90deg, transparent, var(--accent-orange), transparent);
-    }
-
-    .card-badge {
-      display: inline-flex;
-      font-family: var(--font-mono);
-      font-size: 11px;
-      padding: 3px 8px;
-      border-radius: 4px;
-      margin-bottom: 20px;
-      width: fit-content;
-    }
-    .badge-orange { background: rgba(255,107,0,0.12); color: var(--accent-orange); border: 1px solid rgba(255,107,0,0.3); }
-    .badge-cyan { background: rgba(0,229,255,0.12); color: var(--accent-cyan); border: 1px solid rgba(0,229,255,0.3); }
-    .badge-violet { background: rgba(168,85,247,0.12); color: var(--accent-violet); border: 1px solid rgba(168,85,247,0.3); }
-
-    .card-title {
-      font-size: 24px;
-      margin-bottom: 12px;
-    }
-    .card-desc {
-      color: var(--text-secondary);
-      font-size: 14.5px;
-      line-height: 1.6;
-      margin-bottom: 28px;
-    }
-    .card-features {
-      list-style: none;
-      margin-bottom: 32px;
-    }
-    .card-features li {
-      font-size: 13.5px;
-      color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-    .card-features li svg {
-      width: 14px;
-      height: 14px;
-      stroke: var(--accent-orange);
-      flex-shrink: 0;
-    }
-    .card-btn {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-family: var(--font-mono);
-      font-size: 13px;
-      color: #fff;
-      text-decoration: none;
-      padding: 10px 14px;
-      background: var(--bg-elevated);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
-      transition: all 0.2s ease;
-    }
-    .card-btn:hover {
-      background: rgba(255,255,255,0.08);
-      border-color: var(--border-medium);
-    }
-
-    /* ARCHITECTURE SPECS TABLE */
-    .spec-section {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-xl);
-      padding: 48px;
-      margin-bottom: 120px;
-    }
-    .spec-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 32px;
-      margin-top: 36px;
-    }
-    .spec-item h4 {
-      font-size: 14px;
-      font-family: var(--font-mono);
-      color: var(--text-muted);
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .spec-item .spec-val {
-      font-size: 26px;
-      font-weight: 800;
-      color: #fff;
-      font-family: var(--font-display);
-    }
-    .spec-item .spec-sub {
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin-top: 4px;
-    }
-
-    /* FOOTER */
-    .footer {
-      border-top: 1px solid var(--border-subtle);
-      padding: 60px 0 40px;
-      background: #040508;
-    }
-    .footer-top {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      gap: 40px;
-      margin-bottom: 48px;
-    }
-    .footer-brand {
-      max-width: 320px;
-    }
-    .footer-links-group {
-      display: flex;
-      gap: 60px;
-    }
-    .footer-col h5 {
-      font-family: var(--font-mono);
-      font-size: 12px;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      letter-spacing: 0.1em;
-      margin-bottom: 16px;
-    }
-    .footer-col ul {
-      list-style: none;
-    }
-    .footer-col li {
-      margin-bottom: 10px;
-    }
-    .footer-col a {
-      color: var(--text-secondary);
-      font-size: 13.5px;
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-    .footer-col a:hover {
-      color: #fff;
-    }
-
-    .footer-bottom {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      padding-top: 28px;
-      border-top: 1px solid rgba(255,255,255,0.04);
-      font-size: 13px;
-      color: var(--text-muted);
-      font-family: var(--font-mono);
-    }
-
-    /* ANNOUNCEMENT BANNER */
-    .hero-announcement {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: rgba(255, 107, 0, 0.08);
-      border: 1px solid rgba(255, 107, 0, 0.3);
-      padding: 6px 16px;
-      border-radius: 100px;
-      font-size: 13px;
-      color: #fff;
-      text-decoration: none;
-      margin-bottom: 24px;
-      transition: all 0.2s ease;
-    }
-    .hero-announcement:hover {
-      background: rgba(255, 107, 0, 0.16);
-      border-color: var(--accent-orange);
-      transform: translateY(-2px);
-      box-shadow: 0 0 20px var(--accent-orange-glow);
-    }
-    .ann-badge {
-      background: var(--accent-orange);
-      color: #fff;
-      font-family: var(--font-mono);
-      font-weight: 800;
-      font-size: 10px;
-      padding: 2px 7px;
-      border-radius: 100px;
-      letter-spacing: 0.05em;
-    }
-    .ann-arrow {
-      color: var(--accent-orange);
-      font-weight: bold;
-    }
-
-    /* UPDATES / WHAT'S NEW SECTION */
-    .updates-section {
-      padding: 60px 0 100px;
-    }
-    .updates-header {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: flex-end;
-      justify-content: space-between;
-      gap: 20px;
-      margin-bottom: 32px;
-    }
-    .update-filters {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .u-filter-btn {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-secondary);
-      font-family: var(--font-mono);
-      font-size: 12px;
-      padding: 6px 14px;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .u-filter-btn:hover, .u-filter-btn.active {
-      background: rgba(255,107,0,0.12);
-      border-color: var(--accent-orange);
-      color: #fff;
-      font-weight: 600;
-    }
-    .updates-timeline {
+      padding: 32px 28px;
       display: flex;
       flex-direction: column;
       gap: 16px;
-    }
-    .update-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      padding: 24px 28px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
-      transition: all 0.25s ease;
+      overflow: hidden;
     }
-    .update-card:hover {
-      border-color: var(--border-medium);
-      transform: translateX(4px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+
+    .feature-card:hover {
+      border-color: var(--border-highlight);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 30px var(--accent-neon-glow);
     }
-    .update-meta-row {
+
+    .card-icon-box {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 107, 0, 0.1);
+      border: 1px solid var(--border-highlight);
       display: flex;
       align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
+      justify-content: center;
+      color: var(--accent-neon-bright);
     }
-    .update-tag-new {
-      background: linear-gradient(135deg, var(--accent-orange), #e65100);
-      color: #fff;
-      font-family: var(--font-mono);
-      font-weight: 800;
-      font-size: 10px;
-      padding: 2px 8px;
-      border-radius: 4px;
-      letter-spacing: 0.08em;
-      box-shadow: 0 0 10px var(--accent-orange-glow);
-    }
-    .update-tag-update {
-      background: rgba(0, 229, 255, 0.15);
-      border: 1px solid rgba(0, 229, 255, 0.4);
-      color: var(--accent-cyan);
-      font-family: var(--font-mono);
-      font-weight: 700;
-      font-size: 10px;
-      padding: 2px 8px;
-      border-radius: 4px;
-    }
-    .update-version {
-      font-family: var(--font-mono);
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-    .update-category {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      padding: 2px 7px;
-      border-radius: 4px;
-      background: rgba(255,255,255,0.04);
-      color: var(--text-secondary);
-      border: 1px solid var(--border-subtle);
-    }
-    .update-date {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-left: auto;
-    }
-    .update-title {
-      font-size: 18px;
+
+    .feature-card h3 {
+      font-family: var(--font-display);
+      font-size: 20px;
       font-weight: 700;
       color: #fff;
     }
-    .update-desc {
-      font-size: 14px;
-      color: var(--text-secondary);
+
+    .feature-card p {
+      font-size: 14.5px;
+      color: var(--text-muted);
       line-height: 1.6;
     }
 
-    /* RESPONSIVE */
-    @media (max-width: 768px) {
-      .nav-menu { display: none; }
-      .hero-section { padding: 120px 0 60px; }
-      .spec-section { padding: 28px; }
-      .footer-links-group { gap: 32px; }
+    /* Provider Ecosystem Matrix */
+    .ecosystem-section {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: 56px 48px;
+      margin-bottom: 100px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .provider-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-top: 36px;
+    }
+
+    .provider-chip {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .provider-chip:hover {
+      border-color: var(--border-medium);
+      background: #151926;
+    }
+
+    .provider-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .provider-name {
+      font-weight: 700;
+      font-size: 15px;
+      color: #fff;
+    }
+
+    .badge-free {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .provider-speed {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--accent-neon-bright);
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 60px 24px;
+      background: #030406;
+    }
+
+    .footer-container {
+      max-width: 1360px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text-dark);
+      font-size: 13px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: var(--text-main);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        min-height: auto;
+        padding: 40px 0;
+      }
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+      .provider-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .ecosystem-section {
+        padding: 36px 24px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .provider-grid {
+        grid-template-columns: 1fr;
+      }
+      .nav-links {
+        display: none;
+      }
+      .footer-container {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="grid-bg"></div>
-  <div class="glow-sphere orange"></div>
-  <div class="glow-sphere cyan"></div>
+  <div class="cyber-grid"></div>
+  <div class="ambient-glow-1"></div>
+  <div class="ambient-glow-2"></div>
 
-  <!-- NAVIGATION -->
-  <header class="nav-wrap" id="navWrap">
-    <div class="container nav-inner">
-      <a href="#" class="nav-brand">
-        <img src="logo.png" alt="Elytra AI" class="brand-logo-img" style="width:32px; height:32px; border-radius:6px; object-fit:contain; box-shadow:0 0 16px rgba(255,107,0,0.25);">
-        <span class="brand-name">Elytra AI</span>
-        <span class="brand-tag">v2.1.0</span>
+  <!-- Header -->
+  <header>
+    <div class="nav-container">
+      <a href="#" class="brand-group">
+        <div class="brand-icon">G</div>
+        <span class="brand-badge">GLITCH CODE</span>
+        <span class="version-pill">v2.2.0</span>
       </a>
 
-      <nav class="nav-menu">
-        <a href="#glitch-code" class="nav-link">Glitch Code</a>
-        <a href="#glassescat-ai" class="nav-link">GlassesCat-AI</a>
-        <a href="#unreal-ai" class="nav-link">Unreal AI</a>
-        <a href="#updates" class="nav-link" style="display:flex; align-items:center; gap:6px;">
-          <span>Yenilikler</span>
-          <span style="background:var(--accent-orange); color:#fff; font-size:10px; font-weight:800; padding:1px 6px; border-radius:100px; font-family:var(--font-mono); letter-spacing:0.05em;">NEW</span>
-        </a>
-        <a href="#specs" class="nav-link">Mimarî</a>
-        <a href="marketplace.html" class="nav-link">Marketplace</a>
-      </nav>
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#providers">Providers Hub</a></li>
+        <li><a href="#npu">Elytra NPU</a></li>
+        <li><a href="#install">Quickstart</a></li>
+      </ul>
 
       <div class="nav-actions">
-        <a href="https://github.com/glassesglitchstudio-lab/Gltich_code" target="_blank" class="btn-nav-primary">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
-          GitHub
+        <a href="https://github.com/glassesglitchstudio-lab/Gltich_code" target="_blank" class="btn-github">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
+          <span>GitHub Star</span>
         </a>
       </div>
     </div>
   </header>
 
-  <!-- HERO SECTION -->
-  <section class="hero-section">
-    <div class="container">
-      <div style="display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-bottom:24px;">
-        <div class="hero-pill" style="margin-bottom:0;">
-          <div class="pulse-dot"></div>
-          <span>Elytra-ai &bull; GlassesCat Autonomous AI Lab</span>
+  <!-- Hero Section -->
+  <main>
+    <section class="hero-grid">
+      <div class="hero-content">
+        <div class="hero-tag">
+          <span class="tag-dot"></span>
+          <span>100% Free Tier Hub & OpenCode Zen Active</span>
         </div>
-        <a href="#updates" class="hero-announcement" style="margin-bottom:0;">
-          <span class="ann-badge">YENİ</span>
-          <span>Glitch Code v2.1.0 & PTC Çoklu Model Tartışması Yayında!</span>
-          <span class="ann-arrow">&rarr;</span>
-        </a>
+
+        <h1 class="hero-title">
+          The Autonomous <span class="gradient-text">AI Coding Agent</span> For Builders.
+        </h1>
+
+        <p class="hero-desc">
+          Zero subscriptions. Zero telemetry. Glitch Code turns your terminal into a full autonomous software engineer powered by high-speed free providers, visual diffs, and local Elytra NPU acceleration.
+        </p>
+
+        <!-- Install Tabs Box -->
+        <div class="install-box" id="install">
+          <div class="install-tabs">
+            <button class="install-tab-btn active" onclick="switchInstall('npm', this)">npm</button>
+            <button class="install-tab-btn" onclick="switchInstall('powershell', this)">Windows PowerShell</button>
+            <button class="install-tab-btn" onclick="switchInstall('curl', this)">Linux / macOS</button>
+          </div>
+          <div class="install-code-row">
+            <div>
+              <span class="code-prefix">$</span>
+              <span id="install-cmd-text">npm install -g glitchcode-cli</span>
+            </div>
+            <button class="btn-copy" onclick="copyInstallCmd()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              <span id="copy-btn-label">Copy</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="hero-features-chips">
+          <div class="chip">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Groq & Cerebras (1800 T/s)</span>
+          </div>
+          <div class="chip">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Visual Diff Review</span>
+          </div>
+          <div class="chip">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Native C++ AVX2 Driver</span>
+          </div>
+        </div>
       </div>
 
-      <h1 class="hero-title">
-        <span class="gradient-text">Mühendislik için Tasarlanmış</span><br>
-        <span class="accent-text">Otonom Zeka Ekosistemi.</span>
-      </h1>
-
-      <p class="hero-description">
-        Yapay zeka araçlarını şablon kalıplardan kurtarıyoruz. <strong>Glitch Code</strong> ile yerel çoklu model tartışmaları, <strong>GlassesCat-AI</strong> ile nöral bellekli ajanlar ve <strong>Unreal Engine</strong> için yaşayan LLM diyalog sistemleri üretiyoruz.
-      </p>
-
-      <div class="hero-cta-group">
-        <div class="command-box" onclick="copyInstallCmd()">
-          <span class="dollar">&gt;</span>
-          <span id="installCmdText">bun add -g glitchcode-cli</span>
-          <button class="copy-btn" id="copyBtn">Kopyala</button>
-        </div>
-        <a href="#trilogy" class="btn-secondary">
-          Ekosistemi Keşfet &darr;
-        </a>
-      </div>
-
-      <!-- INTERACTIVE TERMINAL WIDGET -->
+      <!-- Live Interactive Terminal -->
       <div class="terminal-window">
         <div class="terminal-header">
           <div class="terminal-dots">
-            <div class="dot red"></div>
-            <div class="dot yellow"></div>
-            <div class="dot green"></div>
+            <div class="tdot red"></div>
+            <div class="tdot yellow"></div>
+            <div class="tdot green"></div>
           </div>
-          <div class="terminal-tabs">
-            <button class="t-tab active" onclick="switchTab('ptc')">1. /ptc Debate</button>
-            <button class="t-tab" onclick="switchTab('doctor')">2. /doctor Health</button>
-            <button class="t-tab" onclick="switchTab('glassescat')">3. GlassesCat Nexus</button>
-            <button class="t-tab" onclick="switchTab('unreal')">4. Unreal Telemetry</button>
+          <div class="terminal-title">glitch-tui — 80x24</div>
+          <div style="width: 40px"></div>
+        </div>
+
+        <div class="terminal-tabs">
+          <button class="term-tab active" onclick="switchTermDemo('live', this)">live_session.ts</button>
+          <button class="term-tab" onclick="switchTermDemo('diff', this)">visual_diff.patch</button>
+          <button class="term-tab" onclick="switchTermDemo('free', this)">free_providers.hub</button>
+        </div>
+
+        <div class="terminal-body" id="term-display">
+          <div class="term-banner">  ██████╗ ██╗     ██╗████████╗ ██████╗██╗  ██╗
+ ██╔════╝ ██║     ██║╚══██╔══╝██╔════╝██║  ██║
+ ██║  ███╗██║     ██║   ██║   ██║     ███████║
+ ╚██████╔╝███████╗██║   ██║   ╚██████╗██║  ██║
+  ╚═════╝ ╚══════╝╚═╝   ╚═╝    ╚═════╝╚═╝  ╚═╝</div>
+          <div><span class="term-accent">glitch-cli v2.2.0</span> — AI-Powered Development Tool</div>
+          <div><span class="term-green">✓</span> Workspace initialized: <span class="term-cyan">~/CascadeProjects/glitch-code</span></div>
+          <div><span class="term-green">✓</span> Provider active: <span class="term-accent">Groq / Llama-3.3-70B-Versatile</span> (Free Tier)</div>
+          <br>
+          <div><span class="term-cyan">user ›</span> refactor auth middleware to use Effect-ts schema validation</div>
+          <br>
+          <div><span class="term-accent">glitch ›</span> Analyzing <span class="term-cyan">src/auth/middleware.ts</span> and AST schema...</div>
+          <div><span class="term-green">✓</span> Reading 4 dependent files via ripgrep</div>
+          <div><span class="term-green">✓</span> Applied patch: <span class="term-diff-add">+28 lines</span> <span class="term-diff-del">-14 lines</span></div>
+          <div><span class="term-green">✓</span> TypeScript Typecheck: <span class="term-green">0 errors</span> (12/12 packages passed)</div>
+          <br>
+          <div><span class="term-gray">Waiting for user instruction [/help, /provider, /fix]...</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Key Features Section -->
+    <section id="features" style="padding-top: 40px">
+      <div class="section-header">
+        <div class="section-label">Engineered For Performance</div>
+        <h2 class="section-title">Everything You Need. Zero Subscriptions.</h2>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="card-icon-box">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
           </div>
-          <span class="mono" style="font-size:11px; color:var(--text-muted);">glitch-tui v2.1.0</span>
+          <h3>Free Tier Providers Hub</h3>
+          <p>Direct integrated access to Cerebras, Groq, Cohere, Google AI Studio and HuggingFace. Code at 1800 tokens/sec without entering credit card details.</p>
         </div>
 
-        <div class="terminal-body" id="terminalBody">
-          <!-- Live injected via JS -->
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- TRILOGY GRID -->
-  <section class="container" id="trilogy" style="padding-top:60px;">
-    <div class="section-title-wrap">
-      <div class="section-eyebrow">ELYTRA-AI CORE PRODUCTS</div>
-      <h2 class="section-title">Üç Temel Mühendislik Sütunu</h2>
-      <p class="section-desc">Geliştiriciler, araştırmacılar ve oyun stüdyoları için bağımsız, yerel öncelikli otonom yazılım gücü.</p>
-    </div>
-
-    <div class="trilogy-grid">
-      <!-- Card 1: Glitch Code -->
-      <div class="trilogy-card" id="glitch-code">
-        <div>
-          <span class="card-badge badge-orange">CLI / TUI CODING ENGINE</span>
-          <h3 class="card-title">Glitch Code</h3>
-          <p class="card-desc">
-            40+ sağlayıcıyı (Claude, DeepSeek-R1, OpenAI, Ollama) tek çatı altında toplayan, çoklu model tartışma protokolü (PTC) ve otonom hata onarımı sunan yeni nesil kodlama CLI'ı.
-          </p>
-          <ul class="card-features">
-            <li>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <strong>PlusTwoCoder (PTC):</strong> 3 model eşzamanlı konsensüs
-            </li>
-            <li>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <strong>Auto-Doctor:</strong> SQLite, Git ve bellek otomatik onarımı
-            </li>
-            <li>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <strong>Crafted & Neon:</strong> İki bağımsız yüksek kontrastlı TUI teması
-            </li>
-            <li>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <strong>Sıfır Telemetri:</strong> Tamamen yerelde ve gizli çalışır
-            </li>
-          </ul>
-        </div>
-        <a href="https://github.com/glassesglitchstudio-lab/Gltich_code" target="_blank" class="card-btn">
-          <span>Kaynak Kodu İncele</span>
-          <span>&rarr;</span>
-        </a>
-      </div>
-
-      <!-- Card 2: GlassesCat-AI -->
-      <div class="trilogy-card" id="glassescat-ai">
-        <div>
-          <span class="card-badge badge-cyan">AUTONOMOUS MULTI-AGENT</span>
-          <h3 class="card-title">GlassesCat-AI</h3>
-          <p class="card-desc">
-            Web paneli ve yerel çalışma alanları için geliştirilmiş çoklu ajan platformu. Nexus Memory ile konuşmalar arasındaki bağlamı asla unutmayan nöral hafıza ağı.
-          </p>
-          <ul class="card-features">
-            <li>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <strong>Nexus Memory Graph:</strong> Kalıcı semantik bilgi tabanı
-            </li>
-            <li>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <strong>Canlı Ajan Denetimi:</strong> Çoklu ajan adım adım planlama
-            </li>
-            <li>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <strong>Web & API Server:</strong> FastAPI + yerel WebSocket desteği
-            </li>
-            <li>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <strong>Ollama Native:</strong> %100 çevrimdışı yerel model yürütme
-            </li>
-          </ul>
-        </div>
-        <a href="#" class="card-btn">
-          <span>Modülü Keşfet</span>
-          <span>&rarr;</span>
-        </a>
-      </div>
-
-      <!-- Card 3: Unreal AI -->
-      <div class="trilogy-card" id="unreal-ai">
-        <div>
-          <span class="card-badge badge-violet">GAME ENGINE INTEGRATION</span>
-          <h3 class="card-title">GlitchCode Unreal AI</h3>
-          <p class="card-desc">
-            Unreal Engine 5.4+ için yerel C++ ve Blueprint AI eklentisi. LLM destekli yaşayan NPC davranışları, dinamik korku eğrisi telemetrisi ve atmosfer yönetimi.
-          </p>
-          <ul class="card-features">
-            <li>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <strong>Dinamik Korku Eğrisi:</strong> Oyuncu nabzına göre sahne yönetimi
-            </li>
-            <li>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <strong>Proaktif NPC Konuşmaları:</strong> Gerçek zamanlı LLM diyalogları
-            </li>
-            <li>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <strong>C++ & Blueprint Native:</strong> Sıfır gecikmeli oyun motoru köprüsü
-            </li>
-            <li>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <strong>HorrorDemo Projesi:</strong> Hazır test ve demo sahnesi
-            </li>
-          </ul>
-        </div>
-        <a href="https://github.com/glassesglitchstudio-lab/Gltich_code/tree/main/unreal" target="_blank" class="card-btn">
-          <span>Unreal Plugin Deposu</span>
-          <span>&rarr;</span>
-        </a>
-      </div>
-    </div>
-
-    <!-- CANLI YENİLİKLER & WHAT'S NEW SECTION -->
-    <div class="updates-section" id="updates">
-      <div class="updates-header">
-        <div>
-          <div class="section-eyebrow">WHAT'S NEW & LIVE CHANGELOG</div>
-          <h2 class="section-title">Canlı Yenilikler & Güncellemeler</h2>
-          <p class="section-desc">GlassesCat & Elytra-ai ekosistemindeki tüm yeni özellikler, güncellemeler ve iyileştirmeler anlık olarak burada listelenir.</p>
-        </div>
-        <div class="update-filters">
-          <button class="u-filter-btn active" onclick="filterUpdates('all', this)">Tümü</button>
-          <button class="u-filter-btn" onclick="filterUpdates('Glitch Code', this)">Glitch Code</button>
-          <button class="u-filter-btn" onclick="filterUpdates('GlassesCat-AI', this)">GlassesCat-AI</button>
-          <button class="u-filter-btn" onclick="filterUpdates('Unreal AI', this)">Unreal AI</button>
-        </div>
-      </div>
-
-      <div class="updates-timeline" id="updatesContainer">
-        <!-- Injected dynamically via JS or Fallback -->
-      </div>
-    </div>
-
-    <!-- SPECIFICATIONS SECTION -->
-    <div class="spec-section" id="specs">
-      <div class="section-eyebrow">SYSTEM ARCHITECTURE & BENCHMARKS</div>
-      <h2 class="section-title">Tavizsiz Performans & Mimari</h2>
-      <p class="section-desc">Bulut bağımlılıkları olmadan, saf mühendislik ve yerel donanım optimizasyonu.</p>
-
-      <div class="spec-grid">
-        <div class="spec-item">
-          <h4>Desteklenen Model Sağlayıcı</h4>
-          <div class="spec-val">40+</div>
-          <div class="spec-sub">OpenAI, Anthropic, DeepSeek, Ollama, Groq...</div>
-        </div>
-        <div class="spec-item">
-          <h4>Çekirdek Bellek Boyutu</h4>
-          <div class="spec-val">~2.0 MB</div>
-          <div class="spec-sub">Sıfır RAM şişmesi, saf SQLite depolama</div>
-        </div>
-        <div class="spec-item">
-          <h4>Başlatma Süresi</h4>
-          <div class="spec-val">&lt; 40 ms</div>
-          <div class="spec-sub">Bun & native binary derlemesi ile anında açılış</div>
-        </div>
-        <div class="spec-item">
-          <h4>Telemetri & İzleme</h4>
-          <div class="spec-val">0 Byte</div>
-          <div class="spec-sub">Kullanıcı verisi asla harici sunucuya gitmez</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- FOOTER -->
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-top">
-        <div class="footer-brand">
-          <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
-            <img src="logo.png" alt="Elytra AI" style="width:30px; height:30px; border-radius:5px; object-fit:contain;">
-            <span class="brand-name">Elytra AI</span>
+        <div class="feature-card">
+          <div class="card-icon-box">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
           </div>
-          <p style="font-size:13.5px; color:var(--text-secondary); line-height:1.6;">
-            Elytra-ai ve GlassesCat Studio tarafından geliştirilen bağımsız, otonom yazılım zekası platformu.
-          </p>
+          <h3>Visual Diffing Engine</h3>
+          <p>Never let an AI blindly overwrite your code. Glitch Code renders high-contrast side-by-side terminal diffs with instant approval controls.</p>
         </div>
 
-        <div class="footer-links-group">
-          <div class="footer-col">
-            <h5>Ürünler</h5>
-            <ul>
-              <li><a href="#glitch-code">Glitch Code</a></li>
-              <li><a href="#glassescat-ai">GlassesCat-AI</a></li>
-              <li><a href="#unreal-ai">Unreal AI</a></li>
-              <li><a href="marketplace.html">Marketplace</a></li>
-            </ul>
+        <div class="feature-card">
+          <div class="card-icon-box">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
           </div>
-          <div class="footer-col">
-            <h5>Geliştirici</h5>
-            <ul>
-              <li><a href="https://github.com/glassesglitchstudio-lab/Gltich_code" target="_blank">GitHub Repository</a></li>
-              <li><a href="https://github.com/glassesglitchstudio-lab/Gltich_code/releases" target="_blank">Sürümler & Notlar</a></li>
-              <li><a href="https://github.com/glassesglitchstudio-lab/Gltich_code/blob/main/docs" target="_blank">Dokümantasyon</a></li>
-            </ul>
-          </div>
-          <div class="footer-col">
-            <h5>Şirket</h5>
-            <ul>
-              <li><a href="#">Elytra-ai Labs</a></li>
-              <li><a href="#">GlassesCat Studio</a></li>
-              <li><a href="#">Gizlilik & Güvenlik</a></li>
-            </ul>
-          </div>
+          <h3>Elytra NPU Driver</h3>
+          <p>Native C++20 AVX2 kernel driver integration. Run quantized GGUF models (JARVIS-14B / ShadowCat) locally with zero cloud dependence.</p>
         </div>
+
+        <div class="feature-card">
+          <div class="card-icon-box">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+          </div>
+          <h3>Interactive Solid TUI</h3>
+          <p>Built with Solid & OpenTUI. Features windowed dialogs, fuzzy file search, auto-complete slash commands, and multi-session persistence.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="card-icon-box">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
+          </div>
+          <h3>OpenCode Zen Compatibility</h3>
+          <p>100% compatible with upstream OpenCode Zen routing. Switch between curated production LLMs and free tier clusters instantly.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="card-icon-box">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+          </div>
+          <h3>Autonomous Tooling</h3>
+          <p>File read/write, AST lint error auto-fixing, ripgrep semantic search, git operations, and subagent orchestration right in your shell.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Providers Ecosystem Hub -->
+    <section id="providers" class="ecosystem-section">
+      <div class="section-header" style="margin-bottom: 20px">
+        <div class="section-label">Zero-Cost AI Coding</div>
+        <h2 class="section-title">Official Free Tier Providers Hub</h2>
+        <p style="color: var(--text-muted); font-size: 15px; margin-top: 8px">
+          Glitch Code connects directly to world-class high-speed inference engines with zero paywalls.
+        </p>
       </div>
 
-      <div class="footer-bottom">
-        <div>&copy; 2026 <strong>Elytra-ai</strong> & GlassesCat Studio. MIT Lisansı ile korunmaktadır.</div>
-        <div style="display:flex; align-items:center; gap:8px;">
-          <div class="pulse-dot"></div>
-          <span>Tüm Sistemler Operasyonel &bull; v2.1.0</span>
+      <div class="provider-grid">
+        <div class="provider-chip">
+          <div class="provider-header">
+            <span class="provider-name">Cerebras</span>
+            <span class="badge-free">FREE</span>
+          </div>
+          <div class="provider-speed">1800+ tokens/sec</div>
+          <div style="font-size: 12px; color: var(--text-muted)">Llama 3.3 70B & 8B Wafer-Scale Engine</div>
+        </div>
+
+        <div class="provider-chip">
+          <div class="provider-header">
+            <span class="provider-name">Groq Cloud</span>
+            <span class="badge-free">FREE</span>
+          </div>
+          <div class="provider-speed">800+ tokens/sec</div>
+          <div style="font-size: 12px; color: var(--text-muted)">LPU Tensor Processing Unit acceleration</div>
+        </div>
+
+        <div class="provider-chip">
+          <div class="provider-header">
+            <span class="provider-name">Google AI Studio</span>
+            <span class="badge-free">FREE</span>
+          </div>
+          <div class="provider-speed">1M Context Window</div>
+          <div style="font-size: 12px; color: var(--text-muted)">Gemini 2.5 Flash & Thinking Models</div>
+        </div>
+
+        <div class="provider-chip">
+          <div class="provider-header">
+            <span class="provider-name">OpenCode Zen</span>
+            <span class="badge-free">READY</span>
+          </div>
+          <div class="provider-speed">Curated Routing</div>
+          <div style="font-size: 12px; color: var(--text-muted)">Official Zen coding optimization layer</div>
         </div>
       </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-container">
+      <div>
+        <b>Glitch Code</b> — Developed by GlassesGlitchStudio & Elytra-ai. Licensed under MIT.
+      </div>
+      <ul class="footer-links">
+        <li><a href="https://github.com/glassesglitchstudio-lab/Gltich_code" target="_blank">GitHub</a></li>
+        <li><a href="https://npmjs.com/package/glitchcode-cli" target="_blank">NPM Package</a></li>
+        <li><a href="https://github.com/glassesglitchstudio-lab/Gltich_code/releases" target="_blank">Releases</a></li>
+      </ul>
     </div>
   </footer>
 
   <script>
-    // Header scroll background effect
-    window.addEventListener('scroll', () => {
-      const nav = document.getElementById('navWrap');
-      if (window.scrollY > 40) {
-        nav.classList.add('scrolled');
-      } else {
-        nav.classList.remove('scrolled');
-      }
-    });
+    // Install Commands Switcher
+    const commands = {
+      npm: 'npm install -g glitchcode-cli',
+      powershell: 'iwr -useb https://raw.githubusercontent.com/glassesglitchstudio-lab/Gltich_code/main/install | iex',
+      curl: 'curl -fsSL https://raw.githubusercontent.com/glassesglitchstudio-lab/Gltich_code/main/install | sh'
+    };
 
-    // Copy command functionality
+    function switchInstall(type, btn) {
+      document.querySelectorAll('.install-tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('install-cmd-text').textContent = commands[type];
+    }
+
     function copyInstallCmd() {
-      const cmdText = document.getElementById('installCmdText').innerText;
-      navigator.clipboard.writeText(cmdText).then(() => {
-        const btn = document.getElementById('copyBtn');
-        btn.innerText = 'Kopyalandı!';
-        btn.style.background = '#10b981';
-        btn.style.color = '#fff';
-        setTimeout(() => {
-          btn.innerText = 'Kopyala';
-          btn.style.background = '';
-          btn.style.color = '';
-        }, 2000);
+      const text = document.getElementById('install-cmd-text').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const label = document.getElementById('copy-btn-label');
+        label.textContent = 'Copied!';
+        setTimeout(() => { label.textContent = 'Copy'; }, 2000);
       });
     }
 
-    // Terminal Simulations
-    const terminalContents = {
-      ptc: `
-        <div class="t-line"><span class="t-prompt">$</span> <span>glitch /ptc "JWT authentication middleware ekle"</span></div>
-        <div class="t-line t-dim">◆ PlusTwoCoder (PTC) — Çoklu Model Tartışma Protokolü Başlatıldı...</div>
-        <div class="t-box">
-          <div style="color:var(--accent-orange); font-weight:bold; margin-bottom:4px;">▶ Model A (Claude 3.7 Sonnet) Çözümü:</div>
-          <div style="color:#9aa2b5;">Express middleware + RS256 asimetrik anahtar doğrulaması. Header Bearer token kontrolü.</div>
-          <div style="color:var(--accent-green); margin-top:4px;">Puan: 94/100 &bull; Eleştiri: Yüksek güvenlik, hafif token cache optimizasyonu gerektirir.</div>
-        </div>
-        <div class="t-box">
-          <div style="color:var(--accent-cyan); font-weight:bold; margin-bottom:4px;">▶ Model B (DeepSeek-R1) Karşı Görüşü:</div>
-          <div style="color:#9aa2b5;">Token revocation (kara liste) Redis katmanı eksik. Anlık yetki iptalleri için Redis eklenmeli.</div>
-          <div style="color:var(--accent-green); margin-top:4px;">Puan: 91/100 &bull; Eleştiri: Dağıtık sistemler için zorunlu ama ek bağımlılık getirir.</div>
-        </div>
-        <div class="t-line t-success">✓ <b>Nihai Konsensus:</b> Model A tabanlı asimetrik doğrulama + hafif memory revocation listesi seçildi.</div>
-        <div class="t-line t-cyan">↳ Kod tabanına uygulandı: src/middleware/auth.ts (1 file changed, +48 lines)</div>
-      `,
-      doctor: `
-        <div class="t-line"><span class="t-prompt">$</span> <span>glitch doctor</span></div>
-        <div class="t-line t-dim">🩺 GLITCH DOCTOR — SYSTEM HEALTH & DIAGNOSTICS</div>
-        <div class="t-box">
-          <div class="t-line"><span class="t-success">✓</span> <span>Runtime (Bun)</span> <span style="margin-left:auto; color:#9aa2b5;">Bun 1.4.0 (Optimal)</span></div>
-          <div class="t-line"><span class="t-success">✓</span> <span>Git Entegrasyonu</span> <span style="margin-left:auto; color:#9aa2b5;">git version 2.54.0</span></div>
-          <div class="t-line"><span class="t-success">✓</span> <span>SQLite Veritabanı</span> <span style="margin-left:auto; color:#9aa2b5;">2.0 MB (Sağlıklı)</span></div>
-          <div class="t-line"><span class="t-success">✓</span> <span>Disk Alanı</span> <span style="margin-left:auto; color:#9aa2b5;">300 GB boş</span></div>
-          <div class="t-line"><span class="t-success">✓</span> <span>Konfigürasyon</span> <span style="margin-left:auto; color:var(--accent-green);">.glitchcode.json Doğrulandı</span></div>
-        </div>
-        <div class="t-line t-success">📊 Sonuç: 5 Başarılı, 0 Hata &bull; Sistem %100 kararlı durumda.</div>
-      `,
-      glassescat: `
-        <div class="t-line"><span class="t-prompt">$</span> <span>glassescat-agent --nexus-memory</span></div>
-        <div class="t-line t-dim">[GlassesCat Core] Nexus Neural Memory Graph başlatılıyor...</div>
-        <div class="t-box">
-          <div style="color:var(--accent-cyan); font-weight:bold;">[Nexus Semantik Düğüm #842]</div>
-          <div style="color:#9aa2b5;">Önceki oturum hatırlandı: Kullanıcı 'horror-demo' projesinde ses optimizasyonu yapıyordu.</div>
-          <div style="color:var(--text-muted); font-size:12px; margin-top:4px;">İlişkili Dosyalar: unreal/HorrorDemo/Source/SoundManager.cpp</div>
-        </div>
-        <div class="t-line t-cyan">⚡ 3 Ajan Görevlendirildi: [Kod Denetçisi] &bull; [Mantık Ajanı] &bull; [Dokümantasyon]</div>
-        <div class="t-line t-success">✓ GlassesCat-AI çalışma alanı senkronizasyonu tamamlandı.</div>
-      `,
-      unreal: `
-        <div class="t-line"><span class="t-prompt">[UE5.4]</span> <span>LogGlitchCodeAI: Initializing Fear Curve Telemetry...</span></div>
-        <div class="t-box">
-          <div style="color:var(--accent-violet); font-weight:bold;">[Korku Eğrisi & Atmosfer Yöneticisi]</div>
-          <div style="color:#9aa2b5;">Oyuncu Durumu: Koridorda &bull; Nabız Simülasyonu: 118 BPM &bull; Işık Seviyesi: %12</div>
-          <div style="color:var(--accent-orange); margin-top:4px;">Dinamik Karar: Jumpscare ertelendi, ortam fısıltı sesleri %30 artırıldı.</div>
-        </div>
-        <div class="t-line t-success">✓ NPC Diyaloğu Canlı Üretildi (LLM Latency: 124ms): "Buradan sağ çıkabileceğini mi sanıyorsun?"</div>
-      `
+    // Terminal Demo Tabs Switcher
+    const termDemos = {
+      live: `
+<div class="term-banner">  ██████╗ ██╗     ██╗████████╗ ██████╗██╗  ██╗
+ ██╔════╝ ██║     ██║╚══██╔══╝██╔════╝██║  ██║
+ ██║  ███╗██║     ██║   ██║   ██║     ███████║
+ ╚██████╔╝███████╗██║   ██║   ╚██████╗██║  ██║
+  ╚═════╝ ╚══════╝╚═╝   ╚═╝    ╚═════╝╚═╝  ╚═╝</div>
+<div><span class="term-accent">glitch-cli v2.2.0</span> — AI-Powered Development Tool</div>
+<div><span class="term-green">✓</span> Workspace initialized: <span class="term-cyan">~/CascadeProjects/glitch-code</span></div>
+<div><span class="term-green">✓</span> Provider active: <span class="term-accent">Groq / Llama-3.3-70B-Versatile</span> (Free Tier)</div>
+<br>
+<div><span class="term-cyan">user ›</span> refactor auth middleware to use Effect-ts schema validation</div>
+<br>
+<div><span class="term-accent">glitch ›</span> Analyzing <span class="term-cyan">src/auth/middleware.ts</span> and AST schema...</div>
+<div><span class="term-green">✓</span> Reading 4 dependent files via ripgrep</div>
+<div><span class="term-green">✓</span> Applied patch: <span class="term-diff-add">+28 lines</span> <span class="term-diff-del">-14 lines</span></div>
+<div><span class="term-green">✓</span> TypeScript Typecheck: <span class="term-green">0 errors</span> (12/12 packages passed)</div>
+<br>
+<div><span class="term-gray">Waiting for user instruction [/help, /provider, /fix]...</span></div>`,
+      
+      diff: `
+<div><span class="term-accent">Viewing Git Diff:</span> <span class="term-cyan">packages/opencode/src/provider/provider.ts</span></div>
+<br>
+<div><span class="term-gray">@@ -185,6 +185,16 @@ export const Provider = {</span></div>
+<div><span class="term-diff-del">-    "opencode-legacy": () => Effect.fail(new Error("Deprecated"))</span></div>
+<div><span class="term-diff-add">+    "opencode-zen": () =></span></div>
+<div><span class="term-diff-add">+      Effect.succeed({</span></div>
+<div><span class="term-diff-add">+        autoload: false,</span></div>
+<div><span class="term-diff-add">+        options: {},</span></div>
+<div><span class="term-diff-add">+      }),</span></div>
+<div><span class="term-diff-add">+    opencode: () =></span></div>
+<div><span class="term-diff-add">+      Effect.succeed({</span></div>
+<div><span class="term-diff-add">+        autoload: false,</span></div>
+<div><span class="term-diff-add">+        options: {},</span></div>
+<div><span class="term-diff-add">+      }),</span></div>
+<br>
+<div><span class="term-green">✓</span> Visual diff verified by AST compiler. Press <span class="term-accent">[Enter]</span> to apply.</div>`,
+      
+      free: `
+<div><span class="term-accent">Select Free Tier Provider Hub [TUI Dialog]:</span></div>
+<br>
+<div>  [1] <span class="term-green">●</span> <b>Cerebras</b> — Llama-3.3-70B (1800 tokens/s, Wafer Scale Engine)</div>
+<div>  [2] <span class="term-green">●</span> <b>Groq Cloud</b> — Llama-3.3-70B & DeepSeek R1 Distill (800 tokens/s)</div>
+<div>  [3] <span class="term-green">●</span> <b>Google AI Studio</b> — Gemini 2.5 Flash (1M Token Context)</div>
+<div>  [4] <span class="term-green">●</span> <b>Cohere</b> — Command R+ (Multilingual & Tool Use)</div>
+<div>  [5] <span class="term-cyan">●</span> <b>OpenCode Zen</b> — Curated high-performance coding layer</div>
+<div>  [6] <span class="term-accent">●</span> <b>Elytra NPU Local</b> — Offline C++20 AVX2 Local Engine</div>
+<br>
+<div><span class="term-gray">Use arrow keys ↑ ↓ to select provider and press Enter.</span></div>`
     };
 
-    function switchTab(tabKey) {
-      document.querySelectorAll('.t-tab').forEach(b => b.classList.remove('active'));
-      if (event && event.currentTarget) event.currentTarget.classList.add('active');
-      document.getElementById('terminalBody').innerHTML = terminalContents[tabKey];
+    function switchTermDemo(tab, btn) {
+      document.querySelectorAll('.term-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('term-display').innerHTML = termDemos[tab];
     }
-
-    // Dynamic Updates & Changelog Loading
-    let allUpdates = [
-      {
-        id: "up-01",
-        tag: "NEW",
-        badge: "badge-orange",
-        category: "Glitch Code",
-        version: "v2.1.0",
-        date: "Bugün",
-        title: "PlusTwoCoder (PTC) & PlusThinking İnteraktif TUI Diyalogları",
-        description: "3 farklı yapay zeka modelinin (Claude 3.7, DeepSeek-R1, GPT) aynı anda bir problemi tartışıp puanlayarak en iyi mimarî çözümü üretmesini sağlayan /ptc ve /think komutları tam klavye odaklı olarak TUI'ye eklendi."
-      },
-      {
-        id: "up-02",
-        tag: "NEW",
-        badge: "badge-orange",
-        category: "Glitch Code",
-        version: "v2.1.0",
-        date: "Bugün",
-        title: "Glitch Auto-Doctor & Otomatik Sistem Teşhisi",
-        description: "Terminalde /doctor komutu ile sistem belleği, SQLite veritabanı bütünlüğü, Git entegrasyonu ve disk izinlerini tek tıkla analiz edip onaran otonom doktor modülü yayında."
-      },
-      {
-        id: "up-03",
-        tag: "NEW",
-        badge: "badge-cyan",
-        category: "GlassesCat-AI",
-        version: "v2.0.0",
-        date: "Yeni",
-        title: "Nexus Neural Memory Graph Entegrasyonu",
-        description: "GlassesCat-AI ajanları için oturumlar arası semantik bağlamı ve çalışma alanı hafızasını canlı tutan derin bellek grafı motoru entegre edildi."
-      },
-      {
-        id: "up-04",
-        tag: "NEW",
-        badge: "badge-violet",
-        category: "Unreal AI",
-        version: "v1.4.0",
-        date: "Yeni",
-        title: "Dinamik Korku Eğrisi & Yaşayan NPC Diyalog Köprüsü",
-        description: "Unreal Engine 5.4+ için oyuncu nabzı ve korku seviyesine göre ortamı ve NPC tepkilerini yöneten C++ / Blueprint AI eklentisi HorrorDemo ile birlikte yayınlandı."
-      },
-      {
-        id: "up-05",
-        tag: "GÜNCELLEME",
-        badge: "badge-orange",
-        category: "Glitch Code",
-        version: "v2.1.0",
-        date: "Bugün",
-        title: "SearXNG & Çoklu Arama Motoru (WebSearch) Entegrasyonu",
-        description: "Glitch Code konfigürasyon şemasına gizlilik odaklı bağımsız yerel ve harici arama sağlayıcıları (SearXNG/MCP) resmi olarak dahil edildi."
-      }
-    ];
-
-    function renderUpdates(items) {
-      const container = document.getElementById('updatesContainer');
-      if (!items || items.length === 0) {
-        container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted);">Bu kategoride henüz güncelleme bulunmuyor.</div>';
-        return;
-      }
-      container.innerHTML = items.map(u => `
-        <div class="update-card">
-          <div class="update-meta-row">
-            <span class="${u.tag === 'NEW' ? 'update-tag-new' : 'update-tag-update'}">${u.tag}</span>
-            <span class="update-category">${u.category}</span>
-            <span class="update-version">${u.version}</span>
-            <span class="update-date">${u.date}</span>
-          </div>
-          <div class="update-title">${u.title}</div>
-          <div class="update-desc">${u.description}</div>
-        </div>
-      `).join('');
-    }
-
-    function filterUpdates(category, btn) {
-      document.querySelectorAll('.u-filter-btn').forEach(b => b.classList.remove('active'));
-      if (btn) btn.classList.add('active');
-      if (category === 'all') {
-        renderUpdates(allUpdates);
-      } else {
-        const filtered = allUpdates.filter(u => u.category.toLowerCase().includes(category.toLowerCase()));
-        renderUpdates(filtered);
-      }
-    }
-
-    // Intelligent Turkish Commit Classifier & Analyzer
-    function parseGitHubCommit(commit) {
-      const msg = (commit.commit?.message || "").trim().split('\n')[0];
-      if (!msg || msg.startsWith('Merge ') || msg.startsWith('chore(deps)')) return null;
-      
-      const lower = msg.toLowerCase();
-      let category = 'Glitch Code';
-      let tag = 'NEW';
-      let title = msg;
-      let description = msg;
-
-      if (lower.includes('unreal') || lower.includes('horror') || lower.includes('ue5')) {
-        category = 'Unreal AI';
-      } else if (lower.includes('glassescat') || lower.includes('niko') || lower.includes('nexus')) {
-        category = 'GlassesCat-AI';
-      }
-
-      if (lower.startsWith('fix') || lower.includes('fix(')) {
-        tag = 'DÜZELTME';
-      } else if (lower.startsWith('feat') || lower.includes('feat(')) {
-        tag = 'NEW';
-      } else {
-        tag = 'GÜNCELLEME';
-      }
-
-      if (lower.includes('ptc') || lower.includes('debate')) {
-        title = 'PlusTwoCoder (PTC) — Çoklu Model Tartışma & Konsensüs';
-        description = '3 yapay zeka modelinin aynı anda çözümleri tartışıp puanlayarak konsensüs ürettiği sistem.';
-      } else if (lower.includes('thinking') || lower.includes('plusthinking')) {
-        title = 'PlusThinking — Çoklu Model Derin Analiz Modülü';
-        description = 'Modellerin adım adım derin mantık yürüterek mimari kararları tartıştığı arayüz.';
-      } else if (lower.includes('doctor') || lower.includes('auto-doctor')) {
-        title = 'Glitch Auto-Doctor — Otonom Sistem Teşhisi';
-        description = 'SQLite veritabanı, Git, bellek ve disk izinlerini denetleyip onaran sağlık motoru.';
-      } else if (lower.includes('websearch') || lower.includes('searxng')) {
-        title = 'SearXNG & Gizlilik Odaklı Web Araması (WebSearch)';
-        description = 'Glitch Code için bağımsız yerel ve harici arama sağlayıcıları resmi şemaya eklendi.';
-      } else if (lower.includes('branding') || lower.includes('showcase') || lower.includes('logo')) {
-        title = 'Elytra-ai & GlassesCat Canlı Ekosistem Portalı';
-        description = 'GitHub Pages üzerinde interaktif terminal, canlı yenilikler ve özgün marka entegrasyonu.';
-      } else {
-        title = msg.replace(/^(feat|fix|perf|chore|refactor|docs)(\([^)]+\))?:\s*/i, '');
-        title = title.charAt(0).toUpperCase() + title.slice(1);
-        description = `Son GitHub güncellemesi [${commit.sha.slice(0, 7)}]: ${msg}`;
-      }
-
-      const dateObj = new Date(commit.commit?.author?.date || Date.now());
-      const dateStr = dateObj.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
-
-      return {
-        id: commit.sha,
-        tag,
-        category,
-        version: 'v2.1.0',
-        date: dateStr,
-        title,
-        description
-      };
-    }
-
-    // Try fetching live GitHub commits directly
-    async function scanGitHubLive() {
-      try {
-        const res = await fetch('https://api.github.com/repos/glassesglitchstudio-lab/Gltich_code/commits?per_page=12');
-        if (!res.ok) return;
-        const commits = await res.json();
-        if (Array.isArray(commits)) {
-          const liveItems = [];
-          const seen = new Set();
-          for (const c of commits) {
-            const parsed = parseGitHubCommit(c);
-            if (parsed && !seen.has(parsed.title)) {
-              seen.add(parsed.title);
-              liveItems.push(parsed);
-            }
-          }
-          if (liveItems.length > 0) {
-            allUpdates = liveItems;
-            renderUpdates(allUpdates);
-          }
-        }
-      } catch (err) {
-        // Fallback to changelog.json or bundled updates
-      }
-    }
-
-    // Initialize first tab & auto-scan
-    document.getElementById('terminalBody').innerHTML = terminalContents.ptc;
-    renderUpdates(allUpdates);
-    scanGitHubLive();
   </script>
 </body>
 </html>
