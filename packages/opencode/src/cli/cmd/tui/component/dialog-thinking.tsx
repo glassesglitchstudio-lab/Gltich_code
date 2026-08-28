@@ -2,6 +2,7 @@ import { createSignal, createMemo, Show, onMount } from "solid-js"
 import { useTheme } from "../context/theme"
 import { useDialog } from "../ui/dialog"
 import { useSDK } from "../context/sdk"
+import { useRoute } from "../context/route"
 import { Spinner } from "./spinner"
 import { PartID } from "@/session/schema"
 import { TextareaRenderable, TextAttributes } from "@opentui/core"
@@ -11,13 +12,17 @@ export function DialogPlusThinking() {
   const { theme } = useTheme()
   const dialog = useDialog()
   const sdk = useSDK()
+  const route = useRoute()
   let textarea: TextareaRenderable
 
   const [task, setTask] = createSignal("")
   const [status, setStatus] = createSignal<"idle" | "running" | "done" | "error">("idle")
   const [error, setError] = createSignal<string>("")
 
-  const canStart = createMemo(() => task().trim().length > 0 && status() === "idle")
+  const canStart = createMemo(() => {
+    const txt = textarea?.plainText?.trim() || task().trim()
+    return txt.length > 0 && status() === "idle"
+  })
 
   useKeyboard((evt) => {
     if (status() === "running") {
@@ -31,8 +36,8 @@ export function DialogPlusThinking() {
       return
     }
     if (evt.name === "return") {
-      const text = textarea?.plainText ?? task()
-      if (text.trim().length > 0 && status() === "idle") {
+      const text = textarea?.plainText?.trim() || task().trim()
+      if (text.length > 0 && status() === "idle") {
         setTask(text)
         runThinking()
       }
@@ -45,7 +50,7 @@ export function DialogPlusThinking() {
       if (!textarea || textarea.isDestroyed) return
       textarea.focus()
       textarea.gotoLineEnd()
-    }, 1)
+    }, 10)
   })
 
   async function runThinking() {
@@ -55,12 +60,16 @@ export function DialogPlusThinking() {
     setStatus("running")
 
     try {
-      const sessionResult = await sdk.client.session.create({})
-      if (!sessionResult.data?.id) {
-        throw new Error("Session olusturulamadi")
+      let sessionID: string
+      if (route.data.type === "session" && route.data.sessionID) {
+        sessionID = route.data.sessionID
+      } else {
+        const sessionResult = await sdk.client.session.create({})
+        if (!sessionResult.data?.id) {
+          throw new Error("Session oluşturulamadı")
+        }
+        sessionID = sessionResult.data.id
       }
-
-      const sessionID = sessionResult.data.id
 
       const thinkingPrompt = `Sen bir PlusThinking analiz moderatörüsün. 3 model derin düşünce süreçlerini karşılaştırarak kapsamlı bir analiz üretir.
 
@@ -104,7 +113,7 @@ TALİMATLAR:
 ## Kenar Vakaları
 [iyi ele alınan ve atlanan kenar vakaları listesi]`
 
-      const promptResult = await sdk.client.session.promptAsync({
+      await sdk.client.session.promptAsync({
         sessionID,
         parts: [
           {
@@ -115,10 +124,7 @@ TALİMATLAR:
         ],
       })
 
-      if (promptResult.error) {
-        throw new Error("Mesaj gönderilemedi")
-      }
-
+      route.navigate({ type: "session", sessionID })
       setStatus("done")
       dialog.clear()
     } catch (err) {
@@ -132,7 +138,7 @@ TALİMATLAR:
       {/* Header */}
       <box flexDirection="row" justifyContent="space-between">
         <text fg={theme.primary} attributes={TextAttributes.BOLD}>
-          ◆ PlusThinking — Çoklu Model Derin Düşünce Analizi
+          ◆ PlusThinking — Çoklu Model Düşünce Süreci Analizi
         </text>
         <text fg={theme.textMuted} onMouseUp={() => dialog.clear()}>
           ESC Kapat
@@ -143,22 +149,25 @@ TALİMATLAR:
       <Show when={status() === "idle"}>
         <box flexDirection="column" gap={1}>
           <text fg={theme.text}>
-            Analiz edilecek konu / soru / mimari karar:
+            Analiz edilecek konu / soru:
           </text>
           <textarea
             onSubmit={() => {
-              const text = textarea?.plainText?.trim()
+              const text = textarea?.plainText?.trim() || task().trim()
               if (text) {
                 setTask(text)
                 runThinking()
               }
+            }}
+            onInput={(val: string) => {
+              setTask(val)
             }}
             height={4}
             keyBindings={[{ name: "return", action: "submit" }]}
             ref={(val: TextareaRenderable) => {
               textarea = val
             }}
-            placeholder="Örn: Bu mimaride WebSocket vs gRPC seçimi için ne dersin?"
+            placeholder="Örn: Dağıtık sistemlerde CAP teoremi ve tutarlılık stratejileri..."
             placeholderColor={theme.textMuted}
             textColor={theme.text}
             focusedTextColor={theme.text}
@@ -184,41 +193,28 @@ TALİMATLAR:
       {/* Running */}
       <Show when={status() === "running"}>
         <box flexDirection="column" gap={1} paddingTop={1} paddingBottom={1}>
-          <Spinner color={theme.primary}>Derin analiz oturumu başlatılıyor...</Spinner>
-          <text fg={theme.textMuted}>
-            Modeller düşünce süreçlerini ve kenar vakalarını analiz ediyor...
-          </text>
-        </box>
-      </Show>
-
-      {/* Done */}
-      <Show when={status() === "done"}>
-        <box flexDirection="column" gap={1} paddingTop={1}>
-          <text fg={theme.success} attributes={TextAttributes.BOLD}>
-            ✓ Analiz oturumu başarıyla başlatıldı!
-          </text>
-          <text fg={theme.textMuted}>
-            Sonuçlar oturum ekranına aktarılıyor.
-          </text>
+          <Spinner color={theme.primary}>Düşünce süreçleri analiz ediliyor ve sentezleniyor...</Spinner>
         </box>
       </Show>
 
       {/* Error */}
-      <Show when={error()}>
-        <box flexDirection="column" gap={1} paddingTop={1}>
-          <text fg={theme.error}>
-            ✗ Hata: {error()}
-          </text>
-          <text
-            fg={theme.primary}
-            onMouseUp={() => {
-              setStatus("idle")
-              setError("")
-              setTimeout(() => textarea?.focus(), 1)
-            }}
-          >
-            Tekrar dene
-          </text>
+      <Show when={status() === "error"}>
+        <box flexDirection="column" gap={1}>
+          <text fg={theme.error}>Hata: {error()}</text>
+          <box flexDirection="row" gap={2}>
+            <text
+              fg={theme.primary}
+              onMouseUp={() => {
+                setStatus("idle")
+                setError("")
+              }}
+            >
+              Tekrar Dene
+            </text>
+            <text fg={theme.textMuted} onMouseUp={() => dialog.clear()}>
+              Kapat
+            </text>
+          </box>
         </box>
       </Show>
     </box>

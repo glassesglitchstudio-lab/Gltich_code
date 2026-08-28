@@ -2,6 +2,7 @@ import { createSignal, createMemo, Show, onMount } from "solid-js"
 import { useTheme } from "../context/theme"
 import { useDialog } from "../ui/dialog"
 import { useSDK } from "../context/sdk"
+import { useRoute } from "../context/route"
 import { Spinner } from "./spinner"
 import { PartID } from "@/session/schema"
 import { TextareaRenderable, TextAttributes } from "@opentui/core"
@@ -11,13 +12,17 @@ export function DialogPTC() {
   const { theme } = useTheme()
   const dialog = useDialog()
   const sdk = useSDK()
+  const route = useRoute()
   let textarea: TextareaRenderable
 
   const [task, setTask] = createSignal("")
   const [status, setStatus] = createSignal<"idle" | "running" | "done" | "error">("idle")
   const [error, setError] = createSignal<string>("")
 
-  const canStart = createMemo(() => task().trim().length > 0 && status() === "idle")
+  const canStart = createMemo(() => {
+    const txt = textarea?.plainText?.trim() || task().trim()
+    return txt.length > 0 && status() === "idle"
+  })
 
   useKeyboard((evt) => {
     if (status() === "running") {
@@ -31,8 +36,8 @@ export function DialogPTC() {
       return
     }
     if (evt.name === "return") {
-      const text = textarea?.plainText ?? task()
-      if (text.trim().length > 0 && status() === "idle") {
+      const text = textarea?.plainText?.trim() || task().trim()
+      if (text.length > 0 && status() === "idle") {
         setTask(text)
         runPTC()
       }
@@ -45,7 +50,7 @@ export function DialogPTC() {
       if (!textarea || textarea.isDestroyed) return
       textarea.focus()
       textarea.gotoLineEnd()
-    }, 1)
+    }, 10)
   })
 
   async function runPTC() {
@@ -55,13 +60,17 @@ export function DialogPTC() {
     setStatus("running")
 
     try {
-      // Create a new session for PTC debate
-      const sessionResult = await sdk.client.session.create({})
-      if (!sessionResult.data?.id) {
-        throw new Error("Session olusturulamadi")
+      // Create new session or use current active session
+      let sessionID: string
+      if (route.data.type === "session" && route.data.sessionID) {
+        sessionID = route.data.sessionID
+      } else {
+        const sessionResult = await sdk.client.session.create({})
+        if (!sessionResult.data?.id) {
+          throw new Error("Session oluşturulamadı")
+        }
+        sessionID = sessionResult.data.id
       }
-
-      const sessionID = sessionResult.data.id
 
       // Send the PTC debate prompt
       const ptcPrompt = `Sen bir PlusTwoCoder (PTC) moderatörüsün. 3 model birbiriyle tartışarak en iyi kod çözümünü üretir.
@@ -96,8 +105,8 @@ TALİMATLAR:
 ## Uygulama Adımları
 [Adım adım talimatlar]`
 
-      // Send the prompt to the session
-      const promptResult = await sdk.client.session.promptAsync({
+      // Send prompt
+      await sdk.client.session.promptAsync({
         sessionID,
         parts: [
           {
@@ -108,10 +117,8 @@ TALİMATLAR:
         ],
       })
 
-      if (promptResult.error) {
-        throw new Error("Mesaj gonderilemedi")
-      }
-
+      // Navigate to session to show live streaming response
+      route.navigate({ type: "session", sessionID })
       setStatus("done")
       dialog.clear()
     } catch (err) {
@@ -140,11 +147,14 @@ TALİMATLAR:
           </text>
           <textarea
             onSubmit={() => {
-              const text = textarea?.plainText?.trim()
+              const text = textarea?.plainText?.trim() || task().trim()
               if (text) {
                 setTask(text)
                 runPTC()
               }
+            }}
+            onInput={(val: string) => {
+              setTask(val)
             }}
             height={4}
             keyBindings={[{ name: "return", action: "submit" }]}
@@ -178,9 +188,6 @@ TALİMATLAR:
       <Show when={status() === "running"}>
         <box flexDirection="column" gap={1} paddingTop={1} paddingBottom={1}>
           <Spinner color={theme.primary}>Modeller arası tartışma ve çözüm oturumu başlatılıyor...</Spinner>
-          <text fg={theme.textMuted}>
-            Yeni oturum oluşturuluyor ve modeller görevi analiz ediyor...
-          </text>
         </box>
       </Show>
 
@@ -189,9 +196,6 @@ TALİMATLAR:
         <box flexDirection="column" gap={1} paddingTop={1}>
           <text fg={theme.success} attributes={TextAttributes.BOLD}>
             ✓ Tartışma oturumu başarıyla başlatıldı!
-          </text>
-          <text fg={theme.textMuted}>
-            Sonuçlar oturum ekranına aktarılıyor.
           </text>
         </box>
       </Show>
