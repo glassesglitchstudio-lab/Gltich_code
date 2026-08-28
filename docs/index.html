@@ -13,7 +13,7 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://glassesglitchstudio-lab.github.io/Gltich_code/">
   
-  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="icon" type="image/svg+xml" href="logo.svg">
 
   <!-- Typography: Cabinet Grotesk / Outfit + JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -148,17 +148,16 @@
       gap: 8px;
     }
 
-    .brand-icon {
-      width: 28px;
-      height: 28px;
-      background: linear-gradient(135deg, var(--accent-neon), var(--accent-neon-bright));
-      border-radius: var(--radius-sm);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #000;
-      font-weight: 900;
-      box-shadow: 0 0 16px var(--accent-neon-glow);
+    .brand-logo-img {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      filter: drop-shadow(0 0 10px rgba(255, 107, 0, 0.4));
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .brand-group:hover .brand-logo-img {
+      transform: scale(1.08) rotate(-3deg);
     }
 
     .version-pill {
@@ -729,7 +728,7 @@
   <header>
     <div class="nav-container">
       <a href="#" class="brand-group">
-        <div class="brand-icon">G</div>
+        <img src="logo.svg" alt="Glitch Code Logo" class="brand-logo-img" width="34" height="34">
         <span class="brand-badge">GLITCH CODE</span>
         <span class="version-pill">v2.2.0</span>
       </a>
