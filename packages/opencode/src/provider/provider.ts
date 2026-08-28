@@ -187,6 +187,16 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
         autoload: false,
         options: {},
       }),
+    "opencode-zen": () =>
+      Effect.succeed({
+        autoload: false,
+        options: {},
+      }),
+    opencode: () =>
+      Effect.succeed({
+        autoload: false,
+        options: {},
+      }),
     xai: () =>
       Effect.succeed({
         autoload: false,
