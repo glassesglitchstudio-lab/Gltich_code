@@ -13,14 +13,16 @@ const CONFIG_FILE = "config.json"
 const GITIGNORE_FILE = ".gitignore"
 
 const PROVIDERS = [
+  { value: "google", label: "★ Google Gemini (FREE TIER)", hint: "Günde 1.500 istek bedava (Gemini 2.0 Flash)" },
+  { value: "groq", label: "★ Groq Cloud (FREE TIER)", hint: "Günde 14.400 istek bedava (Qwen Coder & Llama 70B)" },
+  { value: "cerebras", label: "★ Cerebras AI (FREE TIER)", hint: "Ultra Hızlı Ücretsiz Katman (2000 tok/sn)" },
+  { value: "sambanova", label: "★ SambaNova (FREE TIER)", hint: "%100 Ücretsiz Qwen 2.5 Coder 32B" },
+  { value: "mistral", label: "★ Mistral AI (FREE TIER)", hint: "Bedava Geliştirici Katmanı (Codestral)" },
+  { value: "openrouter", label: "★ OpenRouter (FREE TIER)", hint: "Sıfır Bakiye ile Bedava Modeller (:free)" },
+  { value: "ollama", label: "★ Ollama (Yerel & Bedava)", hint: "Sıfır Key / %100 Çevrimdışı" },
   { value: "openai", label: "OpenAI", hint: "gpt-4o, gpt-4o-mini" },
   { value: "anthropic", label: "Anthropic", hint: "claude-sonnet-4, claude-haiku-3.5" },
-  { value: "google", label: "Google", hint: "gemini-2.5-pro" },
-  { value: "ollama", label: "Ollama (yerel)", hint: "hic kurulum gerekmez" },
-  { value: "groq", label: "Groq", hint: "hizli, ucretsiz" },
-  { value: "openrouter", label: "OpenRouter", hint: "her modele tek API" },
   { value: "deepseek", label: "DeepSeek", hint: "ucuz, guclu" },
-  { value: "xiaomi", label: "Xiaomi", hint: "UYARI: Browser acar (OAuth), yalnizca Xiaomi hesabin varsa kullan" },
 ] as const
 
 function detectProjectType(root: string): string {
@@ -71,7 +73,7 @@ export const InitCommand = cmd({
     })
     if (prompts.isCancel(provider)) throw new UI.CancelledError()
 
-    if (provider === "xiaomi") {
+    if ((provider as string) === "xiaomi") {
       prompts.log.warn("Xiaomi provider'i browser uzerinden OAuth dogrulama acar.")
       prompts.log.warn("Eger Xiaomi hesabin yoksa OpenAI, Anthropic veya Ollama sec.")
     }

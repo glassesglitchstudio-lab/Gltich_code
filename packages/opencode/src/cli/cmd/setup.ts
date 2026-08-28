@@ -10,12 +10,15 @@ const GLITCHCODE_DIR = ".glitchcode"
 const CONFIG_FILE = "glitchcode.json"
 
 const PROVIDERS: Array<{ value: string; label: string; hint: string }> = [
+  { value: "google", label: "★ Google Gemini (FREE TIER)", hint: "Günde 1.500 istek bedava (Gemini 2.0 Flash)" },
+  { value: "groq", label: "★ Groq Cloud (FREE TIER)", hint: "Günde 14.400 istek bedava (Qwen Coder & Llama 70B)" },
+  { value: "cerebras", label: "★ Cerebras AI (FREE TIER)", hint: "Ultra Hızlı Ücretsiz Katman (2000 tok/sn)" },
+  { value: "sambanova", label: "★ SambaNova (FREE TIER)", hint: "%100 Ücretsiz Qwen 2.5 Coder 32B" },
+  { value: "mistral", label: "★ Mistral AI (FREE TIER)", hint: "Bedava Geliştirici Katmanı (Codestral)" },
+  { value: "openrouter", label: "★ OpenRouter (FREE TIER)", hint: "Sıfır Bakiye ile Bedava Modeller (:free)" },
+  { value: "ollama", label: "★ Ollama (Yerel & Bedava)", hint: "Sıfır Key / %100 Çevrimdışı" },
   { value: "anthropic", label: "Anthropic", hint: "claude-sonnet-4, claude-haiku" },
   { value: "openai", label: "OpenAI", hint: "gpt-4o, gpt-4o-mini" },
-  { value: "google", label: "Google", hint: "gemini-2.5-pro" },
-  { value: "ollama", label: "Ollama (yerel)", hint: "hic kurulum gerekmez" },
-  { value: "groq", label: "Groq", hint: "hizli, ucretsiz" },
-  { value: "openrouter", label: "OpenRouter", hint: "her modele tek API" },
   { value: "deepseek", label: "DeepSeek", hint: "ucuz, guclu" },
   { value: "auto", label: "Otomatik sec", hint: "env veya config'e gore" },
 ]

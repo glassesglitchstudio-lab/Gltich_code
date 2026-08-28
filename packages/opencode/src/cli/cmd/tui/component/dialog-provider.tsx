@@ -15,15 +15,28 @@ import * as Clipboard from "@tui/util/clipboard"
 import { useToast, type ToastContext } from "../ui/toast"
 import { isConsoleManagedProvider } from "@tui/util/provider-origin"
 
+const FREE_TIER_PROVIDERS: Record<string, { hint: string; url: string }> = {
+  google: { hint: "Günde 1.500 istek bedava (Gemini 2.0 Flash)", url: "https://aistudio.google.com/app/apikey" },
+  groq: { hint: "Günde 14.400 istek bedava (Qwen Coder & Llama 70B)", url: "https://console.groq.com/keys" },
+  cerebras: { hint: "Ultra Hızlı Ücretsiz (2000+ tok/sn)", url: "https://cloud.cerebras.ai/" },
+  sambanova: { hint: "%100 Ücretsiz (Qwen 2.5 Coder 32B)", url: "https://cloud.sambanova.ai/" },
+  mistral: { hint: "Geliştirici Bedava Kotası (Codestral)", url: "https://console.mistral.ai/" },
+  openrouter: { hint: "Sıfır Bakiye ile Bedava Modeller", url: "https://openrouter.ai/keys" },
+  ollama: { hint: "Sıfır Key / %100 Yerel & Çevrimdışı", url: "https://ollama.com/" },
+}
+
 const PROVIDER_PRIORITY: Record<string, number> = {
-  glassescat: 1,
-  anthropic: 2,
-  openai: 3,
-  google: 4,
-  deepseek: 5,
-  groq: 6,
+  google: 1,
+  groq: 2,
+  cerebras: 3,
+  sambanova: 4,
+  mistral: 5,
+  openrouter: 6,
   ollama: 7,
-  openrouter: 8,
+  anthropic: 8,
+  openai: 9,
+  deepseek: 10,
+  glassescat: 11,
 }
 
 export function createDialogProviderOptions() {
@@ -39,17 +52,18 @@ export function createDialogProviderOptions() {
       map((provider) => {
         const consoleManaged = isConsoleManagedProvider(sync.data.console_state.consoleManagedProviders, provider.id)
         const connected = sync.data.provider_next.connected.includes(provider.id)
+        const freeTier = FREE_TIER_PROVIDERS[provider.id]
 
         return {
-          title: provider.name,
+          title: freeTier ? `★ ${provider.name}` : provider.name,
           value: provider.id,
-          description: {
+          description: freeTier ? freeTier.hint : {
             anthropic: "(API key)",
             openai: "(ChatGPT Plus/Pro or API key)",
             "opencode-go": "Low cost subscription for everyone",
           }[provider.id],
           footer: consoleManaged ? sync.data.console_state.activeOrgName : undefined,
-          category: provider.id in PROVIDER_PRIORITY ? "Popular" : "Other",
+          category: freeTier ? "Ücretsiz Sağlayıcılar (Free Tier - Sıfır Maliyet)" : (provider.id in PROVIDER_PRIORITY ? "Popüler" : "Diğer"),
           gutter: connected ? <text fg={theme.success}>✓</text> : undefined,
           async onSelect() {
             if (consoleManaged) return

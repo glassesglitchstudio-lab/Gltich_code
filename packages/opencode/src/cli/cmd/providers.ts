@@ -325,6 +325,88 @@ function raceCallbackAndStdin<T>(
   })
 }
 
+export const FREE_TIER_PROVIDERS = [
+  {
+    id: "google",
+    name: "Google Gemini",
+    quota: "Günde 1.500 istek bedava (15 RPM)",
+    models: "Gemini 2.0 Flash, Gemini 2.0 Thinking, Gemini 1.5 Pro",
+    url: "https://aistudio.google.com/app/apikey",
+    hint: "Kredi kartı gerekmez - 10 saniyede bedava key alın",
+  },
+  {
+    id: "groq",
+    name: "Groq Cloud",
+    quota: "Günde 14.400 istek bedava (30 RPM)",
+    models: "Qwen 2.5 Coder 32B, Llama 3.3 70B, DeepSeek R1 Distill",
+    url: "https://console.groq.com/keys",
+    hint: "Işık hızında (300+ tok/sn) ücretsiz yapay zeka",
+  },
+  {
+    id: "cerebras",
+    name: "Cerebras AI",
+    quota: "Ultra Hızlı Ücretsiz Katman (2000+ tok/sn)",
+    models: "Llama 3.3 70B, Llama 3.1 8B",
+    url: "https://cloud.cerebras.ai/",
+    hint: "Dünyanın en hızlı çip mimarisiyle bedava kodlama",
+  },
+  {
+    id: "sambanova",
+    name: "SambaNova Systems",
+    quota: "Geliştiriciye %100 Ücretsiz",
+    models: "Qwen 2.5 Coder 32B, Llama 3.3 70B",
+    url: "https://cloud.sambanova.ai/",
+    hint: "Qwen 2.5 Coder ve Llama 70B tam güç ücretsiz",
+  },
+  {
+    id: "mistral",
+    name: "Mistral AI",
+    quota: "Deneme & Geliştirici Ücretsiz Kotası",
+    models: "Codestral 2501, Mistral Large 2, Pixtral",
+    url: "https://console.mistral.ai/",
+    hint: "Avrupa'nın en iyi kodlama modeli Codestral",
+  },
+  {
+    id: "openrouter",
+    name: "OpenRouter",
+    quota: "Sıfır Dolar Bakiye ile Ücretsiz Modeller",
+    models: "Google Gemma, Nvidia Nemotron, MiniMax (:free)",
+    url: "https://openrouter.ai/keys",
+    hint: "Tüm açık modeller için tek ücretsiz API",
+  },
+  {
+    id: "ollama",
+    name: "Ollama (Yerel & Çevrimdışı)",
+    quota: "Sınırsız / %100 Çevrimdışı ve Sıfır Key",
+    models: "Kendi bilgisayarınızda kurulu olan tüm modeller",
+    url: "https://ollama.com/",
+    hint: "Bilgisayarınızda yerel çalışır, internet gerekmez",
+  },
+]
+
+export const FREE_TIER_PROVIDERS_MAP = Object.fromEntries(
+  FREE_TIER_PROVIDERS.map((p) => [p.id, p]),
+)
+
+export const ProvidersFreeCommand = cmd({
+  command: "free",
+  describe: "list all 100% free-tier AI providers and free API key links",
+  async handler(_args) {
+    UI.empty()
+    prompts.intro("🎁 Glitch Code - Ücretsiz Sağlayıcılar Rehberi (Free Tier Hub)")
+    console.log("")
+    for (const p of FREE_TIER_PROVIDERS) {
+      console.log(`  \x1b[36m\x1b[1m★ ${p.name}\x1b[0m \x1b[32m(${p.id})\x1b[0m`)
+      console.log(`    \x1b[90m├─ Kota:\x1b[0m \x1b[33m${p.quota}\x1b[0m`)
+      console.log(`    \x1b[90m├─ Modeller:\x1b[0m \x1b[37m${p.models}\x1b[0m`)
+      console.log(`    \x1b[90m└─ Ücretsiz Key:\x1b[0m \x1b[34m\x1b[4m${p.url}\x1b[0m`)
+      console.log("")
+    }
+    prompts.log.info("Bağlamak için: `glitch providers` yazıp istediğiniz ücretsiz sağlayıcıyı seçebilirsiniz.")
+    prompts.outro("Hazır")
+  },
+})
+
 export const ProvidersCommand = cmd({
   command: "providers",
   aliases: ["auth"],
@@ -335,6 +417,7 @@ export const ProvidersCommand = cmd({
       .command(ProvidersLoginCommand)
       .command(ProvidersLogoutCommand)
       .command(ProvidersWhoamiCommand)
+      .command(ProvidersFreeCommand)
       .demandCommand(),
   async handler() {},
 })
@@ -527,6 +610,7 @@ export const ProvidersLoginCommand = cmd({
           const choice = await prompts.select({
             message: t("cli.providers.select"),
             options: [
+              { label: "★ Ücretsiz Sağlayıcılar (%100 Free Tier Hub)", value: "__free_hub__", hint: "Google Gemini, Groq, Cerebras, SambaNova..." },
               { label: "MiMo", value: "xiaomi", hint: t("cli.providers.mimo.recommended_hint") },
               ...(freeLogin
                 ? [{ label: "MiMo Auto (free)", value: "glitch-free", hint: t("cli.providers.mimo_free.hint") }]
@@ -536,29 +620,38 @@ export const ProvidersLoginCommand = cmd({
           })
           if (prompts.isCancel(choice)) throw new UI.CancelledError()
 
-          if (choice === "xiaomi") {
+          if (choice === "__free_hub__") {
+            const freeChoice = await prompts.select({
+              message: "Bağlamak istediğiniz ücretsiz sağlayıcıyı seçin:",
+              options: FREE_TIER_PROVIDERS.map((p) => ({
+                label: `★ ${p.name} - ${p.quota}`,
+                value: p.id,
+                hint: p.models,
+              })),
+            })
+            if (prompts.isCancel(freeChoice)) throw new UI.CancelledError()
+            provider = freeChoice as string
+          } else if (choice === "xiaomi") {
             await glitchLogin()
             return
-          }
-
-          if (choice === "glitch-free" && freeLogin) {
+          } else if (choice === "glitch-free" && freeLogin) {
             await freeLogin()
             return
+          } else {
+            const selected = await prompts.autocomplete({
+              message: t("cli.providers.select"),
+              maxItems: 8,
+              options: [
+                ...options,
+                {
+                  value: "other",
+                  label: "Other",
+                },
+              ],
+            })
+            if (prompts.isCancel(selected)) throw new UI.CancelledError()
+            provider = selected as string
           }
-
-          const selected = await prompts.autocomplete({
-            message: t("cli.providers.select"),
-            maxItems: 8,
-            options: [
-              ...options,
-              {
-                value: "other",
-                label: "Other",
-              },
-            ],
-          })
-          if (prompts.isCancel(selected)) throw new UI.CancelledError()
-          provider = selected as string
         }
 
         const plugin = hooks.findLast((x) => x.auth?.provider === provider)
@@ -606,8 +699,28 @@ export const ProvidersLoginCommand = cmd({
           )
         }
 
+        if (FREE_TIER_PROVIDERS_MAP[provider]) {
+          const info = FREE_TIER_PROVIDERS_MAP[provider]
+          prompts.log.message(`\x1b[36m\x1b[1m🎁 [FREE TIER - %100 Ücretsiz]:\x1b[0m \x1b[33m${info.quota}\x1b[0m`)
+          prompts.log.message(`\x1b[90m├─ Modeller:\x1b[0m \x1b[37m${info.models}\x1b[0m`)
+          prompts.log.message(`\x1b[90m└─ Ücretsiz Key Linki:\x1b[0m \x1b[34m\x1b[4m${info.url}\x1b[0m`)
+          console.log("")
+        }
+
+        if (provider === "ollama") {
+          prompts.log.success("Ollama yerel olarak bağlandı! (Key gerekmez)")
+          await put("ollama", {
+            type: "api",
+            key: "ollama",
+          })
+          prompts.outro("Done")
+          return
+        }
+
         const key = await prompts.password({
-          message: "Enter your API key",
+          message: FREE_TIER_PROVIDERS_MAP[provider]
+            ? `Yukarıdaki linkten aldığınız ücretsiz ${FREE_TIER_PROVIDERS_MAP[provider].name} key'ini yapıştırın`
+            : "Enter your API key",
           validate: (x) => (x && x.length > 0 ? undefined : "Required"),
         })
         if (prompts.isCancel(key)) throw new UI.CancelledError()
