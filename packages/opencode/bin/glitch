@@ -205,7 +205,7 @@ function downloadWithProgress(url, dest, platform) {
         if (pct < 90) pct += Math.random() * 3
       }, 150)
 
-      const result = spawnSync(curlExe, ["-L", "-s", "-o", dest, url], {
+      const result = spawnSync(curlExe, ["-L", "-f", "-s", "-o", dest, url], {
         stdio: "pipe",
         timeout: 300000,
       })
@@ -224,7 +224,7 @@ function downloadWithProgress(url, dest, platform) {
         reject(new Error("Download failed"))
       }
     } else {
-      const result = spawnSync(curlExe, ["-L", "-o", dest, url], { stdio: "inherit", timeout: 300000 })
+      const result = spawnSync(curlExe, ["-L", "-f", "-o", dest, url], { stdio: "inherit", timeout: 300000 })
       if (result.status !== 0) {
         reject(new Error("Download failed"))
       } else {
