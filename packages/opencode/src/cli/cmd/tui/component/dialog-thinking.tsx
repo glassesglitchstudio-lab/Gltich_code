@@ -159,9 +159,6 @@ TALİMATLAR:
                 runThinking()
               }
             }}
-            onInput={(val: string) => {
-              setTask(val)
-            }}
             height={4}
             keyBindings={[{ name: "return", action: "submit" }]}
             ref={(val: TextareaRenderable) => {
