@@ -281,7 +281,7 @@
     },
     "packages/opencode": {
       "name": "glitchcode-cli",
-      "version": "1.0.10",
+      "version": "2.1.0",
       "bin": {
         "glitch": "./bin/glitch",
       },

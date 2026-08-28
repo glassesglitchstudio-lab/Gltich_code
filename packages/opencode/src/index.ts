@@ -75,10 +75,19 @@ process.on("unhandledRejection", (e) => {
   })
 })
 
+let isHandlingException = false
 process.on("uncaughtException", (e) => {
-  Log.Default.error("exception", {
-    e: errorMessage(e),
-  })
+  if (isHandlingException) {
+    process.stderr.write(`Fatal recursive error: ${String(e)}\n`)
+    process.exit(1)
+  }
+  isHandlingException = true
+  try {
+    Log.Default.error("exception", {
+      e: errorMessage(e),
+    })
+  } catch {}
+  process.exit(1)
 })
 
 const args = hideBin(process.argv)
@@ -237,7 +246,7 @@ const cli = yargs(args)
   .command(ChangelogCommand)
   .command(ReplayCommand)
   .command(AuditCommand)
-   .command(BenchCommand)
+  .command(BenchCommand)
   .command(CostRouterCommand)
   .command(ProviderTestCommand)
   .command(DoctorCommand)
@@ -284,17 +293,6 @@ try {
     })
   }
 
-  if (e instanceof ResolveMessage) {
-    Object.assign(data, {
-      name: e.name,
-      message: e.message,
-      code: e.code,
-      specifier: e.specifier,
-      referrer: e.referrer,
-      position: e.position,
-      importKind: e.importKind,
-    })
-  }
   Log.Default.error("fatal", data)
   const formatted = FormatError(e)
   if (formatted) UI.error(formatted)

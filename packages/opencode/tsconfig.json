@@ -11,7 +11,14 @@
     "paths": {
       "@/*": ["./src/*"],
       "@tui/*": ["./src/cli/cmd/tui/*"],
-      "@test/*": ["./test/*"]
+      "@test/*": ["./test/*"],
+      "@glitchcode/shared/*": ["../shared/src/*"],
+      "@glitchcode/shared": ["../shared/src/index.ts"],
+      "@glitchcode/sdk/v2": ["../sdk/js/src/v2/index.ts"],
+      "@glitchcode/sdk/*": ["../sdk/js/src/*"],
+      "@glitchcode/sdk": ["../sdk/js/src/index.ts"],
+      "@glitchcode/plugin/*": ["../plugin/src/*"],
+      "@glitchcode/plugin": ["../plugin/src/index.ts"]
     },
     "plugins": [
       {

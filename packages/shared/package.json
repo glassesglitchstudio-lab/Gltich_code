@@ -16,7 +16,9 @@
     "opencode": "./bin/opencode"
   },
   "exports": {
-    "./*": "./src/*.ts"
+    "./*": "./src/*.ts",
+    "./util/*": "./src/util/*.ts",
+    "./*/*": "./src/*/*.ts"
   },
   "imports": {},
   "devDependencies": {
