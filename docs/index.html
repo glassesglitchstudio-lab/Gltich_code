@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Glitch Code — Autonomous AI Coding Assistant for Builders</title>
-  <meta name="description" content="Next-generation autonomous AI coding CLI with interactive TUI, visual diff engine, built-in Free Tier Providers hub, OpenCode Zen, and local Elytra NPU driver support.">
-  <meta name="keywords" content="Glitch Code, AI Coding Assistant, Terminal User Interface, TUI, OpenCode, LLM CLI, Groq, Cerebras, Elytra NPU">
+  <title>Glitch Code — Geliştiriciler İçin Otonom Yapay Zeka Kodlama Asistanı</title>
+  <meta name="description" content="İnteraktif TUI arayüzü, görsel diff motoru, dahili Ücretsiz Sağlayıcılar Merkezi, OpenCode Zen ve yerel Elytra NPU sürücü desteği sunan yeni nesil otonom AI kodlama CLI aracı.">
+  <meta name="keywords" content="Glitch Code, Yapay Zeka Kodlama Asistanı, Terminal Kullanıcı Arayüzü, TUI, OpenCode, LLM CLI, Groq, Cerebras, Elytra NPU">
   
   <!-- Open Graph -->
-  <meta property="og:title" content="Glitch Code — Autonomous AI Coding Assistant">
-  <meta property="og:description" content="Zero telemetry, 100% Free Tier Hub, OpenCode Zen, and local Elytra NPU acceleration.">
+  <meta property="og:title" content="Glitch Code — Otonom Yapay Zeka Kodlama Asistanı">
+  <meta property="og:description" content="Sıfır telemetri, %100 Ücretsiz Sağlayıcı Merkezi, OpenCode Zen ve yerel Elytra NPU hızlandırması.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://glassesglitchstudio-lab.github.io/Gltich_code/">
   
@@ -25,7 +25,7 @@
       --bg: #050608;
       --bg-surface: #0b0d13;
       --bg-elevated: #11141d;
-      --bg-glass: rgba(11, 13, 19, 0.78);
+      --bg-glass: rgba(11, 13, 19, 0.82);
       
       --border-subtle: rgba(255, 255, 255, 0.07);
       --border-medium: rgba(255, 255, 255, 0.14);
@@ -195,6 +195,33 @@
       display: flex;
       align-items: center;
       gap: 12px;
+    }
+
+    /* Language Switcher */
+    .lang-switcher {
+      display: flex;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 2px;
+    }
+
+    .lang-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-dark);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .lang-btn.active {
+      background: rgba(255, 107, 0, 0.18);
+      color: var(--accent-neon-bright);
     }
 
     .btn-github {
@@ -708,16 +735,22 @@
       </a>
 
       <ul class="nav-links">
-        <li><a href="#features">Features</a></li>
-        <li><a href="#providers">Providers Hub</a></li>
-        <li><a href="#npu">Elytra NPU</a></li>
-        <li><a href="#install">Quickstart</a></li>
+        <li><a href="#features" data-i18n="nav_features">Özellikler</a></li>
+        <li><a href="#providers" data-i18n="nav_providers">Ücretsiz Sağlayıcılar</a></li>
+        <li><a href="#npu" data-i18n="nav_npu">Elytra NPU</a></li>
+        <li><a href="#install" data-i18n="nav_install">Kurulum</a></li>
       </ul>
 
       <div class="nav-actions">
+        <!-- Dil Değiştirici -->
+        <div class="lang-switcher">
+          <button class="lang-btn active" id="btn-lang-tr" onclick="setLanguage('tr')">TR</button>
+          <button class="lang-btn" id="btn-lang-en" onclick="setLanguage('en')">EN</button>
+        </div>
+
         <a href="https://github.com/glassesglitchstudio-lab/Gltich_code" target="_blank" class="btn-github">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
-          <span>GitHub Star</span>
+          <span>GitHub</span>
         </a>
       </div>
     </div>
@@ -729,15 +762,15 @@
       <div class="hero-content">
         <div class="hero-tag">
           <span class="tag-dot"></span>
-          <span>100% Free Tier Hub & OpenCode Zen Active</span>
+          <span data-i18n="hero_tag">%100 Ücretsiz Sağlayıcı Merkezi & OpenCode Zen Aktif</span>
         </div>
 
-        <h1 class="hero-title">
-          The Autonomous <span class="gradient-text">AI Coding Agent</span> For Builders.
+        <h1 class="hero-title" data-i18n="hero_title">
+          Geliştiriciler İçin <span class="gradient-text">Otonom Yapay Zeka</span> Kodlama Ajanı.
         </h1>
 
-        <p class="hero-desc">
-          Zero subscriptions. Zero telemetry. Glitch Code turns your terminal into a full autonomous software engineer powered by high-speed free providers, visual diffs, and local Elytra NPU acceleration.
+        <p class="hero-desc" data-i18n="hero_desc">
+          Sıfır abonelik. Sıfır telemetri. Glitch Code, terminalinizi yüksek hızlı ücretsiz sağlayıcılar, görsel diff ve yerel Elytra NPU hızlandırmasıyla çalışan otonom bir yazılım mühendisine dönüştürür.
         </p>
 
         <!-- Install Tabs Box -->
@@ -754,7 +787,7 @@
             </div>
             <button class="btn-copy" onclick="copyInstallCmd()">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-              <span id="copy-btn-label">Copy</span>
+              <span id="copy-btn-label" data-i18n="btn_copy">Kopyala</span>
             </button>
           </div>
         </div>
@@ -762,15 +795,15 @@
         <div class="hero-features-chips">
           <div class="chip">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            <span>Groq & Cerebras (1800 T/s)</span>
+            <span data-i18n="chip_speed">Groq & Cerebras (1800 T/s)</span>
           </div>
           <div class="chip">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            <span>Visual Diff Review</span>
+            <span data-i18n="chip_diff">Görsel Diff Onayı</span>
           </div>
           <div class="chip">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            <span>Native C++ AVX2 Driver</span>
+            <span data-i18n="chip_npu">Yerel C++ AVX2 Sürücüsü</span>
           </div>
         </div>
       </div>
@@ -788,9 +821,9 @@
         </div>
 
         <div class="terminal-tabs">
-          <button class="term-tab active" onclick="switchTermDemo('live', this)">live_session.ts</button>
-          <button class="term-tab" onclick="switchTermDemo('diff', this)">visual_diff.patch</button>
-          <button class="term-tab" onclick="switchTermDemo('free', this)">free_providers.hub</button>
+          <button class="term-tab active" onclick="switchTermDemo('live', this)">canli_oturum.ts</button>
+          <button class="term-tab" onclick="switchTermDemo('diff', this)">gorsel_diff.patch</button>
+          <button class="term-tab" onclick="switchTermDemo('free', this)">ucretsiz_saglayicilar.hub</button>
         </div>
 
         <div class="terminal-body" id="term-display">
@@ -800,17 +833,17 @@
  ╚██████╔╝███████╗██║   ██║   ╚██████╗██║  ██║
   ╚═════╝ ╚══════╝╚═╝   ╚═╝    ╚═════╝╚═╝  ╚═╝</div>
           <div><span class="term-accent">glitch-cli v2.2.0</span> — AI-Powered Development Tool</div>
-          <div><span class="term-green">✓</span> Workspace initialized: <span class="term-cyan">~/CascadeProjects/glitch-code</span></div>
-          <div><span class="term-green">✓</span> Provider active: <span class="term-accent">Groq / Llama-3.3-70B-Versatile</span> (Free Tier)</div>
+          <div><span class="term-green">✓</span> Çalışma alanı hazır: <span class="term-cyan">~/CascadeProjects/glitch-code</span></div>
+          <div><span class="term-green">✓</span> Aktif Sağlayıcı: <span class="term-accent">Groq / Llama-3.3-70B-Versatile</span> (Ücretsiz Plan)</div>
           <br>
-          <div><span class="term-cyan">user ›</span> refactor auth middleware to use Effect-ts schema validation</div>
+          <div><span class="term-cyan">kullanıcı ›</span> auth middleware'ini Effect-ts şema doğrulamasına refactor et</div>
           <br>
-          <div><span class="term-accent">glitch ›</span> Analyzing <span class="term-cyan">src/auth/middleware.ts</span> and AST schema...</div>
-          <div><span class="term-green">✓</span> Reading 4 dependent files via ripgrep</div>
-          <div><span class="term-green">✓</span> Applied patch: <span class="term-diff-add">+28 lines</span> <span class="term-diff-del">-14 lines</span></div>
-          <div><span class="term-green">✓</span> TypeScript Typecheck: <span class="term-green">0 errors</span> (12/12 packages passed)</div>
+          <div><span class="term-accent">glitch ›</span> <span class="term-cyan">src/auth/middleware.ts</span> ve AST şeması analiz ediliyor...</div>
+          <div><span class="term-green">✓</span> 4 bağımlı dosya ripgrep ile tarandı</div>
+          <div><span class="term-green">✓</span> Değişiklik uygulandı: <span class="term-diff-add">+28 satır</span> <span class="term-diff-del">-14 satır</span></div>
+          <div><span class="term-green">✓</span> TypeScript Tip Kontrolü: <span class="term-green">0 hata</span> (12/12 paket geçti)</div>
           <br>
-          <div><span class="term-gray">Waiting for user instruction [/help, /provider, /fix]...</span></div>
+          <div><span class="term-gray">Kullanıcı komutu bekleniyor [/help, /provider, /fix]...</span></div>
         </div>
       </div>
     </section>
@@ -818,8 +851,8 @@
     <!-- Key Features Section -->
     <section id="features" style="padding-top: 40px">
       <div class="section-header">
-        <div class="section-label">Engineered For Performance</div>
-        <h2 class="section-title">Everything You Need. Zero Subscriptions.</h2>
+        <div class="section-label" data-i18n="feat_label">Maksimum Performans İçin Tasarlandı</div>
+        <h2 class="section-title" data-i18n="feat_title">İhtiyacınız Olan Her Şey. Sıfır Abonelik.</h2>
       </div>
 
       <div class="features-grid">
@@ -827,48 +860,48 @@
           <div class="card-icon-box">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
           </div>
-          <h3>Free Tier Providers Hub</h3>
-          <p>Direct integrated access to Cerebras, Groq, Cohere, Google AI Studio and HuggingFace. Code at 1800 tokens/sec without entering credit card details.</p>
+          <h3 data-i18n="f1_title">Ücretsiz Sağlayıcılar Merkezi</h3>
+          <p data-i18n="f1_desc">Cerebras, Groq, Cohere, Google AI Studio ve HuggingFace'e doğrudan entegre erişim. Kredi kartı gerekmeden saniyede 1800 token hızında kod geliştirin.</p>
         </div>
 
         <div class="feature-card">
           <div class="card-icon-box">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
           </div>
-          <h3>Visual Diffing Engine</h3>
-          <p>Never let an AI blindly overwrite your code. Glitch Code renders high-contrast side-by-side terminal diffs with instant approval controls.</p>
+          <h3 data-i18n="f2_title">Görsel Diff Motoru</h3>
+          <p data-i18n="f2_desc">Yapay zekanın kodlarınızı körü körüne ezmesine asla izin vermeyin. Glitch Code, terminalde renkli satır satır diff'ler ve canlı onay kontrolleri sunar.</p>
         </div>
 
         <div class="feature-card">
-          <div class="card-icon-box">
+          <div class="card-icon-box" id="npu">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
           </div>
-          <h3>Elytra NPU Driver</h3>
-          <p>Native C++20 AVX2 kernel driver integration. Run quantized GGUF models (JARVIS-14B / ShadowCat) locally with zero cloud dependence.</p>
+          <h3 data-i18n="f3_title">Elytra NPU Sürücüsü</h3>
+          <p data-i18n="f3_desc">Yerel C++20 AVX2 çekirdek sürücüsü entegrasyonu. Kuantize GGUF modellerini (JARVIS-14B / ShadowCat) buluta bağımlı olmadan yerelde çalıştırın.</p>
         </div>
 
         <div class="feature-card">
           <div class="card-icon-box">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
           </div>
-          <h3>Interactive Solid TUI</h3>
-          <p>Built with Solid & OpenTUI. Features windowed dialogs, fuzzy file search, auto-complete slash commands, and multi-session persistence.</p>
+          <h3 data-i18n="f4_title">İnteraktif Solid TUI</h3>
+          <p data-i18n="f4_desc">Solid & OpenTUI ile geliştirildi. Pencereli diyaloglar, bulanık dosya araması, otomatik tamamlanan slash komutları ve oturum koruması.</p>
         </div>
 
         <div class="feature-card">
           <div class="card-icon-box">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
           </div>
-          <h3>OpenCode Zen Compatibility</h3>
-          <p>100% compatible with upstream OpenCode Zen routing. Switch between curated production LLMs and free tier clusters instantly.</p>
+          <h3 data-i18n="f5_title">OpenCode Zen Uyumluluğu</h3>
+          <p data-i18n="f5_desc">Resmi OpenCode Zen yönlendirmesiyle %100 uyumlu. Üretim seviyesi LLM'ler ile ücretsiz kümeler arasında anında geçiş yapın.</p>
         </div>
 
         <div class="feature-card">
           <div class="card-icon-box">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
           </div>
-          <h3>Autonomous Tooling</h3>
-          <p>File read/write, AST lint error auto-fixing, ripgrep semantic search, git operations, and subagent orchestration right in your shell.</p>
+          <h3 data-i18n="f6_title">Otonom Araç Seti</h3>
+          <p data-i18n="f6_desc">Dosya okuma/yazma, AST lint hata düzeltme, ripgrep anlamsal arama, git işlemleri ve alt ajan yönetimi doğrudan kabuğunuzda.</p>
         </div>
       </div>
     </section>
@@ -876,10 +909,10 @@
     <!-- Providers Ecosystem Hub -->
     <section id="providers" class="ecosystem-section">
       <div class="section-header" style="margin-bottom: 20px">
-        <div class="section-label">Zero-Cost AI Coding</div>
-        <h2 class="section-title">Official Free Tier Providers Hub</h2>
-        <p style="color: var(--text-muted); font-size: 15px; margin-top: 8px">
-          Glitch Code connects directly to world-class high-speed inference engines with zero paywalls.
+        <div class="section-label" data-i18n="eco_label">Sıfır Maliyetli AI Kodlama</div>
+        <h2 class="section-title" data-i18n="eco_title">Resmi Ücretsiz Sağlayıcılar Merkezi</h2>
+        <p style="color: var(--text-muted); font-size: 15px; margin-top: 8px" data-i18n="eco_desc">
+          Glitch Code, sıfır ödeme duvarıyla dünyanın en hızlı çıkarım motorlarına doğrudan bağlanır.
         </p>
       </div>
 
@@ -887,37 +920,37 @@
         <div class="provider-chip">
           <div class="provider-header">
             <span class="provider-name">Cerebras</span>
-            <span class="badge-free">FREE</span>
+            <span class="badge-free" data-i18n="badge_free">ÜCRETSİZ</span>
           </div>
-          <div class="provider-speed">1800+ tokens/sec</div>
-          <div style="font-size: 12px; color: var(--text-muted)">Llama 3.3 70B & 8B Wafer-Scale Engine</div>
+          <div class="provider-speed">1800+ token/sn</div>
+          <div style="font-size: 12px; color: var(--text-muted)" data-i18n="p1_desc">Llama 3.3 70B & 8B Wafer-Scale Motoru</div>
         </div>
 
         <div class="provider-chip">
           <div class="provider-header">
             <span class="provider-name">Groq Cloud</span>
-            <span class="badge-free">FREE</span>
+            <span class="badge-free" data-i18n="badge_free">ÜCRETSİZ</span>
           </div>
-          <div class="provider-speed">800+ tokens/sec</div>
-          <div style="font-size: 12px; color: var(--text-muted)">LPU Tensor Processing Unit acceleration</div>
+          <div class="provider-speed">800+ token/sn</div>
+          <div style="font-size: 12px; color: var(--text-muted)" data-i18n="p2_desc">LPU Tensor İşleme Ünitesi Hızlandırması</div>
         </div>
 
         <div class="provider-chip">
           <div class="provider-header">
             <span class="provider-name">Google AI Studio</span>
-            <span class="badge-free">FREE</span>
+            <span class="badge-free" data-i18n="badge_free">ÜCRETSİZ</span>
           </div>
-          <div class="provider-speed">1M Context Window</div>
-          <div style="font-size: 12px; color: var(--text-muted)">Gemini 2.5 Flash & Thinking Models</div>
+          <div class="provider-speed">1M Bağlam Penceresi</div>
+          <div style="font-size: 12px; color: var(--text-muted)" data-i18n="p3_desc">Gemini 2.5 Flash & Düşünce Modelleri</div>
         </div>
 
         <div class="provider-chip">
           <div class="provider-header">
             <span class="provider-name">OpenCode Zen</span>
-            <span class="badge-free">READY</span>
+            <span class="badge-free">HAZIR</span>
           </div>
-          <div class="provider-speed">Curated Routing</div>
-          <div style="font-size: 12px; color: var(--text-muted)">Official Zen coding optimization layer</div>
+          <div class="provider-speed">Optimize Yönlendirme</div>
+          <div style="font-size: 12px; color: var(--text-muted)" data-i18n="p4_desc">Resmi Zen kodlama optimizasyon katmanı</div>
         </div>
       </div>
     </section>
@@ -927,17 +960,106 @@
   <footer>
     <div class="footer-container">
       <div>
-        <b>Glitch Code</b> — Developed by GlassesGlitchStudio & Elytra-ai. Licensed under MIT.
+        <b>Glitch Code</b> — GlassesGlitchStudio & Elytra-ai tarafından geliştirildi. MIT Lisanslı.
       </div>
       <ul class="footer-links">
         <li><a href="https://github.com/glassesglitchstudio-lab/Gltich_code" target="_blank">GitHub</a></li>
-        <li><a href="https://npmjs.com/package/glitchcode-cli" target="_blank">NPM Package</a></li>
-        <li><a href="https://github.com/glassesglitchstudio-lab/Gltich_code/releases" target="_blank">Releases</a></li>
+        <li><a href="https://npmjs.com/package/glitchcode-cli" target="_blank">NPM Paketi</a></li>
+        <li><a href="https://github.com/glassesglitchstudio-lab/Gltich_code/releases" target="_blank">Sürümler</a></li>
       </ul>
     </div>
   </footer>
 
   <script>
+    // i18n Sözlüğü
+    const dictionary = {
+      tr: {
+        nav_features: "Özellikler",
+        nav_providers: "Ücretsiz Sağlayıcılar",
+        nav_npu: "Elytra NPU",
+        nav_install: "Kurulum",
+        hero_tag: "%100 Ücretsiz Sağlayıcı Merkezi & OpenCode Zen Aktif",
+        hero_title: 'Geliştiriciler İçin <span class="gradient-text">Otonom Yapay Zeka</span> Kodlama Ajanı.',
+        hero_desc: "Sıfır abonelik. Sıfır telemetri. Glitch Code, terminalinizi yüksek hızlı ücretsiz sağlayıcılar, görsel diff ve yerel Elytra NPU hızlandırmasıyla çalışan otonom bir yazılım mühendisine dönüştürür.",
+        btn_copy: "Kopyala",
+        chip_speed: "Groq & Cerebras (1800 T/s)",
+        chip_diff: "Görsel Diff Onayı",
+        chip_npu: "Yerel C++ AVX2 Sürücüsü",
+        feat_label: "Maksimum Performans İçin Tasarlandı",
+        feat_title: "İhtiyacınız Olan Her Şey. Sıfır Abonelik.",
+        f1_title: "Ücretsiz Sağlayıcılar Merkezi",
+        f1_desc: "Cerebras, Groq, Cohere, Google AI Studio ve HuggingFace'e doğrudan entegre erişim. Kredi kartı gerekmeden saniyede 1800 token hızında kod geliştirin.",
+        f2_title: "Görsel Diff Motoru",
+        f2_desc: "Yapay zekanın kodlarınızı körü körüne ezmesine asla izin vermeyin. Glitch Code, terminalde renkli satır satır diff'ler ve canlı onay kontrolleri sunar.",
+        f3_title: "Elytra NPU Sürücüsü",
+        f3_desc: "Yerel C++20 AVX2 çekirdek sürücüsü entegrasyonu. Kuantize GGUF modellerini (JARVIS-14B / ShadowCat) buluta bağımlı olmadan yerelde çalıştırın.",
+        f4_title: "İnteraktif Solid TUI",
+        f4_desc: "Solid & OpenTUI ile geliştirildi. Pencereli diyaloglar, bulanık dosya araması, otomatik tamamlanan slash komutları ve oturum koruması.",
+        f5_title: "OpenCode Zen Uyumluluğu",
+        f5_desc: "Resmi OpenCode Zen yönlendirmesiyle %100 uyumlu. Üretim seviyesi LLM'ler ile ücretsiz kümeler arasında anında geçiş yapın.",
+        f6_title: "Otonom Araç Seti",
+        f6_desc: "Dosya okuma/yazma, AST lint hata düzeltme, ripgrep anlamsal arama, git işlemleri ve alt ajan yönetimi doğrudan kabuğunuzda.",
+        eco_label: "Sıfır Maliyetli AI Kodlama",
+        eco_title: "Resmi Ücretsiz Sağlayıcılar Merkezi",
+        eco_desc: "Glitch Code, sıfır ödeme duvarıyla dünyanın en hızlı çıkarım motorlarına doğrudan bağlanır.",
+        badge_free: "ÜCRETSİZ",
+        p1_desc: "Llama 3.3 70B & 8B Wafer-Scale Motoru",
+        p2_desc: "LPU Tensor İşleme Ünitesi Hızlandırması",
+        p3_desc: "Gemini 2.5 Flash & Düşünce Modelleri",
+        p4_desc: "Resmi Zen kodlama optimizasyon katmanı"
+      },
+      en: {
+        nav_features: "Features",
+        nav_providers: "Free Providers Hub",
+        nav_npu: "Elytra NPU",
+        nav_install: "Quickstart",
+        hero_tag: "100% Free Tier Hub & OpenCode Zen Active",
+        hero_title: 'The Autonomous <span class="gradient-text">AI Coding Agent</span> For Builders.',
+        hero_desc: "Zero subscriptions. Zero telemetry. Glitch Code turns your terminal into a full autonomous software engineer powered by high-speed free providers, visual diffs, and local Elytra NPU acceleration.",
+        btn_copy: "Copy",
+        chip_speed: "Groq & Cerebras (1800 T/s)",
+        chip_diff: "Visual Diff Review",
+        chip_npu: "Native C++ AVX2 Driver",
+        feat_label: "Engineered For Performance",
+        feat_title: "Everything You Need. Zero Subscriptions.",
+        f1_title: "Free Tier Providers Hub",
+        f1_desc: "Direct integrated access to Cerebras, Groq, Cohere, Google AI Studio and HuggingFace. Code at 1800 tokens/sec without entering credit card details.",
+        f2_title: "Visual Diffing Engine",
+        f2_desc: "Never let an AI blindly overwrite your code. Glitch Code renders high-contrast side-by-side terminal diffs with instant approval controls.",
+        f3_title: "Elytra NPU Driver",
+        f3_desc: "Native C++20 AVX2 kernel driver integration. Run quantized GGUF models (JARVIS-14B / ShadowCat) locally with zero cloud dependence.",
+        f4_title: "Interactive Solid TUI",
+        f4_desc: "Built with Solid & OpenTUI. Features windowed dialogs, fuzzy file search, auto-complete slash commands, and multi-session persistence.",
+        f5_title: "OpenCode Zen Compatibility",
+        f5_desc: "100% compatible with upstream OpenCode Zen routing. Switch between curated production LLMs and free tier clusters instantly.",
+        f6_title: "Autonomous Tooling",
+        f6_desc: "File read/write, AST lint error auto-fixing, ripgrep semantic search, git operations, and subagent orchestration right in your shell.",
+        eco_label: "Zero-Cost AI Coding",
+        eco_title: "Official Free Tier Providers Hub",
+        eco_desc: "Glitch Code connects directly to world-class high-speed inference engines with zero paywalls.",
+        badge_free: "FREE",
+        p1_desc: "Llama 3.3 70B & 8B Wafer-Scale Engine",
+        p2_desc: "LPU Tensor Processing Unit acceleration",
+        p3_desc: "Gemini 2.5 Flash & Thinking Models",
+        p4_desc: "Official Zen coding optimization layer"
+      }
+    };
+
+    let currentLang = 'tr';
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dictionary[lang][key]) {
+          el.innerHTML = dictionary[lang][key];
+        }
+      });
+
+      document.getElementById('btn-lang-tr').classList.toggle('active', lang === 'tr');
+      document.getElementById('btn-lang-en').classList.toggle('active', lang === 'en');
+    }
+
     // Install Commands Switcher
     const commands = {
       npm: 'npm install -g glitchcode-cli',
@@ -955,8 +1077,9 @@
       const text = document.getElementById('install-cmd-text').textContent;
       navigator.clipboard.writeText(text).then(() => {
         const label = document.getElementById('copy-btn-label');
-        label.textContent = 'Copied!';
-        setTimeout(() => { label.textContent = 'Copy'; }, 2000);
+        const originalText = label.textContent;
+        label.textContent = currentLang === 'tr' ? 'Kopyalandı!' : 'Copied!';
+        setTimeout(() => { label.textContent = originalText; }, 2000);
       });
     }
 
@@ -969,20 +1092,20 @@
  ╚██████╔╝███████╗██║   ██║   ╚██████╗██║  ██║
   ╚═════╝ ╚══════╝╚═╝   ╚═╝    ╚═════╝╚═╝  ╚═╝</div>
 <div><span class="term-accent">glitch-cli v2.2.0</span> — AI-Powered Development Tool</div>
-<div><span class="term-green">✓</span> Workspace initialized: <span class="term-cyan">~/CascadeProjects/glitch-code</span></div>
-<div><span class="term-green">✓</span> Provider active: <span class="term-accent">Groq / Llama-3.3-70B-Versatile</span> (Free Tier)</div>
+<div><span class="term-green">✓</span> Çalışma alanı hazır: <span class="term-cyan">~/CascadeProjects/glitch-code</span></div>
+<div><span class="term-green">✓</span> Aktif Sağlayıcı: <span class="term-accent">Groq / Llama-3.3-70B-Versatile</span> (Ücretsiz Plan)</div>
 <br>
-<div><span class="term-cyan">user ›</span> refactor auth middleware to use Effect-ts schema validation</div>
+<div><span class="term-cyan">kullanıcı ›</span> auth middleware'ini Effect-ts şema doğrulamasına refactor et</div>
 <br>
-<div><span class="term-accent">glitch ›</span> Analyzing <span class="term-cyan">src/auth/middleware.ts</span> and AST schema...</div>
-<div><span class="term-green">✓</span> Reading 4 dependent files via ripgrep</div>
-<div><span class="term-green">✓</span> Applied patch: <span class="term-diff-add">+28 lines</span> <span class="term-diff-del">-14 lines</span></div>
-<div><span class="term-green">✓</span> TypeScript Typecheck: <span class="term-green">0 errors</span> (12/12 packages passed)</div>
+<div><span class="term-accent">glitch ›</span> <span class="term-cyan">src/auth/middleware.ts</span> ve AST şeması analiz ediliyor...</div>
+<div><span class="term-green">✓</span> 4 bağımlı dosya ripgrep ile tarandı</div>
+<div><span class="term-green">✓</span> Değişiklik uygulandı: <span class="term-diff-add">+28 satır</span> <span class="term-diff-del">-14 satır</span></div>
+<div><span class="term-green">✓</span> TypeScript Tip Kontrolü: <span class="term-green">0 hata</span> (12/12 paket geçti)</div>
 <br>
-<div><span class="term-gray">Waiting for user instruction [/help, /provider, /fix]...</span></div>`,
+<div><span class="term-gray">Kullanıcı komutu bekleniyor [/help, /provider, /fix]...</span></div>`,
       
       diff: `
-<div><span class="term-accent">Viewing Git Diff:</span> <span class="term-cyan">packages/opencode/src/provider/provider.ts</span></div>
+<div><span class="term-accent">Git Diff İnceleme:</span> <span class="term-cyan">packages/opencode/src/provider/provider.ts</span></div>
 <br>
 <div><span class="term-gray">@@ -185,6 +185,16 @@ export const Provider = {</span></div>
 <div><span class="term-diff-del">-    "opencode-legacy": () => Effect.fail(new Error("Deprecated"))</span></div>
@@ -997,19 +1120,19 @@
 <div><span class="term-diff-add">+        options: {},</span></div>
 <div><span class="term-diff-add">+      }),</span></div>
 <br>
-<div><span class="term-green">✓</span> Visual diff verified by AST compiler. Press <span class="term-accent">[Enter]</span> to apply.</div>`,
+<div><span class="term-green">✓</span> Görsel diff AST derleyicisi tarafından doğrulandı. Uygulamak için <span class="term-accent">[Enter]</span> basın.</div>`,
       
       free: `
-<div><span class="term-accent">Select Free Tier Provider Hub [TUI Dialog]:</span></div>
+<div><span class="term-accent">Ücretsiz Sağlayıcı Merkezi Seçimi [TUI Dialog]:</span></div>
 <br>
-<div>  [1] <span class="term-green">●</span> <b>Cerebras</b> — Llama-3.3-70B (1800 tokens/s, Wafer Scale Engine)</div>
-<div>  [2] <span class="term-green">●</span> <b>Groq Cloud</b> — Llama-3.3-70B & DeepSeek R1 Distill (800 tokens/s)</div>
-<div>  [3] <span class="term-green">●</span> <b>Google AI Studio</b> — Gemini 2.5 Flash (1M Token Context)</div>
-<div>  [4] <span class="term-green">●</span> <b>Cohere</b> — Command R+ (Multilingual & Tool Use)</div>
-<div>  [5] <span class="term-cyan">●</span> <b>OpenCode Zen</b> — Curated high-performance coding layer</div>
-<div>  [6] <span class="term-accent">●</span> <b>Elytra NPU Local</b> — Offline C++20 AVX2 Local Engine</div>
+<div>  [1] <span class="term-green">●</span> <b>Cerebras</b> — Llama-3.3-70B (1800 token/sn, Wafer Scale Engine)</div>
+<div>  [2] <span class="term-green">●</span> <b>Groq Cloud</b> — Llama-3.3-70B & DeepSeek R1 Distill (800 token/sn)</div>
+<div>  [3] <span class="term-green">●</span> <b>Google AI Studio</b> — Gemini 2.5 Flash (1M Token Bağlamı)</div>
+<div>  [4] <span class="term-green">●</span> <b>Cohere</b> — Command R+ (Çok Dilli & Araç Kullanımı)</div>
+<div>  [5] <span class="term-cyan">●</span> <b>OpenCode Zen</b> — Optimize edilmiş yüksek performanslı kodlama katmanı</div>
+<div>  [6] <span class="term-accent">●</span> <b>Elytra NPU Yerel</b> — Çevrimdışı C++20 AVX2 Yerel Motoru</div>
 <br>
-<div><span class="term-gray">Use arrow keys ↑ ↓ to select provider and press Enter.</span></div>`
+<div><span class="term-gray">Sağlayıcı seçmek için ↑ ↓ yön tuşlarını kullanın ve Enter'a basın.</span></div>`
     };
 
     function switchTermDemo(tab, btn) {
