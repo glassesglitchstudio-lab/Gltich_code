@@ -16,12 +16,14 @@ import { useToast, type ToastContext } from "../ui/toast"
 import { isConsoleManagedProvider } from "@tui/util/provider-origin"
 
 const PROVIDER_PRIORITY: Record<string, number> = {
-  "free-all": 1,
-  "opencode-go": 2,
+  glassescat: 1,
+  anthropic: 2,
   openai: 3,
-  "github-copilot": 4,
-  anthropic: 5,
-  google: 6,
+  google: 4,
+  deepseek: 5,
+  groq: 6,
+  ollama: 7,
+  openrouter: 8,
 }
 
 export function createDialogProviderOptions() {
@@ -36,13 +38,12 @@ export function createDialogProviderOptions() {
       sortBy((x) => PROVIDER_PRIORITY[x.id] ?? 99),
       map((provider) => {
         const consoleManaged = isConsoleManagedProvider(sync.data.console_state.consoleManagedProviders, provider.id)
-        const connected = sync.data.provider_next.connected.includes(provider.id) || provider.id === "free-all"
+        const connected = sync.data.provider_next.connected.includes(provider.id)
 
         return {
           title: provider.name,
           value: provider.id,
           description: {
-            "free-all": "Tamamen Ücretsiz (API Key İstemez)",
             anthropic: "(API key)",
             openai: "(ChatGPT Plus/Pro or API key)",
             "opencode-go": "Low cost subscription for everyone",
@@ -52,14 +53,6 @@ export function createDialogProviderOptions() {
           gutter: connected ? <text fg={theme.success}>✓</text> : undefined,
           async onSelect() {
             if (consoleManaged) return
-            if (provider.id === "free-all") {
-              toast.show({
-                variant: "info",
-                message: "Free All Models aktif! API Key gerekmeden tüm modeller kullanıma hazır.",
-              })
-              dialog.clear()
-              return
-            }
 
             const methods = sync.data.provider_auth[provider.id] ?? [
               {

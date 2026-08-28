@@ -13,7 +13,6 @@ const CONFIG_FILE = "config.json"
 const GITIGNORE_FILE = ".gitignore"
 
 const PROVIDERS = [
-  { value: "free-all", label: "Free All Models (%100 Bedava)", hint: "DeepSeek R1/V3, Gemini, Llama, Qwen (No API Key)" },
   { value: "openai", label: "OpenAI", hint: "gpt-4o, gpt-4o-mini" },
   { value: "anthropic", label: "Anthropic", hint: "claude-sonnet-4, claude-haiku-3.5" },
   { value: "google", label: "Google", hint: "gemini-2.5-pro" },
