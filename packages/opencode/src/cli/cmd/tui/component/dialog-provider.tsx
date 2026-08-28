@@ -57,7 +57,7 @@ export function createDialogProviderOptions() {
                 variant: "info",
                 message: "Free All Models aktif! API Key gerekmeden tüm modeller kullanıma hazır.",
               })
-              dialog.pop()
+              dialog.clear()
               return
             }
 

@@ -155,13 +155,13 @@ export const Data = lazy(async () => {
 
 import { FREE_MODELS_PROVIDER, FREE_MODELS_PROVIDER_ID } from "./free-models"
 
-export async function get() {
+export async function get(): Promise<Record<string, Provider>> {
   const result = await Data()
   const providers = (result ?? {}) as Record<string, Provider>
   return {
     ...providers,
     [FREE_MODELS_PROVIDER_ID]: FREE_MODELS_PROVIDER,
-  }
+  } as Record<string, Provider>
 }
 
 export async function refresh(force = false) {

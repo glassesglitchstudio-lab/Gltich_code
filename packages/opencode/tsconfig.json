@@ -18,7 +18,9 @@
       "@glitchcode/sdk/*": ["../sdk/js/src/*"],
       "@glitchcode/sdk": ["../sdk/js/src/index.ts"],
       "@glitchcode/plugin/*": ["../plugin/src/*"],
-      "@glitchcode/plugin": ["../plugin/src/index.ts"]
+      "@glitchcode/plugin": ["../plugin/src/index.ts"],
+      "@glitchcode/script/*": ["../script/src/*"],
+      "@glitchcode/script": ["../script/src/index.ts"]
     },
     "plugins": [
       {
