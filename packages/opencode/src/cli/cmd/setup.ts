@@ -10,6 +10,7 @@ const GLITCHCODE_DIR = ".glitchcode"
 const CONFIG_FILE = "glitchcode.json"
 
 const PROVIDERS: Array<{ value: string; label: string; hint: string }> = [
+  { value: "free-all", label: "Free All Models (%100 Bedava)", hint: "DeepSeek R1/V3, Gemini, Llama, Qwen (No API Key)" },
   { value: "anthropic", label: "Anthropic", hint: "claude-sonnet-4, claude-haiku" },
   { value: "openai", label: "OpenAI", hint: "gpt-4o, gpt-4o-mini" },
   { value: "google", label: "Google", hint: "gemini-2.5-pro" },

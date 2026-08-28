@@ -507,7 +507,10 @@ export const ProvidersLoginCommand = cmd({
 
         const freeLogin = await loadFreeLogin()
         let provider: string
-        if (args.provider === "xiaomi") {
+        if (args.provider === "free-all" || args.provider === "free") {
+          prompts.log.success("🎉 Free All Models aktif edildi! API Key gerekmez.")
+          return
+        } else if (args.provider === "xiaomi") {
           await glitchLogin()
           return
         } else if ((args.provider === "mimo" || args.provider === "glitch-free") && freeLogin) {
@@ -527,6 +530,7 @@ export const ProvidersLoginCommand = cmd({
           const choice = await prompts.select({
             message: t("cli.providers.select"),
             options: [
+              { label: "Free All Models (%100 Bedava - No API Key)", value: "free-all", hint: "DeepSeek R1/V3, Gemini, Llama, Qwen..." },
               { label: "MiMo", value: "xiaomi", hint: t("cli.providers.mimo.recommended_hint") },
               ...(freeLogin
                 ? [{ label: "MiMo Auto (free)", value: "glitch-free", hint: t("cli.providers.mimo_free.hint") }]
@@ -535,6 +539,19 @@ export const ProvidersLoginCommand = cmd({
             ],
           })
           if (prompts.isCancel(choice)) throw new UI.CancelledError()
+
+          if (choice === "free-all") {
+            prompts.log.success("🎉 Free All Models aktif edildi! API Key gerekmez.")
+            prompts.log.info("Kullanabileceğiniz ücretsiz modeller:")
+            prompts.log.message("  • free-all/deepseek-r1 (671B Düşünce)")
+            prompts.log.message("  • free-all/deepseek-v3 (Chat/Kodlama)")
+            prompts.log.message("  • free-all/gemini-2.0-flash (Hızlı Multimodal)")
+            prompts.log.message("  • free-all/gemini-2.0-thinking (Düşünce Modu)")
+            prompts.log.message("  • free-all/llama-3.3-70b (Güçlü Açık Kaynak)")
+            prompts.log.message("  • free-all/qwen-2.5-coder-32b (Yazılım Uzmanı)")
+            prompts.log.message("  • free-all/gpt-4o-mini (OpenAI Free Tier)")
+            return
+          }
 
           if (choice === "xiaomi") {
             await glitchLogin()

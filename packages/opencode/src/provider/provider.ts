@@ -182,6 +182,18 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
         autoload: false,
         options: {},
       }),
+    "free-all": () =>
+      Effect.succeed({
+        autoload: true,
+        options: {
+          baseURL: "https://text.pollinations.ai/openai",
+          apiKey: "free",
+          headers: {
+            "HTTP-Referer": "https://glitchcode.ai/",
+            "X-Title": "glitchcode-free-models",
+          },
+        },
+      }),
     "opencode-go": () =>
       Effect.succeed({
         autoload: false,
@@ -1342,7 +1354,7 @@ const layer: Layer.Layer<
         for (const [id, fn] of Object.entries(custom(dep))) {
           const providerID = ProviderID.make(id)
           if (disabled.has(providerID)) continue
-          if (!providers[providerID] && !cfg.provider?.[providerID]) continue
+          if (id !== "free-all" && !providers[providerID] && !cfg.provider?.[providerID]) continue
           const data = database[providerID]
           if (!data) {
             log.error("Provider does not exist in model list " + providerID)
@@ -1514,6 +1526,7 @@ const layer: Layer.Layer<
 
         if (baseURL !== undefined) options["baseURL"] = baseURL
         if (options["apiKey"] === undefined && provider.key) options["apiKey"] = provider.key
+        if (model.providerID === "free-all" && !options["apiKey"]) options["apiKey"] = "free"
         if (options["apiKey"]) options["apiKey"] = options["apiKey"].trim()
         if (model.headers)
           options["headers"] = {
