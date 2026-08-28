@@ -419,8 +419,10 @@ async function showFirstRunSetup(archiveName, releaseUrl, glitchDir, cachedBinar
     }
     printStep("fail", "Binary indirilemedi", "")
     showCursor()
-    console.log(`\n${C.red}  Hata: ${releaseUrl} adresinden indirme başarısız${C.reset}\n`)
-    console.log(`${C.gray}  Manuel kurulum: https://github.com/glassesglitchstudio-lab/Gltich_code/releases${C.reset}\n`)
+    try { unlinkSync(tmpFile) } catch {}
+    console.log(`\n${C.red}  Hata: Sürüm paketi (${archiveName}) indirilemedi.${C.reset}`)
+    console.log(`${C.gray}  → Bu sürüm (v${PKG_VERSION}) henüz GitHub Releases üzerinde yayınlanmamış olabilir veya internet bağlantısı kesildi.${C.reset}`)
+    console.log(`${C.gray}  → Sürümleri incelemek veya manuel kurmak için: https://github.com/glassesglitchstudio-lab/Gltich_code/releases${C.reset}\n`)
     process.exit(1)
   }
 
@@ -432,13 +434,17 @@ async function showFirstRunSetup(archiveName, releaseUrl, glitchDir, cachedBinar
     } else {
       spawnSync("tar", ["-xzf", tmpFile, "-C", glitchDir], { stdio: "pipe" })
     }
-  } catch (e) {
+  } catch {
     if (isInteractive) {
       process.stdout.write("\x1b[1A")
       process.stdout.write("\x1b[2K")
     }
-    printStep("fail", "Arşiv çıkarılamadı", e.message)
+    printStep("fail", "Arşiv çıkarılamadı", "")
     showCursor()
+    try { unlinkSync(tmpFile) } catch {}
+    console.log(`\n${C.red}  Hata: İndirilen arşiv dosyası açılamadı (Dosya bozuk veya eksik inmiş).${C.reset}`)
+    console.log(`${C.gray}  → Bozuk geçici dosya temizlendi. Lütfen komutu tekrar çalıştırın.${C.reset}`)
+    console.log(`${C.gray}  → Manuel kurulum için: https://github.com/glassesglitchstudio-lab/Gltich_code/releases${C.reset}\n`)
     process.exit(1)
   }
 
