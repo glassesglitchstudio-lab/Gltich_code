@@ -10,6 +10,7 @@ const GLITCHCODE_DIR = ".glitchcode"
 const CONFIG_FILE = "glitchcode.json"
 
 const PROVIDERS: Array<{ value: string; label: string; hint: string }> = [
+  { value: "elytra", label: "★ JARVIS-14B & Elytra Driver (Yerel & Sıfır Key)", hint: "120 FPS Ekran Gözü / AVX2 C++20 Sürücü / %100 Çevrimdışı" },
   { value: "google", label: "★ Google Gemini (FREE TIER)", hint: "Günde 1.500 istek bedava (Gemini 2.0 Flash)" },
   { value: "groq", label: "★ Groq Cloud (FREE TIER)", hint: "Günde 14.400 istek bedava (Qwen Coder & Llama 70B)" },
   { value: "cerebras", label: "★ Cerebras AI (FREE TIER)", hint: "Ultra Hızlı Ücretsiz Katman (2000 tok/sn)" },
@@ -143,6 +144,7 @@ export async function runSetupWizard(root: string): Promise<boolean> {
 
   if (provider && provider !== "__skip__" && provider !== "auto") {
     const providerDefaultModels: Record<string, string> = {
+      elytra: "ollama/jarvis-14b",
       anthropic: "anthropic/claude-3-7-sonnet-20250219",
       openai: "openai/gpt-4o",
       google: "google/gemini-2.5-pro",
