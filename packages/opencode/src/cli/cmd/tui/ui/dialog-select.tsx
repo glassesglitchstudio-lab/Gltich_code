@@ -449,7 +449,7 @@ function Option(props: {
         paddingLeft={3}
       >
         {Locale.truncate(props.title, 61)}
-        {props.description && <span style={{ fg: props.active ? fg : theme.textMuted }}> {props.description}</span>}
+        <Show when={props.description}>{(d) => <span style={{ fg: props.active ? fg : theme.textMuted }}> {d()}</span>}</Show>
       </text>
       <Show when={props.footer}>
         <box flexShrink={0}>

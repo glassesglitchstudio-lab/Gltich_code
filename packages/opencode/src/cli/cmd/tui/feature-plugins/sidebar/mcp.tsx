@@ -1,4 +1,4 @@
-﻿import type { TuiPlugin, TuiPluginApi, TuiPluginModule } from "@glitchcode/plugin/tui"
+import type { TuiPlugin, TuiPluginApi, TuiPluginModule } from "@glitchcode/plugin/tui"
 import { createMemo, For, Match, Show, Switch, createSignal } from "solid-js"
 
 const id = "internal:sidebar-mcp"
@@ -35,10 +35,12 @@ function View(props: { api: TuiPluginApi }) {
           </Show>
           <text fg={theme().text}>
             <b>MCP</b>
-            {!open() && <span style={{ fg: theme().textMuted }}>
-              {" "}
-              ({on()} active{bad() > 0 ? `, ${bad()} error${bad() > 1 ? "s" : ""}` : ""})
-            </span>}
+            <Show when={!open()}>
+              <span style={{ fg: theme().textMuted }}>
+                {" "}
+                ({on()} active{bad() > 0 ? `, ${bad()} error${bad() > 1 ? "s" : ""}` : ""})
+              </span>
+            </Show>
           </text>
         </box>
         <Show when={list().length <= 2 || open()}>

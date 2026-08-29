@@ -1149,8 +1149,8 @@ export function Session() {
                                     {(file) => (
                                       <text fg={theme.text}>
                                         {file.filename}
-                                        {file.additions > 0 && <span style={{ fg: theme.diffAdded }}> +{file.additions}</span>}
-                                        {file.deletions > 0 && <span style={{ fg: theme.diffRemoved }}> -{file.deletions}</span>}
+                                        <Show when={file.additions > 0}><span style={{ fg: theme.diffAdded }}> +{file.additions}</span></Show>
+                                        <Show when={file.deletions > 0}><span style={{ fg: theme.diffRemoved }}> -{file.deletions}</span></Show>
                                       </text>
                                     )}
                                   </For>
@@ -1469,8 +1469,8 @@ function AssistantMessage(props: { message: AssistantMessage; parts: Part[]; las
                 <b>Glitch</b>
               </span>
               <span style={{ fg: theme.textMuted }}> · {model()}</span>
-              {duration() && <span style={{ fg: theme.textMuted }}> · {Locale.duration(duration())}</span>}
-              {props.message.error?.name === "MessageAbortedError" && <span style={{ fg: theme.textMuted }}> · interrupted</span>}
+              <Show when={duration()}>{(d) => <span style={{ fg: theme.textMuted }}> · {Locale.duration(d())}</span>}</Show>
+              <Show when={props.message.error?.name === "MessageAbortedError"}><span style={{ fg: theme.textMuted }}> · interrupted</span></Show>
             </text>
             <Show when={props.message.time.completed}>
               <box
@@ -1625,11 +1625,11 @@ function ReasoningHeader(props: {
       </Match>
       <Match when={true}>
         <text fg={fg()} wrapMode="none">
-          {props.toggleable && <span>{props.open ? "- " : "+ "}</span>}
+          <Show when={props.toggleable}><span>{props.open ? "- " : "+ "}</span></Show>
           <span>Thought</span>
-          {(props.title || props.duration) && <span>: </span>}
-          {props.title && <span>{props.title}</span>}
-          {props.duration && <span>{props.title ? " · " : ""}{props.duration}</span>}
+          <Show when={props.title || props.duration}><span>: </span></Show>
+          <Show when={props.title}><span>{props.title}</span></Show>
+          <Show when={props.duration}><span>{props.title ? " · " : ""}{props.duration}</span></Show>
         </text>
       </Match>
     </Switch>

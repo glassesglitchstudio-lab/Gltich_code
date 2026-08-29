@@ -158,7 +158,7 @@ export function DialogStatus() {
                 </text>
                 <text wrapMode="word" fg={theme.text}>
                   <b>{item.name}</b>
-                  {item.version && <span style={{ fg: theme.textMuted }}> @{item.version}</span>}
+                  <Show when={item.version}>{(v) => <span style={{ fg: theme.textMuted }}> @{v()}</span>}</Show>
                 </text>
               </box>
             )}
