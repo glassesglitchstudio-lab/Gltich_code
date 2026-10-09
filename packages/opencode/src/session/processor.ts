@@ -285,19 +285,25 @@ export const layer: Layer.Layer<
 
       const failToolCall = Effect.fn("SessionProcessor.failToolCall")(function* (toolCallID: string, error: unknown) {
         const match = yield* readToolCall(toolCallID)
-        if (!match || match.part.state.status !== "running") return false
+        if (!match || !["running", "pending"].includes(match.part.state.status)) return false
         // Agent-recoverable failures (bad args, malformed call, unknown task/actor
         // id) carry a marker the TUI reads to render them muted instead of as a red
         // error block. The full actionable message still flows to the model.
         const recoverable = isRecoverableError(error)
+        const startTime =
+          match.part.state.status === "running"
+            ? match.part.state.time.start
+            : Date.now()
+        const existingMetadata =
+          "metadata" in match.part.state ? match.part.state.metadata : undefined
         yield* session.updatePart({
           ...match.part,
           state: {
             status: "error",
             input: match.part.state.input,
             error: errorMessage(error),
-            metadata: { ...match.part.state.metadata, ...(recoverable ? { recoverable: true } : {}) },
-            time: { start: match.part.state.time.start, end: Date.now() },
+            metadata: { ...existingMetadata, ...(recoverable ? { recoverable: true } : {}) },
+            time: { start: startTime, end: Date.now() },
           },
         })
         if (error instanceof Permission.RejectedError || error instanceof Question.RejectedError) {

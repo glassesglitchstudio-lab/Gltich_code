@@ -85,71 +85,73 @@ export const ApiTesterTool = Tool.define(
                 time: elapsed,
               } satisfies HttpResponse
             },
-            catch: (err: any) => {
-              const elapsed = Date.now() - startTime
-              const output: string[] = [
-                `# API Request Failed`,
-                "",
-                `**URL:** \`${params.url}\``,
-                `**Method:** ${method}`,
-                `**Time:** ${elapsed}ms`,
-                "",
-                `## Error`,
-                `\`\`\``,
-                err?.message || String(err),
-                `\`\`\``,
-              ]
-              return {
-                title: `API Error: ${method} ${new URL(params.url).hostname}`,
-                metadata: { error: true } as Tool.Metadata,
-                output: output.join("\n"),
-                _error: true as const,
-              }
-            },
-          })
+            catch: (err: unknown) => err,
+          }).pipe(
+            Effect.match({
+              onFailure: (err: unknown) => {
+                const elapsed = Date.now() - startTime
+                const message = err instanceof Error ? err.message : String(err)
+                const output: string[] = [
+                  `# API Request Failed`,
+                  "",
+                  `**URL:** \`${params.url}\``,
+                  `**Method:** ${method}`,
+                  `**Time:** ${elapsed}ms`,
+                  "",
+                  `## Error`,
+                  "```",
+                  message,
+                  "```",
+                ]
+                return {
+                  title: `API Error: ${method} ${new URL(params.url).hostname}`,
+                  metadata: { error: true } as Tool.Metadata,
+                  output: output.join("\n"),
+                }
+              },
+              onSuccess: (result: HttpResponse) => {
+                const output: string[] = [
+                  `# API Response`,
+                  "",
+                  `**URL:** \`${params.url}\``,
+                  `**Method:** ${method}`,
+                  `**Status:** ${result.status} ${result.statusText}`,
+                  `**Time:** ${result.time}ms`,
+                  "",
+                  `## Response Headers`,
+                ]
 
-          if ("_error" in result) {
-            const { _error: _, ...rest } = result as any
-            return rest
-          }
+                for (const [k, v] of Object.entries(result.headers)) {
+                  output.push(`- **${k}:** ${v}`)
+                }
 
-          const output: string[] = [
-            `# API Response`,
-            "",
-            `**URL:** \`${params.url}\``,
-            `**Method:** ${method}`,
-            `**Status:** ${result.status} ${result.statusText}`,
-            `**Time:** ${result.time}ms`,
-            "",
-            `## Response Headers`,
-          ]
+                output.push("", "## Response Body")
 
-          for (const [k, v] of Object.entries(result.headers)) {
-            output.push(`- **${k}:** ${v}`)
-          }
+                let prettyBody = result.body
+                try {
+                  prettyBody = JSON.stringify(JSON.parse(result.body), null, 2)
+                } catch { /* keep raw */ }
 
-          output.push("", "## Response Body")
+                const truncated = prettyBody.length > 3000 ? prettyBody.slice(0, 3000) + "\n... (truncated)" : prettyBody
+                output.push("```json\n" + truncated + "\n```")
 
-          let prettyBody = result.body
-          try {
-            prettyBody = JSON.stringify(JSON.parse(result.body), null, 2)
-          } catch { /* keep raw */ }
+                const statusIcon = result.status < 300 ? "✅" : result.status < 400 ? "🟡" : "🔴"
 
-          const truncated = prettyBody.length > 3000 ? prettyBody.slice(0, 3000) + "\n... (truncated)" : prettyBody
-          output.push(`\`\`\`json\n${truncated}\n\`\`\``)
+                return {
+                  title: `${statusIcon} ${result.status} ${method} ${new URL(params.url).hostname}`,
+                  metadata: {
+                    status: result.status,
+                    method,
+                    time: result.time,
+                    bodyLength: result.body.length,
+                  },
+                  output: output.join("\n"),
+                }
+              },
+            }),
+          )
 
-          const statusIcon = result.status < 300 ? "✅" : result.status < 400 ? "🟡" : "🔴"
-
-          return {
-            title: `${statusIcon} ${result.status} ${method} ${new URL(params.url).hostname}`,
-            metadata: {
-              status: result.status,
-              method,
-              time: result.time,
-              bodyLength: result.body.length,
-            },
-            output: output.join("\n"),
-          }
+          return result
         }).pipe(Effect.orDie),
     }
   }),
