@@ -1,4 +1,4 @@
-import { createEffect, createMemo, createSignal, onCleanup, onMount, Show } from "solid-js"
+import { createEffect, createMemo, createSignal, onCleanup, onMount, Show, type JSX } from "solid-js"
 import { useTheme } from "../context/theme"
 import { InstallationVersion } from "@/installation/version"
 import { logo } from "@/cli/logo"
@@ -8,6 +8,8 @@ const GLITCH_LOGO = logo.left.map((line, i) => line + " ".repeat(GAP) + logo.rig
 
 const GLITCH_CHARS = "!@#$%^&*()_+-=[]{}|;':\",./<>?`~"
 const FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+const WAVE = ["▁", "▃", "▅", "▇", "█", "▇", "▅", "▃"]
+const PARTICLE = ["·", "∙", "˙", "•", "∘"]
 
 export function StartupAnimation(props: { ready: () => boolean }) {
   const { theme } = useTheme()
@@ -17,9 +19,17 @@ export function StartupAnimation(props: { ready: () => boolean }) {
   const [logoVisible, setLogoVisible] = createSignal(0)
   const [glitchLine, setGlitchLine] = createSignal(-1)
   const [glitchChars, setGlitchChars] = createSignal<number[]>([])
+  const [wavePhase, setWavePhase] = createSignal(0)
+  const [pulse, setPulse] = createSignal(0)
+  const [particles, setParticles] = createSignal<Array<{ x: number; y: number; char: string }>>([])
+  const [cursor, setCursor] = createSignal(true)
   let interval: ReturnType<typeof setInterval> | undefined
   let stepTimer: ReturnType<typeof setInterval> | undefined
   let glitchTimer: ReturnType<typeof setInterval> | undefined
+  let waveTimer: ReturnType<typeof setInterval> | undefined
+  let pulseTimer: ReturnType<typeof setInterval> | undefined
+  let particleTimer: ReturnType<typeof setInterval> | undefined
+  let cursorTimer: ReturnType<typeof setInterval> | undefined
 
   const steps = [
     "Initializing Glitch Code...",
@@ -28,6 +38,9 @@ export function StartupAnimation(props: { ready: () => boolean }) {
     "Preparing workspace...",
     "Ready!",
   ]
+
+  const width = GLITCH_LOGO[0]?.length ?? 40
+  const height = GLITCH_LOGO.length
 
   const displayLogo = createMemo(() => {
     return GLITCH_LOGO.slice(0, logoVisible()).map((line, lineIdx) => {
@@ -75,14 +88,44 @@ export function StartupAnimation(props: { ready: () => boolean }) {
         indices.push(Math.floor(Math.random() * GLITCH_LOGO[0].length))
       }
       setGlitchChars(indices)
-      setTimeout(() => setGlitchLine(-1), 100)
-    }, 400)
+      setTimeout(() => setGlitchLine(-1), 90)
+    }, 350)
+
+    // Grok tarzi dalga animasyonu
+    waveTimer = setInterval(() => setWavePhase((p) => (p + 1) % (WAVE.length * 4)), 90)
+
+    // Pulse (nefes alma)
+    let t = 0
+    pulseTimer = setInterval(() => {
+      t += 0.08
+      setPulse(Math.sin(t) * 0.5 + 0.5)
+    }, 50)
+
+    // Parcaciklar
+    const initParticles = Array.from({ length: 10 }, () => ({
+      x: Math.floor(Math.random() * width),
+      y: Math.floor(Math.random() * height),
+      char: PARTICLE[Math.floor(Math.random() * PARTICLE.length)]!,
+    }))
+    setParticles(initParticles)
+    particleTimer = setInterval(() => {
+      setParticles((list) =>
+        list.map((p) => ({
+          ...p,
+          x: (p.x + 1) % width,
+          y: Math.max(0, Math.min(height - 1, p.y + (Math.random() - 0.5))),
+        })),
+      )
+    }, 150)
+
+    // Cursor blink
+    cursorTimer = setInterval(() => setCursor((v) => !v), 530)
   })
 
   createEffect(() => {
     if (props.ready()) {
       setStep(steps.length - 1)
-      setTimeout(() => setShow(false), 1500)
+      setTimeout(() => setShow(false), 1200)
     }
   })
 
@@ -90,7 +133,36 @@ export function StartupAnimation(props: { ready: () => boolean }) {
     if (interval) clearInterval(interval)
     if (stepTimer) clearInterval(stepTimer)
     if (glitchTimer) clearInterval(glitchTimer)
+    if (waveTimer) clearInterval(waveTimer)
+    if (pulseTimer) clearInterval(pulseTimer)
+    if (particleTimer) clearInterval(particleTimer)
+    if (cursorTimer) clearInterval(cursorTimer)
   })
+
+  const renderWave = () => {
+    const waveWidth = 20
+    const chars: JSX.Element[] = []
+    for (let i = 0; i < waveWidth; i++) {
+      const idx = (wavePhase() + i) % (WAVE.length * 4)
+      const waveIdx = idx < WAVE.length ? idx : (WAVE.length * 2 - 1 - idx) % WAVE.length
+      const intensity = 1 - Math.abs(i - waveWidth / 2) / (waveWidth / 2)
+      chars.push(
+        <text
+          fg={
+            intensity > 0.5
+              ? theme.primary
+              : intensity > 0.2
+                ? theme.secondary
+                : theme.borderSubtle
+          }
+          selectable={false}
+        >
+          {WAVE[waveIdx]}
+        </text>,
+      )
+    }
+    return <>{chars}</>
+  }
 
   return (
     <Show when={show()}>
@@ -106,10 +178,20 @@ export function StartupAnimation(props: { ready: () => boolean }) {
         flexDirection="column"
         backgroundColor={theme.background}
       >
+        {/* Parcaciklar */}
+        <box position="absolute" top={0} left={0} width={width} height={height} zIndex={0}>
+          {particles().map((p) => (
+            <text position="absolute" top={p.y} left={p.x} fg={theme.borderSubtle} selectable={false}>
+              {p.char}
+            </text>
+          ))}
+        </box>
+
         <box
           flexDirection="column"
           alignItems="center"
           gap={1}
+          zIndex={1}
         >
           {/* Logo Animation with Glitch */}
           <box flexDirection="column" alignItems="center" gap={0}>
@@ -120,40 +202,59 @@ export function StartupAnimation(props: { ready: () => boolean }) {
             ))}
           </box>
 
-          {/* Subtitle */}
+          {/* Subtitle + cursor */}
           <Show when={logoVisible() >= GLITCH_LOGO.length}>
-            <text fg={theme.textMuted} selectable={false}>
-              AI-Powered CLI for Software Engineering
-            </text>
+            <box flexDirection="row" gap={1}>
+              <text fg={theme.textMuted} selectable={false}>
+                AI-Powered CLI for Software Engineering
+              </text>
+              <Show when={cursor()}>
+                <text fg={theme.primary} selectable={false}>
+                  ▌
+                </text>
+              </Show>
+            </box>
           </Show>
 
-          {/* Loading Spinner */}
-          <box flexDirection="row" gap={1} marginTop={1}>
+          {/* Grok tarzi dalga spinner */}
+          <box flexDirection="row" gap={1} marginTop={1} alignItems="center">
             <text fg={theme.primary} selectable={false}>
               {FRAMES[frame()]}
             </text>
+            <box flexDirection="row">{renderWave()}</box>
             <text fg={theme.text} selectable={false}>
               {steps[step()]}
             </text>
           </box>
 
-          {/* Progress Bar */}
+          {/* Progress Bar — gradyanli */}
           <box flexDirection="column" marginTop={1} width={40}>
             <box flexDirection="row" gap={0}>
-              {Array.from({ length: 30 }).map((_, i) => (
-                <text
-                  fg={i < (step() / (steps.length - 1)) * 30 ? theme.primary : theme.borderSubtle}
-                  selectable={false}
-                >
-                  ▓
-                </text>
-              ))}
+              {Array.from({ length: 30 }).map((_, i) => {
+                const progress = (step() / (steps.length - 1)) * 30
+                const isFilled = i < progress
+                const isEdge = i === Math.floor(progress) - 1
+                return (
+                  <text
+                    fg={
+                      isEdge
+                        ? theme.primary
+                        : isFilled
+                          ? theme.secondary
+                          : theme.borderSubtle
+                    }
+                    selectable={false}
+                  >
+                    {isEdge ? "█" : isFilled ? "▓" : "░"}
+                  </text>
+                )
+              })}
             </box>
           </box>
 
-          {/* Version */}
+          {/* Version — pulse */}
           <text fg={theme.textMuted} selectable={false}>
-            v{InstallationVersion}
+            v{InstallationVersion} {pulse() > 0.5 ? "•" : " "}
           </text>
         </box>
       </box>

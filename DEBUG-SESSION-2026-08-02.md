@@ -85,11 +85,11 @@ Uncommitted değişiklik: `process()` path'ine `Effect.ensuring(cleanup())` ekle
 
 ```powershell
 # 1) Tool tanı scripti (TUI açmaz, ~3-5 sn)
-cd C:\Users\ErCuM\CascadeProjects\glitch-code\packages\opencode
+cd C:\Users\ErCuM\CascadeProjects\eski_projeler\glitch-code\packages\opencode
 bun run script/debug-tools.ts
 
 # 2) Headless — TUI mi tool mu ayır
-cd C:\Users\ErCuM\CascadeProjects\glitch-code
+cd C:\Users\ErCuM\CascadeProjects\eski_projeler\glitch-code
 glitch run "hafızana bak" --print-logs
 glitch run "webde glitch code ara" --print-logs
 

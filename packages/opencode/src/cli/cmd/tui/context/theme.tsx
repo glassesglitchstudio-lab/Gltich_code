@@ -38,6 +38,7 @@ import zenburn from "./theme/zenburn.json" with { type: "json" }
 import carbonfox from "./theme/carbonfox.json" with { type: "json" }
 import glitch from "./theme/glitch.json" with { type: "json" }
 import crafted from "./theme/crafted.json" with { type: "json" }
+import grok from "./theme/grok.json" with { type: "json" }
 import { useKV } from "./kv"
 import { useRenderer } from "@opentui/solid"
 import { createStore, produce } from "solid-js/store"
@@ -158,6 +159,7 @@ export const DEFAULT_THEMES: Record<string, ThemeJson> = {
   carbonfox,
   glitch,
   crafted,
+  grok,
 }
 
 type State = {

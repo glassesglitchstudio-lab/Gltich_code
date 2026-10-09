@@ -82,7 +82,7 @@ Add to your MCP settings:
   "mcpServers": {
     "glitch-ue5": {
       "command": "python",
-      "args": ["C:/Users/ErCuM/CascadeProjects/glitch-code/unreal/mcp-server/server.py"]
+      "args": ["C:/Users/ErCuM/CascadeProjects/eski_projeler/glitch-code/unreal/mcp-server/server.py"]
     }
   }
 }

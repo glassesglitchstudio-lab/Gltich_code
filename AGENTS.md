@@ -579,6 +579,6 @@ Berkay bundan sonra VS Code yerine **Orca IDE** (stablyai/orca) kullanacak. Orca
 |-------|-----------|-------|
 | **glitch-code** | v0.4.5, provider bug fix `d9a31ec` | ✅ Aktif |
 | **shadowcat-r1** | 3 dataset hazır (761K entry), Colab Pro+ bekliyor | ⏸ Beklemede |
-| **niko_ai** | V7_HYBRID_TITAN, X_FABLE_CODER_V1 | ⏸ Beklemede |
+| **shadowcat** | V7_HYBRID_TITAN, X_FABLE_CODER_V1 | ⏸ Beklemede |
 | **deenemee** | Portfolyo sayfası cyberpunk tema | ✅ Hazır |
 | **jarvis my pc** | Snapchat entegrasyonu tamam | ⏸ Beklemede |
