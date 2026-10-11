@@ -19,7 +19,10 @@ async function publish(dir: string, name: string, version: string) {
   }
   await $`rm -f *.tgz`.cwd(dir).nothrow()
   await $`bun pm pack`.cwd(dir)
-  await $`npm publish *.tgz --access public --tag ${Script.channel} --workspaces false`.cwd(dir)
+  // Staged publishing: defers 2FA to maintainer approval. Works with any
+  // valid token (no 2FA required at stage time). After the run, approve at
+  // https://www.npmjs.com/package/<name>/access → Staged Packages tab.
+  await $`npm stage publish *.tgz --access public --tag ${Script.channel}`.cwd(dir)
 }
 
 const binaries: { dir: string; name: string; version: string }[] = []
