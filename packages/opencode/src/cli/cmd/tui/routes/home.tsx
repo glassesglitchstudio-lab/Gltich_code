@@ -21,15 +21,12 @@ import { isPlainTerminal } from "../util/terminal"
 import { RGBA } from "@opentui/core"
 
 const GLITCH_BANNER = [
-  "   ██████╗ ██╗  ██╗ ██████╗ ███████╗",
-  "  ██╔════╝ ██║  ██║ ██╔══██╗ ██╔════╝",
-  "  ██║      ███████║ ██║  ██║ █████╗  ",
-  "  ██║      ██╔══██║ ██║  ██║ ██╔══╝  ",
-  "  ╚██████╗ ██║  ██║ ██████╔╝ ███████╗",
-  "   ╚═════╝ ╚═╝  ╚═╝ ╚═════╝  ╚══════╝",
+  "  █▀▀ █   █ ▀█▀  █▀▀ █ █ █▀▀ █▀▀",
+  "  █   █▀▀▄  █   ▀▀█▄ █ █ █   █▀▀",
+  "  ▀▀▀ ▀   ▀  ▀   ▀▀▀  ▀▀▀ ▀▀▀ ▀▀▀",
 ]
 
-const GLITCH_TAGLINE = "  AI-Powered Software Engineering"
+const GLITCH_TAGLINE = "  Terminal-Native AI Coding Assistant"
 const GLITCH_SUBTITLE = "  Code · Debug · Refactor · Ship"
 
 const BANNER_WIDTH = GLITCH_BANNER[0].length + 4
@@ -140,34 +137,31 @@ export function Home() {
             when={plainTerminal}
             fallback={
               <TuiPluginRuntime.Slot name="home_logo" mode="replace">
-                <box flexDirection="column" alignItems="center" gap={1}>
-                  {/* Top accent line with orbit ornaments */}
+                <box flexDirection="column" alignItems="center" gap={0}>
+                  {/* Ust ince cizgi — nabiz atar */}
                   <box flexDirection="row" gap={1} alignItems="center">
-                    <text fg={pulsePrimary()} selectable={false}>{ORBIT_FRAMES[orbitFrame()]}</text>
-                    <box width={BANNER_WIDTH} height={1} backgroundColor={pulsePrimary()} />
-                    <text fg={pulsePrimary()} selectable={false}>{ORBIT_FRAMES[(orbitFrame() + 2) % ORBIT_FRAMES.length]}</text>
+                    <text fg={theme.borderActive} selectable={false}>─</text>
+                    <box width={BANNER_WIDTH - 4} height={1} backgroundColor={pulsePrimary()} />
+                    <text fg={theme.borderActive} selectable={false}>─</text>
                   </box>
+                  <text fg={theme.borderSubtle} selectable={false}> </text>
+                  {/* Wordmark */}
                   {GLITCH_BANNER.map((line) => (
-                    <box flexDirection="row" gap={2} alignItems="center">
-                      <text fg={theme.backgroundPanel} selectable={false}>║</text>
-                      <text fg={theme.primary} selectable={false}>
-                        <b>{line}</b>
-                      </text>
-                      <text fg={theme.backgroundPanel} selectable={false}>║</text>
-                    </box>
+                    <text fg={theme.primary} selectable={false}>
+                      <b>{line}</b>
+                    </text>
                   ))}
-                  {/* Bottom accent line with orbit ornaments */}
+                  <text fg={theme.borderSubtle} selectable={false}> </text>
+                  {/* Alt ince cizgi */}
                   <box flexDirection="row" gap={1} alignItems="center">
-                    <text fg={pulsePrimary()} selectable={false}>{ORBIT_FRAMES[(orbitFrame() + 1) % ORBIT_FRAMES.length]}</text>
-                    <box width={BANNER_WIDTH} height={1} backgroundColor={pulsePrimary()} />
-                    <text fg={pulsePrimary()} selectable={false}>{ORBIT_FRAMES[(orbitFrame() + 3) % ORBIT_FRAMES.length]}</text>
+                    <text fg={theme.borderActive} selectable={false}>─</text>
+                    <box width={BANNER_WIDTH - 4} height={1} backgroundColor={pulsePrimary()} />
+                    <text fg={theme.borderActive} selectable={false}>─</text>
                   </box>
                   {/* Tagline */}
-                  <box flexDirection="row" gap={2} alignItems="center" paddingTop={1}>
-                    <text fg={theme.textMuted} selectable={false}>└</text>
-                    <text fg={theme.textMuted} selectable={false}>{GLITCH_TAGLINE}</text>
-                    <text fg={theme.textMuted} selectable={false}>┘</text>
-                  </box>
+                  <text fg={theme.text} selectable={false} paddingTop={1}>
+                    {GLITCH_TAGLINE}
+                  </text>
                   <text fg={theme.textMuted} selectable={false}>
                     {GLITCH_SUBTITLE}
                   </text>
