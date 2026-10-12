@@ -248,6 +248,10 @@ export const TuiThreadCommand = cmd({
       const env = sanitizedProcessEnv({
         [GLITCHCODE_PROCESS_ROLE]: "worker",
         [GLITCHCODE_RUN_ID]: ensureRunID(),
+        // Propagate the parent's TTY state: bun Workers on Linux lose
+        // stdout/stdin isTTY flags, which makes the renderer treat the
+        // worker as non-interactive and render nothing.
+        GLITCHCODE_PARENT_TTY: process.stdout.isTTY ? "1" : "0",
       })
 
       const worker = new Worker(file, {

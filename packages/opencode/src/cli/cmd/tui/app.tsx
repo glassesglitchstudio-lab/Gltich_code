@@ -168,6 +168,7 @@ export function tui(input: {
     // 默认使用 dark 模式(不跟随终端背景);用户手动切换后会被 theme_mode_lock 记住并优先。
     const mode = "dark"
 
+    try { require("node:fs").writeFileSync("/tmp/gc-dbg.log", "before render() " + Date.now() + "\n") } catch {}
     await render(() => {
       return (
         <ErrorBoundary

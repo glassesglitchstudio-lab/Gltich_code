@@ -660,8 +660,19 @@ export const { use: useSync, provider: SyncProvider } = createSimpleContext({
         ...(args.continue ? [sessionListPromise] : []),
       ]
 
-      await Promise.all(blockingRequests)
-        .then(async () => {
+      // A stalled RPC channel (observed on WSL, where worker fetches can
+      // hang indefinitely) must not block the TUI forever: if the blocking
+      // bootstrap requests don't settle in time, open the render gate with
+      // partial data — the non-blocking refreshes below still fill in later.
+      await Promise.race([
+        Promise.all(blockingRequests),
+        new Promise<"timeout">((resolve) => setTimeout(() => resolve("timeout"), 15000)),
+      ])
+        .then(async (result) => {
+          if (result === "timeout") {
+            setStore("status", "partial")
+            return
+          }
           const providersResponse = providersPromise.then((x) => x.data!)
           const providerListResponse = providerListPromise.then((x) => x.data!)
           const consoleStateResponse = consoleStatePromise

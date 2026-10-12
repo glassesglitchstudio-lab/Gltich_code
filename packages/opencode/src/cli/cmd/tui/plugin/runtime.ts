@@ -936,8 +936,7 @@ export async function init(input: { api: HostPluginApi; config: TuiConfig.Info }
   dir = cwd
   loaded = load(input)
   return loaded
-}
-
+  }
 export function list() {
   if (!runtime) return []
   return listPluginStatus(runtime)

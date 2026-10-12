@@ -972,7 +972,15 @@ export const layer = Layer.effect(
 
     const waitForDependencies = Effect.fn("Config.waitForDependencies")(function* () {
       yield* InstanceState.useEffect(state, (s) =>
-        Effect.forEach(s.deps, Fiber.join, { concurrency: "unbounded" }).pipe(Effect.asVoid),
+        Effect.forEach(s.deps, Fiber.join, { concurrency: "unbounded" }).pipe(
+          // A background dependency install (e.g. the unpublished
+          // @glitchcode/plugin package in local dev) must never block the
+          // TUI forever: a stalled npm registry on some platforms (notably
+          // WSL) can hang the install indefinitely. Proceed without the
+          // deps after a grace period — they keep installing in background.
+          Effect.timeoutOption(Duration.seconds(10)),
+          Effect.asVoid,
+        ),
       )
     })
 

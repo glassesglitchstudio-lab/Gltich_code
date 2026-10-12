@@ -392,10 +392,16 @@ export const { use: useTheme, provider: ThemeProvider } = createSimpleContext({
     onMount(init)
 
     function resolveSystemTheme(mode: "dark" | "light" = store.mode) {
-      return renderer
-        .getPalette({
-          size: 16,
-        })
+      // getPalette() queries the terminal for its 16-color palette via OSC 4.
+      // Terminals that never answer (some WSL/PTY setups, tmux without
+      // passthrough) leave the promise pending forever — gate the TUI behind
+      // a timeout so the theme falls back to the default instead of blocking
+      // the whole render tree.
+      const palette = Promise.race([
+        renderer.getPalette({ size: 16 }),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error("palette query timeout")), 3000)),
+      ])
+      return palette
         .then((colors: TerminalColors) => {
           if (!colors.palette[0]) {
             systemTheme = undefined

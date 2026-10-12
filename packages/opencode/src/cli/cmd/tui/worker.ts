@@ -13,6 +13,19 @@ import { Heap } from "@/cli/heap"
 import { AppRuntime } from "@/effect/app-runtime"
 import { ensureProcessMetadata } from "@/util/glitch-process"
 
+// bun Workers on Linux don't inherit the parent's TTY flags — the renderer
+// sees stdout.isTTY === undefined and renders nothing (black screen). The
+// parent thread had a real terminal; restore the flags before anything
+// touches the renderer.
+if (
+  process.stdout.isTTY === undefined &&
+  process.stdin.isTTY === undefined &&
+  process.env.GLITCHCODE_PARENT_TTY === "1"
+) {
+  ;(process.stdout as { isTTY?: boolean }).isTTY = true
+  ;(process.stdin as { isTTY?: boolean }).isTTY = true
+}
+
 ensureProcessMetadata("worker")
 
 await Log.init({
