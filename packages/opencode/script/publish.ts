@@ -22,7 +22,9 @@ async function publish(dir: string, name: string, version: string) {
   // Staged publishing: defers 2FA to maintainer approval. Works with any
   // valid token (no 2FA required at stage time). After the run, approve at
   // https://www.npmjs.com/package/<name>/access → Staged Packages tab.
-  await $`npm stage publish *.tgz --access public --tag ${Script.channel}`.cwd(dir)
+  // `npm stage` requires npm 11+; the runner's default npm may be older —
+  // run it through npx so a compatible npm is fetched on demand.
+  await $`npx -y npm@11 stage publish *.tgz --access public --tag ${Script.channel}`.cwd(dir)
 }
 
 const binaries: { dir: string; name: string; version: string }[] = []
